@@ -8,16 +8,6 @@ ANNUALIZED_PERCENTAGE_FACTOR = ANNUALIZATION_FACTOR * PERCENTAGE_FACTOR
 
 # Spécification des chemins de fichiers
 file_path_yf = "C:\\Users\\stett\\Documents\\FinancialData\\YahooFinance\\price_data.csv"
-file_path_tradingview = "D:\\Python\\Data\\Excel_Data\\TradingView\\combined_data.csv"
-#file_path_spot_3M_data = "D:\\Python\\Data\\Excel_Data\\SpotData\\US03MY.csv"
-#file_path_spot_10Y_data = "D:\\Python\\Data\\Excel_Data\\SpotData\\US10Y.csv"
-#file_path_main_data = "D:\\Python\\Data\\Excel_Data\\Divers\\MainData\\main_data.csv"
-
-#file_path_txt = "D:\\Python\\Data\\Excel_Data\\Turtle data\\raw_txt"
-#file_path_out = "D:\\Python\\Data\\Excel_Data\\Turtle data\\raw_csv"
-
-#file_path_test = "D:\\Python\\Data\\Excel_Data\\Turtle data\\raw_csv\\SP"
-
 
 # Spécification des structures de portfolio et stratégies
 
