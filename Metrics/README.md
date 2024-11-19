@@ -79,7 +79,7 @@ The `__init__.py` file consolidates all the package's functionality for streamli
 from .Aggregation import (rolling_mean, rolling_median, rolling_min, rolling_max, rolling_sum, rolling_weighted_mean, rolling_quantile_ratio)
 from .Distribution import (rolling_skewness, rolling_kurtosis)
 from .Volatility import (rolling_volatility, hv_composite, hv_composite_df, separate_volatility)
-from .Performance import (rolling_sharpe_ratios_numpy, rolling_sharpe_ratios_df, rolling_sortino_ratios_numpy, expanding_sharpe_ratios_numpy)
+from .Performance import (rolling_sharpe_ratios, rolling_sharpe_ratios_df, rolling_sortino_ratios, expanding_sharpe_ratios)
 from .Behavior import rolling_autocorrelation
 ```
 

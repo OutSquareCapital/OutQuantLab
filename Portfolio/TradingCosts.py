@@ -91,8 +91,13 @@ def calculate_cost_adjusted_returns(raw_adjusted_returns_df: pd.DataFrame,
     - cost_adjusted_returns_df: DataFrame des rendements ajustés après prise en compte des coûts.
     """
     # Calcul des Sharpe ratios roulants pour les rendements bruts et nets
-    raw_rolling_sharpe_df = mt.rolling_sharpe_ratios_df(raw_adjusted_returns_df, window_size)
-    net_rolling_sharpe_df = mt.rolling_sharpe_ratios_df(net_adjusted_returns_df, window_size)
+    raw_rolling_sharpe_df = pd.DataFrame(mt.rolling_sharpe_ratios(raw_adjusted_returns_df, window_size, window_size),
+                                         index=raw_adjusted_returns_df.index,
+                                         columns=raw_adjusted_returns_df.columns)
+    
+    net_rolling_sharpe_df = pd.DataFrame(mt.rolling_sharpe_ratios(net_adjusted_returns_df, window_size, window_size),
+                                         index=net_adjusted_returns_df.index,
+                                         columns=net_adjusted_returns_df.columns)
     
     # Calcul de la limite des coûts en fonction des Sharpe ratios
     cost_validation_df = calculate_cost_limit(raw_rolling_sharpe_df, net_rolling_sharpe_df, asset_names)

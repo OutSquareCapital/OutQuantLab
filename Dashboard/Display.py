@@ -350,7 +350,9 @@ def rolling_sharpe_ratio(daily_returns: pd.DataFrame, window_size: int):
         daily_returns (pd.DataFrame): DataFrame containing daily returns.
         window_size (int): Window size for rolling calculation.
     """
-    rolling_sharpe_ratios = mt.rolling_sharpe_ratios_df(daily_returns, window_size)
+    rolling_sharpe_ratios = pd.DataFrame(mt.rolling_sharpe_ratios(daily_returns.values, window_size, window_size),
+                                         index=daily_returns.index,
+                                         columns=daily_returns.columns)
 
     title = f'Rolling Sharpe Ratios Over {window_size} Days'
     xlabel = 'Date'

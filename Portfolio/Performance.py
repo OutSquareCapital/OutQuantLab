@@ -24,7 +24,7 @@ def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookbac
     sharpe_array = ft.process_in_blocks_parallel_numpy(
         returns_df.values, 
         block_size=10,
-        func=mt.rolling_sharpe_ratios_numpy,
+        func=mt.rolling_sharpe_ratios,
         length = sharpe_lookback,
         min_length = 125
     )
