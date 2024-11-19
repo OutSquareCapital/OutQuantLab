@@ -7,7 +7,6 @@ from typing import List, Tuple
 import Metrics as mt
 from itertools import combinations
 
-
 def calculate_volatility_adjusted_returns(
     pct_returns_array: np.ndarray, 
     hv_array: np.ndarray, 
@@ -86,10 +85,6 @@ def pct_returns_np(prices_array: np.ndarray) -> np.ndarray:
     
     return pct_returns_array
 
-def log_returns_df(prices_df: pd.DataFrame) -> pd.DataFrame:
-
-    return np.log(prices_df / prices_df.shift(1))
-
 def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
 
     # Vérifie si l'array est 1D ou 2D
@@ -106,7 +101,11 @@ def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
     
     return log_returns_array
 
-def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:int) -> Tuple[pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, List[str]]:
+def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:int) -> Tuple[np.ndarray, 
+                                                                                             np.ndarray, 
+                                                                                             np.ndarray, 
+                                                                                             List[str],
+                                                                                             pd.Index]:
 
     # Création de l'array des pct returns
     pct_returns_array = pct_returns_df.to_numpy(dtype=np.float32)
@@ -121,35 +120,11 @@ def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:i
     log_returns_array = log_returns_np(prices_array)
     hv_array = mt.hv_composite(pct_returns_array)
 
-    log_returns_df = pd.DataFrame(log_returns_array, 
-                                    index=prices_df.index, 
-                                    columns=prices_df.columns,
-                                    dtype=np.float32)
-
-
     # Liste des noms des actifs
     asset_names = list(prices_df.columns)
-    
-    return prices_df, prices_array, pct_returns_df, pct_returns_array, log_returns_df, log_returns_array, hv_array, asset_names
+    dates = prices_df.index
 
-def extract_data_from_prices(prices_df: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, List[str]]:
-
-    # Conversion du DataFrame de prix en array
-    prices_array = prices_df.to_numpy(dtype=np.float32)
-
-    # Calcul des rendements simples
-    pct_returns_array = pct_returns_np(prices_array)
-
-    pct_returns_df = pd.DataFrame(pct_returns_array, index=prices_df.index, columns=prices_df.columns, dtype=np.float32)
-
-    # Calcul des rendements log
-    log_returns_array = log_returns_np(prices_array)
-    log_returns_df = pd.DataFrame(log_returns_array, prices_df.index, prices_df.columns, dtype=np.float32)
-    
-    # Liste des noms des actifs
-    asset_names = list(prices_df.columns)
-
-    return prices_df, prices_array, pct_returns_df, pct_returns_array, log_returns_df, log_returns_array, asset_names
+    return prices_array, pct_returns_array, log_returns_array, hv_array, asset_names, dates
 
 def calculate_ratios_returns(returns_df: pd.DataFrame, asset_names: list) -> pd.DataFrame:
 
@@ -191,18 +166,7 @@ def calculate_ensembles_returns(returns_df: pd.DataFrame, asset_names: list, com
     return ensembles_returns_df
 
 def adjust_prices_for_inversion(data_prices_df: pd.DataFrame, columns_list: list) -> pd.DataFrame:
-    """
-    Inverse les rendements pour les colonnes spécifiées, calcule les courbes d'équité à partir des rendements inversés,
-    et remplace les colonnes originales dans le DataFrame par les nouveaux prix calculés.
 
-    Args:
-        data_prices_df (pd.DataFrame): Le DataFrame contenant les prix historiques.
-        colonnes (list): Liste des noms de colonnes à inverser et à recalculer.
-        initial_equity (float): Valeur initiale pour calculer la courbe d'équité. Par défaut 1.0.
-
-    Returns:
-        pd.DataFrame: Le DataFrame mis à jour avec les colonnes inversées recalculées.
-    """
     for column in columns_list:
         # Calcul des rendements pour la colonne spécifiée
         returns = data_prices_df[column].pct_change()

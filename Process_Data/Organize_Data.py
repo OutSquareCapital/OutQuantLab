@@ -149,26 +149,22 @@ def extract_category_data(category_dfs: Dict[str, pd.DataFrame], initial_equity:
         if not df.empty:  # Si le DataFrame n'est pas vide
             # Appliquer extract_data_from_prices pour chaque DataFrame non vide
             (
-                prices_df,
                 prices_array,
-                pct_returns_df,
                 pct_returns_array,
-                log_returns_df,
                 log_returns_array,
                 hv_array,
-                asset_names
+                asset_names,
+                dates_index
             ) = TransformData.extract_data_from_pct_returns(df, initial_equity)
 
             # Stocker les résultats dans le dictionnaire
             category_extracted_data[category] = {
-                'prices_df': prices_df,
                 'prices_array': prices_array,
-                'pct_returns_df': pct_returns_df,
                 'pct_returns_array': pct_returns_array,
-                'log_returns_df': log_returns_df,
                 'log_returns_array': log_returns_array,
                 'hv_array': hv_array,
-                'asset_names': asset_names
+                'asset_names': asset_names,
+                'dates': dates_index
             }
 
     return category_extracted_data

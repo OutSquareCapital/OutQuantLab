@@ -174,7 +174,7 @@ class SignalsProcessing:
     @staticmethod
     def data_arrays_to_dataframe(raw_adjusted_returns_array: np.ndarray, 
                                  signals_array: np.ndarray, 
-                                 log_returns_df: pd.DataFrame, 
+                                 dates_index: pd.Index, 
                                  indicators_and_params: dict, 
                                  asset_names: list) -> tuple[pd.DataFrame, pd.DataFrame]:
 
@@ -187,11 +187,11 @@ class SignalsProcessing:
                     column_names.append(f"{asset}_{indicator_name}_{param_str}")
 
         adjusted_returns_df = pd.DataFrame(raw_adjusted_returns_array, 
-                                           index=log_returns_df.index, 
+                                           index=dates_index, 
                                            columns=column_names, 
                                            dtype=np.float32)
         signals_df = pd.DataFrame(signals_array, 
-                                  index=log_returns_df.index, 
+                                  index=dates_index, 
                                   columns=column_names, 
                                   dtype=np.float32)
 
@@ -201,11 +201,11 @@ class SignalsProcessing:
     @staticmethod
     def trading_signals(
                         prices_array: np.ndarray, 
-                        log_returns_array: np.ndarray, 
-                        log_returns_df: pd.DataFrame, 
+                        log_returns_array: np.ndarray,
                         pct_returns_array: np.ndarray, 
                         hv_array: np.ndarray, 
-                        asset_names: list, 
+                        asset_names: list,
+                        dates_index: pd.Index,
                         indicators_and_params: dict,
                         vol_adjustement:int = 15,
                         long_bias_adjustment: bool = False
@@ -214,10 +214,10 @@ class SignalsProcessing:
         (signals_array, 
         data_arrays, 
         num_indicators,
-        num_repeats) = SignalsProcessing.initialize_signals_array(prices_array, 
-                                                                        log_returns_array, 
-                                                                        indicators_and_params, 
-                                                                        asset_names)
+        num_repeats) = SignalsProcessing.initialize_signals_array(  prices_array, 
+                                                                    log_returns_array, 
+                                                                    indicators_and_params, 
+                                                                    asset_names)
 
         signals_array = SignalsProcessing.calculate_signals_array(signals_array,
                                                                 data_arrays,
@@ -225,18 +225,20 @@ class SignalsProcessing:
                                                                 num_indicators)
         
 
-        raw_adjusted_returns_array = SignalsProcessing.calculate_strategy_returns(pct_returns_array, 
-                                                                               signals_array, 
-                                                                               hv_array, 
-                                                                               num_repeats,
-                                                                               vol_adjustement, 
-                                                                               long_bias_adjustment)
+        raw_adjusted_returns_array = SignalsProcessing.calculate_strategy_returns(
+                                                                            pct_returns_array, 
+                                                                            signals_array, 
+                                                                            hv_array, 
+                                                                            num_repeats,
+                                                                            vol_adjustement, 
+                                                                            long_bias_adjustment)
         
-        signals_df, raw_adjusted_returns_df = SignalsProcessing.data_arrays_to_dataframe(raw_adjusted_returns_array, 
-                                                                                      signals_array, 
-                                                                                      log_returns_df, 
-                                                                                      indicators_and_params, 
-                                                                                      asset_names)
+        signals_df, raw_adjusted_returns_df = SignalsProcessing.data_arrays_to_dataframe(
+                                                                                    raw_adjusted_returns_array, 
+                                                                                    signals_array, 
+                                                                                    dates_index, 
+                                                                                    indicators_and_params, 
+                                                                                    asset_names)
 
         print('strategies processed!')
 
