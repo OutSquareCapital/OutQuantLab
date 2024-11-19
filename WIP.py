@@ -15,8 +15,6 @@ def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> 
 '''
 # Data formatting & cleaning
 
-#Data.get_yahoo_finance_data(Config.yahoo_assets, Config.file_path_yf)
-
 #data_prices_df, _ = Data.load_prices_from_csv(Config.file_path_tradingview, dtype=np.float64)
 
 #Data.clean_and_process_prices(Config.file_path_tradingview, ['VX'])
