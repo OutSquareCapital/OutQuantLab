@@ -66,72 +66,80 @@ portfolio_futures = {
 
 portfolio_strategies = {
     'RiskPremium': {
-        'PriceBased':[
+        'PriceBased': [
             'FixedBias'
         ]
     },
     'Divergent': {
         'Direction': {  
             'Trend': [
-                'Trend_SmaRatio',
-                'Trend_MedianRatio',
-                'Trend_CentralPointRatio'
-                'Trend_RateOfChangeSmoothed'
-                'Trend_MeanReturnsRatio',
-                'Trend_MedianReturnsRatio',
-                'Trend_QuantileReturnsSignal'
-            ],
+                'Trend_MeanPriceRatio',
+                'Trend_MedianPriceRatio',
+                'Trend_CentralPriceRatio',
+                'Trend_MeanRateOfChange',
+                'Trend_MedianRateOfChange',
+                'Trend_CentralRateOfChange',
+            ]
         },
         'Speed': {
             'Acceleration': [
-                'Acceleration_SmaMacd',
-                'Acceleration_MedianMacd',
-                'Acceleration_CentralPointMacd'
-                'Acceleration_MeanReturnsMacd',
-                'Acceleration_MedianReturnsMacd',
-                'Acceleration_QuantileReturnsMacd'
+                'Acceleration_MeanPriceMacd',
+                'Acceleration_MedianPriceMacd',
+                'Acceleration_CentralPriceMacd',
+                'Acceleration_MeanRateOfChangeMacd',
+                'Acceleration_MedianRateOfChangeMacd',
+                'Acceleration_CentralRateOfChangeMacd',
             ],
             'AccelerationTrend': [
-                'AccelerationTrend_SmaMacdTrend',
-                'AccelerationTrend_MedianMacdTrend',
-                'AccelerationTrend_CentralPointMacdTrend',
-                'AccelerationTrend_MeanMacdTrend',
-                'AccelerationTrend_MedianMacdTrend',
-                'AccelerationTrend_QuantilesMacdTrend',
+                'AccelerationTrend_MeanPriceMacdTrend',
+                'AccelerationTrend_MedianPriceMacdTrend',
+                'AccelerationTrend_CentralPriceMacdTrend',
+                'AccelerationTrend_MeanRateOfChangeMacdTrend',
+                'AccelerationTrend_MedianRateOfChangeMacdTrend',
+                'AccelerationTrend_CentralRateOfChangeMacdTrend',
             ]
         }
     },
     'Convergent': {
         'MeanReversion': {
             'MR': [
-                'MeanReversion_SmaRatioNormalised',
-                'MeanReversion_MedianRatioNormalised',
-                'MeanReversion_ZScoreNormalised',
-                'MeanReversion_RsiNormalised',
-                'MeanReversion_BreakoutNormalised',
+                'MeanReversion_MeanPriceRatioNormalised',
+                'MeanReversion_MeanRateOfChangeNormalised',
             ],
             'MRTrend': [
-                'MeanReversionTrend_SmaRatioNormalisedTrend',
-                'MeanReversionTrend_MedianRatioNormalisedTrend',
-                'MeanReversionTrend_ZScoreNormalisedTrend',
-                'MeanReversionTrend_RsiNormalisedTrend',
-                'MeanReversionTrend_BreakoutNormalisedTrend',
+                'MeanReversionTrend_MeanPriceRatioNormalisedTrend',
+                'MeanReversionTrend_MeanRateOfChangeNormalisedTrend',
             ],
         },
         'Stats': {
             'ReturnsDistribution': [
                 'ReturnsDistribution_Skewness',
                 'ReturnsDistribution_RelativeSkewness',
-                'ReturnsDistributionTrend_SkewnessTrend'
-                'ReturnsDistributionTrend_SkewnessOnKurtosis'
+                'ReturnsDistribution_SkewnessOnKurtosis_ST',
+                'ReturnsDistribution_SkewnessOnKurtosis_LT',
+                'ReturnsDistribution_RelativeSkewnessOnKurtosis_ST',
+                'ReturnsDistribution_RelativeSkewnessOnKurtosis_LT',
+            ],
+            'ReturnsDistributionTrend': [
+                'ReturnsDistributionTrend_Skewness',
+                'ReturnsDistributionTrend_RelativeSkewness',
+                'ReturnsDistributionTrend_SkewnessOnKurtosis_ST_Trend',
+                'ReturnsDistributionTrend_SkewnessOnKurtosis_LT_Trend',
+                'ReturnsDistributionTrend_RelativeSkewnessOnKurtosis_ST_Trend',
+                'ReturnsDistributionTrend_RelativeSkewnessOnKurtosis_LT_Trend',
             ],
             'Volatility': [
-                'Volatility_NetVolatility',
-                'VolatilityTrend_NetVolatilityTrend'
+                'Volatility_RelativeDirectionalVolatility',
+                'Volatility_NormalisedDirectionalVolatility',
+            ],
+            'VolatilityTrend': [
+                'VolatilityTrend_RelativeDirectionalVolatilityTrend',
+                'VolatilityTrend_NormalisedDirectionalVolatilityTrend',
             ]
         }
     }
 }
+
 
 paires_futures_etf = [
 ("6A", "AD"),

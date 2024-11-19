@@ -390,6 +390,8 @@ def diversification_multiplier_by_group(returns_df, portfolio_dict, window):
     diversification_multiplier_df = diversification_multiplier_df.rolling(window=250, min_periods=1).mean()
     
     return diversification_multiplier_df
+
+#test_diversification_multipliers = diversification_multiplier_by_group(test_asset_returns,portfolio_base_structure, 2500)
 '''
 
 

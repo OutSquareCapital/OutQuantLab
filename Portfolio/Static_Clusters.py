@@ -3,7 +3,6 @@ import pandas as pd
 import bottleneck as bn
 import Portfolio.Common as Common
 
-@staticmethod
 def classify_assets(asset_list, portfolio):
     portfolios = {
         'Assets': {},
@@ -75,9 +74,6 @@ def classify_assets(asset_list, portfolio):
     
     return portfolios
 
-
-
-@staticmethod
 def generate_static_weights(portfolio, parent_weight=1.0):
     """
     Génère un dictionnaire des poids égaux pour chaque actif dans le portefeuille, 
@@ -97,9 +93,6 @@ def generate_static_weights(portfolio, parent_weight=1.0):
     
     return weighted_portfolio
 
-
-
-@staticmethod
 def generate_dynamic_weights(returns_df, base_weights):
     """
     Génère un DataFrame des poids dynamiques en fonction des actifs disponibles pour chaque période,
@@ -130,7 +123,6 @@ def generate_dynamic_weights(returns_df, base_weights):
 
     return adjusted_dynamic_weights
 
-@staticmethod
 def generate_recursive_means(returns_df, asset_tree):
     """
     Génère les moyennes des rendements de manière récursive en descendant dans l'arbre d'actifs, puis en remontant 
@@ -166,62 +158,38 @@ def generate_recursive_means(returns_df, asset_tree):
     else:
         # Si aucune donnée n'est disponible, retourner un DataFrame vide avec des NaN
         return pd.DataFrame(np.nan, index=returns_df.index, columns=['PortfolioReturns'], dtype=np.float32)
-    
-@staticmethod
+
 def generate_recursive_strategy_means(returns_df, strategy_tree):
-    """
-    Génère les moyennes des rendements de manière récursive pour chaque actif en fonction de la structure des stratégies.
-    Chaque actif est traité séparément, et les moyennes sont calculées pour les sous-catégories de stratégies tout en respectant 
-    la hiérarchie de l'arbre.
+    strategy_means = {}
 
-    Args:
-        returns_df (pd.DataFrame): DataFrame des rendements des stratégies par actif.
-        strategy_tree (dict): Dictionnaire imbriqué représentant la structure des stratégies.
-
-    Returns:
-        pd.DataFrame: DataFrame avec une colonne par actif contenant les rendements agrégés.
-    """
-    
-    strategy_means = {}  # Dictionnaire pour stocker les moyennes par actif
-
-    # Parcours récursif de l'arbre des stratégies
     for key, value in strategy_tree.items():
         if isinstance(value, dict):
-            # Si c'est une sous-catégorie de stratégies, on applique la récursion pour obtenir les moyennes
             sub_strategy_means = generate_recursive_strategy_means(returns_df, value)
-            # Ajouter ou fusionner les résultats des sous-groupes dans le dictionnaire
             for asset, sub_mean in sub_strategy_means.items():
                 if asset in strategy_means:
                     strategy_means[asset].append(sub_mean)
                 else:
                     strategy_means[asset] = [sub_mean]
-
         elif isinstance(value, list):
-            # Si c'est une liste de stratégies, on calcule la moyenne des rendements pour chaque actif
-            for asset in returns_df.columns.str.split('_').str[0].unique():  # Séparation par actif
-                # Filtrer les colonnes qui contiennent à la fois l'actif et la stratégie
+            for asset in returns_df.columns.str.split('_').str[0].unique():
                 matching_columns = [col for col in returns_df.columns 
                                     if col.startswith(asset) and any(strategy in col for strategy in value)]
-                
-                if matching_columns:
-                    # Calcul de la moyenne des stratégies pour cet actif
-                    sub_strategy_mean = pd.Series(bn.nanmean(returns_df[matching_columns], axis=1), index=returns_df.index, name=asset, dtype=np.float32)
-                    if asset in strategy_means:
-                        strategy_means[asset].append(sub_strategy_mean)
-                    else:
-                        strategy_means[asset] = [sub_strategy_mean]
+                sub_strategy_mean = pd.Series(
+                    bn.nanmean(returns_df[matching_columns], axis=1), 
+                    index=returns_df.index, 
+                    name=asset, 
+                    dtype=np.float32
+                )
+                if asset in strategy_means:
+                    strategy_means[asset].append(sub_strategy_mean)
+                else:
+                    strategy_means[asset] = [sub_strategy_mean]
 
-    # Construire un DataFrame final avec une colonne pour chaque actif
-    final_means = {}
-    for asset, means in strategy_means.items():
-        # Combiner toutes les moyennes pour cet actif et calculer la moyenne finale
-        final_means[asset] = pd.concat(means, axis=1).mean(axis=1)
+    final_means = {asset: pd.concat(means, axis=1).mean(axis=1) for asset, means in strategy_means.items()}
 
-    # Retourner un DataFrame avec une colonne par actif
     return pd.DataFrame(final_means, dtype=np.float32)
 
 
-@staticmethod
 def calculate_daily_average_returns(returns_df: pd.DataFrame, 
                                     global_avg=False, 
                                     by_asset=False, 
