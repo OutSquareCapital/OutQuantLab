@@ -108,8 +108,8 @@ def apply_returns_threshold(returns_array: np.ndarray, rolling_periods: list) ->
     # Calcul des poids moyens avec la fonction optimisée en NumPy
     average_weights = calculate_weights(returns_array, rolling_periods)
 
-    # Renormalisation des poids avec la fonction existante
-    normalized_average_weights = Common.renormalize_weights_np(average_weights, returns_array)
+    # Renormalisation des poids
+    normalized_average_weights = Common.renormalize_weights(average_weights, returns_array)
 
     # Décalage des poids pour éviter le lookahead bias (décalage d'une ligne)
     normalized_shifted_weights = ft.shift_array(normalized_average_weights)

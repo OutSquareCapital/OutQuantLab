@@ -119,7 +119,9 @@ def generate_dynamic_weights(returns_df, base_weights):
     dynamic_weights = base_weights_matrix.where(available_mask == 1, np.nan)
 
     # Appliquer la renormalisation des poids
-    adjusted_dynamic_weights = Common.renormalize_weights_pd(dynamic_weights, returns_df)
+    adjusted_dynamic_weights = pd.DataFrame(Common.renormalize_weights(dynamic_weights, returns_df),
+                                            index=dynamic_weights.index,
+                                            columns=dynamic_weights.columns)
 
     return adjusted_dynamic_weights
 
