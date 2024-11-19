@@ -261,9 +261,6 @@ roll_dates_df = identify_roll_dates(adjusted_front_df, unadjusted_front_df)
 Final_adjusted_prices_df = apply_adjustment(roll_dates_df, use_price_diff=False)
 '''
 
-#relativized_sharpes_df = RollingSharpe.relative_sharpe_on_confidence_period(raw_adjusted_returns_df, sharpe_lookback = 5000, confidence_lookback=2500)
-#optimized_returns_rltv = raw_adjusted_returns_df * relativized_sharpes_df.shift(1)
-
 '''
 from joblib import Parallel, delayed
 import pandas as pd
