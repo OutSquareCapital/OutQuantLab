@@ -114,7 +114,7 @@ Dashboard.equity(Data.equity_curves_calculs(raw_adjusted_returns_df, initial_equ
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/OutQuantLab.git
+   git clone https://github.com/OutSquareCapital/OutQuantLab.git
    cd OutQuantLab
    ```
 
