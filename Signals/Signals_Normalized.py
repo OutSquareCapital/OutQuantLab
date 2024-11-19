@@ -1,6 +1,5 @@
 import numpy as np
 from numba import njit
-import bottleneck as bn
 from Signals.Signals_Raw import *
 import Metrics as mt
 from Infrastructure import Fast_Tools as ft

@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import Metrics as mt
-import bottleneck as bn
 
 def calculate_cost_limit(raw_rolling_sharpe_df: pd.DataFrame, net_rolling_sharpe_df: pd.DataFrame, asset_names: list, limit_treshold=0.05, ma_window=250, day_treshold = 60) -> pd.DataFrame:
     """
@@ -38,7 +37,7 @@ def calculate_cost_limit(raw_rolling_sharpe_df: pd.DataFrame, net_rolling_sharpe
         sharpe_diff = (raw_sharpe + 100) - (net_sharpe + 100)
         
         # Calcul de la moyenne mobile de la différence de Sharpe
-        ma_sharpe_diff = bn.move_mean(sharpe_diff, window=ma_window, min_count=1, axis=0)
+        ma_sharpe_diff = mt.rolling_mean(sharpe_diff, length=ma_window, min_length=1)
         
         # Conditions pour déterminer si les coûts de transaction sont trop élevés
         positive_invalid_costs = (raw_sharpe > 0) & (ma_sharpe_diff > (raw_sharpe * limit_treshold))
