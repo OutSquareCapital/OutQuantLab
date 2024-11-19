@@ -471,10 +471,14 @@ def plot_strategy_returns_by_decile(strategy_returns_by_decile: pd.DataFrame):
 def volatility(daily_returns: pd.DataFrame, means=False):
 
     if means:
-        rolling_volatility_df = mt.hv_composite_df(daily_returns)
+        rolling_volatility_df = pd.DataFrame(mt.hv_composite(daily_returns.values), 
+                                             index=daily_returns.index, 
+                                             columns=daily_returns.columns)
         rolling_volatility_df = rolling_volatility_df.expanding(min_periods=1).mean()
     else:
-        rolling_volatility_df = mt.hv_composite_df(daily_returns)
+        rolling_volatility_df = pd.DataFrame(mt.hv_composite(daily_returns.values), 
+                                             index=daily_returns.index, 
+                                             columns=daily_returns.columns)
 
     rolling_volatility_df = rolling_volatility_df.round(2)
     

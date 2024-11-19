@@ -86,10 +86,15 @@ def calculate_all_ensembles_and_ratios(category_returns_dfs: dict) -> dict:
 
             elif category_name in ['ratios', 'canary_ratios', 'ensembles', 'canary_ensembles']:
                 
-                hv = mt.hv_composite_df(returns_df)
+                hv = pd.DataFrame(mt.hv_composite(returns_df.values), 
+                                  index=returns_df.index, 
+                                  columns=returns_df.columns, 
+                                  dtype=np.float32)
 
-                # Calcul des rendements ajustés par la volatilité
-                adjusted_returns_df = TransformData.calculate_volatility_adjusted_returns_pd(returns_df, hv)
+                adjusted_returns_df = pd.DataFrame(TransformData.calculate_volatility_adjusted_returns(returns_df.values, hv), 
+                                                   index=returns_df.index, 
+                                                   columns=returns_df.columns,
+                                                   dtype=np.float32)
 
                 if category_name in ['ensembles', 'canary_ensembles']:
                     # Générer les ensembles à partir des rendements ajustés

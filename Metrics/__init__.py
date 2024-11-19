@@ -12,8 +12,7 @@ from .Distribution import (rolling_kurtosis,
                           rolling_skewness)
 
 from .Volatility import (rolling_volatility, 
-                        hv_composite_array, 
-                        hv_composite_df,
+                        hv_composite,
                         separate_volatility)
 
 from .Performance import (rolling_sharpe_ratios_numpy, 

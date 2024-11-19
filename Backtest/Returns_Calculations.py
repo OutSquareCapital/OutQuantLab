@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import numexpr as ne
 from joblib import Parallel, delayed
-from Process_Data import calculate_volatility_adjusted_returns_np
+from Process_Data import calculate_volatility_adjusted_returns
 from typing import Tuple
 from Infrastructure import Fast_Tools as ft
 from tqdm import tqdm
@@ -39,7 +39,7 @@ class SignalsApplication :
     ) -> np.ndarray:
         
         # Étape 1 : Calcul des rendements ajustés par la volatilité
-        volatility_adjusted_returns = calculate_volatility_adjusted_returns_np(
+        volatility_adjusted_returns = calculate_volatility_adjusted_returns(
             pct_returns_array, 
             hv_array, 
             vol_adjustement

@@ -7,20 +7,8 @@ from typing import List, Tuple
 import Metrics as mt
 from itertools import combinations
 
-def calculate_volatility_adjusted_returns_pd(
-    returns_df: pd.DataFrame, 
-    hv_df: pd.DataFrame,
-    target_volatility: int = 15
-    ) -> pd.DataFrame:
 
-    volatility_adjustment = target_volatility / hv_df
-
-    volatility_adjustment_shifted = volatility_adjustment.shift(1)
-    
-    return returns_df * volatility_adjustment_shifted
-
-
-def calculate_volatility_adjusted_returns_np(
+def calculate_volatility_adjusted_returns(
     pct_returns_array: np.ndarray, 
     hv_array: np.ndarray, 
     target_volatility: int = 15
@@ -68,8 +56,6 @@ def normalize_returns_distribution_rolling(pct_returns_df: pd.DataFrame,
 
     return normalized_returns
 
-
-@staticmethod
 def equity_curves_calculs(daily_returns: pd.DataFrame , initial_equity: int =100) -> pd.DataFrame:
 
     equity_curves = (1 + daily_returns).cumprod() * initial_equity
@@ -100,12 +86,10 @@ def pct_returns_np(prices_array: np.ndarray) -> np.ndarray:
     
     return pct_returns_array
 
-@staticmethod
 def log_returns_df(prices_df: pd.DataFrame) -> pd.DataFrame:
 
     return np.log(prices_df / prices_df.shift(1))
 
-@staticmethod
 def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
 
     # Vérifie si l'array est 1D ou 2D
@@ -122,8 +106,6 @@ def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
     
     return log_returns_array
 
-
-@staticmethod
 def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:int) -> Tuple[pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, List[str]]:
 
     # Création de l'array des pct returns
@@ -137,7 +119,7 @@ def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:i
     
     # Calcul des rendements log
     log_returns_array = log_returns_np(prices_array)
-    hv_array = mt.hv_composite_array(pct_returns_array)
+    hv_array = mt.hv_composite(pct_returns_array)
 
     log_returns_df = pd.DataFrame(log_returns_array, 
                                     index=prices_df.index, 
@@ -150,8 +132,6 @@ def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:i
     
     return prices_df, prices_array, pct_returns_df, pct_returns_array, log_returns_df, log_returns_array, hv_array, asset_names
 
-
-@staticmethod
 def extract_data_from_prices(prices_df: pd.DataFrame) -> Tuple[pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, pd.DataFrame, np.ndarray, List[str]]:
 
     # Conversion du DataFrame de prix en array
@@ -171,7 +151,6 @@ def extract_data_from_prices(prices_df: pd.DataFrame) -> Tuple[pd.DataFrame, np.
 
     return prices_df, prices_array, pct_returns_df, pct_returns_array, log_returns_df, log_returns_array, asset_names
 
-@staticmethod
 def calculate_ratios_returns(returns_df: pd.DataFrame, asset_names: list) -> pd.DataFrame:
 
     # Création d'une liste pour stocker les DataFrames de chaque paire
@@ -190,7 +169,6 @@ def calculate_ratios_returns(returns_df: pd.DataFrame, asset_names: list) -> pd.
     
     return ratios_returns_df
 
-@staticmethod
 def calculate_ensembles_returns(returns_df: pd.DataFrame, asset_names: list, combination_size: int = 2) -> pd.DataFrame:
 
     # Création d'une liste pour stocker les rendements combinés
