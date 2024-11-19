@@ -1,1 +1,2 @@
 from Get_Data.Fetch_Data import get_yahoo_finance_data, load_prices_from_csv
+from Get_Data.Clean_Data import clean_and_process_prices

@@ -212,7 +212,7 @@ def calculate_ensembles_returns(returns_df: pd.DataFrame, asset_names: list, com
 
     return ensembles_returns_df
 
-def adjust_prices_for_inversion(data_prices_df: pd.DataFrame, colonnes: list) -> pd.DataFrame:
+def adjust_prices_for_inversion(data_prices_df: pd.DataFrame, columns_list: list) -> pd.DataFrame:
     """
     Inverse les rendements pour les colonnes spécifiées, calcule les courbes d'équité à partir des rendements inversés,
     et remplace les colonnes originales dans le DataFrame par les nouveaux prix calculés.
@@ -225,20 +225,20 @@ def adjust_prices_for_inversion(data_prices_df: pd.DataFrame, colonnes: list) ->
     Returns:
         pd.DataFrame: Le DataFrame mis à jour avec les colonnes inversées recalculées.
     """
-    for colonne in colonnes:
+    for column in columns_list:
         # Calcul des rendements pour la colonne spécifiée
-        returns = data_prices_df[colonne].pct_change()
+        returns = data_prices_df[column].pct_change()
         
         # Inverser les rendements
         inverted_returns = returns * -1
         
         # Convertir en DataFrame pour le traitement dans la fonction equity_curves_calculs
-        inverted_returns_df = inverted_returns.to_frame(name=colonne)
+        inverted_returns_df = inverted_returns.to_frame(name=column)
         
         # Calculer la courbe d'équité à partir des rendements inversés
         inverted_price = equity_curves_calculs(inverted_returns_df)
         
         # Remplacer la colonne originale dans le DataFrame par les nouveaux prix
-        data_prices_df[colonne] = inverted_price.squeeze()
+        data_prices_df[column] = inverted_price.squeeze()
     
     return data_prices_df

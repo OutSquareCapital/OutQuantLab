@@ -13,21 +13,10 @@ def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> 
 
     return nb.move_std(array, window=length, min_count=min_length, axis=0)
 '''
-# Data formatting & cleaning
-
-#data_prices_df, _ = Data.load_prices_from_csv(Config.file_path_tradingview, dtype=np.float64)
-
-#Data.clean_and_process_prices(Config.file_path_tradingview, ['VX'])
-
-#data_prices_df_yahoo, _ = LoadInternalData.load_prices_from_csv(Config.file_path_yf, dtype=np.float64)
-
-#CleanData.clean_and_process_prices(Config.file_path_yf, ['VIXY'])
 
 #data_prices_df_merged = MergeData.raccommoder_prices_futures_etf(data_prices_df, data_prices_df_yahoo, paires_futures_etf)
 
 #data_prices_df_merged.to_csv(file_path_main_data)
-
-#CleanData.clean_and_process_prices(file_path_main_data, ['VX'])
 
 #test = CleanData.adjust_prices_with_risk_free_rate(etf_data, bill_data)
 
