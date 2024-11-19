@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import Metrics as mt
 from Infrastructure import Fast_Tools as ft
-import bottleneck as bn
 import numexpr as ne
 import Portfolio.Common as Common
 
@@ -34,8 +33,8 @@ def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookbac
     mean_sharpe_array = ft.process_in_blocks_parallel_numpy(
         sharpe_array, 
         block_size=10,
-        func=bn.move_mean,
-        window=20, min_count=1, axis=0
+        func=mt.rolling_mean,
+        length=20, min_length=1
     )
 
     # Calcul des jours non-NaN
@@ -80,7 +79,7 @@ def calculate_weights(returns_array: np.ndarray, rolling_periods: list) -> np.nd
     # Boucle uniquement sur les périodes glissantes (les calculs par jour sont vectorisés)
     for rolling_period in rolling_periods:
         # Calcul de la moyenne glissante pour la période donnée en utilisant bottleneck.move_mean
-        rolling_means = bn.move_mean(returns_array, window=rolling_period, min_count=1, axis=0)
+        rolling_means = mt.rolling_mean(returns_array, length=rolling_period, min_length=1)
 
         # Calcul des poids : 1 si la moyenne est >= 0, sinon 0
         weights = (rolling_means >= 0).astype(np.float32)
