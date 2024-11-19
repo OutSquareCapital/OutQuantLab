@@ -1,7 +1,7 @@
 
 # Metrics
 
-**Metrics** is a Python package developed with the ultimate goal of eliminating the reliance on pandas or polars, transitioning entirely to optimized NumPy arrays, Numba, and Bottleneck. This approach ensures not only superior computational efficiency but also significantly reduced memory usage, particularly for parallelized operations on large datasets.
+**Metrics** is a Python package developed with the ultimate goal of eliminating the reliance on pandas, transitioning entirely to optimized NumPy arrays, Numba, and Bottleneck. This approach ensures not only superior computational efficiency but also significantly reduced memory usage, particularly for parallelized operations on large datasets.
 
 ## Design Philosophy
 
@@ -44,19 +44,24 @@
   - Rolling autocorrelation implemented with precise variance and covariance tracking.
   - Designed to uncover persistence and mean-reversion patterns in financial datasets.
 
-## Why Transition Away From pandas and polars?
+## Why Transition Away From pandas?
 
 1. **Parallelization Efficiency**:
-   - Pandas and polars rely heavily on single-threaded operations for many tasks.
+   - Pandas rely heavily on single-threaded operations for many tasks.
+   - Polars is good, but having a dataframe overhead isn't necessary most of the time.
    - NumPy and Numba provide far better scalability for parallelized array-based computations.
 
 2. **Reduced Overhead**:
-   - DataFrame structures introduce significant memory and computation overhead.
+   - DataFrame structures introduce memory and computation overhead relative to numpy arrays.
    - Arrays and optimized libraries like Bottleneck focus purely on numerical performance.
 
 3. **Flexibility for Large Datasets**:
    - With Numba and Bottleneck, computations scale efficiently for very large arrays, something pandas struggles with in high-dimensional data.
-
+   - It's because it's easier to chunk it down into smaller arrays computed in parallel.
+## Why not use just polars then?
+   - altought polars is good, it's still a really recent library
+   - but first and foremost, if you are only doing numerical computations, just go with the less memory consumption solution.
+   - I don't like the polars syntax :)
 ## Optimization Highlights
 
 - **Custom Algorithms**:
