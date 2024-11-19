@@ -4,55 +4,30 @@ from typing import List, Dict
 import Metrics as mt
 import Process_Data.Transform_Data as TransformData
 
-@staticmethod
 def generate_data_categories(assets_names: List[str], 
-                assets: List[str] = None, 
-                ratios: List[str] = None, 
-                ensembles: List[str] = None, 
-                canary: List[str] = None, 
-                canary_ratios: List[str] = None, 
-                canary_ensembles: List[str] = None) -> Dict[str, List[str]]:
+                             assets_to_backtest: Dict[str, List[str]]
+                             ) -> Dict[str, List[str]]:
     
-    # Dictionnaire pour regrouper toutes les catégories sous forme de listes vides
-    categories = {
-        'assets': [],
-        'ratios': [],
-        'ensembles': [],
-        'canary_assets': [],
-        'canary_ratios': [],
-        'canary_ensembles': []
-    }
+    # Initialisation des catégories avec des listes vides
+    categories = {key: [] for key in assets_to_backtest.keys()}
 
-    # Validation pour les catégories nécessitant au moins 2 éléments
-    if ratios and len(ratios) < 2:
-        raise ValueError("Le groupe 'ratios' doit contenir au moins 2 éléments.")
-    if ensembles and len(ensembles) < 2:
-        raise ValueError("Le groupe 'ensembles' doit contenir au moins 2 éléments.")
-    if canary_ratios and len(canary_ratios) < 2:
-        raise ValueError("Le groupe 'canary_ratios' doit contenir au moins 2 éléments.")
-    if canary_ensembles and len(canary_ensembles) < 2:
-        raise ValueError("Le groupe 'canary_ensembles' doit contenir au moins 2 éléments.")
+    # Validation spécifique pour certaines catégories
+    restricted_keys = ['ratios', 'ensembles', 'canary_ratios', 'canary_ensembles']
+    for key in restricted_keys:
+        if key in assets_to_backtest:
+            if len(assets_to_backtest[key]) == 1:
+                raise ValueError(f"Le groupe '{key}' ne peut pas contenir exactement 1 actif.")
 
     # Parcourir les assets disponibles et les ajouter dans les catégories correspondantes
     for asset in assets_names:
-        if assets and asset in assets:
-            categories['assets'].append(asset)
-        if ratios and asset in ratios:
-            categories['ratios'].append(asset)
-        if ensembles and asset in ensembles:
-            categories['ensembles'].append(asset)
-        if canary and asset in canary:
-            categories['canary_assets'].append(asset)
-        if canary_ratios and asset in canary_ratios:
-            categories['canary_ratios'].append(asset)
-        if canary_ensembles and asset in canary_ensembles:
-            categories['canary_ensembles'].append(asset)
+        for category, assets_list in assets_to_backtest.items():
+            if asset in assets_list:
+                categories[category].append(asset)
 
     return categories
 
-@staticmethod
 def generate_category_dataframes(data_prices_df: pd.DataFrame, 
-                                    categories: Dict[str, List[str]]) -> Dict[str, pd.DataFrame]:
+                                categories: Dict[str, List[str]]) -> Dict[str, pd.DataFrame]:
 
     category_returns_dfs = {}
 
@@ -69,7 +44,6 @@ def generate_category_dataframes(data_prices_df: pd.DataFrame,
 
     return category_returns_dfs
 
-@staticmethod
 def calculate_all_ensembles_and_ratios(category_returns_dfs: dict) -> dict:
 
     category_ratios_ensembles_returns_df = {}
@@ -116,7 +90,6 @@ def calculate_all_ensembles_and_ratios(category_returns_dfs: dict) -> dict:
 
     return category_ratios_ensembles_returns_df
 
-@staticmethod
 def recombine_categories(category_returns_dfs: Dict[str, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
 
     combined_category_dfs = {}
@@ -140,7 +113,6 @@ def recombine_categories(category_returns_dfs: Dict[str, pd.DataFrame]) -> Dict[
         combined_category_dfs['canary_all'] = pd.DataFrame(dtype=np.float32)
     return combined_category_dfs
 
-@staticmethod
 def extract_category_data(category_dfs: Dict[str, pd.DataFrame], initial_equity:int):
     # Un dictionnaire pour stocker les résultats pour chaque catégorie
     category_extracted_data = {}
@@ -169,27 +141,15 @@ def extract_category_data(category_dfs: Dict[str, pd.DataFrame], initial_equity:
 
     return category_extracted_data
 
-@staticmethod
-def process_category_data(assets_names: List[str], 
+def process_category_data(
+                        assets_names: List[str], 
                         data_prices_df: pd.DataFrame, 
-                        assets: List[str] = None, 
-                        ratios: List[str] = None, 
-                        ensembles: List[str] = None, 
-                        canary_assets: List[str] = None, 
-                        canary_ratios: List[str] = None, 
-                        canary_ensembles: List[str] = None,
-                        initial_equity = 100) -> Dict[str, Dict[str, any]]:
+                        assets_to_backtest: Dict[str, List[str]],
+                        initial_equity = 100
+                        ) -> Dict[str, Dict[str, any]]:
 
     # Génération du dictionnaire des catégories
-    categories = generate_data_categories(
-        assets_names,
-        assets,               
-        ratios,        
-        ensembles,      
-        canary_assets,
-        canary_ratios,
-        canary_ensembles       
-    )
+    categories = generate_data_categories(assets_names, assets_to_backtest)
 
     # Génération des DataFrames de returns pour chaque catégorie
     base_category_returns_dfs = generate_category_dataframes(data_prices_df, categories)
@@ -200,7 +160,4 @@ def process_category_data(assets_names: List[str],
     # Recombiner les catégories en 'returnstreams' et 'canary_all'
     recombined_category_returns_dfs = recombine_categories(all_category_returns_dfs)
 
-    # Extraction du data pour toutes les category
-    extracted_data = extract_category_data(recombined_category_returns_dfs, initial_equity)
-
-    return extracted_data
+    return extract_category_data(recombined_category_returns_dfs, initial_equity)
