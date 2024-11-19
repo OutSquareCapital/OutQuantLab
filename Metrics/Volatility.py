@@ -2,17 +2,11 @@ import numpy as np
 import pandas as pd
 import Config
 import bottleneck as bn
-import numbagg as nb
 from Metrics.Aggregation import rolling_mean, rolling_median
 
 def rolling_volatility(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
 
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1)
-
-
-def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
-
-    return nb.move_std(array, window=length, min_count=min_length, axis=0)
 
 def hv_short_term_array(returns_array: np.ndarray, lengths_list=[8, 16, 32, 64]) -> np.ndarray:
 

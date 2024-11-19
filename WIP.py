@@ -1,3 +1,18 @@
+'''
+import numbagg as nb
+
+def rolling_mean_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+
+    return nb.move_mean(array, window=length, min_count=min_length, axis=0)
+
+def rolling_sum_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+
+    return nb.move_sum(array, window=length, min_count=min_length, axis=0)
+
+def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+
+    return nb.move_std(array, window=length, min_count=min_length, axis=0)
+'''
 # Data formatting & cleaning
 
 #Data.get_yahoo_finance_data(Config.yahoo_assets, Config.file_path_yf)

@@ -1,12 +1,6 @@
 import bottleneck as bn
 import numpy as np
 import polars as pl
-import numbagg as nb
-
-
-def rolling_mean_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
-
-    return nb.move_mean(array, window=length, min_count=min_length, axis=0)
 
 def rolling_mean(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
 
@@ -34,10 +28,6 @@ def rolling_central(array:np.ndarray, length: int, min_length: int = 1) -> np.nd
 def rolling_sum(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
 
     return bn.move_sum(array, window=length, min_count=min_length, axis=0)
-
-def rolling_sum_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
-
-    return nb.move_sum(array, window=length, min_count=min_length, axis=0)
 
 def rolling_weighted_mean(array: np.ndarray, length: int) -> np.ndarray:
 
