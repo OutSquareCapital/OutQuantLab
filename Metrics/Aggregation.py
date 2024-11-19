@@ -4,11 +4,11 @@ import polars as pl
 import numbagg as nb
 
 
-def rolling_mean(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+def rolling_mean_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
 
     return nb.move_mean(array, window=length, min_count=min_length, axis=0)
 
-def rolling_mean_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+def rolling_mean(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
 
     return bn.move_mean(array, window=length, min_count=min_length, axis=0)
 
