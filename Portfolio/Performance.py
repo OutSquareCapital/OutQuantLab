@@ -21,7 +21,7 @@ def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookbac
     """
 
     # Calcul du Sharpe ratio roulant
-    sharpe_array = ft.process_in_blocks_parallel_numpy(
+    sharpe_array = ft.process_in_blocks_parallel(
         returns_df.values, 
         block_size=10,
         func=mt.rolling_sharpe_ratios,
@@ -30,7 +30,7 @@ def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookbac
     )
 
     # Moyenne roulante
-    mean_sharpe_array = ft.process_in_blocks_parallel_numpy(
+    mean_sharpe_array = ft.process_in_blocks_parallel(
         sharpe_array, 
         block_size=10,
         func=mt.rolling_mean,
@@ -38,7 +38,7 @@ def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookbac
     )
 
     # Calcul des jours non-NaN
-    non_nan_counts = ft.process_in_blocks_parallel_numpy(
+    non_nan_counts = ft.process_in_blocks_parallel(
         mean_sharpe_array, 
         block_size=10,
         func=lambda x: np.cumsum(~np.isnan(x), axis=0, dtype=np.float32)

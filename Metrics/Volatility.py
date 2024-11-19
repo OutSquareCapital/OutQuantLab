@@ -14,14 +14,12 @@ def hv_short_term(returns_array: np.ndarray, lengths_list=[8, 16, 32, 64]) -> np
 
     return np.nanmean(hv_arrays, axis=0)
 
-
 def hv_long_term(short_term_vol_array: np.ndarray, long_term_lengths=[200, 400, 800, 1600, 3200]) -> np.ndarray:
 
     long_term_vol_arrays = np.array([rolling_median(short_term_vol_array, length)
                                         for length in long_term_lengths])
 
     return np.nanmean(long_term_vol_arrays, axis=0)
-
 
 def hv_composite(returns_array: np.ndarray, 
                        lengths=[8, 16, 32, 64], 

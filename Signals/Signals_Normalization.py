@@ -1,7 +1,7 @@
 import numexpr as ne
 import numpy as np
-import pandas as pd
 import Metrics as mt
+from Infrastructure import Fast_Tools as ft
 
 def ratio_normalization(nominator: np.ndarray, denominator: np.ndarray) -> np.ndarray:
 
@@ -69,10 +69,11 @@ def rolling_scalar_normalisation(signal_array: np.ndarray, window_length: int) -
     row_mean_array = np.nanmean(np.abs(signal_array), axis=1)
 
     # Calcul de la médiane roulante sur la colonne résultante
-    rolling_median = mt.rolling_median(row_mean_array, length=window_length, min_length=500)
+    rolling_median = mt.rolling_median(row_mean_array, length=window_length, min_length=1)
 
     # Backfill pour remplacer les NaN par la dernière valeur non-NaN disponible
-    rolling_median = pd.Series(rolling_median, dtype=np.float32).bfill().values
+    #rolling_median = pd.Series(rolling_median, dtype=np.float32).bfill().values
+    rolling_median = ft.bfill(rolling_median)
 
     # Pré-allocation du tableau pour le résultat
     adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)
