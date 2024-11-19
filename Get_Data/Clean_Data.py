@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 from datetime import datetime
-import Get_Data.Fetch_Data as GetData
+from Get_Data.Fetch_Data import load_prices_from_csv
 
 def convert_txt_to_csv(base_dir: str, output_base_dir: str):
     """
@@ -214,7 +214,7 @@ def adjust_prices_for_nans(prices_df: pd.DataFrame) -> pd.DataFrame:
 def clean_and_process_prices(file_path: str) -> None:
 
     # Charger le data brut
-    raw_prices_df, _ = GetData.load_prices_from_csv(file_path, dtype=np.float32)
+    raw_prices_df, _ = load_prices_from_csv(file_path, dtype=np.float32)
 
     # Ajuster les prix pour éviter les valeurs négatives
     value_level_adjusted_raw_prices_df = adjust_prices_for_negativity(raw_prices_df)
