@@ -31,11 +31,11 @@ def rolling_central(array:np.ndarray, length: int, min_length: int = 1) -> np.nd
 
     return (upper + lower) / 2
 
-def rolling_sum_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+def rolling_sum(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
 
     return bn.move_sum(array, window=length, min_count=min_length, axis=0)
 
-def rolling_sum(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+def rolling_sum_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
 
     return nb.move_sum(array, window=length, min_count=min_length, axis=0)
 

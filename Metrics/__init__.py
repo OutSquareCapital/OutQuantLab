@@ -26,8 +26,7 @@ import numpy as np
 dummy_array_2d = np.random.rand(100, 10).astype(np.float32)
 
 
-rolling_mean(dummy_array_2d, 10)
-rolling_sum(dummy_array_2d, 10)
-rolling_volatility(dummy_array_2d, 10)
+rolling_kurtosis(dummy_array_2d, 10, 10)
+rolling_skewness(dummy_array_2d, 10, 10)
 
 del dummy_array_2d
