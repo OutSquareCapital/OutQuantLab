@@ -21,3 +21,6 @@ venv/
 # Ignore OS-specific files
 .DS_Store
 Thumbs.db
+
+# ignore test py file
+test.py
