@@ -10,14 +10,7 @@ def generate_data_categories(assets_names: List[str],
     
     # Initialisation des catégories avec des listes vides
     categories = {key: [] for key in assets_to_backtest.keys()}
-
-    # Validation spécifique pour certaines catégories
-    restricted_keys = ['ratios', 'ensembles', 'canary_ratios', 'canary_ensembles']
-    for key in restricted_keys:
-        if key in assets_to_backtest:
-            if len(assets_to_backtest[key]) == 1:
-                raise ValueError(f"Le groupe '{key}' ne peut pas contenir exactement 1 actif.")
-
+    
     # Parcourir les assets disponibles et les ajouter dans les catégories correspondantes
     for asset in assets_names:
         for category, assets_list in assets_to_backtest.items():

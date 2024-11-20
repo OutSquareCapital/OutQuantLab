@@ -2,105 +2,156 @@ import json
 import os
 from typing import Dict, List
 from Config import assets_to_backtest, DYNAMIC_CONFIG_FILE
-import tkinter as tk
-from tkinter import ttk
+from PySide6.QtWidgets import (
+    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QWidget, QScrollArea, QLabel
+)
 
 def load_last_config(assets_names: List[str]) -> Dict[str, List[str]]:
-    """Charge la dernière configuration sauvegardée depuis un fichier JSON.
-       Si aucun fichier n'est trouvé, ouvre la fenêtre Tkinter pour configurer."""
     if os.path.exists(DYNAMIC_CONFIG_FILE):
         with open(DYNAMIC_CONFIG_FILE, "r") as file:
             try:
                 return json.load(file)
             except json.JSONDecodeError:
-                pass  # Si le fichier est corrompu, passe à la configuration Tkinter
+                pass  # Si le fichier est corrompu, passe à la configuration GUI
 
-    # Si le fichier n'existe pas ou est invalide, ouvrir la fenêtre Tkinter
     print("No configuration file found. Opening configuration window...")
     return select_assets(assets_names)
 
 def save_last_config(config: Dict[str, List[str]]):
-    """Sauvegarde la configuration actuelle dans un fichier JSON."""
     with open(DYNAMIC_CONFIG_FILE, "w") as file:
         json.dump(config, file)
 
 def select_assets(assets_names: List[str]) -> Dict[str, List[str]]:
-    """Ouvre une interface Tkinter pour configurer les actifs à backtester."""
+    # Charger la configuration existante depuis le fichier ou utiliser la structure par défaut
+    if os.path.exists(DYNAMIC_CONFIG_FILE):
+        try:
+            with open(DYNAMIC_CONFIG_FILE, "r") as file:
+                current_config = json.load(file)
+        except json.JSONDecodeError:
+            current_config = assets_to_backtest  # Si le fichier est corrompu, utiliser la config par défaut
+    else:
+        current_config = assets_to_backtest  # Si le fichier n'existe pas, utiliser la config par défaut
 
-    # Charger la configuration existante ou utiliser la structure par défaut
-    current_config = assets_to_backtest
+    app = QApplication([])
 
-    # Fonction pour sauvegarder la sélection depuis Tkinter
-    def save_selection():
-        for category, asset_vars in category_vars.items():
-            current_config[category] = [asset for asset, var in asset_vars.items() if var.get()]
-        save_last_config(current_config)  # Sauvegarde dans le fichier JSON
-        root.destroy()
+    class AssetSelectionWindow(QMainWindow):
+        def __init__(self):
+            super().__init__()
+            self.setWindowTitle("Assets to backtest selection")
+            self.current_config = current_config
+            self.category_vars = {}
+            self.select_all_buttons = {}
+            self.unselect_all_buttons = {}
+            self.validation_label = None
+            self.apply_button = None
+            self.restricted_keys = ['ratios', 'ensembles', 'canary_ratios', 'canary_ensembles']
+            self.init_ui()
 
-    # Fonction pour mettre à jour l'état de "All"
-    def update_all_checkbox(category: str):
-        all_selected = all(var.get() for var in category_vars[category].values())
-        all_vars[category].set(all_selected)
+        def init_ui(self):
+            main_widget = QWidget()
+            main_layout = QVBoxLayout()
+            scroll_area = QScrollArea()
+            scroll_widget = QWidget()
+            scroll_layout = QHBoxLayout()
 
-    # Fonction pour gérer le clic sur une case d'actif
-    def on_asset_toggle(category: str):
-        update_all_checkbox(category)
+            # Création des catégories et des cases à cocher
+            for category in self.current_config.keys():
+                category_box = QGroupBox(category)
+                category_layout = QVBoxLayout()
 
-    # Fonction pour sélectionner/désélectionner tous les actifs d'une catégorie
-    def toggle_all(category: str):
-        new_state = all_vars[category].get()
-        for var in category_vars[category].values():
-            var.set(new_state)
+                # Boutons "Select All" et "Unselect All"
+                button_layout = QHBoxLayout()
+                select_all_button = QPushButton("Select All")
+                unselect_all_button = QPushButton("Unselect All")
 
-    # Création de l'interface Tkinter
-    root = tk.Tk()
-    root.title("Assets to backtest selection")
+                select_all_button.clicked.connect(lambda _, c=category: self.select_all(c))
+                unselect_all_button.clicked.connect(lambda _, c=category: self.unselect_all(c))
 
-    # Variables pour chaque catégorie et chaque actif
-    category_vars = {
-        category: {
-            asset: tk.BooleanVar(value=(asset in current_config.get(category, [])))
-            for asset in assets_names
-        }
-        for category in current_config.keys()
-    }
-    all_vars = {
-        category: tk.BooleanVar(value=all(asset in current_config.get(category, []) for asset in assets_names))
-        for category in current_config.keys()
-    }
+                button_layout.addWidget(select_all_button)
+                button_layout.addWidget(unselect_all_button)
+                category_layout.addLayout(button_layout)
 
-    # Gestion des frames pour chaque catégorie
-    for category in current_config.keys():
-        frame = ttk.LabelFrame(root, text=f"{category}")
-        frame.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+                self.select_all_buttons[category] = select_all_button
+                self.unselect_all_buttons[category] = unselect_all_button
 
-        # Case "All" pour sélectionner tous les actifs
-        all_checkbox = ttk.Checkbutton(
-            frame,
-            text="All",
-            variable=all_vars[category],
-            command=lambda c=category: toggle_all(c)
-        )
-        all_checkbox.pack(anchor="w")
-        ttk.Label(frame, text="").pack(anchor="w", pady=5)
+                # Actifs individuels
+                self.category_vars[category] = {}
+                for asset in assets_names:
+                    asset_checkbox = QCheckBox(asset)
+                    asset_checkbox.setChecked(asset in self.current_config.get(category, []))
+                    asset_checkbox.stateChanged.connect(self.validate_config)
+                    self.category_vars[category][asset] = asset_checkbox
+                    category_layout.addWidget(asset_checkbox)
 
-        # Actifs individuels
-        for asset in assets_names:
-            cb = ttk.Checkbutton(
-                frame,
-                text=asset,
-                variable=category_vars[category][asset],
-                command=lambda c=category: on_asset_toggle(c)
-            )
-            cb.pack(anchor="w")
+                category_box.setLayout(category_layout)
+                scroll_layout.addWidget(category_box)
 
-    # Bouton pour sauvegarder
-    save_button = ttk.Button(root, text="Apply selection", command=save_selection)
-    save_button.pack(pady=10)
+            scroll_widget.setLayout(scroll_layout)
+            scroll_area.setWidget(scroll_widget)
+            scroll_area.setWidgetResizable(True)
+            main_layout.addWidget(scroll_area)
 
-    # Initialiser les cases "All" en fonction de l'état des actifs
-    for category in current_config.keys():
-        update_all_checkbox(category)
+            # Bouton "Apply selection"
+            self.apply_button = QPushButton("Apply selection")
+            self.apply_button.clicked.connect(self.save_selection)
+            self.apply_button.setEnabled(False)
+            main_layout.addWidget(self.apply_button)
 
-    root.mainloop()
-    return current_config  # Retourner la configuration mise à jour
+            # Label pour afficher les messages d'avertissement
+            self.validation_label = QLabel("")
+            self.validation_label.setStyleSheet("color: red;")
+            main_layout.addWidget(self.validation_label)
+
+            main_widget.setLayout(main_layout)
+            self.setCentralWidget(main_widget)
+
+            # Initialiser l'état des boutons et valider la configuration
+            for category in self.current_config.keys():
+                self.update_buttons_state(category)
+            self.validate_config()
+
+        def update_buttons_state(self, category: str):
+            # Vérifie si tous les actifs sont sélectionnés ou aucun
+            all_selected = all(var.isChecked() for var in self.category_vars[category].values())
+            none_selected = not any(var.isChecked() for var in self.category_vars[category].values())
+
+            # Activer/désactiver les boutons en conséquence
+            self.select_all_buttons[category].setEnabled(not all_selected)
+            self.unselect_all_buttons[category].setEnabled(not none_selected)
+
+        def select_all(self, category: str):
+            for var in self.category_vars[category].values():
+                var.setChecked(True)
+            self.update_buttons_state(category)
+            self.validate_config()
+
+        def unselect_all(self, category: str):
+            for var in self.category_vars[category].values():
+                var.setChecked(False)
+            self.update_buttons_state(category)
+            self.validate_config()
+
+        def validate_config(self):
+            # Vérifie les restrictions spécifiques pour les catégories
+            for key in self.restricted_keys:
+                if key in self.category_vars:
+                    selected_assets = [asset for asset, var in self.category_vars[key].items() if var.isChecked()]
+                    if len(selected_assets) == 1:
+                        self.validation_label.setText(f"Error: '{key}' cannot contain exactly 1 asset.")
+                        self.apply_button.setEnabled(False)
+                        return
+
+            # Si tout est valide, activer le bouton
+            self.validation_label.setText("")
+            self.apply_button.setEnabled(True)
+
+        def save_selection(self):
+            for category, asset_vars in self.category_vars.items():
+                self.current_config[category] = [asset for asset, var in asset_vars.items() if var.isChecked()]
+            save_last_config(self.current_config)
+            self.close()
+
+    window = AssetSelectionWindow()
+    window.show()
+    app.exec()
+    return window.current_config
