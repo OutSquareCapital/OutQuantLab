@@ -3,15 +3,15 @@ from typing import Dict, List
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QWidget, QScrollArea, QLabel
 )
-from .Dynamic_Config_Backend import save_last_config, load_last_config_on_launch
+from .Dynamic_Config_Backend import save_assets_to_backtest_config, load_assets_to_backtest_config
 
 def select_assets(assets_names: List[str], auto: bool = True) -> Dict[str, List[str]]:
 
     if auto:
-        return load_last_config_on_launch()
+        return load_assets_to_backtest_config()
 
     else: 
-        current_config = load_last_config_on_launch()
+        current_config = load_assets_to_backtest_config()
         app = QApplication([])
 
         class AssetSelectionWindow(QMainWindow):
@@ -128,7 +128,7 @@ def select_assets(assets_names: List[str], auto: bool = True) -> Dict[str, List[
             def save_selection(self):
                 for category, asset_vars in self.category_vars.items():
                     self.current_config[category] = [asset for asset, var in asset_vars.items() if var.isChecked()]
-                save_last_config(self.current_config)
+                save_assets_to_backtest_config(self.current_config)
                 self.close()
 
         window = AssetSelectionWindow()

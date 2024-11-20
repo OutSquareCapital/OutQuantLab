@@ -16,7 +16,6 @@ def param_range_values(start: int, end: int, num_values: int, linear: bool = Fal
     ratio = (end / start) ** (1 / (num_values - 1))
     return [int(round(start * (ratio ** i))) for i in range(num_values)]
 
-@staticmethod
 def filter_valid_pairs(params: Dict[str, List[int]]) -> List[Dict[str, int]]:
     param_names = list(params.keys())
     param_values = product(*params.values())
@@ -29,7 +28,6 @@ def filter_valid_pairs(params: Dict[str, List[int]]) -> List[Dict[str, int]]:
 
     return valid_pairs
 
-@staticmethod
 def is_valid_combination(param_dict: Dict[str, int]) -> bool:
     st_param = next((k for k in param_dict if 'ST' in k), None)
     lt_param = next((k for k in param_dict if 'LT' in k), None)
@@ -47,7 +45,6 @@ def is_valid_combination(param_dict: Dict[str, int]) -> bool:
     
     return True
 
-@staticmethod
 def extract_options_by_class(methods: List[Callable], param_options: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     options_by_class = {}
     
@@ -65,19 +62,16 @@ def extract_options_by_class(methods: List[Callable], param_options: Dict[str, D
 
     return options_by_class
 
-@staticmethod
 def extract_class_and_method_names(method: Callable) -> Tuple[str, str]:
     method_str = str(method)
     class_name, method_name = method_str.split()[1].split('.')
     return class_name, method_name
 
-@staticmethod
 def determine_array_type(method: Callable) -> str:
     if 'returns_array' in method.__code__.co_varnames:
         return 'returns_array'
     return 'prices_array'
 
-@staticmethod
 def generate_all_indicators_params(
     methods: List[Callable], 
     options_by_class: Dict[str, Dict[str, Any]]
@@ -102,7 +96,6 @@ def generate_all_indicators_params(
 
     return all_indicators_params
 
-@staticmethod
 def automatic_generation(methods: List[Callable], 
                             param_options: Dict[str, Dict[str, Any]],
                         ) -> Dict[str, Tuple[Callable, str, List[Dict[str, int]]]]:

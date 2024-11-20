@@ -9,7 +9,9 @@ PERCENTAGE_FACTOR = 100
 ANNUALIZED_PERCENTAGE_FACTOR = ANNUALIZATION_FACTOR * PERCENTAGE_FACTOR
 
 DYNAMIC_CONFIG_FOLDER = os.path.join(os.path.dirname(__file__), "json")
-DYNAMIC_CONFIG_FILE = os.path.join(DYNAMIC_CONFIG_FOLDER, "last_config.json")
+
+DYNAMIC_CONFIG_FILE = os.path.join(DYNAMIC_CONFIG_FOLDER, "assets_to_backtest.json")
+PARAM_CONFIG_FILE = os.path.join(DYNAMIC_CONFIG_FOLDER, "param_values.json")
 
 # Spécification des chemins de fichiers
 file_path_yf = "C:\\Users\\stett\\Documents\\FinancialData\\YahooFinance\\price_data.csv"
