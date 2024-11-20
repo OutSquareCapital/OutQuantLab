@@ -25,7 +25,6 @@ def save_param_config(config: dict):
     with open(PARAM_CONFIG_FILE, "w") as file:
         json.dump(config, file, indent=4)
 
-
 def param_range_values(start: int, end: int, num_values: int, linear: bool = False) -> list:
     if num_values == 1:
         return [int((start + end) / 2)]
