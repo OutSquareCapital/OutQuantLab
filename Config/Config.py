@@ -1,3 +1,5 @@
+import os
+
 TRADING_DAYS_PER_WEEK = 5
 TRADING_DAYS_PER_MONTH = 21
 TRADING_DAYS_PER_YEAR = 256
@@ -5,6 +7,9 @@ TRADING_DAYS_PER_5_YEARS = 1280
 ANNUALIZATION_FACTOR = 16
 PERCENTAGE_FACTOR = 100
 ANNUALIZED_PERCENTAGE_FACTOR = ANNUALIZATION_FACTOR * PERCENTAGE_FACTOR
+
+DYNAMIC_CONFIG_FOLDER = os.path.join(os.path.dirname(__file__), "json")
+DYNAMIC_CONFIG_FILE = os.path.join(DYNAMIC_CONFIG_FOLDER, "last_config.json")
 
 # Spécification des chemins de fichiers
 file_path_yf = "C:\\Users\\stett\\Documents\\FinancialData\\YahooFinance\\price_data.csv"
@@ -168,3 +173,12 @@ yahoo_assets = [
 'VIXY',
 'DBB'
 ]
+
+assets_to_backtest = {
+    "assets": [],
+    "ratios": [],
+    "ensembles": [],
+    "canary_assets": [],
+    "canary_ratios": [],
+    "canary_ensembles": [],
+}
