@@ -11,9 +11,10 @@ import Dashboard.Widgets as Widgets
 import Dashboard.Computations as Computations
 from Portfolio import Static_Clusters
 import Metrics as mt
+from Process_Data import equity_curves_calculs
 
-@staticmethod
-def equity(equity_curve: pd.DataFrame):
+
+def equity(returns_df: pd.DataFrame):
     """
     Plot equity curves.
 
@@ -25,7 +26,9 @@ def equity(equity_curve: pd.DataFrame):
     xlabel = 'Date'
     ylabel = 'Equity'
 
-    final_values = equity_curve.iloc[-1]
+    equity_curves = equity_curves_calculs(returns_df)
+    
+    final_values = equity_curves.iloc[-1]
     sorted_columns = final_values.sort_values(ascending=True).index
     n_strats = len(sorted_columns)
     cmap = Common.get_custom_colormap(n_strats)
@@ -37,8 +40,8 @@ def equity(equity_curve: pd.DataFrame):
     fig = go.Figure()
     for index, column in enumerate(sorted_columns):
         color = colors[index]
-        y = equity_curve[column]
-        Widgets.curves(fig, equity_curve.index, y, label=column, color=color)
+        y = equity_curves[column]
+        Widgets.curves(fig, equity_curves.index, y, label=column, color=color)
 
     fig.update_layout(
         title=title,
@@ -53,7 +56,7 @@ def equity(equity_curve: pd.DataFrame):
     )
     fig.show()
 
-@staticmethod
+
 def plot_final_equity_values(daily_returns: pd.DataFrame):
     """
     Plot the final equity value if the backtest started each day.
@@ -103,15 +106,15 @@ def plot_final_equity_values(daily_returns: pd.DataFrame):
     fig.show()
 
         
-@staticmethod
-def drawdowns(equity_curves: pd.DataFrame):
+
+def drawdowns(returns_df: pd.DataFrame):
     """
     Plot drawdowns for each equity curve.
 
     Args:
         equity_curves (pd.DataFrame): DataFrame containing equity curves.
     """
-    drawdowns = Computations.drawdowns_calculs(equity_curves)
+    drawdowns = Computations.drawdowns_calculs(returns_df)
 
     title = "Drawdowns"
     xlabel = "Date"
@@ -132,7 +135,7 @@ def drawdowns(equity_curves: pd.DataFrame):
     for index, column in enumerate(sorted_columns):
         color = colors[index]
         Widgets.curves(fig, 
-                                        equity_curves.index, 
+                                        returns_df.index, 
                                         drawdowns[column], 
                                         label=column.replace('Equity_', '').replace('_Drawdown', ''), 
                                         color=color,
@@ -145,7 +148,7 @@ def drawdowns(equity_curves: pd.DataFrame):
     )
     fig.show()
 
-@staticmethod
+
 def max_drawdowns(equity_curves: pd.DataFrame):
     """
     Plot max drawdowns histogram.
@@ -187,7 +190,7 @@ def max_drawdowns(equity_curves: pd.DataFrame):
     fig.show()
 
 
-@staticmethod
+
 def annual_returns(daily_returns: pd.DataFrame):
     """
     Trace les rendements annuels pour chaque courbe d'équité sous forme de tableau.
@@ -203,7 +206,7 @@ def annual_returns(daily_returns: pd.DataFrame):
                                             sort_ascending=True, 
                                             color_high_to_low=False)
 
-@staticmethod
+
 def correlation_heatmap(daily_returns: pd.DataFrame):
     """
     Plot correlation heatmap of equity curve returns.
@@ -229,10 +232,8 @@ def correlation_heatmap(daily_returns: pd.DataFrame):
     )
     plt.title(title)
     plt.show()
-    return correlation_matrix.round(2)
 
 
-@staticmethod
 def average_correlation_bar_chart(daily_returns: pd.DataFrame):
     """
     Plot average correlations of equity curve returns.
@@ -268,7 +269,7 @@ def average_correlation_bar_chart(daily_returns: pd.DataFrame):
     fig.show()
 
 
-@staticmethod
+
 def overall_sharpe_ratios(daily_returns: pd.DataFrame):
     """
     Plot Sharpe ratios histogram.
@@ -303,9 +304,8 @@ def overall_sharpe_ratios(daily_returns: pd.DataFrame):
         template="plotly_dark"
     )
     fig.show()
-    return sorted_sharpe_ratios
 
-@staticmethod
+
 def overall_monthly_skew(daily_returns: pd.DataFrame):
     """
     Plot Skew histogram for each asset.
@@ -341,7 +341,7 @@ def overall_monthly_skew(daily_returns: pd.DataFrame):
     )
     fig.show()
     
-@staticmethod
+
 def rolling_sharpe_ratio(daily_returns: pd.DataFrame, window_size: int):
     """
     Plot rolling Sharpe ratios for each equity curve.
@@ -387,7 +387,7 @@ def rolling_sharpe_ratio(daily_returns: pd.DataFrame, window_size: int):
     fig.show()
 
 
-@staticmethod
+
 def sharpe_ratios_yearly_table(daily_returns: pd.DataFrame):
     """
     Plot Sharpe ratios for each years.
@@ -405,7 +405,7 @@ def sharpe_ratios_yearly_table(daily_returns: pd.DataFrame):
                                             color_high_to_low=False)
 
 
-@staticmethod
+
 def sortino_ratios(daily_returns: pd.DataFrame):
 
     sortino_ratios_df = Computations.overall_sortino_ratios_calculs(daily_returns)
@@ -436,7 +436,7 @@ def sortino_ratios(daily_returns: pd.DataFrame):
     )
     fig.show()
 
-@staticmethod
+
 def returns_distribution(daily_returns: pd.DataFrame, freq: str = 'H'):
     """
     Plot return distribution of returns.
@@ -451,7 +451,7 @@ def returns_distribution(daily_returns: pd.DataFrame, freq: str = 'H'):
     ylabel = 'Frequency'
     Widgets.histogram(daily_returns, title, xlabel, ylabel)
 
-@staticmethod
+
 def plot_strategy_returns_by_decile(strategy_returns_by_decile: pd.DataFrame):
     """
     Plot strategy returns by volatility decile using Plotly.
@@ -469,7 +469,7 @@ def plot_strategy_returns_by_decile(strategy_returns_by_decile: pd.DataFrame):
     fig.show()
 
 
-@staticmethod
+
 def volatility(daily_returns: pd.DataFrame, means=False):
 
     if means:
@@ -516,10 +516,9 @@ def volatility(daily_returns: pd.DataFrame, means=False):
     )
 
     fig.show()
-    return rolling_volatility_means.sort_values(ascending=True)
 
 
-@staticmethod
+
 def sharpe_ratios_3d_surface_plot(daily_returns: pd.DataFrame, param1: str, param2: str):
     """
     Generate a 3D surface plot with two parameters on the X and Y axes, and the Sharpe ratio on the Z axis,
@@ -594,7 +593,7 @@ def sharpe_ratios_3d_surface_plot(daily_returns: pd.DataFrame, param1: str, para
     # Afficher le graphique
     fig.show()
 
-@staticmethod
+
 def sharpe_correlation_3d_surface_plot(daily_returns: pd.DataFrame, param1: str, param2: str):
     """
     Generate a 3D surface plot with two parameters on the X and Y axes, and the Sharpe/AvgCorrelation on the Z axis,
@@ -671,7 +670,7 @@ def sharpe_correlation_3d_surface_plot(daily_returns: pd.DataFrame, param1: str,
 
 
 
-@staticmethod
+
 def sharpe_ratios_3d_scatter_plot(daily_returns: pd.DataFrame, params: list):
     """
     Generate a 3D scatter plot with three parameters and Sharpe Ratio as the color. 
@@ -716,7 +715,7 @@ def sharpe_ratios_3d_scatter_plot(daily_returns: pd.DataFrame, params: list):
     # Affichage du graphique
     fig.show()
 
-@staticmethod
+
 def sharpe_ratios_heatmap(daily_returns: pd.DataFrame, param1: str, param2: str):
     """
     Generate a heatmap with two parameters on the X and Y axes, and the Sharpe ratio represented by the color intensity,
@@ -779,7 +778,7 @@ def sharpe_ratios_heatmap(daily_returns: pd.DataFrame, param1: str, param2: str)
     fig.show()
 
 
-@staticmethod
+
 def params_relative_impact_on_sharpe(daily_returns: pd.DataFrame, params: list):
     """
     Perform parameter sensitivity analysis and plot sorted regression coefficients in a bar chart.
@@ -825,7 +824,7 @@ def params_relative_impact_on_sharpe(daily_returns: pd.DataFrame, params: list):
     fig.show()
 
 
-@staticmethod
+
 def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
     """
     Plot a bar chart showing Sharpe Ratio Rank divided by Average Correlation Rank for each strategy.
@@ -876,7 +875,7 @@ def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
     # Afficher le graphique
     fig.show()
 
-@staticmethod
+
 def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
     """
     Prépare les données pour le Sunburst/Treemap et affiche le graphique avec Plotly.
@@ -937,47 +936,3 @@ def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub
 
     # Afficher la figure
     fig.show()
-
-
-def nan_param_dict(daily_returns, params):
-    """
-    Visualise les zones de NaN en fonction de param1, param2 et param3 avec Plotly et retourne un dictionnaire des zones occupées.
-    Regroupe et ordonne les combinaisons de param1 et param2 qui apparaissent dans chaque param3.
-    
-    Args:
-    daily_returns (pd.DataFrame): DataFrame contenant les retours journaliers des stratégies.
-    params (list): Liste des paramètres à extraire des noms des stratégies.
-    
-    Returns:
-    dict: Un dictionnaire des zones où les NaN apparaissent, regroupées par param3 et param1 communs.
-    """
-    # Étape 1 : Calculer les moyennes des Sharpe ratios par combinaison de paramètres
-    x_vals, y_vals, z_vals, sharpe_means = Computations.calculate_sharpe_means_from_combination(daily_returns, params)
-    
-    # Étape 2 : Créer un DataFrame pour plus de facilité
-    sharpe_df = pd.DataFrame({
-        'param1': x_vals,
-        'param2': y_vals,
-        'param3': z_vals,
-        'sharpe': sharpe_means
-    })
-    
-    # Étape 3 : Filtrer les lignes où le Sharpe Ratio est NaN
-    nan_df = sharpe_df[sharpe_df['sharpe'].isna()]
-
-    # Étape 4 : Regrouper les combinaisons par param3 et param1 communs
-    nan_zones = defaultdict(lambda: defaultdict(list))  # Dictionnaire imbriqué
-
-    for param3 in nan_df['param3'].unique():  # Parcourir chaque param3
-        for param1 in nan_df[nan_df['param3'] == param3]['param1'].unique():  # Parcourir chaque param1 pour ce param3
-            param2_list = nan_df[(nan_df['param3'] == param3) & (nan_df['param1'] == param1)]['param2'].tolist()
-            nan_zones[param3][param1] = sorted(param2_list)  # Trier les param2 pour chaque param1
-
-    # Tri des résultats par param3
-    sorted_nan_zones = {}
-    for param3 in sorted(nan_zones.keys()):  # Tri des param3
-        sorted_nan_zones[param3] = {}
-        for param1 in sorted(nan_zones[param3].keys()):  # Tri des param1
-            sorted_nan_zones[param3][param1] = sorted(nan_zones[param3][param1])  # Tri des param2
-
-    return sorted_nan_zones

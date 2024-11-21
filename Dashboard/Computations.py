@@ -6,8 +6,8 @@ from collections import defaultdict
 from scipy.stats import skew
 import Config
 import Dashboard.Common as cmon
+from Process_Data import equity_curves_calculs
 
-@staticmethod
 def overall_sharpe_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     sharpe_ratios = daily_returns.mean() / daily_returns.std() * Config.ANNUALIZATION_FACTOR
@@ -16,7 +16,6 @@ def overall_sharpe_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     return sharpe_ratios_df.round(2)
 
-@staticmethod
 def overall_sortino_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     mean_returns = daily_returns.mean()
@@ -29,7 +28,6 @@ def overall_sortino_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     return sortino_ratios_df.round(2)
 
-@staticmethod
 def calculate_final_equity_values(daily_returns: pd.DataFrame, initial_equity: int = 100000) -> pd.DataFrame:
 
     final_equities = []
@@ -46,17 +44,16 @@ def calculate_final_equity_values(daily_returns: pd.DataFrame, initial_equity: i
 
     return final_equities_df
 
+def drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-@staticmethod
-def drawdowns_calculs(equity_curves: pd.DataFrame) -> pd.DataFrame:
-
+    equity_curves = equity_curves_calculs(returns_df)
+    
     # Calculate drawdowns for each equity curve directly
     drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR
     drawdowns = drawdowns.round(2)
 
     return drawdowns
 
-@staticmethod
 def annual_returns_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     # Grouper les rendements par année
@@ -72,7 +69,6 @@ def annual_returns_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     return cumulative_returns_df
 
-@staticmethod
 def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     correlation_matrix = daily_returns.corr()
@@ -84,7 +80,6 @@ def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     return average_correlations_df
 
-@staticmethod
 def analyze_param_sensitivity(daily_returns: pd.DataFrame, params: list):
 
     # Calcul du ratio de Sharpe pour chaque stratégie
@@ -136,7 +131,6 @@ def analyze_param_sensitivity(daily_returns: pd.DataFrame, params: list):
 
     return sorted_coefficients
 
-@staticmethod
 def calculate_sharpe_correlation_ratio(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     # Calcul des Sharpe Ratios et des Average Correlations
@@ -203,7 +197,6 @@ def calculate_sharpe_means_from_combination(daily_returns, params):
 
     return x_vals, y_vals, z_vals, sharpe_means
 
-@staticmethod
 def sharpe_ratios_yearly_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
     """
     Calculate Sharpe ratios for each year.
@@ -225,8 +218,6 @@ def sharpe_ratios_yearly_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     return sharpe_ratios_df
 
-
-@staticmethod
 def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
     """
     Agrège les retours quotidiens en rendements mensuels moyens et calcule le skew de cette série mensuelle 
@@ -246,8 +237,6 @@ def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
     
     return skew_series
 
-
-@staticmethod
 def calculate_and_group_information_ratio(signals_df: pd.DataFrame, returns_df: pd.DataFrame, by_param=False, by_method=False, by_class=False, by_asset=False) -> pd.DataFrame:
     """
     Calculate the Information Coefficient (IC) between trading signals and future returns,
