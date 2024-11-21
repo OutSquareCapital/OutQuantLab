@@ -1,2 +1,2 @@
 from .Config import *
-from .Dynamic_Config_Assets import select_assets
+from .Config_Main import dynamic_config

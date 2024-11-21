@@ -24,3 +24,6 @@ Thumbs.db
 
 # ignore test py file
 test.py
+
+# ignore data files
+*.csv

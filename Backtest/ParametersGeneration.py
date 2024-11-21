@@ -1,20 +1,6 @@
 from typing import List, Dict, Any, Callable, Tuple
 from itertools import product
 import inspect
-import numpy as np
-
-def param_range_values(start: int, end: int, num_values: int, linear: bool = False) -> List[int]:
-    if end - start == 0:
-        return [int(end)]
-    
-    if num_values == 1:
-        return [int((start + end) / 2)]
-    
-    if linear:
-        return list(map(int, np.linspace(start, end, num_values)))
-    
-    ratio = (end / start) ** (1 / (num_values - 1))
-    return [int(round(start * (ratio ** i))) for i in range(num_values)]
 
 def filter_valid_pairs(params: Dict[str, List[int]]) -> List[Dict[str, int]]:
     param_names = list(params.keys())

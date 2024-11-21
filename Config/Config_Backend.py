@@ -1,28 +1,42 @@
 import json
-from Config import DYNAMIC_CONFIG_FILE, PARAM_CONFIG_FILE
+from Config import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_CONFIG_FILE
 from typing import Dict, List
 import numpy as np
 
 def load_assets_to_backtest_config():
     try:
-        with open(DYNAMIC_CONFIG_FILE, "r") as file:
+        with open(ASSETS_TO_TEST_CONFIG_FILE, "r") as file:
             return json.load(file)
     except json.JSONDecodeError:
         print("define new config, saved file corrupted")
 
 def save_assets_to_backtest_config(config: Dict[str, List[str]]):
-    with open(DYNAMIC_CONFIG_FILE, "w") as file:
-        json.dump(config, file)
+    with open(ASSETS_TO_TEST_CONFIG_FILE, "w") as file:
+        json.dump(config, file, indent=3)
 
 def load_param_config() -> dict:
     try:
         with open(PARAM_CONFIG_FILE, "r") as file:
             return json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return {}
+    except (json.JSONDecodeError):
+        print("define new config, saved file corrupted")
 
 def save_param_config(config: dict):
     with open(PARAM_CONFIG_FILE, "w") as file:
+        json.dump(config, file, indent=4)
+
+def load_methods_config() -> Dict[str, Dict[str, bool]]:
+
+    try:
+        with open(METHODS_CONFIG_FILE, "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        print("define new config, saved file corrupted")
+        return {}
+
+def save_methods_config(config: Dict[str, Dict[str, bool]]) -> None:
+
+    with open(METHODS_CONFIG_FILE, "w") as file:
         json.dump(config, file, indent=4)
 
 def param_range_values(start: int, end: int, num_values: int, linear: bool = False) -> list:

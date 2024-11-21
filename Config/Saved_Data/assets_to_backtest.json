@@ -1,0 +1,28 @@
+{
+   "assets": [
+      "DBB",
+      "USO",
+      "FXB",
+      "TLT",
+      "FXE",
+      "IWM",
+      "VIXY",
+      "QQQ",
+      "FXC",
+      "SLV",
+      "SOYB",
+      "WEAT",
+      "GLD",
+      "GBTC",
+      "UNG",
+      "DIA",
+      "CORN",
+      "SPY",
+      "FXA"
+   ],
+   "ratios": [],
+   "ensembles": [],
+   "canary_assets": [],
+   "canary_ratios": [],
+   "canary_ensembles": []
+}

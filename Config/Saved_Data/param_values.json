@@ -1,0 +1,141 @@
+{
+    "RiskPremium": {
+        "Bias": [
+            1
+        ]
+    },
+    "Trend": {
+        "LenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ]
+    },
+    "Acceleration": {
+        "LenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ],
+        "MacdLength": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ]
+    },
+    "AccelerationTrend": {
+        "LenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ],
+        "MacdLength": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "TrendLenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "TrendLenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ]
+    },
+    "MeanReversion": {
+        "SignalLength": [],
+        "PLength": []
+    },
+    "MeanReversionTrend": {
+        "SignalLength": [],
+        "PLength": [],
+        "LenST": [],
+        "LenLT": []
+    },
+    "ReturnsDistribution": {
+        "LenSmooth": [],
+        "LenSkew": []
+    },
+    "ReturnsDistributionTrend": {
+        "LenSmooth": [],
+        "LenSkew": [],
+        "TrendLenST": [],
+        "TrendLenLT": []
+    },
+    "Volatility": {
+        "LenVol": [],
+        "LenST": [],
+        "LenLT": []
+    },
+    "VolatilityTrend": {
+        "LenVol": [],
+        "LenST": [],
+        "LenLT": [],
+        "TrendLenST": [],
+        "TrendLenLT": []
+    },
+    "Seasonality": {
+        "GroupBy": [],
+        "GroupSelected": [],
+        "LenST": [],
+        "LenLT": []
+    },
+    "SeasonalityTrend": {
+        "GroupBy": [],
+        "GroupSelected": [],
+        "LenST": [],
+        "LenLT": [],
+        "TrendLenST": [],
+        "TrendLenLT": []
+    },
+    "SeasonalBreakout": {
+        "LengthMean": [],
+        "LengthSnapshot": [],
+        "amplitude": []
+    },
+    "SeasonalBreakoutTrend": {
+        "LengthMean": [],
+        "LengthSnapshot": [],
+        "amplitude": [],
+        "LenST": [],
+        "LenLT": []
+    }
+}

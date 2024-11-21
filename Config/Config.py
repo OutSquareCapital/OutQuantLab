@@ -8,15 +8,14 @@ ANNUALIZATION_FACTOR = 16
 PERCENTAGE_FACTOR = 100
 ANNUALIZED_PERCENTAGE_FACTOR = ANNUALIZATION_FACTOR * PERCENTAGE_FACTOR
 
-DYNAMIC_CONFIG_FOLDER = os.path.join(os.path.dirname(__file__), "json")
+SAVED_DATA_FOLDER = os.path.join(os.path.dirname(__file__), "Saved_Data")
 
-DYNAMIC_CONFIG_FILE = os.path.join(DYNAMIC_CONFIG_FOLDER, "assets_to_backtest.json")
-PARAM_CONFIG_FILE = os.path.join(DYNAMIC_CONFIG_FOLDER, "param_values.json")
+ASSETS_TO_TEST_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "assets_to_backtest.json")
+PARAM_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "param_values.json")
+METHODS_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_config.json")
 
-# Spécification des chemins de fichiers
-file_path_yf = "C:\\Users\\stett\\Documents\\FinancialData\\YahooFinance\\price_data.csv"
+FILE_PATH_YF = os.path.join(SAVED_DATA_FOLDER, "price_data.csv")
 
-# Spécification des structures de portfolio et stratégies
 
 portfolio_etf = {
     'Equities': {
@@ -175,12 +174,3 @@ yahoo_assets = [
 'VIXY',
 'DBB'
 ]
-
-assets_to_backtest = {
-    "assets": [],
-    "ratios": [],
-    "ensembles": [],
-    "canary_assets": [],
-    "canary_ratios": [],
-    "canary_ensembles": [],
-}
