@@ -154,3 +154,22 @@ def process_category_data(
     recombined_category_returns_dfs = recombine_categories(all_category_returns_dfs)
 
     return extract_category_data(recombined_category_returns_dfs, initial_equity)
+
+def process_data(assets_names: List[str], 
+                data_prices_df: pd.DataFrame, 
+                assets_to_backtest: Dict[str, List[str]],
+                initial_equity:int = 100
+                ):
+
+    data = process_category_data(assets_names,
+                                data_prices_df, 
+                                assets_to_backtest,
+                                initial_equity)   
+
+    prices_array = data['returnstreams']['prices_array']
+    volatility_adjusted_pct_returns_array = data['returnstreams']['volatility_adjusted_pct_returns']
+    log_returns_array = data['returnstreams']['log_returns_array']
+    asset_names = data['returnstreams']['asset_names']
+    dates_index = data['returnstreams']['dates']
+
+    return prices_array, volatility_adjusted_pct_returns_array, log_returns_array, asset_names, dates_index

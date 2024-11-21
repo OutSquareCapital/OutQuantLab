@@ -1,2 +1,2 @@
 from Process_Data.Transform_Data import equity_curves_calculs
-from Process_Data.Organize_Data import process_category_data
+from Process_Data.Organize_Data import process_data
