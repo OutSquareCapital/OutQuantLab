@@ -1,8 +1,8 @@
 import numpy as np
-import numba
 from numba import prange
+from numba import njit
 
-@numba.njit
+@njit
 def calc_skew(min_periods, nobs, x, xx, xxx, num_consecutive_same_value):
     if nobs >= min_periods:
         dnobs = float(nobs)
@@ -23,7 +23,7 @@ def calc_skew(min_periods, nobs, x, xx, xxx, num_consecutive_same_value):
         return np.nan
 
 
-@numba.njit
+@njit
 def add_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx,
             num_consecutive_same_value, prev_value):
     if val == val:
@@ -53,7 +53,7 @@ def add_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensatio
     return nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx, num_consecutive_same_value, prev_value
 
 
-@numba.njit
+@njit
 def remove_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx):
     if val == val:
         nobs -= 1
@@ -75,7 +75,7 @@ def remove_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensa
 
     return nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx
 
-@numba.njit(parallel=True)
+@njit(parallel=True)
 def rolling_skewness(array, length, min_length):
     N, M = array.shape
     output = np.empty((N, M), dtype=np.float64)
@@ -113,7 +113,7 @@ def rolling_skewness(array, length, min_length):
     
 
 
-@numba.njit
+@njit
 def calc_kurt(min_periods, nobs, x, xx, xxx, xxxx, num_consecutive_same_value):
     if nobs >= min_periods:
         if nobs < 4:
@@ -139,7 +139,7 @@ def calc_kurt(min_periods, nobs, x, xx, xxx, xxxx, num_consecutive_same_value):
         return np.nan
 
 
-@numba.njit
+@njit
 def add_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx,
             num_consecutive_same_value, prev_value):
     if val == val:
@@ -174,7 +174,7 @@ def add_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compe
     return nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx, num_consecutive_same_value, prev_value
 
 
-@numba.njit
+@njit
 def remove_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx):
     if val == val:
         nobs -= 1
@@ -201,7 +201,7 @@ def remove_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, co
 
     return nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx
 
-@numba.njit(parallel=True)
+@njit(parallel=True)
 def rolling_kurtosis(array, length, min_length):
     N, M = array.shape
     output = np.empty((N, M), dtype=np.float64)
