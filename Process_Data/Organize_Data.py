@@ -26,6 +26,8 @@ def generate_category_dataframes(data_prices_df: pd.DataFrame,
 
     returns_df = data_prices_df.pct_change(fill_method=None)
 
+    returns_df = TransformData.adjust_returns_for_inversion(returns_df, ['VIXY'])
+    
     # Boucle unique pour traiter toutes les catégories de manière uniforme
     for category, assets_list in categories.items():
         if assets_list:
