@@ -16,8 +16,6 @@ def get_yahoo_finance_data(assets:list, file_path:str) -> None:
 
     print(f"Yahoo Finance Data Updated")
 
-
-@staticmethod
 def load_prices_from_csv(file_path: str, dtype=np.float32) -> Tuple[pd.DataFrame, List[str]]:
     """
     Charge le fichier CSV combiné et extrait les données des actifs (prix) ainsi que les noms des actifs.
