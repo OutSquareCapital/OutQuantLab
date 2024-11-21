@@ -103,12 +103,34 @@
         "LenLT": []
     },
     "ReturnsDistribution": {
-        "LenSmooth": [],
+        "LenSmooth": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            512
+        ],
         "LenSkew": []
     },
     "ReturnsDistributionTrend": {
         "LenSmooth": [],
-        "LenSkew": [],
+        "LenSkew": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            512
+        ],
         "TrendLenST": [],
         "TrendLenLT": []
     },

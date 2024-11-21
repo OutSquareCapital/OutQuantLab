@@ -1,7 +1,8 @@
 import json
 from Config import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_CONFIG_FILE
-from typing import Dict, List
+from typing import Dict, List, Callable
 import numpy as np
+import importlib
 
 def load_assets_to_backtest_config():
     try:
@@ -46,3 +47,22 @@ def param_range_values(start: int, end: int, num_values: int, linear: bool = Fal
         return list(map(int, np.linspace(start, end, num_values)))
     ratio = (end / start) ** (1 / (num_values - 1))
     return [int(round(start * (ratio ** i))) for i in range(num_values)]
+
+def get_active_methods(current_config: dict, module_name: str = "Signals.Signals_Normalized") -> List[Callable]:
+    active_methods = []
+    try:
+        module = importlib.import_module(module_name)
+    except ModuleNotFoundError:
+        return []
+
+    for category, methods in current_config.items():
+        cls = getattr(module, category, None)
+        if cls is None:
+            continue
+
+        for method, is_checked in methods.items():
+            if is_checked:
+                method_ref = getattr(cls, method, None)
+                if callable(method_ref):
+                    active_methods.append(method_ref)
+    return active_methods

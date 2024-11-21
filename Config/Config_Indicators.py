@@ -2,9 +2,8 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QGroupBox, QCheckBox, QPushButton, QHBoxLayout, QScrollArea, QLabel
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Signal
-from .Config_Backend import save_methods_config
+from .Config_Backend import save_methods_config, get_active_methods
 from typing import List, Callable
-import importlib
 
 
 class MethodSelectionWidget(QWidget):
@@ -118,31 +117,7 @@ class MethodSelectionWidget(QWidget):
         return self.current_config
     
     def get_active_methods(self) -> List[Callable]:
-        active_methods = []
-        module_name = "Signals.Signals_Normalized"
-        try:
-            # Charger dynamiquement le module contenant les classes
-            module = importlib.import_module(module_name)
-        except ModuleNotFoundError:
-            print(f"Module {module_name} introuvable.")
-            return []
-
-        for category, methods in self.current_config.items():
-            # Récupérer la classe correspondante dans le module
-            cls = getattr(module, category, None)
-            if cls is None:
-                print(f"Classe {category} introuvable dans {module_name}.")
-                continue
-
-            for method, is_checked in methods.items():
-                if is_checked:
-                    # Récupérer la méthode statique dans la classe
-                    method_ref = getattr(cls, method, None)
-                    if callable(method_ref):
-                        active_methods.append(method_ref)
-                    else:
-                        print(f"Méthode {method} introuvable dans la classe {category}.")
-        return active_methods
+        return get_active_methods(self.current_config)
         
 
 

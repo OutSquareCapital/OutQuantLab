@@ -19,12 +19,12 @@ from .Performance import (rolling_sharpe_ratios,
                          rolling_sortino_ratios, 
                          expanding_sharpe_ratios)
 
-import numpy as np
+#import numpy as np
 
-dummy_array_2d = np.random.rand(100, 10).astype(np.float32)
+#dummy_array_2d = np.random.rand(100, 10).astype(np.float32)
 
 
-rolling_kurtosis(dummy_array_2d, 10, 10)
-rolling_skewness(dummy_array_2d, 10, 10)
+#rolling_kurtosis(dummy_array_2d, 10, 10)
+#rolling_skewness(dummy_array_2d, 10, 10)
 
-del dummy_array_2d
+#del dummy_array_2d

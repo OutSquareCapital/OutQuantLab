@@ -2,7 +2,12 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QTabWidget
 from .Config_Params import ParameterWidget
 from .Config_Assets import AssetSelectionWidget
 from .Config_Indicators import MethodSelectionWidget
-from .Config_Backend import load_param_config, load_assets_to_backtest_config, load_methods_config
+from .Config_Backend import (
+                             load_param_config, 
+                             load_assets_to_backtest_config, 
+                             load_methods_config,
+                             get_active_methods
+                            )
 from .Strategy_Params_Generation import automatic_generation
 
 class MainWindow(QMainWindow):
@@ -109,4 +114,24 @@ def dynamic_config(assets_names, auto=True):
     app.exec()
 
     indicators_and_params = automatic_generation(window.active_methods, param_config)
+    return indicators_and_params, window.asset_config
+
+def dynamic_config(assets_names, auto=True):
+    
+    param_config = load_param_config()
+    asset_config = load_assets_to_backtest_config()
+    methods_config = load_methods_config()
+
+    if auto:
+        active_methods = get_active_methods(methods_config)
+        indicators_and_params = automatic_generation(active_methods, param_config)
+        return indicators_and_params, asset_config
+
+    app = QApplication([])
+    window = MainWindow(param_config, asset_config, assets_names, methods_config)
+    window.show()
+    app.exec()
+
+    active_methods = get_active_methods(window.methods_config)
+    indicators_and_params = automatic_generation(active_methods, param_config)
     return indicators_and_params, window.asset_config
