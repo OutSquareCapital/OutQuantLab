@@ -23,21 +23,17 @@ def data_arrays_to_dataframe(raw_adjusted_returns_array: np.ndarray,
 
 def process_backtest(prices_array: np.ndarray, 
                     log_returns_array: np.ndarray,
-                    pct_returns_array: np.ndarray, 
-                    hv_array: np.ndarray, 
+                    volatility_adjusted_pct_returns_array: np.ndarray,
                     asset_names: list,
                     dates_index: pd.Index,
-                    indicators_and_params: dict,
-                    vol_adjustement:int = 15
+                    indicators_and_params: dict
                     ) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     raw_adjusted_returns_array = transform_signals_into_returns(prices_array,
                                                                 log_returns_array,
-                                                                pct_returns_array,
-                                                                hv_array,
+                                                                volatility_adjusted_pct_returns_array,
                                                                 asset_names,
-                                                                indicators_and_params,
-                                                                vol_adjustement)
+                                                                indicators_and_params)
 
     return data_arrays_to_dataframe(raw_adjusted_returns_array, 
                                     dates_index, 

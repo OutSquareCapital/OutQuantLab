@@ -1,6 +1,5 @@
 from joblib import Parallel, delayed
 import numpy as np
-from Process_Data import calculate_volatility_adjusted_returns
 from .Backtest_Initialization import create_progress_bar, initialize_returns_array
 
 def process_param(func, data_array, adjusted_returns_array, param):
@@ -52,18 +51,11 @@ def calculate_strategy_returns(signals_array: np.ndarray,
 
 def transform_signals_into_returns(prices_array: np.ndarray, 
                                     log_returns_array: np.ndarray,
-                                    pct_returns_array: np.ndarray, 
-                                    hv_array: np.ndarray, 
+                                    volatility_adjusted_pct_returns_array: np.ndarray, 
                                     asset_names: list,
-                                    indicators_and_params: dict,
-                                    vol_adjustement:int = 15,
+                                    indicators_and_params: dict
                                     ) -> np.ndarray:
     
-    volatility_adjusted_returns = calculate_volatility_adjusted_returns(
-                                                                        pct_returns_array, 
-                                                                        hv_array, 
-                                                                        vol_adjustement
-                                                                        )
     (
     signals_array, 
     data_arrays, 
@@ -75,5 +67,5 @@ def transform_signals_into_returns(prices_array: np.ndarray,
     return calculate_strategy_returns(signals_array,
                                     data_arrays,
                                     indicators_and_params,
-                                    volatility_adjusted_returns,
+                                    volatility_adjusted_pct_returns_array,
                                     num_indicators)

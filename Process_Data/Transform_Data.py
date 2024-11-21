@@ -103,7 +103,7 @@ def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
 
 def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:int) -> Tuple[np.ndarray, 
                                                                                              np.ndarray, 
-                                                                                             np.ndarray, 
+                                                                                             np.ndarray,
                                                                                              List[str],
                                                                                              pd.Index]:
 
@@ -121,10 +121,12 @@ def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:i
     hv_array = mt.hv_composite(pct_returns_array)
 
     # Liste des noms des actifs
-    asset_names = list(prices_df.columns)
-    dates = prices_df.index
+    asset_names = list(pct_returns_df.columns)
+    dates = pct_returns_df.index
 
-    return prices_array, pct_returns_array, log_returns_array, hv_array, asset_names, dates
+    volatility_adjusted_pct_returns = calculate_volatility_adjusted_returns(pct_returns_array, hv_array)
+    
+    return prices_array, volatility_adjusted_pct_returns, log_returns_array, asset_names, dates
 
 def calculate_ratios_returns(returns_df: pd.DataFrame, asset_names: list) -> pd.DataFrame:
 
