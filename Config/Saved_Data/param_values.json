@@ -81,8 +81,20 @@
         ]
     },
     "MeanReversion": {
-        "SignalLength": [],
-        "PLength": []
+        "SignalLength": [
+            2,
+            4,
+            8,
+            16,
+            32
+        ],
+        "PLength": [
+            64,
+            128,
+            256,
+            512,
+            1024
+        ]
     },
     "MeanReversionTrend": {
         "SignalLength": [],

@@ -3,7 +3,7 @@ from .Config_Params import ParameterWidget
 from .Config_Assets import AssetSelectionWidget
 from .Config_Indicators import MethodSelectionWidget
 from .Config_Backend import load_param_config, load_assets_to_backtest_config, load_methods_config
-
+from .Strategy_Params_Generation import automatic_generation
 
 class MainWindow(QMainWindow):
     def __init__(self, param_config, asset_config, assets_names, methods_config):
@@ -87,3 +87,26 @@ def dynamic_config(assets_names, auto=True):
     app.exec()
 
     return window.get_results()
+
+def dynamic_config(assets_names, auto=True):
+    if auto:
+        param_config = load_param_config()
+        asset_config = load_assets_to_backtest_config()
+        methods_config = load_methods_config()
+        active_methods = MethodSelectionWidget(methods_config).get_active_methods()
+
+        # Génération automatique
+        indicators_and_params = automatic_generation(active_methods, param_config)
+        return indicators_and_params, asset_config
+
+    param_config = load_param_config()
+    asset_config = load_assets_to_backtest_config()
+    methods_config = load_methods_config()
+
+    app = QApplication([])
+    window = MainWindow(param_config, asset_config, assets_names, methods_config)
+    window.show()
+    app.exec()
+
+    indicators_and_params = automatic_generation(window.active_methods, param_config)
+    return indicators_and_params, window.asset_config

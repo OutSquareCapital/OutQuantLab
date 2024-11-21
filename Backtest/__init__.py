@@ -1,2 +1,1 @@
-from .ParametersGeneration import automatic_generation
 from .Returns_Calculations import SignalsProcessing
