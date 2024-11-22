@@ -9,34 +9,25 @@ from Portfolio import generate_static_clusters
 def equity(returns_df: pd.DataFrame):
 
     equity_curves = equity_curves_calculs(returns_df)
-    final_values = equity_curves.iloc[-1]
-    sorted_columns = Transformations.sort_columns_by_metric(final_values, ascending=True)
+    sorted_columns = Transformations.sort_dataframe(equity_curves, 
+                                                    use_final=True,
+                                                    ascending=True)
 
-    Widgets.curves(y_values=equity_curves[sorted_columns], 
-                   x_values=equity_curves.index, 
+    Widgets.curves(x_values=equity_curves.index,
+                   y_values=equity_curves[sorted_columns],
                    title="Equity Curves", 
                    xlabel='Date', 
                    ylabel='Equity', 
                    log_scale=True)
 
-def plot_final_equity_values(daily_returns: pd.DataFrame):
-
-    final_equities_df = Computations.calculate_final_equity_values(daily_returns)
-    sorted_columns = Transformations.sort_by_final_equity(final_equities_df)
-
-    Widgets.curves(x_values=final_equities_df[sorted_columns], 
-                   y_values=final_equities_df.index, 
-                   title="Final Equity Value Starting Each Day", 
-                   xlabel='Start Date', 
-                   ylabel='Final Equity Value')
-
 def volatility(daily_returns: pd.DataFrame, means=False):
 
     rolling_volatility_df = Computations.rolling_volatility_calculs(daily_returns, means)
-    sorted_columns = Transformations.sort_columns_by_volatility(rolling_volatility_df)
+    sorted_columns = Transformations.sort_dataframe(rolling_volatility_df,
+                                                    ascending=False)
 
-    Widgets.curves(x_values=rolling_volatility_df[sorted_columns], 
-                   y_values=daily_returns.index, 
+    Widgets.curves(x_values=daily_returns.index,
+                   y_values=rolling_volatility_df[sorted_columns], 
                    title="Rolling Volatility", 
                    xlabel='Date', 
                    ylabel='Rolling Volatility (%)', 
@@ -45,10 +36,11 @@ def volatility(daily_returns: pd.DataFrame, means=False):
 def drawdowns(returns_df: pd.DataFrame):
 
     drawdowns = Computations.drawdowns_calculs(returns_df)
-    sorted_columns = Transformations.sort_columns_by_drawdown(drawdowns)
+    sorted_columns = Transformations.sort_dataframe(drawdowns,
+                                                    ascending=True)
 
-    Widgets.curves(x_values=drawdowns[sorted_columns], 
-                   y_values=returns_df.index, 
+    Widgets.curves(x_values=returns_df.index, 
+                   y_values=drawdowns[sorted_columns], 
                    title="Drawdowns", 
                    xlabel="Date", 
                    ylabel="Drawdown (%)", 
@@ -57,10 +49,11 @@ def drawdowns(returns_df: pd.DataFrame):
 def rolling_sharpe_ratio(daily_returns: pd.DataFrame):
 
     rolling_sharpe_ratio_df = Computations.rolling_sharpe_ratios_calculs(daily_returns)
-    sorted_columns = Transformations.sort_sharpe_ratios(rolling_sharpe_ratio_df)
+    sorted_columns = Transformations.sort_dataframe(rolling_sharpe_ratio_df,
+                                                    ascending=True)
 
-    Widgets.curves(x_values=rolling_sharpe_ratio_df[sorted_columns], 
-                   y_values=daily_returns.index, 
+    Widgets.curves(x_values=daily_returns.index,
+                   y_values=rolling_sharpe_ratio_df[sorted_columns], 
                    title="Rolling Sharpe Ratios", 
                    xlabel='Date', 
                    ylabel='Rolling Sharpe Ratio', 
@@ -69,7 +62,9 @@ def rolling_sharpe_ratio(daily_returns: pd.DataFrame):
 
 def max_drawdowns(equity_curves: pd.DataFrame):
     drawdowns = Computations.drawdowns_calculs(equity_curves)
-    sorted_drawdowns = Transformations.sort_max_drawdowns(drawdowns)
+    sorted_drawdowns = Transformations.sort_series(drawdowns,
+                                                   ascending=False)
+    
     data = pd.DataFrame({'x': sorted_drawdowns.index, 'y': sorted_drawdowns.values})
 
     Widgets.bars(data=data, 
@@ -79,7 +74,8 @@ def max_drawdowns(equity_curves: pd.DataFrame):
 
 def average_inverted_correlation_bar_chart(daily_returns: pd.DataFrame):
     average_correlations_df = Computations.average_correlation_calculs(daily_returns) * -1
-    sorted_correlations = Transformations.sort_average_correlation(average_correlations_df)
+    sorted_correlations = Transformations.sort_series(average_correlations_df,
+                                                      ascending=False)
     data = pd.DataFrame({'x': sorted_correlations.index, 'y': sorted_correlations['Average Correlation']})
 
     Widgets.bars(data=data, 
@@ -90,7 +86,8 @@ def average_inverted_correlation_bar_chart(daily_returns: pd.DataFrame):
 
 def overall_sharpe_ratios(daily_returns: pd.DataFrame):
     sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
-    sorted_sharpe_ratios = sharpe_ratios_df.sort_values(by='Sharpe Ratio', ascending=True)
+    sorted_sharpe_ratios = Transformations.sort_series(sharpe_ratios_df, 
+                                                       ascending=True)
     data = pd.DataFrame({'x': sorted_sharpe_ratios.index, 'y': sorted_sharpe_ratios['Sharpe Ratio']})
 
     Widgets.bars(data, 
@@ -100,7 +97,8 @@ def overall_sharpe_ratios(daily_returns: pd.DataFrame):
 
 def overall_monthly_skew(daily_returns: pd.DataFrame):
     skew_series = Computations.overall_monthly_skew_calculs(daily_returns)
-    sorted_skew_series = skew_series.sort_values(ascending=True)
+    sorted_skew_series = Transformations.sort_series(skew_series,
+                                                     ascending=True)
     data = pd.DataFrame({'x': sorted_skew_series.index, 'y': sorted_skew_series.values})
     Widgets.bars(data, 
                  title="Monthly Skew", 
@@ -109,7 +107,8 @@ def overall_monthly_skew(daily_returns: pd.DataFrame):
 
 def sortino_ratios(daily_returns: pd.DataFrame):
     sortino_ratios_df = Computations.overall_sortino_ratios_calculs(daily_returns)
-    sorted_sortino_ratios = sortino_ratios_df.sort_values(by='Sortino Ratio', ascending=True)
+    sorted_sortino_ratios = Transformations.sort_series(sortino_ratios_df, 
+                                                        ascending=True)
     data = pd.DataFrame({'x': sorted_sortino_ratios.index, 'y': sorted_sortino_ratios['Sortino Ratio']})
     Widgets.bars(data, 
                  title="Sortino Ratios", 
@@ -117,9 +116,10 @@ def sortino_ratios(daily_returns: pd.DataFrame):
                  ylabel="Sortino Ratio")
     
 def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
-    combined_df = Computations.calculate_sharpe_correlation_ratio(daily_returns)
-    sorted_combined_df = combined_df.sort_values(by='Sharpe/AvgCorrelation', ascending=True)
-    data = pd.DataFrame({'x': sorted_combined_df.index, 'y': sorted_combined_df['Sharpe/AvgCorrelation']})
+    sharpe_correlation_ratio_df = Computations.calculate_sharpe_correlation_ratio(daily_returns)
+    sortedsharpe_correlation_ratio_df = Transformations.sort_series(sharpe_correlation_ratio_df, 
+                                                     ascending=True)
+    data = pd.DataFrame({'x': sortedsharpe_correlation_ratio_df.index, 'y': sortedsharpe_correlation_ratio_df['Sharpe/AvgCorrelation']})
     Widgets.bars(data, 
                  title="Sharpe Ratio Rank / Average Correlation Rank", 
                  xlabel="Strats", 

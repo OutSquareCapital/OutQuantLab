@@ -144,38 +144,10 @@ def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=No
             
     return labels, parents
 
-def sort_columns_by_metric(metric_series: pd.Series, ascending: bool = True) -> list:
-    return metric_series.sort_values(ascending=ascending).index.tolist()
+def sort_series(data: pd.Series, ascending: bool = True) -> list:
+    return data.sort_values(ascending=ascending).index.tolist()
 
-def sort_by_final_equity(final_equities_df: pd.DataFrame) -> list:
-    final_equity_means = final_equities_df.mean()
-    final_equity_percentiles = final_equity_means.rank(pct=True)
-    return final_equity_percentiles.sort_values(ascending=True).index.tolist()
-
-def sort_columns_by_drawdown(drawdowns_df: pd.DataFrame) -> list:
-    drawdown_means = drawdowns_df.mean()
-    return drawdown_means.sort_values(ascending=True).index.tolist()
-
-def sort_columns_by_volatility(rolling_volatility_df: pd.DataFrame) -> list:
-    rolling_volatility_means = rolling_volatility_df.mean()
-    return rolling_volatility_means.sort_values(ascending=True).index.tolist()
-
-def sort_sharpe_ratios(rolling_sharpe_ratio_df: pd.DataFrame) -> list:
-    mean_sharpes = {column: np.nanmean(sharpe) for column, sharpe in rolling_sharpe_ratio_df.items()}
-    return sorted(mean_sharpes, key=mean_sharpes.get, reverse=False)
-
-def sort_max_drawdowns(drawdowns: pd.DataFrame) -> pd.DataFrame:
-    return drawdowns.min(axis=0).sort_values(ascending=True)
-
-def rank_final_equities(final_equities_df: pd.DataFrame) -> pd.Index:
-    final_equity_means = final_equities_df.mean()
-    return final_equity_means.rank(pct=True).sort_values(ascending=True).index
-
-def sort_average_correlation(average_correlations_df: pd.DataFrame) -> pd.DataFrame:
-    return average_correlations_df.sort_values(by='Average Correlation', ascending=True)
-
-def sort_sortino_ratios(sortino_ratios_df: pd.DataFrame) -> pd.Index:
-    return sortino_ratios_df.sort_values(by='Sortino Ratio', ascending=True).index
-
-def sort_by_metric(data: pd.DataFrame, column: str, ascending: bool = True) -> pd.Index:
-    return data.sort_values(by=column, ascending=ascending).index
+def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool = True) -> list:
+    if use_final:
+        return data.iloc[-1].sort_values(ascending=ascending).index.tolist()
+    return data.mean().sort_values(ascending=ascending).index.tolist()

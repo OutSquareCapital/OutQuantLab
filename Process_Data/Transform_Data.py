@@ -6,6 +6,7 @@ from Infrastructure import Fast_Tools as ft
 from typing import List, Tuple
 import Metrics as mt
 from itertools import combinations
+import Config
 
 def calculate_volatility_adjusted_returns(
     pct_returns_array: np.ndarray, 
@@ -55,19 +56,9 @@ def normalize_returns_distribution_rolling(pct_returns_df: pd.DataFrame,
 
     return normalized_returns
 
-def equity_curves_calculs(daily_returns: pd.DataFrame , initial_equity: int =100) -> pd.DataFrame:
+def equity_curves_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
-    equity_curves = (1 + daily_returns).cumprod() * initial_equity
-
-    # Mettre à jour les dernières valeurs NaN dans equity_curves afin de correspondre à initial equity
-    for asset in equity_curves.columns:
-        na_positions = equity_curves[asset].isna()
-        if na_positions.any():
-            na_indices = equity_curves.index[na_positions]
-            last_na_index = na_indices[-1]
-            equity_curves.loc[last_na_index, asset] = initial_equity
-    
-    return equity_curves
+    return (1+daily_returns).cumprod() * Config.PERCENTAGE_FACTOR
 
 def pct_returns_np(prices_array: np.ndarray) -> np.ndarray:
 
@@ -111,7 +102,7 @@ def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:i
     pct_returns_array = pct_returns_df.to_numpy(dtype=np.float32)
 
     # Création du DataFrame des prix avec des NaN
-    prices_df = equity_curves_calculs(pct_returns_df, initial_equity)
+    prices_df = equity_curves_calculs(pct_returns_df)
 
     # Conversion en array
     prices_array = prices_df.to_numpy(dtype=np.float32)

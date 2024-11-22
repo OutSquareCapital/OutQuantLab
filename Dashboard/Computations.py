@@ -87,20 +87,6 @@ def rolling_volatility_calculs(daily_returns: pd.DataFrame, means):
                                              index=daily_returns.index, 
                                              columns=daily_returns.columns).round(2)
 
-def calculate_final_equity_values(daily_returns: pd.DataFrame, initial_equity: int = 100000) -> pd.DataFrame:
-
-    final_equities = []
-    for start_date in daily_returns.index:
-        # Calculer les courbes d'équité en utilisant cumprod depuis le start_date
-        equity_curve = (1 + daily_returns.loc[start_date:]).cumprod() * initial_equity
-        final_values = equity_curve.iloc[-1]
-        final_equities.append(final_values)
-
-    return pd.DataFrame(final_equities, 
-                                        index=daily_returns.index, 
-                                        columns=daily_returns.columns, 
-                                        dtype=np.float32).round(2)
-
 def drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     equity_curves = equity_curves_calculs(returns_df)
