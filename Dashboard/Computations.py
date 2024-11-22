@@ -27,6 +27,43 @@ def overall_sortino_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
                         dtype=np.float32
                         ).round(2)
 
+def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
+
+    correlation_matrix = daily_returns.corr()
+    average_correlations = correlation_matrix.mean()
+
+    return pd.DataFrame(average_correlations, 
+                        columns=['Average Correlation'], 
+                        dtype=np.float32
+                        ).round(2)
+
+def calculate_sharpe_correlation_ratio(daily_returns: pd.DataFrame) -> pd.DataFrame:
+
+    # Calcul des Sharpe Ratios et des Average Correlations
+    sharpe_ratios_df = overall_sharpe_ratios_calculs(daily_returns)
+    average_correlations_df = average_correlation_calculs(daily_returns)
+
+    # Calculer les rangs des Sharpe Ratios et des Correlations indépendamment
+    sharpe_ratios_df['Sharpe Rank'] = sharpe_ratios_df['Sharpe Ratio'].rank(method='min')
+    average_correlations_df['Correlation Rank'] = average_correlations_df['Average Correlation'].rank(method='min')
+
+    # Fusionner les deux DataFrames avec pd.concat en s'assurant que les index sont alignés
+    combined_df = pd.concat([sharpe_ratios_df, average_correlations_df], axis=1)
+
+    # Calculer la nouvelle métrique : Sharpe Rank / Correlation Rank
+    combined_df['Sharpe/AvgCorrelation'] = combined_df['Sharpe Rank'] / combined_df['Correlation Rank']
+
+    return combined_df
+
+def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
+
+    # Agréger par mois pour obtenir les rendements mensuels moyens pour chaque actif
+    monthly_returns_df = returns_df.resample('ME').mean()
+    
+    return monthly_returns_df.apply(lambda x: skew(x, nan_policy='omit')
+                                    ).astype(np.float32
+                                    ).round(2)
+
 def rolling_sharpe_ratios_calculs(daily_returns: pd.DataFrame, window_size: int = 1250):
         
         return pd.DataFrame(mt.rolling_sharpe_ratios(
@@ -72,40 +109,3 @@ def drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
     drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR
 
     return drawdowns.round(2)
-
-def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
-
-    correlation_matrix = daily_returns.corr()
-    average_correlations = correlation_matrix.mean()
-
-    return pd.DataFrame(average_correlations, 
-                        columns=['Average Correlation'], 
-                        dtype=np.float32
-                        ).round(2)
-
-def calculate_sharpe_correlation_ratio(daily_returns: pd.DataFrame) -> pd.DataFrame:
-
-    # Calcul des Sharpe Ratios et des Average Correlations
-    sharpe_ratios_df = overall_sharpe_ratios_calculs(daily_returns)
-    average_correlations_df = average_correlation_calculs(daily_returns)
-
-    # Calculer les rangs des Sharpe Ratios et des Correlations indépendamment
-    sharpe_ratios_df['Sharpe Rank'] = sharpe_ratios_df['Sharpe Ratio'].rank(method='min')
-    average_correlations_df['Correlation Rank'] = average_correlations_df['Average Correlation'].rank(method='min')
-
-    # Fusionner les deux DataFrames avec pd.concat en s'assurant que les index sont alignés
-    combined_df = pd.concat([sharpe_ratios_df, average_correlations_df], axis=1)
-
-    # Calculer la nouvelle métrique : Sharpe Rank / Correlation Rank
-    combined_df['Sharpe/AvgCorrelation'] = combined_df['Sharpe Rank'] / combined_df['Correlation Rank']
-
-    return combined_df
-
-def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
-
-    # Agréger par mois pour obtenir les rendements mensuels moyens pour chaque actif
-    monthly_returns_df = returns_df.resample('ME').mean()
-    
-    return monthly_returns_df.apply(lambda x: skew(x, nan_policy='omit')
-                                    ).astype(np.float32
-                                    ).round(2)

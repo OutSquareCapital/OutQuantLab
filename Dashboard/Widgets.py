@@ -1,37 +1,26 @@
 import plotly.express as px
 import plotly.graph_objects as go
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import Dashboard.Common as Common
 
-def bar(fig: go.Figure, x: list, y: list, label: str, color: str, show_x_axis: bool = False):
-
-    fig.add_trace(go.Bar(
-        x=x,
-        y=y,
-        name=label,
-        marker_color=color
-    ))
-    if not show_x_axis:
-        fig.update_layout(xaxis=dict(showticklabels=False))
-    plt.close()
-
-def plot_curves(data: pd.DataFrame, 
-                x_values: pd.Index, 
-                colors: dict, 
-                title: str, 
-                xlabel: str, 
-                ylabel: str, 
-                log_scale: bool = False, 
-                add_zero_line: bool = False):
+def curves( x_values: pd.Index,
+            y_values: pd.DataFrame,  
+            title: str, 
+            xlabel: str, 
+            ylabel: str, 
+            log_scale: bool = False, 
+            add_zero_line: bool = False):
     
     fig = go.Figure()
 
-    for column in data.columns:
+    color_map = Common.get_color_map(y_values.columns)
+    colors = {col: color_map[col] for col in y_values.columns}
+
+    for column in y_values.columns:
         fig.add_trace(go.Scatter(
             x=x_values,
-            y=data[column],
+            y=y_values[column],
             mode='lines',
             name=column,
             line=dict(width=2, color=colors[column]),
@@ -58,37 +47,30 @@ def plot_curves(data: pd.DataFrame,
     )
     fig.show()
 
-def histogram(df: pd.DataFrame, title: str, xlabel: str, ylabel: str):
 
-    df = df * 100
-    # Transformation pour correspondre au format attendu par Plotly
-    melted_data = df.melt(var_name='Strat', value_name='Returns')
-
-    # Utilisation de Common pour obtenir les couleurs
-    unique_assets = melted_data['Strat'].unique()
-    color_map = Common.get_color_map(unique_assets)
-
-
-    # Création de l'histogramme avec Plotly
-    fig = px.histogram(
-        melted_data,
-        x='Returns',
-        color='Strat',
-        nbins=50,
-        title=title,
-        labels={'Returns': xlabel},
-        opacity=0.5,
-        barmode='overlay',
-        color_discrete_map=color_map
-    )
+def bars(data: pd.DataFrame, 
+        title: str, 
+        xlabel: str, 
+        ylabel: str, 
+        color_column: str = None):
+    
+    unique_items = data[color_column].unique() if color_column else data['x']
+    color_map = Common.get_color_map(unique_items)
+    colors = [color_map[item] for item in data[color_column]] if color_column else [color_map[item] for item in data['x']]
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=data['x'],
+        y=data['y'],
+        marker_color=colors
+    ))
     fig.update_layout(
+        title=title,
         xaxis_title=xlabel,
         yaxis_title=ylabel,
-        template='plotly_dark',
-        yaxis_type='log'  # Axe Y en échelle logarithmique
+        template="plotly_dark"
     )
     fig.show()
-    plt.close()
 
 def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str, colorbar_title: str):
 
@@ -148,23 +130,3 @@ def treemap(labels: list, parents: list, title: str):
         maxdepth=-1
     )
     fig.show()
-
-def bar_chart(data: pd.DataFrame, title: str, xlabel: str, ylabel: str, color_column: str = None):
-    unique_items = data[color_column].unique() if color_column else data['x']
-    color_map = Common.get_color_map(unique_items)
-    colors = [color_map[item] for item in data[color_column]] if color_column else [color_map[item] for item in data['x']]
-    
-    fig = go.Figure()
-    fig.add_trace(go.Bar(
-        x=data['x'],
-        y=data['y'],
-        marker_color=colors
-    ))
-    fig.update_layout(
-        title=title,
-        xaxis_title=xlabel,
-        yaxis_title=ylabel,
-        template="plotly_dark"
-    )
-    fig.show()
-
