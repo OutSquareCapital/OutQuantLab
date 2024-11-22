@@ -73,18 +73,6 @@ def drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     return drawdowns.round(2)
 
-def annual_returns_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
-
-    # Grouper les rendements par année
-    grouped = daily_returns.groupby(daily_returns.index.year)
-
-    # Calculer les rendements cumulés pour chaque groupe (année)
-    cumulative_returns = grouped.apply(lambda x: (x + 1).prod() - 1) * Config.PERCENTAGE_FACTOR
-
-    return pd.DataFrame(cumulative_returns, 
-                        dtype=np.float32
-                        ).round(4)
-
 def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     correlation_matrix = daily_returns.corr()
@@ -112,16 +100,6 @@ def calculate_sharpe_correlation_ratio(daily_returns: pd.DataFrame) -> pd.DataFr
     combined_df['Sharpe/AvgCorrelation'] = combined_df['Sharpe Rank'] / combined_df['Correlation Rank']
 
     return combined_df
-
-def sharpe_ratios_yearly_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
-
-    # Grouper les retours par année
-    grouped = daily_returns.groupby(daily_returns.index.year)
-
-    # Calculer les ratios de Sharpe pour chaque groupe (année)
-    sharpe_ratios = grouped.apply(lambda x: sharpe_ratios_yearly_calculs(x)['Sharpe Ratio'])
-
-    return pd.DataFrame(sharpe_ratios, dtype=np.float32)
 
 def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
 
