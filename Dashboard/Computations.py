@@ -5,20 +5,20 @@ import Config
 from Process_Data import equity_curves_calculs
 import Metrics as mt
 
-def overall_sharpe_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
+def overall_sharpe_ratios_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    sharpe_ratios = daily_returns.mean() / daily_returns.std() * Config.ANNUALIZATION_FACTOR
+    sharpe_ratios = returns_df.mean() / returns_df.std() * Config.ANNUALIZATION_FACTOR
 
     return pd.DataFrame(sharpe_ratios, 
                         columns=['Sharpe Ratio'], 
                         dtype=np.float32
                         ).round(2)
 
-def overall_sortino_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
+def overall_sortino_ratios_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    mean_returns = daily_returns.mean()
+    mean_returns = returns_df.mean()
     
-    downside_deviation = daily_returns[daily_returns < 0].std()
+    downside_deviation = returns_df[returns_df < 0].std()
     
     sortino_ratios = mean_returns / downside_deviation * Config.ANNUALIZATION_FACTOR
 
@@ -27,9 +27,9 @@ def overall_sortino_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
                         dtype=np.float32
                         ).round(2)
 
-def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
+def average_correlation_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    correlation_matrix = daily_returns.corr()
+    correlation_matrix = returns_df.corr()
     average_correlations = correlation_matrix.mean()
 
     return pd.DataFrame(average_correlations, 
@@ -37,11 +37,20 @@ def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
                         dtype=np.float32
                         ).round(2)
 
-def calculate_sharpe_correlation_ratio(daily_returns: pd.DataFrame) -> pd.DataFrame:
+def mean_drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
+
+    equity_curves = equity_curves_calculs(returns_df)
+    
+    # Calculate drawdowns for each equity curve directly
+    drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR
+
+    return drawdowns.mean().round(2)
+
+def calculate_sharpe_correlation_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     # Calcul des Sharpe Ratios et des Average Correlations
-    sharpe_ratios_df = overall_sharpe_ratios_calculs(daily_returns)
-    average_correlations_df = average_correlation_calculs(daily_returns)
+    sharpe_ratios_df = overall_sharpe_ratios_calculs(returns_df)
+    average_correlations_df = average_correlation_calculs(returns_df)
 
     # Calculer les rangs des Sharpe Ratios et des Correlations indépendamment
     sharpe_ratios_df['Sharpe Rank'] = sharpe_ratios_df['Sharpe Ratio'].rank(method='min')
@@ -64,28 +73,28 @@ def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
                                     ).astype(np.float32
                                     ).round(2)
 
-def rolling_sharpe_ratios_calculs(daily_returns: pd.DataFrame, window_size: int = 1250):
+def rolling_sharpe_ratios_calculs(returns_df: pd.DataFrame, window_size: int = 1250):
         
         return pd.DataFrame(mt.rolling_sharpe_ratios(
-                                                    daily_returns.values, 
+                                                    returns_df.values, 
                                                     window_size, 
                                                     window_size),
-                                                    index=daily_returns.index,
-                                                    columns=daily_returns.columns
+                                                    index=returns_df.index,
+                                                    columns=returns_df.columns
                                                     ).round(2)
         
 
-def rolling_volatility_calculs(daily_returns: pd.DataFrame, means):
+def rolling_volatility_calculs(returns_df: pd.DataFrame, means):
     
     if means:
-        rolling_volatility_df = pd.DataFrame(mt.hv_composite(daily_returns.values), 
-                                             index=daily_returns.index, 
-                                             columns=daily_returns.columns)
+        rolling_volatility_df = pd.DataFrame(mt.hv_composite(returns_df.values), 
+                                             index=returns_df.index, 
+                                             columns=returns_df.columns)
         return rolling_volatility_df.expanding(min_periods=1).mean().round(2)
     else:
-        return pd.DataFrame(mt.hv_composite(daily_returns.values), 
-                                             index=daily_returns.index, 
-                                             columns=daily_returns.columns).round(2)
+        return pd.DataFrame(mt.hv_composite(returns_df.values), 
+                                             index=returns_df.index, 
+                                             columns=returns_df.columns).round(2)
 
 def drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
