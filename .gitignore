@@ -27,3 +27,6 @@ test.py
 
 # ignore data files
 *.csv
+
+#ignore jupyter
+*.ipynb
