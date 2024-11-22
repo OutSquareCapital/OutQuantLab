@@ -1,12 +1,10 @@
-import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import plotly.express as px
 import plotly.graph_objects as go
 
-import Dashboard.Format as Format
+import Dashboard.Transformations as Transformations
+import Dashboard.Common as Common
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations
 
@@ -22,13 +20,9 @@ def equity(returns_df: pd.DataFrame):
     equity_curves = equity_curves_calculs(returns_df)
     
     final_values = equity_curves.iloc[-1]
-    sorted_columns = final_values.sort_values(ascending=True).index
+    sorted_columns = Transformations.sort_columns_by_metric(final_values, ascending=True)
     n_strats = len(sorted_columns)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+    colors = Common.map_colors_to_columns(n_strats, sorted_columns)
 
     fig = go.Figure()
     for index, column in enumerate(sorted_columns):
@@ -65,12 +59,9 @@ def plot_final_equity_values(daily_returns: pd.DataFrame):
     sorted_columns = final_equity_percentiles.sort_values(ascending=True).index
 
     fig = go.Figure()
-    n_strats = len(sorted_columns)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+
+    colors = Common.map_colors_to_columns(len(sorted_columns), sorted_columns)
+
 
     for index, column in enumerate(sorted_columns):
         color = colors[index]
@@ -106,12 +97,8 @@ def drawdowns(returns_df: pd.DataFrame):
     drawdown_means = drawdowns.mean()
     drawdown_percentiles = drawdown_means.rank(pct=True)
     sorted_columns = drawdown_percentiles.sort_values(ascending=True).index
-    n_strats = len(sorted_columns)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+
+    colors = Common.map_colors_to_columns(len(sorted_columns), sorted_columns)
 
     fig = go.Figure()
     for index, column in enumerate(sorted_columns):
@@ -145,12 +132,7 @@ def max_drawdowns(equity_curves: pd.DataFrame):
 
     # Tri des stratégies par drawdown maximal (du plus grand au plus petit drawdown)
     sorted_max_drawdowns = max_drawdowns.sort_values(ascending=True)
-    n_strats = len(sorted_max_drawdowns)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+    colors = Common.map_colors_to_columns(len(sorted_max_drawdowns), sorted_max_drawdowns.index)
 
     fig = go.Figure()
     for index, column in enumerate(sorted_max_drawdowns.index):
@@ -166,8 +148,6 @@ def max_drawdowns(equity_curves: pd.DataFrame):
     )
     fig.show()
 
-
-
 def annual_returns(daily_returns: pd.DataFrame):
 
     annual_returns = Computations.annual_returns_calculs(daily_returns)
@@ -178,28 +158,9 @@ def annual_returns(daily_returns: pd.DataFrame):
                             sort_ascending=True, 
                             color_high_to_low=False)
 
-
 def correlation_heatmap(daily_returns: pd.DataFrame):
-
     correlation_matrix = daily_returns.corr()
-
-    title = 'Correlation Matrix'
-    # Utiliser les labels complets sans simplification
-    labels = daily_returns.columns
-
-    plt.figure(figsize=(16, 14))
-    sns.heatmap(
-        correlation_matrix, 
-        annot=True, 
-        cmap='coolwarm', 
-        fmt=".2f", 
-        linewidths=.05,
-        xticklabels=labels, 
-        yticklabels=labels
-    )
-    plt.title(title)
-    plt.show()
-
+    Widgets.heatmap(correlation_matrix, daily_returns.columns, "Correlation Matrix")
 
 def average_correlation_bar_chart(daily_returns: pd.DataFrame):
 
@@ -211,11 +172,8 @@ def average_correlation_bar_chart(daily_returns: pd.DataFrame):
 
     sorted_correlations = average_correlations_df.sort_values(by='Average Correlation', ascending=False)
     n_strats = len(sorted_correlations)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+    colors = Common.map_colors_to_columns(n_strats, sorted_correlations.index)
+
     fig = go.Figure()
     for index, (column, row) in enumerate(sorted_correlations.iterrows()):
         color = colors[index]
@@ -242,12 +200,9 @@ def overall_sharpe_ratios(daily_returns: pd.DataFrame):
 
     # Sort by Sharpe Ratio values
     sorted_sharpe_ratios = sharpe_ratios_df.sort_values(by='Sharpe Ratio', ascending=True)
-    n_strats = len(sorted_sharpe_ratios)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+
+    colors = Common.map_colors_to_columns(len(sorted_sharpe_ratios), sorted_sharpe_ratios)
+
     fig = go.Figure()
     for index, (column, row) in enumerate(sorted_sharpe_ratios.iterrows()):
         color = colors[index]
@@ -275,13 +230,8 @@ def overall_monthly_skew(daily_returns: pd.DataFrame):
     sorted_skew_series = skew_series.sort_values(ascending=True)
     n_strats = len(sorted_skew_series)
     
-    # Obtenir un colormap personnalisé pour les barres
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
-    
+    colors = Common.map_colors_to_columns(n_strats, sorted_skew_series.index)
+
     # Création de la figure
     fig = go.Figure()
     for index, (column, skew_value) in enumerate(sorted_skew_series.items()):
@@ -306,12 +256,9 @@ def rolling_sharpe_ratio(daily_returns: pd.DataFrame):
     
     mean_sharpes = {column: np.nanmean(sharpe) for column, sharpe in rolling_sharpe_ratio_df.items()}
     sorted_columns = sorted(mean_sharpes, key=mean_sharpes.get, reverse=False)
-    n_strats = len(sorted_columns)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+
+    colors = Common.map_colors_to_columns(len(sorted_columns), sorted_columns)
+
     fig = go.Figure()
     for index, column in enumerate(sorted_columns):
         color = colors[index]
@@ -353,11 +300,7 @@ def sortino_ratios(daily_returns: pd.DataFrame):
 
     sorted_sortino_ratios = sortino_ratios_df.sort_values(by='Sortino Ratio', ascending=True)
     n_strats = len(sorted_sortino_ratios)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+    colors = Common.map_colors_to_columns(n_strats, sorted_sortino_ratios.index)
     fig = go.Figure()
     for index, (column, row) in enumerate(sorted_sortino_ratios.iterrows()):
         color = colors[index]
@@ -394,21 +337,18 @@ def volatility(daily_returns: pd.DataFrame, means=False):
     rolling_volatility_percentiles = rolling_volatility_means.rank(pct=True)
     sorted_columns = rolling_volatility_percentiles.sort_values(ascending=True).index
     n_strats = len(sorted_columns)
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+
+    colors = Common.map_colors_to_columns(n_strats, sorted_columns)
 
     fig = go.Figure()
     for index, column in enumerate(sorted_columns):
         color = colors[index]
         Widgets.curves(fig, 
-                                        daily_returns.index, 
-                                        rolling_volatility_df[column],
-                                        label=column, 
-                                        color=color, 
-                                        add_zero_line=True)
+                        daily_returns.index, 
+                        rolling_volatility_df[column],
+                        label=column, 
+                        color=color, 
+                        add_zero_line=True)
 
     fig.update_layout(
         title=title,
@@ -421,47 +361,13 @@ def volatility(daily_returns: pd.DataFrame, means=False):
 
 def sharpe_ratios_3d_scatter_plot(daily_returns: pd.DataFrame, params: list):
 
-    x_vals, y_vals, z_vals, sharpe_means = Format.calculate_sharpe_means_from_combination(daily_returns, params)
-
-    # Créer un scatter 3D avec les couleurs basées sur la moyenne du Sharpe Ratio
-    fig = go.Figure(data=[go.Scatter3d(
-        x=x_vals,
-        y=y_vals,
-        z=z_vals,
-        mode='markers',
-        marker=dict(
-            size=8,  # Taille des points
-            color=sharpe_means,  # Couleur en fonction du Sharpe Ratio moyen
-            colorscale='Jet_r',  # Palette de couleurs pour représenter le Sharpe Ratio
-            colorbar=dict(title="Sharpe Ratio"),  # Barre de couleur pour Sharpe Ratio
-            showscale=True
-        ),
-        text=['Sharpe Ratio moyen: {:.2f}'.format(sr) for sr in sharpe_means],  # Info bulle pour chaque point
-        hovertemplate='Param1: %{x}<br>Param2: %{y}<br>Param3: %{z}<br>Sharpe Ratio: %{marker.color}<extra></extra>'
-    )])
-
-    # Mise à jour de la mise en page du graphique
-    fig.update_layout(
-        scene=dict(
-            xaxis_title=params[0],
-            yaxis_title=params[1],
-            zaxis_title=params[2]
-        ),
-        template="plotly_dark",
-        title=f'Scatter Plot 3D des Sharpe Ratios pour {params[0]}, {params[1]} et {params[2]}',
-        height=800
-    )
-
-    # Affichage du graphique
-    fig.show()
-
+    x_vals, y_vals, z_vals, sharpe_means = Transformations.convert_params_to_4d(daily_returns, params)
+    Widgets.scatter_3d(x_vals, y_vals, z_vals, sharpe_means, params, "Scatter Plot 3D")
 
 def sharpe_ratios_heatmap(daily_returns: pd.DataFrame, param1: str, param2: str):
 
-    x_vals, y_vals, z_vals = Format.convert_sharpe_to_coordinates(daily_returns, param1, param2)
-
     # Convertir les listes en un grid de type heatmap
-    X, Y, Z = Format.convert_to_surface_grid(x_vals, y_vals, z_vals)
+    X, Y, Z = Transformations.convert_params_to_3d(daily_returns, param1, param2)
 
     # Créer une heatmap avec Plotly
     fig = go.Figure(data=go.Heatmap(
@@ -501,12 +407,7 @@ def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
     # Nombre de stratégies
     n_strats = len(sorted_combined_df)
 
-    # Générer une colormap pour les barres
-    cmap = Format.get_custom_colormap(n_strats)
-    if n_strats == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_strats - 1))) for i in range(n_strats)]
+    colors = Common.map_colors_to_columns(n_strats, sorted_combined_df.index)
 
     # Créer la figure avec Plotly
     fig = go.Figure()
@@ -534,17 +435,5 @@ def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
 def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
 
     clusters_dict = generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
-
-    # Préparer les données pour le Sunburst
-    labels, parents = Format.prepare_sunburst_data(clusters_dict)
-
-    # Créer le Sunburst/Treemap Plot avec Plotly
-    fig = px.treemap(
-        names=labels,
-        parents=parents,
-        title="Visualisation des Clusters",
-        maxdepth=-1  # Affiche toute la hiérarchie
-    )
-
-    # Afficher la figure
-    fig.show()
+    labels, parents = Transformations.prepare_sunburst_data(clusters_dict)
+    Widgets.treemap(labels, parents, "Visualisation des Clusters")

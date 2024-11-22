@@ -1,10 +1,10 @@
 import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
 import pandas as pd
 import numpy as np
-import Dashboard.Format as Format
+import Dashboard.Common as Common
+import seaborn as sns
 
 def colored_table(df: pd.DataFrame, title: str, sort_ascending: bool = True, color_high_to_low: bool = True):
 
@@ -13,8 +13,9 @@ def colored_table(df: pd.DataFrame, title: str, sort_ascending: bool = True, col
 
     avg_performance = df.mean()
     sorted_assets = avg_performance.sort_values(ascending=not color_high_to_low).index
-    # Association des couleurs aux actifs triés
-    asset_colors = {asset: mcolors.to_hex(Format.get_color(i, len(sorted_assets))) for i, asset in enumerate(sorted_assets)}
+
+    colors = Common.map_colors_to_columns(len(sorted_assets), sorted_assets)
+    asset_colors = {asset: color for asset, color in zip(sorted_assets, colors)}
 
     sorted_values = []
     sorted_colors = []
@@ -102,16 +103,16 @@ def curves(fig: go.Figure, x: list, y: list, label: str, color: str, add_zero_li
 
 def histogram(df: pd.DataFrame, title: str, xlabel: str, ylabel: str):
 
-    df = df*100
-    # Flatten the DataFrame for Plotly
+    df = df * 100
+    # Transformation pour correspondre au format attendu par Plotly
     melted_data = df.melt(var_name='Strat', value_name='Returns')
 
-    # Create a color map for the assets
+    # Utilisation de Common pour obtenir les couleurs
     unique_assets = melted_data['Strat'].unique()
-    colors = [Format.get_color(i, len(unique_assets)) for i in range(len(unique_assets))]
-    color_map = dict(zip(unique_assets, colors))
+    color_map = Common.get_color_map(unique_assets)
 
-    # Plot using Plotly Express
+
+    # Création de l'histogramme avec Plotly
     fig = px.histogram(
         melted_data,
         x='Returns',
@@ -121,13 +122,65 @@ def histogram(df: pd.DataFrame, title: str, xlabel: str, ylabel: str):
         labels={'Returns': xlabel},
         opacity=0.5,
         barmode='overlay',
-        color_discrete_map={k: mcolors.to_hex(v) for k, v in color_map.items()}
+        color_discrete_map=color_map
     )
     fig.update_layout(
         xaxis_title=xlabel,
         yaxis_title=ylabel,
         template='plotly_dark',
-        yaxis_type='log'  # Ajout de l'axe y en échelle logarithmique
+        yaxis_type='log'  # Axe Y en échelle logarithmique
     )
     fig.show()
     plt.close()
+
+def heatmap(matrix: pd.DataFrame, labels: list, title: str):
+    plt.figure(figsize=(16, 14))
+    sns.heatmap(
+        matrix, 
+        annot=True, 
+        cmap='coolwarm', 
+        fmt=".2f", 
+        linewidths=.05,
+        xticklabels=labels, 
+        yticklabels=labels
+    )
+    plt.title(title)
+    plt.show()
+
+def scatter_3d(x_vals, y_vals, z_vals, values, params, title: str):
+    fig = go.Figure(data=[go.Scatter3d(
+        x=x_vals,
+        y=y_vals,
+        z=z_vals,
+        mode='markers',
+        marker=dict(
+            size=8,
+            color=values,
+            colorscale='Jet_r',
+            colorbar=dict(title="Value"),
+            showscale=True
+        ),
+        text=['Value: {:.2f}'.format(v) for v in values],
+        hovertemplate='Param1: %{x}<br>Param2: %{y}<br>Param3: %{z}<br>Value: %{marker.color}<extra></extra>'
+    )])
+
+    fig.update_layout(
+        scene=dict(
+            xaxis_title=params[0],
+            yaxis_title=params[1],
+            zaxis_title=params[2]
+        ),
+        template="plotly_dark",
+        title=title,
+        height=800
+    )
+    fig.show()
+
+def treemap(labels: list, parents: list, title: str):
+    fig = px.treemap(
+        names=labels,
+        parents=parents,
+        title=title,
+        maxdepth=-1
+    )
+    fig.show()
