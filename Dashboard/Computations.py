@@ -109,4 +109,3 @@ def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
     return monthly_returns_df.apply(lambda x: skew(x, nan_policy='omit')
                                     ).astype(np.float32
                                     ).round(2)
-                        
