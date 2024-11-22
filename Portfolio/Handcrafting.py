@@ -11,9 +11,7 @@ def classify_assets(asset_list, portfolio):
     }
 
     def find_category_and_subcategory(asset, portfolio):
-        """
-        Helper function to find the main category and subcategory of a single asset.
-        """
+
         for category, subcategories in portfolio.items():
             if isinstance(subcategories, dict):  # Check nested structure
                 for subcategory, assets in subcategories.items():
@@ -75,10 +73,7 @@ def classify_assets(asset_list, portfolio):
     return portfolios
 
 def generate_static_weights(portfolio, parent_weight=1.0):
-    """
-    Génère un dictionnaire des poids égaux pour chaque actif dans le portefeuille, 
-    en gérant une hiérarchie flexible.
-    """
+
     total_items = len(portfolio)
     weighted_portfolio = {}
     
@@ -94,17 +89,7 @@ def generate_static_weights(portfolio, parent_weight=1.0):
     return weighted_portfolio
 
 def generate_dynamic_weights(returns_df, base_weights):
-    """
-    Génère un DataFrame des poids dynamiques en fonction des actifs disponibles pour chaque période,
-    et ajuste les poids en fonction du nombre d'actifs disponibles pour éviter la perte de volatilité.
-    
-    Args:
-        returns_df (pd.DataFrame): DataFrame des rendements des actifs.
-        base_weights (dict): Dictionnaire des poids de base pour chaque actif.
 
-    Returns:
-        pd.DataFrame: DataFrame des poids dynamiques ajustés.
-    """
     # Convertir le dictionnaire des poids de base en DataFrame aligné sur returns_df
     base_weights_df = pd.Series(base_weights).reindex(returns_df.columns)
 
@@ -126,17 +111,6 @@ def generate_dynamic_weights(returns_df, base_weights):
     return adjusted_dynamic_weights
 
 def generate_recursive_means(returns_df, asset_tree):
-    """
-    Génère les moyennes des rendements de manière récursive en descendant dans l'arbre d'actifs, puis en remontant 
-    pour calculer les moyennes à chaque niveau (feuilles -> sous-groupes -> groupes -> niveau global).
-
-    Args:
-        returns_df (pd.DataFrame): DataFrame des rendements des actifs.
-        asset_tree (dict): Dictionnaire imbriqué représentant la structure des actifs.
-
-    Returns:
-        pd.Series: Moyenne des rendements à chaque niveau du dictionnaire.
-    """
     
     group_means = []  # Liste pour stocker les moyennes calculées à chaque niveau
 

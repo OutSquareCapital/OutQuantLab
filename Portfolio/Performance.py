@@ -6,19 +6,6 @@ import numexpr as ne
 import Portfolio.Common as Common
 
 def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookback:int, confidence_lookback = 2500):
-    """
-    Génère un DataFrame de retours pondérés ajustés en fonction des Sharpe ratios.
-    Utilise un ajustement basé sur le nombre de jours pour moduler la plage des allocations, 
-    applique un doublement de la plage, et renormalise les poids.
-    
-    Paramètres:
-    - returns_df : DataFrame de retours journaliers des actifs (index : dates, colonnes : actifs)
-    - nb_jours : int, nombre de jours pour calculer les rolling sharpes
-    - nb_jours : int, nombre de jours observés pour ajuster la plage de l'allocation
-
-    Retourne:
-    - DataFrame des retours pondérés et ajustés
-    """
 
     # Calcul du Sharpe ratio roulant
     sharpe_array = ft.process_in_blocks_parallel(
@@ -59,19 +46,7 @@ def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookbac
                         dtype=np.float32
                         )
 
-
-@staticmethod
 def calculate_weights(returns_array: np.ndarray, rolling_periods: list) -> np.ndarray:
-    """
-    Calcule les poids pour chaque actif et chaque jour sur plusieurs périodes glissantes de manière vectorisée avec NumPy.
-
-    Args:
-        returns_array (np.ndarray): Tableau 2D NumPy contenant les rendements quotidiens (jours x actifs).
-        rolling_periods (list): Liste des périodes glissantes sur lesquelles les rendements sont calculés.
-
-    Returns:
-        np.ndarray: Moyenne des poids pour chaque actif et chaque jour.
-    """
 
     # Stocker les poids calculés pour chaque période glissante
     weights_array = np.zeros_like(returns_array, dtype=np.float32)
@@ -92,19 +67,8 @@ def calculate_weights(returns_array: np.ndarray, rolling_periods: list) -> np.nd
 
     return average_weights
 
-@staticmethod
 def apply_returns_threshold(returns_array: np.ndarray, rolling_periods: list) -> np.ndarray:
-    """
-    Applique un seuil sur les rendements quotidiens en utilisant des périodes mobiles pour ajuster les poids,
-    en utilisant des calculs optimisés uniquement avec NumPy.
 
-    Args:
-        returns_array (np.ndarray): Tableau NumPy contenant les rendements quotidiens (jours x actifs).
-        rolling_periods (list): Liste des périodes glissantes sur lesquelles les rendements sont calculés.
-
-    Returns:
-        np.ndarray: Rendements ajustés par les poids moyens (jours x actifs).
-    """
     # Calcul des poids moyens avec la fonction optimisée en NumPy
     average_weights = calculate_weights(returns_array, rolling_periods)
 
@@ -122,20 +86,8 @@ def apply_returns_threshold(returns_array: np.ndarray, rolling_periods: list) ->
 
     return adjusted_returns
 
-@staticmethod
 def apply_returns_threshold_generic(returns_df: pd.DataFrame, rolling_periods: list, by_class: bool = False) -> pd.DataFrame:
-    """
-    Optimisation de la fragmentation et du traitement des rendements par asset avec une option pour traiter par classe.
-    
-    Args:
-        returns_df (pd.DataFrame): DataFrame contenant les rendements quotidiens.
-                                Les colonnes doivent être formatées comme 'Asset_Class' si by_class=True.
-        rolling_periods (list): Liste des périodes mobiles sur lesquelles les rendements sont calculés.
-        by_class (bool): Si True, applique le traitement par 'Asset_Class'. Sinon, par 'Asset' seulement.
 
-    Returns:
-        pd.DataFrame: DataFrame contenant les rendements ajustés pour chaque asset (et classe si applicable).
-    """
     # Convertir le DataFrame en tableau NumPy pour des calculs rapides
     returns_array = returns_df.to_numpy(dtype=np.float32)
     

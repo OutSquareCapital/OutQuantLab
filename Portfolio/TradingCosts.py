@@ -2,22 +2,13 @@ import pandas as pd
 import numpy as np
 import Metrics as mt
 
-def calculate_cost_limit(raw_rolling_sharpe_df: pd.DataFrame, net_rolling_sharpe_df: pd.DataFrame, asset_names: list, limit_treshold=0.05, ma_window=250, day_treshold = 60) -> pd.DataFrame:
-    """
-    Calcule l'impact des coûts de transaction sur le ratio de Sharpe pour chaque actif, en utilisant la moyenne mobile.
+def calculate_cost_limit(raw_rolling_sharpe_df: pd.DataFrame, 
+                         net_rolling_sharpe_df: pd.DataFrame, 
+                         asset_names: list, 
+                         limit_treshold=0.05, 
+                         ma_window=250, 
+                         day_treshold = 60) -> pd.DataFrame:
 
-    Parameters:
-
-    - raw_rolling_sharpe_df : pd.DataFrame : DataFrame contenant les ratios de Sharpe bruts calculés sur une fenêtre de temps donnée.
-    - net_rolling_sharpe_df : pd.DataFrame : DataFrame contenant les ratios de Sharpe nets calculés sur une fenêtre de temps donnée.
-    - asset_names : list : Liste des noms des actifs à analyser.
-    - limit_treshold : float : pourcentage de différence maximal accepté pour la limite de coût
-    - ma_window : int : fenêtre de temps pour le calcul de la moyenne mobile
-    
-    Returns:
-
-    - cost_validation_df : pd.DataFrame : DataFrame indiquant l'impact des coûts de transaction sur le ratio de Sharpe pour chaque actif.
-    """
     # Initialisation du DataFrame d'impact
     cost_validation_df = pd.DataFrame(0, 
                                         index=raw_rolling_sharpe_df.index, 
@@ -58,16 +49,7 @@ def calculate_cost_limit(raw_rolling_sharpe_df: pd.DataFrame, net_rolling_sharpe
 
 
 def adjust_returns_by_impact(net_adjusted_returns_df: pd.DataFrame, cost_validation_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Ajuste le DataFrame des rendements nets en fonction de l'impact des coûts de transaction.
 
-    Parameters:
-    - net_adjusted_returns_df : pd.DataFrame : DataFrame contenant les rendements nets ajustés.
-    - cost_validation_df : pd.DataFrame : DataFrame indiquant l'impact des coûts de transaction sur le ratio de Sharpe pour chaque actif.
-
-    Returns:
-    - adjusted_returns_df : pd.DataFrame : DataFrame des rendements nets ajustés par l'impact des coûts de transaction.
-    """
     # Ajustement des rendements nets en utilisant l'impact des coûts de transaction
     adjusted_returns_df = net_adjusted_returns_df * cost_validation_df
 
@@ -77,18 +59,7 @@ def calculate_cost_adjusted_returns(raw_adjusted_returns_df: pd.DataFrame,
                                     net_adjusted_returns_df: pd.DataFrame, 
                                     asset_names: list, 
                                     window_size: int = 250) -> pd.DataFrame:
-    """
-    Calcule les rendements ajustés après prise en compte de l'impact du coût.
-    
-    Args:
-    - raw_adjusted_returns_df: DataFrame des rendements bruts ajustés.
-    - net_adjusted_returns_df: DataFrame des rendements nets ajustés.
-    - asset_names: Liste des noms des actifs.
-    - window_size: Taille de la fenêtre pour calculer les Sharpe ratios roulants (par défaut 250).
 
-    Retourne:
-    - cost_adjusted_returns_df: DataFrame des rendements ajustés après prise en compte des coûts.
-    """
     # Calcul des Sharpe ratios roulants pour les rendements bruts et nets
     raw_rolling_sharpe_df = pd.DataFrame(mt.rolling_sharpe_ratios(raw_adjusted_returns_df, window_size, window_size),
                                          index=raw_adjusted_returns_df.index,
