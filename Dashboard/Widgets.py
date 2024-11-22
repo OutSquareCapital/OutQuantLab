@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import Dashboard.Common as Common
-import seaborn as sns
 
 def colored_table(df: pd.DataFrame, title: str, sort_ascending: bool = True, color_high_to_low: bool = True):
 
@@ -78,28 +77,46 @@ def bar(fig: go.Figure, x: list, y: list, label: str, color: str, show_x_axis: b
         fig.update_layout(xaxis=dict(showticklabels=False))
     plt.close()
 
+def plot_curves(data: pd.DataFrame, 
+                x_values: pd.Index, 
+                colors: dict, 
+                title: str, 
+                xlabel: str, 
+                ylabel: str, 
+                log_scale: bool = False, 
+                add_zero_line: bool = False):
+    
+    fig = go.Figure()
 
-def curves(fig: go.Figure, x: list, y: list, label: str, color: str, add_zero_line: bool = False):
+    for column in data.columns:
+        fig.add_trace(go.Scatter(
+            x=x_values,
+            y=data[column],
+            mode='lines',
+            name=column,
+            line=dict(width=2, color=colors[column]),
+            showlegend=True
+        ))
 
-    if len(y) == 0:
-        return
-    fig.add_trace(go.Scatter(
-        x=x,
-        y=y,
-        mode='lines',
-        name=label,
-        line=dict(width=2, color=color),
-        showlegend=True
-    ))
     if add_zero_line:
         fig.add_trace(go.Scatter(
-            x=x,
-            y=[0] * len(x),
+            x=x_values,
+            y=[0] * len(x_values),
             mode='lines',
             name='Zero Line',
-            line=dict(width=2, color='white'),
+            line=dict(width=1, color='white', dash="dot"),
             showlegend=False
         ))
+
+    fig.update_layout(
+        title=title,
+        xaxis_title=xlabel,
+        yaxis_title=ylabel,
+        yaxis=dict(type="log" if log_scale else "linear"),
+        template="plotly_dark",
+        height=800
+    )
+    fig.show()
 
 def histogram(df: pd.DataFrame, title: str, xlabel: str, ylabel: str):
 
@@ -133,19 +150,26 @@ def histogram(df: pd.DataFrame, title: str, xlabel: str, ylabel: str):
     fig.show()
     plt.close()
 
-def heatmap(matrix: pd.DataFrame, labels: list, title: str):
-    plt.figure(figsize=(16, 14))
-    sns.heatmap(
-        matrix, 
-        annot=True, 
-        cmap='coolwarm', 
-        fmt=".2f", 
-        linewidths=.05,
-        xticklabels=labels, 
-        yticklabels=labels
+def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str, colorbar_title: str):
+
+    fig = go.Figure(data=go.Heatmap(
+        z=z_values,
+        x=x_labels,
+        y=y_labels,
+        colorscale="Jet_r",  # Aligné avec la logique existante
+        colorbar=dict(title=colorbar_title),
+        hovertemplate="X: %{x}<br>Y: %{y}<br>Value: %{z}<extra></extra>"
+    ))
+
+    fig.update_layout(
+        title=title,
+        xaxis=dict(title="X Axis", showgrid=False),
+        yaxis=dict(title="Y Axis", showgrid=False, autorange="reversed"),
+        template="plotly_dark",
+        height=800
     )
-    plt.title(title)
-    plt.show()
+    fig.show()
+
 
 def scatter_3d(x_vals, y_vals, z_vals, values, params, title: str):
     fig = go.Figure(data=[go.Scatter3d(
@@ -184,3 +208,23 @@ def treemap(labels: list, parents: list, title: str):
         maxdepth=-1
     )
     fig.show()
+
+def bar_chart(data: pd.DataFrame, title: str, xlabel: str, ylabel: str, color_column: str = None):
+    unique_items = data[color_column].unique() if color_column else data['x']
+    color_map = Common.get_color_map(unique_items)
+    colors = [color_map[item] for item in data[color_column]] if color_column else [color_map[item] for item in data['x']]
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=data['x'],
+        y=data['y'],
+        marker_color=colors
+    ))
+    fig.update_layout(
+        title=title,
+        xaxis_title=xlabel,
+        yaxis_title=ylabel,
+        template="plotly_dark"
+    )
+    fig.show()
+
