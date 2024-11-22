@@ -7,6 +7,7 @@ from scipy.stats import skew
 import Config
 import Dashboard.Common as cmon
 from Process_Data import equity_curves_calculs
+import Metrics as mt
 
 def overall_sharpe_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
@@ -28,6 +29,29 @@ def overall_sortino_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     return sortino_ratios_df.round(2)
 
+def rolling_sharpe_ratios_calculs(daily_returns: pd.DataFrame, window_size: int = 1250):
+        rolling_sharpe_ratios_df = pd.DataFrame(mt.rolling_sharpe_ratios(daily_returns.values, 
+                                                                         window_size, 
+                                                                         window_size),
+                                                                        index=daily_returns.index,
+                                                                        columns=daily_returns.columns)
+        
+        return rolling_sharpe_ratios_df.round(2)
+
+def rolling_volatility_calculs(daily_returns, means):
+    
+    if means:
+        rolling_volatility_df = pd.DataFrame(mt.hv_composite(daily_returns.values), 
+                                             index=daily_returns.index, 
+                                             columns=daily_returns.columns)
+        rolling_volatility_df = rolling_volatility_df.expanding(min_periods=1).mean()
+    else:
+        rolling_volatility_df = pd.DataFrame(mt.hv_composite(daily_returns.values), 
+                                             index=daily_returns.index, 
+                                             columns=daily_returns.columns)
+
+    return rolling_volatility_df.round(2)
+
 def calculate_final_equity_values(daily_returns: pd.DataFrame, initial_equity: int = 100000) -> pd.DataFrame:
 
     final_equities = []
@@ -42,7 +66,7 @@ def calculate_final_equity_values(daily_returns: pd.DataFrame, initial_equity: i
                                         columns=daily_returns.columns, 
                                         dtype=np.float32)
 
-    return final_equities_df
+    return final_equities_df.round(2)
 
 def drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
@@ -50,9 +74,8 @@ def drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
     
     # Calculate drawdowns for each equity curve directly
     drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR
-    drawdowns = drawdowns.round(2)
 
-    return drawdowns
+    return drawdowns.round(2)
 
 def annual_returns_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
@@ -65,9 +88,7 @@ def annual_returns_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
     # Conversion en DataFrame
     cumulative_returns_df = pd.DataFrame(cumulative_returns, dtype=np.float32)
 
-    cumulative_returns_df = cumulative_returns_df.round(4) * Config.PERCENTAGE_FACTOR
-
-    return cumulative_returns_df
+    return cumulative_returns_df.round(4) * Config.PERCENTAGE_FACTOR
 
 def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
@@ -76,9 +97,8 @@ def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
     average_correlations_df = pd.DataFrame(average_correlations, 
                                             columns=['Average Correlation'], 
                                             dtype=np.float32)
-    average_correlations_df = average_correlations_df.round(2)
 
-    return average_correlations_df
+    return average_correlations_df.round(2)
 
 def analyze_param_sensitivity(daily_returns: pd.DataFrame, params: list):
 
@@ -150,16 +170,7 @@ def calculate_sharpe_correlation_ratio(daily_returns: pd.DataFrame) -> pd.DataFr
     return combined_df
 
 def calculate_sharpe_means_from_combination(daily_returns, params):
-    """
-    Calcule les moyennes des Sharpe ratios pour chaque combinaison de trois paramètres.
 
-    Args:
-    daily_returns (pd.DataFrame): DataFrame contenant les retours journaliers des stratégies.
-    params (list): Liste des paramètres à extraire des noms des stratégies.
-
-    Returns:
-    tuple: Contient quatre np.arrays : x_vals (param1), y_vals (param2), z_vals (param3), et sharpe_means (moyenne des Sharpe ratios).
-    """
     # Calcul du ratio de Sharpe pour chaque stratégie
     sharpe_ratios_df = overall_sharpe_ratios_calculs(daily_returns)
 
@@ -198,15 +209,7 @@ def calculate_sharpe_means_from_combination(daily_returns, params):
     return x_vals, y_vals, z_vals, sharpe_means
 
 def sharpe_ratios_yearly_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
-    """
-    Calculate Sharpe ratios for each year.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-
-    Returns:
-        pd.DataFrame: DataFrame containing Sharpe ratios for each year.
-    """
     # Grouper les retours par année
     grouped = daily_returns.groupby(daily_returns.index.year)
 
@@ -219,16 +222,7 @@ def sharpe_ratios_yearly_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
     return sharpe_ratios_df
 
 def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
-    """
-    Agrège les retours quotidiens en rendements mensuels moyens et calcule le skew de cette série mensuelle 
-    pour chaque actif.
 
-    Parameters:
-    - returns_df (pd.DataFrame): DataFrame des retours quotidiens avec un index datetime.
-
-    Returns:
-    - pd.Series: Série contenant le skew mensuel global pour chaque actif.
-    """
     # Agréger par mois pour obtenir les rendements mensuels moyens pour chaque actif
     monthly_returns_df = returns_df.resample('ME').mean()
     
@@ -238,21 +232,7 @@ def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
     return skew_series
 
 def calculate_and_group_information_ratio(signals_df: pd.DataFrame, returns_df: pd.DataFrame, by_param=False, by_method=False, by_class=False, by_asset=False) -> pd.DataFrame:
-    """
-    Calculate the Information Coefficient (IC) between trading signals and future returns,
-    and calculate average IC values based on specified grouping options.
 
-    Args:
-        signals_df (pd.DataFrame): DataFrame containing the trading signals.
-        returns_df (pd.DataFrame): DataFrame containing the returns of the underlying assets.
-        by_param (bool): Whether to group by parameter.
-        by_method (bool): Whether to group by method.
-        by_class (bool): Whether to group by class.
-        by_asset (bool): Whether to group by asset.
-
-    Returns:
-        pd.DataFrame: DataFrame containing the average IC values.
-    """
     # Calculate IC values
     ic_dict = {}
     future_returns_df = returns_df.shift(-1)

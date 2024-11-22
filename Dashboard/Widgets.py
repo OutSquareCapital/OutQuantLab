@@ -4,28 +4,17 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import pandas as pd
 import numpy as np
-import Dashboard.Common as gc
+import Dashboard.Common as Common
 
 def colored_table(df: pd.DataFrame, title: str, sort_ascending: bool = True, color_high_to_low: bool = True):
-    """
-    Create a colored table plot using Plotly express.
 
-    Args:
-        df (pd.DataFrame): DataFrame containing the data.
-        title (str): Title of the plot.
-        sort_ascending (bool): Whether to sort values in ascending order.
-        color_high_to_low (bool): Whether to color from high to low values.
-
-    Returns:
-        None
-    """
     # Arrondir les valeurs à 4
     df = df.round(4)
 
     avg_performance = df.mean()
     sorted_assets = avg_performance.sort_values(ascending=not color_high_to_low).index
     # Association des couleurs aux actifs triés
-    asset_colors = {asset: mcolors.to_hex(gc.get_color(i, len(sorted_assets))) for i, asset in enumerate(sorted_assets)}
+    asset_colors = {asset: mcolors.to_hex(Common.get_color(i, len(sorted_assets))) for i, asset in enumerate(sorted_assets)}
 
     sorted_values = []
     sorted_colors = []
@@ -77,20 +66,7 @@ def colored_table(df: pd.DataFrame, title: str, sort_ascending: bool = True, col
     plt.close()
 
 def bar(fig: go.Figure, x: list, y: list, label: str, color: str, show_x_axis: bool = False):
-    """
-    Add a bar plot to the given figure.
 
-    Args:
-        fig (go.Figure): Plotly figure to add the bar plot to.
-        x (list): List of x values.
-        y (list): List of y values.
-        label (str): Label for the bar plot.
-        color (str): Color for the bars.
-        show_x_axis (bool): Whether to show the x-axis labels.
-
-    Returns:
-        None
-    """
     fig.add_trace(go.Bar(
         x=x,
         y=y,
@@ -103,20 +79,7 @@ def bar(fig: go.Figure, x: list, y: list, label: str, color: str, show_x_axis: b
 
 
 def curves(fig: go.Figure, x: list, y: list, label: str, color: str, add_zero_line: bool = False):
-    """
-    Add a line plot to the given figure.
 
-    Args:
-        fig (go.Figure): Plotly figure to add the line plot to.
-        x (list): List of x values.
-        y (list): List of y values.
-        label (str): Label for the line plot.
-        color (str): Color for the line.
-        add_zero_line (bool): Whether to add a zero line.
-
-    Returns:
-        None
-    """
     if len(y) == 0:
         return
     fig.add_trace(go.Scatter(
@@ -138,24 +101,13 @@ def curves(fig: go.Figure, x: list, y: list, label: str, color: str, add_zero_li
         ))
 
 def histogram(df: pd.DataFrame, title: str, xlabel: str, ylabel: str):
-    """
-    Create a histogram plot using Plotly express.
 
-    Args:
-        df (pd.DataFrame): DataFrame containing the data.
-        title (str): Title of the plot.
-        xlabel (str): Label for the x-axis.
-        ylabel (str): Label for the y-axis.
-
-    Returns:
-        None
-    """
     # Flatten the DataFrame for Plotly
     melted_data = df.melt(var_name='Strat', value_name='Returns')
 
     # Create a color map for the assets
     unique_assets = melted_data['Strat'].unique()
-    colors = [gc.get_color(i, len(unique_assets)) for i in range(len(unique_assets))]
+    colors = [Common.get_color(i, len(unique_assets)) for i in range(len(unique_assets))]
     color_map = dict(zip(unique_assets, colors))
 
     # Plot using Plotly Express

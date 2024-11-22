@@ -9,19 +9,12 @@ from collections import defaultdict
 import Dashboard.Common as Common
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations
-from Portfolio import Static_Clusters
-import Metrics as mt
-from Process_Data import equity_curves_calculs
 
+from Process_Data import equity_curves_calculs
+import Portfolio
 
 def equity(returns_df: pd.DataFrame):
-    """
-    Plot equity curves.
 
-    Args:
-        equity_curve (pd.DataFrame): DataFrame containing equity curves.
-        log_scale (bool): Whether to use log scale for the y-axis.
-    """
     title = 'Equity Curves'
     xlabel = 'Date'
     ylabel = 'Equity'
@@ -58,13 +51,7 @@ def equity(returns_df: pd.DataFrame):
 
 
 def plot_final_equity_values(daily_returns: pd.DataFrame):
-    """
-    Plot the final equity value if the backtest started each day.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-        initial_equity (int): Initial equity value.
-    """
     # Calcul des valeurs finales de l'équity
     final_equities_df = Computations.calculate_final_equity_values(daily_returns)
 
@@ -108,12 +95,7 @@ def plot_final_equity_values(daily_returns: pd.DataFrame):
         
 
 def drawdowns(returns_df: pd.DataFrame):
-    """
-    Plot drawdowns for each equity curve.
 
-    Args:
-        equity_curves (pd.DataFrame): DataFrame containing equity curves.
-    """
     drawdowns = Computations.drawdowns_calculs(returns_df)
 
     title = "Drawdowns"
@@ -150,12 +132,7 @@ def drawdowns(returns_df: pd.DataFrame):
 
 
 def max_drawdowns(equity_curves: pd.DataFrame):
-    """
-    Plot max drawdowns histogram.
 
-    Args:
-        equity_curves (pd.DataFrame): DataFrame containing equity curves.
-    """
     # Calcul des drawdowns
     drawdowns = Computations.drawdowns_calculs(equity_curves)
 
@@ -192,12 +169,7 @@ def max_drawdowns(equity_curves: pd.DataFrame):
 
 
 def annual_returns(daily_returns: pd.DataFrame):
-    """
-    Trace les rendements annuels pour chaque courbe d'équité sous forme de tableau.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame contenant les rendements quotidiens.
-    """
     annual_returns = Computations.annual_returns_calculs(daily_returns)
 
     title = 'Yearly Returns'
@@ -208,12 +180,7 @@ def annual_returns(daily_returns: pd.DataFrame):
 
 
 def correlation_heatmap(daily_returns: pd.DataFrame):
-    """
-    Plot correlation heatmap of equity curve returns.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-    """
     correlation_matrix = daily_returns.corr()
 
     title = 'Correlation Matrix'
@@ -235,12 +202,7 @@ def correlation_heatmap(daily_returns: pd.DataFrame):
 
 
 def average_correlation_bar_chart(daily_returns: pd.DataFrame):
-    """
-    Plot average correlations of equity curve returns.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-    """
     average_correlations_df = Computations.average_correlation_calculs(daily_returns)
 
     title = 'Average Correlations'
@@ -271,19 +233,14 @@ def average_correlation_bar_chart(daily_returns: pd.DataFrame):
 
 
 def overall_sharpe_ratios(daily_returns: pd.DataFrame):
-    """
-    Plot Sharpe ratios histogram.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-    """
     sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
     
     title = 'Sharpe Ratios'
     xlabel = 'Strats'
     ylabel = 'Sharpe Ratio'
 
-        # Sort by Sharpe Ratio values
+    # Sort by Sharpe Ratio values
     sorted_sharpe_ratios = sharpe_ratios_df.sort_values(by='Sharpe Ratio', ascending=True)
     n_strats = len(sorted_sharpe_ratios)
     cmap = Common.get_custom_colormap(n_strats)
@@ -307,9 +264,7 @@ def overall_sharpe_ratios(daily_returns: pd.DataFrame):
 
 
 def overall_monthly_skew(daily_returns: pd.DataFrame):
-    """
-    Plot Skew histogram for each asset.
-    """
+
     title = 'Monthly Skew'
     xlabel = 'Strats'
     ylabel = 'Skew'
@@ -342,23 +297,14 @@ def overall_monthly_skew(daily_returns: pd.DataFrame):
     fig.show()
     
 
-def rolling_sharpe_ratio(daily_returns: pd.DataFrame, window_size: int):
-    """
-    Plot rolling Sharpe ratios for each equity curve.
+def rolling_sharpe_ratio(daily_returns: pd.DataFrame):
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-        window_size (int): Window size for rolling calculation.
-    """
-    rolling_sharpe_ratios = pd.DataFrame(mt.rolling_sharpe_ratios(daily_returns.values, window_size, window_size),
-                                         index=daily_returns.index,
-                                         columns=daily_returns.columns)
-
-    title = f'Rolling Sharpe Ratios Over {window_size} Days'
+    rolling_sharpe_ratio_df = Computations.rolling_sharpe_ratios_calculs(daily_returns)
+    title = f'Rolling Sharpe Ratios'
     xlabel = 'Date'
     ylabel = 'Rolling Sharpe Ratio'
     
-    mean_sharpes = {column: np.nanmean(sharpe) for column, sharpe in rolling_sharpe_ratios.items()}
+    mean_sharpes = {column: np.nanmean(sharpe) for column, sharpe in rolling_sharpe_ratio_df.items()}
     sorted_columns = sorted(mean_sharpes, key=mean_sharpes.get, reverse=False)
     n_strats = len(sorted_columns)
     cmap = Common.get_custom_colormap(n_strats)
@@ -371,7 +317,7 @@ def rolling_sharpe_ratio(daily_returns: pd.DataFrame, window_size: int):
         color = colors[index]
         Widgets.curves(fig, 
                                         daily_returns.index,
-                                        rolling_sharpe_ratios[column], 
+                                        rolling_sharpe_ratio_df[column], 
                                         label=column, 
                                         color=color,
                                         add_zero_line=True)
@@ -386,15 +332,8 @@ def rolling_sharpe_ratio(daily_returns: pd.DataFrame, window_size: int):
 
     fig.show()
 
-
-
 def sharpe_ratios_yearly_table(daily_returns: pd.DataFrame):
-    """
-    Plot Sharpe ratios for each years.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-    """
     sharpe_ratios_df = Computations.sharpe_ratios_yearly_calculs(daily_returns)
 
     title = 'Sharpe Ratios per year'
@@ -403,8 +342,6 @@ def sharpe_ratios_yearly_table(daily_returns: pd.DataFrame):
                                             title, 
                                             sort_ascending=True, 
                                             color_high_to_low=False)
-
-
 
 def sortino_ratios(daily_returns: pd.DataFrame):
 
@@ -438,13 +375,7 @@ def sortino_ratios(daily_returns: pd.DataFrame):
 
 
 def returns_distribution(daily_returns: pd.DataFrame, freq: str = 'H'):
-    """
-    Plot return distribution of returns.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-        freq (str): Frequency for resampling returns.
-    """
     daily_returns = daily_returns * 100
     title = 'Histogram of Strategy % Returns Distribution'
     xlabel = 'Strategy % Returns'
@@ -453,12 +384,7 @@ def returns_distribution(daily_returns: pd.DataFrame, freq: str = 'H'):
 
 
 def plot_strategy_returns_by_decile(strategy_returns_by_decile: pd.DataFrame):
-    """
-    Plot strategy returns by volatility decile using Plotly.
 
-    Args:
-        strategy_returns_by_decile (pd.DataFrame): DataFrame of strategy returns by volatility decile.
-    """
     fig = px.bar(strategy_returns_by_decile, 
                 x=strategy_returns_by_decile.index, 
                 y=strategy_returns_by_decile.columns, 
@@ -471,19 +397,9 @@ def plot_strategy_returns_by_decile(strategy_returns_by_decile: pd.DataFrame):
 
 
 def volatility(daily_returns: pd.DataFrame, means=False):
-
-    if means:
-        rolling_volatility_df = pd.DataFrame(mt.hv_composite(daily_returns.values), 
-                                             index=daily_returns.index, 
-                                             columns=daily_returns.columns)
-        rolling_volatility_df = rolling_volatility_df.expanding(min_periods=1).mean()
-    else:
-        rolling_volatility_df = pd.DataFrame(mt.hv_composite(daily_returns.values), 
-                                             index=daily_returns.index, 
-                                             columns=daily_returns.columns)
-
-    rolling_volatility_df = rolling_volatility_df.round(2)
     
+    rolling_volatility_df = Computations.rolling_volatility_calculs(daily_returns, means)
+
     title = f'Rolling Volatility'
     xlabel = 'Date'
     ylabel = 'Rolling Volatility (%)'
@@ -520,17 +436,9 @@ def volatility(daily_returns: pd.DataFrame, means=False):
 
 
 def sharpe_ratios_3d_surface_plot(daily_returns: pd.DataFrame, param1: str, param2: str):
-    """
-    Generate a 3D surface plot with two parameters on the X and Y axes, and the Sharpe ratio on the Z axis,
-    while colorizing the surface based on the Sharpe/AvgCorrelation metric.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns for different strategies.
-        param1 (str): The first parameter to plot on the X axis.
-        param2 (str): The second parameter to plot on the Y axis.
-    """
     # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = mt.overall_sharpe_ratios_calculs(daily_returns)
+    sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
     
     # Calcul de la nouvelle métrique via la fonction calculate_sharpe_correlation_ratio
     combined_df = Computations.calculate_sharpe_correlation_ratio(daily_returns)
@@ -595,20 +503,12 @@ def sharpe_ratios_3d_surface_plot(daily_returns: pd.DataFrame, param1: str, para
 
 
 def sharpe_correlation_3d_surface_plot(daily_returns: pd.DataFrame, param1: str, param2: str):
-    """
-    Generate a 3D surface plot with two parameters on the X and Y axes, and the Sharpe/AvgCorrelation on the Z axis,
-    while colorizing the surface based on the Sharpe ratio.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns for different strategies.
-        param1 (str): The first parameter to plot on the X axis.
-        param2 (str): The second parameter to plot on the Y axis.
-    """
     # Calcul de la nouvelle métrique via la fonction calculate_sharpe_correlation_ratio
     combined_df = Computations.calculate_sharpe_correlation_ratio(daily_returns)
     
     # Calcul des Sharpe Ratios pour chaque stratégie
-    sharpe_ratios_df = mt.overall_sharpe_ratios_calculs(daily_returns)
+    sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
 
     # Initialiser des dictionnaires pour stocker la nouvelle métrique Sharpe/AvgCorrelation et les Sharpe Ratios par (param1, param2)
     sharpe_corr_dict = defaultdict(list)
@@ -672,15 +572,7 @@ def sharpe_correlation_3d_surface_plot(daily_returns: pd.DataFrame, param1: str,
 
 
 def sharpe_ratios_3d_scatter_plot(daily_returns: pd.DataFrame, params: list):
-    """
-    Generate a 3D scatter plot with three parameters and Sharpe Ratio as the color. 
-    If more than three parameters are provided, calculate the mean Sharpe ratio for each combination 
-    of the first three parameters.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns for different strategies.
-        params (list): List of parameter names to extract (e.g., ['param1', 'param2', 'param3']).
-    """
     x_vals, y_vals, z_vals, sharpe_means = Computations.calculate_sharpe_means_from_combination(daily_returns, params)
 
     # Créer un scatter 3D avec les couleurs basées sur la moyenne du Sharpe Ratio
@@ -717,17 +609,9 @@ def sharpe_ratios_3d_scatter_plot(daily_returns: pd.DataFrame, params: list):
 
 
 def sharpe_ratios_heatmap(daily_returns: pd.DataFrame, param1: str, param2: str):
-    """
-    Generate a heatmap with two parameters on the X and Y axes, and the Sharpe ratio represented by the color intensity,
-    calculating the mean of the Sharpe ratios for strategies with the same param1 and param2 values.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns for different strategies.
-        param1 (str): The first parameter to plot on the X axis.
-        param2 (str): The second parameter to plot on the Y axis.
-    """
     # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = mt.overall_sharpe_ratios_calculs(daily_returns)
+    sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
 
     # Initialiser un dictionnaire pour stocker les Sharpe ratios par (param1, param2)
     sharpe_dict = defaultdict(list)
@@ -780,13 +664,7 @@ def sharpe_ratios_heatmap(daily_returns: pd.DataFrame, param1: str, param2: str)
 
 
 def params_relative_impact_on_sharpe(daily_returns: pd.DataFrame, params: list):
-    """
-    Perform parameter sensitivity analysis and plot sorted regression coefficients in a bar chart.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns.
-        params (list): List of parameter names to analyze (e.g., ['LenST', 'LenLT', 'MacdLength']).
-    """
     # Analyse de sensibilité des paramètres (obtenir les coefficients triés)
     sorted_coefficients = Computations.analyze_param_sensitivity(daily_returns, params)
 
@@ -826,12 +704,7 @@ def params_relative_impact_on_sharpe(daily_returns: pd.DataFrame, params: list):
 
 
 def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
-    """
-    Plot a bar chart showing Sharpe Ratio Rank divided by Average Correlation Rank for each strategy.
 
-    Args:
-        daily_returns (pd.DataFrame): DataFrame containing daily returns for different strategies.
-    """
     # Calculer la nouvelle métrique via la fonction séparée
     combined_df = Computations.calculate_sharpe_correlation_ratio(daily_returns)
 
@@ -877,27 +750,11 @@ def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
 
 
 def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
-    """
-    Prépare les données pour le Sunburst/Treemap et affiche le graphique avec Plotly.
-    
-    Args:
-        clusters_dict (dict): La structure des clusters.
-    """
-    clusters_dict = Static_Clusters.generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
+
+    clusters_dict = Portfolio.generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
 
     def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=None):
-        """
-        Prépare les données pour le Sunburst Plot en formatant les clusters récursivement.
-        
-        Args:
-            cluster_dict (dict): La structure des clusters.
-            parent_label (str): Nom du parent actuel dans la hiérarchie.
-            labels (list): Liste des noms pour les feuilles.
-            parents (list): Liste des parents pour chaque feuille.
 
-        Returns:
-            tuple: Deux listes contenant les labels et les parents pour le Sunburst plot.
-        """
         if labels is None:
             labels = []  # Réinitialisation de la liste à chaque appel
         if parents is None:
