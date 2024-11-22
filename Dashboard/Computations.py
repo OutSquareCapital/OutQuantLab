@@ -5,7 +5,7 @@ import Config
 from Process_Data import equity_curves_calculs
 import Metrics as mt
 
-def overall_sharpe_ratios_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
+def calculate_overall_sharpe_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     sharpe_ratios = returns_df.mean() / returns_df.std() * Config.ANNUALIZATION_FACTOR
 
@@ -14,7 +14,7 @@ def overall_sharpe_ratios_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
                         dtype=np.float32
                         ).round(2)
 
-def overall_sortino_ratios_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
+def calculate_overall_sortino_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     mean_returns = returns_df.mean()
     
@@ -27,7 +27,7 @@ def overall_sortino_ratios_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
                         dtype=np.float32
                         ).round(2)
 
-def average_correlation_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
+def calculate_average_correlation(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     correlation_matrix = returns_df.corr()
     average_correlations = correlation_matrix.mean()
@@ -37,7 +37,7 @@ def average_correlation_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
                         dtype=np.float32
                         ).round(2)
 
-def mean_drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
+def calculate_average_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     equity_curves = equity_curves_calculs(returns_df)
     
@@ -46,11 +46,11 @@ def mean_drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     return drawdowns.mean().round(2)
 
-def calculate_sharpe_correlation_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
+def calculate_overall_sharpe_correlation_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     # Calcul des Sharpe Ratios et des Average Correlations
-    sharpe_ratios_df = overall_sharpe_ratios_calculs(returns_df)
-    average_correlations_df = average_correlation_calculs(returns_df)
+    sharpe_ratios_df = calculate_overall_sharpe_ratio(returns_df)
+    average_correlations_df = calculate_average_correlation(returns_df)
 
     # Calculer les rangs des Sharpe Ratios et des Correlations indépendamment
     sharpe_ratios_df['Sharpe Rank'] = sharpe_ratios_df['Sharpe Ratio'].rank(method='min')
@@ -64,7 +64,7 @@ def calculate_sharpe_correlation_ratio(returns_df: pd.DataFrame) -> pd.DataFrame
 
     return combined_df
 
-def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
+def calculate_overall_monthly_skew(returns_df: pd.DataFrame) -> pd.Series:
 
     # Agréger par mois pour obtenir les rendements mensuels moyens pour chaque actif
     monthly_returns_df = returns_df.resample('ME').mean()
@@ -73,7 +73,7 @@ def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
                                     ).astype(np.float32
                                     ).round(2)
 
-def rolling_sharpe_ratios_calculs(returns_df: pd.DataFrame, window_size: int = 1250):
+def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, window_size: int = 1250):
         
         return pd.DataFrame(mt.rolling_sharpe_ratios(
                                                     returns_df.values, 
@@ -82,9 +82,8 @@ def rolling_sharpe_ratios_calculs(returns_df: pd.DataFrame, window_size: int = 1
                                                     index=returns_df.index,
                                                     columns=returns_df.columns
                                                     ).round(2)
-        
 
-def rolling_volatility_calculs(returns_df: pd.DataFrame, means):
+def calculate_rolling_volatility(returns_df: pd.DataFrame, means):
     
     if means:
         rolling_volatility_df = pd.DataFrame(mt.hv_composite(returns_df.values), 
@@ -96,7 +95,7 @@ def rolling_volatility_calculs(returns_df: pd.DataFrame, means):
                                              index=returns_df.index, 
                                              columns=returns_df.columns).round(2)
 
-def drawdowns_calculs(returns_df: pd.DataFrame) -> pd.DataFrame:
+def calculate_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     equity_curves = equity_curves_calculs(returns_df)
     

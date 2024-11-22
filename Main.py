@@ -69,16 +69,16 @@ equal_weights_global_returns = equal_weights_global_returns.rename(columns={equa
 
 test_returns = equal_weights_asset_returns#.loc['2015-01-01':]
 
-Dashboard.equity(test_returns)
-Dashboard.drawdowns(test_returns)
-Dashboard.volatility(test_returns, means=False)
-Dashboard.rolling_sharpe_ratio(test_returns)
+Dashboard.plot_equity(test_returns)
+Dashboard.plot_drawdowns(test_returns)
+Dashboard.plot_rolling_volatility(test_returns, means=False)
+Dashboard.plot_rolling_sharpe_ratio(test_returns)
 
-Dashboard.max_drawdowns(test_returns)
-Dashboard.overall_sharpe_ratios(test_returns)
-Dashboard.overall_monthly_skew(test_returns)
-Dashboard.average_inverted_correlation_bar_chart(test_returns)
-Dashboard.sharpe_correlation_ratio_bar_chart(test_returns)
+Dashboard.plot_overall_sharpe_ratio(test_returns)
+Dashboard.plot_average_drawdown(test_returns)
+Dashboard.plot_overall_monthly_skew(test_returns)
+Dashboard.plot_average_inverted_correlation(test_returns)
+Dashboard.plot_overall_sharpe_correlation_ratio(test_returns)
 
 #Dashboard.correlation_heatmap(test_returns)
 #Dashboard.sharpe_ratios_heatmap(raw_adjusted_returns_df, 'LenVol', 'LenSmooth')

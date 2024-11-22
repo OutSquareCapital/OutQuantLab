@@ -144,8 +144,8 @@ def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=No
             
     return labels, parents
 
-def sort_series(data: pd.Series, ascending: bool = True) -> list:
-    return data.sort_values(ascending=ascending).index
+def sort_series(data: pd.Series, ascending: bool = True) -> pd.Series:
+    return data.sort_values(ascending=ascending)
 
 def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool = True) -> list:
     if use_final:

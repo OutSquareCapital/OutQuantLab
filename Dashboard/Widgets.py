@@ -48,20 +48,19 @@ def curves( x_values: pd.Index,
     fig.show()
 
 
-def bars(data: pd.DataFrame, 
-        title: str, 
-        xlabel: str, 
-        ylabel: str, 
-        color_column: str = None):
+def bars(series: pd.Series, 
+         title: str, 
+         xlabel: str, 
+         ylabel: str):
     
-    unique_items = data[color_column].unique() if color_column else data['x']
-    color_map = Common.get_color_map(unique_items)
-    colors = [color_map[item] for item in data[color_column]] if color_column else [color_map[item] for item in data['x']]
+    # Générer la palette de couleurs basée sur l'index de la série
+    color_map = Common.get_color_map(series.index.tolist())
+    colors = [color_map[item] for item in series.index]
     
     fig = go.Figure()
     fig.add_trace(go.Bar(
-        x=data['x'],
-        y=data['y'],
+        x=series.index,
+        y=series.values,
         marker_color=colors
     ))
     fig.update_layout(
@@ -71,6 +70,7 @@ def bars(data: pd.DataFrame,
         template="plotly_dark"
     )
     fig.show()
+
 
 def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str, colorbar_title: str):
 
