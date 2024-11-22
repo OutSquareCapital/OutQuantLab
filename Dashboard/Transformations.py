@@ -145,9 +145,12 @@ def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=No
     return labels, parents
 
 def sort_series(data: pd.Series, ascending: bool = True) -> list:
-    return data.sort_values(ascending=ascending).index.tolist()
+    return data.sort_values(ascending=ascending).index
 
 def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool = True) -> list:
     if use_final:
-        return data.iloc[-1].sort_values(ascending=ascending).index.tolist()
-    return data.mean().sort_values(ascending=ascending).index.tolist()
+        sorted_data = data.sort_values(by=data.index[-1], axis=1, ascending=ascending)
+    else:
+        sorted_data = data.mean().sort_values(ascending=ascending)
+        sorted_data = data[sorted_data.index]
+    return sorted_data

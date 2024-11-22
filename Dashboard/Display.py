@@ -9,12 +9,12 @@ from Portfolio import generate_static_clusters
 def equity(returns_df: pd.DataFrame):
 
     equity_curves = equity_curves_calculs(returns_df)
-    sorted_columns = Transformations.sort_dataframe(equity_curves, 
+    sorted_equity_curves = Transformations.sort_dataframe(equity_curves, 
                                                     use_final=True,
                                                     ascending=True)
 
-    Widgets.curves(x_values=equity_curves.index,
-                   y_values=equity_curves[sorted_columns],
+    Widgets.curves(x_values=sorted_equity_curves.index,
+                   y_values=sorted_equity_curves,
                    title="Equity Curves", 
                    xlabel='Date', 
                    ylabel='Equity', 
@@ -23,11 +23,11 @@ def equity(returns_df: pd.DataFrame):
 def volatility(daily_returns: pd.DataFrame, means=False):
 
     rolling_volatility_df = Computations.rolling_volatility_calculs(daily_returns, means)
-    sorted_columns = Transformations.sort_dataframe(rolling_volatility_df,
-                                                    ascending=False)
+    sorted_rolling_volatility_df = Transformations.sort_dataframe(rolling_volatility_df,
+                                                                  ascending=False)
 
-    Widgets.curves(x_values=daily_returns.index,
-                   y_values=rolling_volatility_df[sorted_columns], 
+    Widgets.curves(x_values=sorted_rolling_volatility_df.index,
+                   y_values=sorted_rolling_volatility_df, 
                    title="Rolling Volatility", 
                    xlabel='Date', 
                    ylabel='Rolling Volatility (%)', 
@@ -36,11 +36,11 @@ def volatility(daily_returns: pd.DataFrame, means=False):
 def drawdowns(returns_df: pd.DataFrame):
 
     drawdowns = Computations.drawdowns_calculs(returns_df)
-    sorted_columns = Transformations.sort_dataframe(drawdowns,
-                                                    ascending=True)
+    sorted_drawdowns = Transformations.sort_dataframe(drawdowns,
+                                                      ascending=True)
 
-    Widgets.curves(x_values=returns_df.index, 
-                   y_values=drawdowns[sorted_columns], 
+    Widgets.curves(x_values=sorted_drawdowns.index, 
+                   y_values=sorted_drawdowns, 
                    title="Drawdowns", 
                    xlabel="Date", 
                    ylabel="Drawdown (%)", 
@@ -49,19 +49,19 @@ def drawdowns(returns_df: pd.DataFrame):
 def rolling_sharpe_ratio(daily_returns: pd.DataFrame):
 
     rolling_sharpe_ratio_df = Computations.rolling_sharpe_ratios_calculs(daily_returns)
-    sorted_columns = Transformations.sort_dataframe(rolling_sharpe_ratio_df,
-                                                    ascending=True)
+    sorted_rolling_sharpe_ratio_df = Transformations.sort_dataframe(rolling_sharpe_ratio_df,
+                                                                    ascending=True)
 
-    Widgets.curves(x_values=daily_returns.index,
-                   y_values=rolling_sharpe_ratio_df[sorted_columns], 
+    Widgets.curves(x_values=sorted_rolling_sharpe_ratio_df.index,
+                   y_values=sorted_rolling_sharpe_ratio_df, 
                    title="Rolling Sharpe Ratios", 
                    xlabel='Date', 
                    ylabel='Rolling Sharpe Ratio', 
                    add_zero_line=True)
 
 
-def max_drawdowns(equity_curves: pd.DataFrame):
-    drawdowns = Computations.drawdowns_calculs(equity_curves)
+def mean_drawdowns(equity_curves: pd.DataFrame):
+    drawdowns = Computations.mean_drawdowns_calculs(equity_curves)
     sorted_drawdowns = Transformations.sort_series(drawdowns,
                                                    ascending=False)
     
