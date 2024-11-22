@@ -69,19 +69,19 @@ equal_weights_global_returns = equal_weights_global_returns.rename(columns={equa
 
 test_returns = equal_weights_asset_returns#.loc['2015-01-01':]
 
-Dashboard.plot_equity(test_returns)
-Dashboard.plot_drawdowns(test_returns)
-Dashboard.plot_rolling_volatility(test_returns, means=False)
-Dashboard.plot_rolling_sharpe_ratio(test_returns)
+#Dashboard.plot_equity(test_returns)
+#Dashboard.plot_drawdowns(test_returns)
+#Dashboard.plot_rolling_volatility(test_returns, means=False)
+#Dashboard.plot_rolling_sharpe_ratio(test_returns)
 
-Dashboard.plot_overall_sharpe_ratio(test_returns)
-Dashboard.plot_average_drawdown(test_returns)
-Dashboard.plot_overall_monthly_skew(test_returns)
-Dashboard.plot_average_inverted_correlation(test_returns)
-Dashboard.plot_overall_sharpe_correlation_ratio(test_returns)
+#Dashboard.plot_overall_sharpe_ratio(test_returns)
+#Dashboard.plot_average_drawdown(test_returns)
+#Dashboard.plot_overall_monthly_skew(test_returns)
+#Dashboard.plot_average_inverted_correlation(test_returns)
+#Dashboard.plot_overall_sharpe_correlation_ratio(test_returns)
 
-#Dashboard.correlation_heatmap(test_returns)
-#Dashboard.sharpe_ratios_heatmap(raw_adjusted_returns_df, 'LenVol', 'LenSmooth')
-#Dashboard.sharpe_ratios_yearly_table(test_returns)
-#Dashboard.plot_static_clusters(test_returns, 4, 1, 1)
+Dashboard.plot_correlation_heatmap(test_returns)
+Dashboard.plot_sharpe_ratio_heatmap(raw_adjusted_returns_df, 'LenVol', 'LenSmooth')
+
 #Dashboard.sharpe_ratios_3d_scatter_plot(raw_adjusted_returns_df, ['LenST', 'LenLT', 'MacdLength'])
+#Dashboard.plot_static_clusters(test_returns, 4, 1, 1)

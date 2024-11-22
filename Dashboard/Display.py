@@ -61,6 +61,7 @@ def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame):
 
 
 def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
+
     sharpe_ratios = Computations.calculate_overall_sharpe_ratio(daily_returns).squeeze()
     sorted_sharpe_ratios = Transformations.sort_series(sharpe_ratios, ascending=True)
 
@@ -70,6 +71,7 @@ def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
                  ylabel="Sharpe Ratio")
 
 def plot_overall_sortino_ratios(returns_df: pd.DataFrame):
+
     sortino_ratios = Computations.calculate_overall_sortino_ratio(returns_df).squeeze()
     sorted_sortino_ratios = Transformations.sort_series(sortino_ratios, ascending=True)
 
@@ -79,6 +81,7 @@ def plot_overall_sortino_ratios(returns_df: pd.DataFrame):
                  ylabel="Sortino Ratio")
 
 def plot_average_drawdown(returns_df: pd.DataFrame):
+
     drawdowns = Computations.calculate_average_drawdown(returns_df)
     sorted_drawdowns = Transformations.sort_series(drawdowns, ascending=True)
 
@@ -88,6 +91,7 @@ def plot_average_drawdown(returns_df: pd.DataFrame):
                  ylabel="Mean Drawdown (%)")
 
 def plot_average_inverted_correlation(returns_df: pd.DataFrame):
+
     average_correlations = Computations.calculate_average_correlation(returns_df).squeeze() * -1
     sorted_correlations = Transformations.sort_series(average_correlations, ascending=True)
 
@@ -98,6 +102,7 @@ def plot_average_inverted_correlation(returns_df: pd.DataFrame):
 
 
 def plot_overall_monthly_skew(returns_df: pd.DataFrame):
+
     skew_series = Computations.calculate_overall_monthly_skew(returns_df)
     sorted_skew_series = Transformations.sort_series(skew_series, ascending=True)
 
@@ -107,6 +112,7 @@ def plot_overall_monthly_skew(returns_df: pd.DataFrame):
                  ylabel="Skew")
     
 def plot_overall_sharpe_correlation_ratio(returns_df: pd.DataFrame):
+
     sharpe_correlation_ratio = Computations.calculate_overall_sharpe_correlation_ratio(returns_df)['Sharpe/AvgCorrelation']
     sorted_sharpe_correlation_ratio = Transformations.sort_series(sharpe_correlation_ratio, ascending=True)
 
@@ -115,15 +121,7 @@ def plot_overall_sharpe_correlation_ratio(returns_df: pd.DataFrame):
                  xlabel="Strats", 
                  ylabel="Sharpe / Avg Correlation")
 
-
-
-
-
-def sharpe_ratios_3d_scatter_plot(returns_df: pd.DataFrame, params: list):
-    x_vals, y_vals, z_vals, sharpe_means = Transformations.convert_params_to_4d(returns_df, params)
-    Widgets.scatter_3d(x_vals, y_vals, z_vals, sharpe_means, params, "Scatter Plot 3D")
-
-def sharpe_ratios_heatmap(returns_df: pd.DataFrame, param1: str, param2: str):
+def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str):
     X, Y, Z = Transformations.convert_params_to_3d(returns_df, param1, param2)
     Widgets.heatmap(
         z_values=Z,
@@ -133,8 +131,9 @@ def sharpe_ratios_heatmap(returns_df: pd.DataFrame, param1: str, param2: str):
         colorbar_title="Sharpe Ratio"
     )
 
-def correlation_heatmap(returns_df: pd.DataFrame):
-    correlation_matrix = returns_df.corr()
+def plot_correlation_heatmap(returns_df: pd.DataFrame):
+    correlation_matrix = Computations.calculate_overall_correlation_matrix(returns_df)
+
     Widgets.heatmap(
         z_values=correlation_matrix.values,
         x_labels=returns_df.columns.tolist(),
@@ -142,6 +141,11 @@ def correlation_heatmap(returns_df: pd.DataFrame):
         title="Correlation Matrix",
         colorbar_title="Correlation"
     )
+
+
+def sharpe_ratios_3d_scatter_plot(returns_df: pd.DataFrame, params: list):
+    x_vals, y_vals, z_vals, sharpe_means = Transformations.convert_params_to_4d(returns_df, params)
+    Widgets.scatter_3d(x_vals, y_vals, z_vals, sharpe_means, params, "Scatter Plot 3D")
 
 def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
     clusters_dict = generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
