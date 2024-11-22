@@ -5,13 +5,13 @@ import pandas as pd
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
-from collections import defaultdict
-import Dashboard.Common as Common
+
+import Dashboard.Format as Format
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations
 
 from Process_Data import equity_curves_calculs
-import Portfolio
+from Portfolio import generate_static_clusters
 
 def equity(returns_df: pd.DataFrame):
 
@@ -24,7 +24,7 @@ def equity(returns_df: pd.DataFrame):
     final_values = equity_curves.iloc[-1]
     sorted_columns = final_values.sort_values(ascending=True).index
     n_strats = len(sorted_columns)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -66,7 +66,7 @@ def plot_final_equity_values(daily_returns: pd.DataFrame):
 
     fig = go.Figure()
     n_strats = len(sorted_columns)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -75,10 +75,10 @@ def plot_final_equity_values(daily_returns: pd.DataFrame):
     for index, column in enumerate(sorted_columns):
         color = colors[index]
         Widgets.curves(fig, 
-                                        final_equities_df.index, 
-                                        final_equities_df[column], 
-                                        label=column, 
-                                        color=color)
+                        final_equities_df.index, 
+                        final_equities_df[column], 
+                        label=column, 
+                        color=color)
 
     fig.update_layout(
         title=title,
@@ -107,7 +107,7 @@ def drawdowns(returns_df: pd.DataFrame):
     drawdown_percentiles = drawdown_means.rank(pct=True)
     sorted_columns = drawdown_percentiles.sort_values(ascending=True).index
     n_strats = len(sorted_columns)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -146,7 +146,7 @@ def max_drawdowns(equity_curves: pd.DataFrame):
     # Tri des stratégies par drawdown maximal (du plus grand au plus petit drawdown)
     sorted_max_drawdowns = max_drawdowns.sort_values(ascending=True)
     n_strats = len(sorted_max_drawdowns)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -174,9 +174,9 @@ def annual_returns(daily_returns: pd.DataFrame):
 
     title = 'Yearly Returns'
     Widgets.colored_table(annual_returns, 
-                                            title, 
-                                            sort_ascending=True, 
-                                            color_high_to_low=False)
+                            title, 
+                            sort_ascending=True, 
+                            color_high_to_low=False)
 
 
 def correlation_heatmap(daily_returns: pd.DataFrame):
@@ -211,7 +211,7 @@ def average_correlation_bar_chart(daily_returns: pd.DataFrame):
 
     sorted_correlations = average_correlations_df.sort_values(by='Average Correlation', ascending=False)
     n_strats = len(sorted_correlations)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -243,7 +243,7 @@ def overall_sharpe_ratios(daily_returns: pd.DataFrame):
     # Sort by Sharpe Ratio values
     sorted_sharpe_ratios = sharpe_ratios_df.sort_values(by='Sharpe Ratio', ascending=True)
     n_strats = len(sorted_sharpe_ratios)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -276,7 +276,7 @@ def overall_monthly_skew(daily_returns: pd.DataFrame):
     n_strats = len(sorted_skew_series)
     
     # Obtenir un colormap personnalisé pour les barres
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -307,7 +307,7 @@ def rolling_sharpe_ratio(daily_returns: pd.DataFrame):
     mean_sharpes = {column: np.nanmean(sharpe) for column, sharpe in rolling_sharpe_ratio_df.items()}
     sorted_columns = sorted(mean_sharpes, key=mean_sharpes.get, reverse=False)
     n_strats = len(sorted_columns)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -339,9 +339,9 @@ def sharpe_ratios_yearly_table(daily_returns: pd.DataFrame):
     title = 'Sharpe Ratios per year'
     
     Widgets.colored_table(sharpe_ratios_df, 
-                                            title, 
-                                            sort_ascending=True, 
-                                            color_high_to_low=False)
+                            title, 
+                            sort_ascending=True, 
+                            color_high_to_low=False)
 
 def sortino_ratios(daily_returns: pd.DataFrame):
 
@@ -353,7 +353,7 @@ def sortino_ratios(daily_returns: pd.DataFrame):
 
     sorted_sortino_ratios = sortino_ratios_df.sort_values(by='Sortino Ratio', ascending=True)
     n_strats = len(sorted_sortino_ratios)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -376,24 +376,10 @@ def sortino_ratios(daily_returns: pd.DataFrame):
 
 def returns_distribution(daily_returns: pd.DataFrame, freq: str = 'H'):
 
-    daily_returns = daily_returns * 100
     title = 'Histogram of Strategy % Returns Distribution'
     xlabel = 'Strategy % Returns'
     ylabel = 'Frequency'
     Widgets.histogram(daily_returns, title, xlabel, ylabel)
-
-
-def plot_strategy_returns_by_decile(strategy_returns_by_decile: pd.DataFrame):
-
-    fig = px.bar(strategy_returns_by_decile, 
-                x=strategy_returns_by_decile.index, 
-                y=strategy_returns_by_decile.columns, 
-                title="Strategy Returns by Volatility Decile", 
-                labels={"index": "Volatility Decile", "value": "Strategy Returns"},
-                barmode='group')
-    fig.update_layout(xaxis_title="Volatility Decile", yaxis_title="Average Strategy Return")
-    fig.show()
-
 
 
 def volatility(daily_returns: pd.DataFrame, means=False):
@@ -408,7 +394,7 @@ def volatility(daily_returns: pd.DataFrame, means=False):
     rolling_volatility_percentiles = rolling_volatility_means.rank(pct=True)
     sorted_columns = rolling_volatility_percentiles.sort_values(ascending=True).index
     n_strats = len(sorted_columns)
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -433,147 +419,9 @@ def volatility(daily_returns: pd.DataFrame, means=False):
 
     fig.show()
 
-
-
-def sharpe_ratios_3d_surface_plot(daily_returns: pd.DataFrame, param1: str, param2: str):
-
-    # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
-    
-    # Calcul de la nouvelle métrique via la fonction calculate_sharpe_correlation_ratio
-    combined_df = Computations.calculate_sharpe_correlation_ratio(daily_returns)
-
-    # Initialiser des dictionnaires pour stocker les Sharpe ratios et la nouvelle métrique Sharpe/AvgCorrelation par (param1, param2)
-    sharpe_dict = defaultdict(list)
-    sharpe_corr_dict = defaultdict(list)
-
-    # Extraire les paramètres et les ratios de Sharpe ainsi que la nouvelle métrique Sharpe/AvgCorrelation
-    for index, row in sharpe_ratios_df.iterrows():
-        param1_value, param2_value = Computations.extract_params_from_name(index, param1, param2)
-
-        if param1_value is not None and param2_value is not None:
-            # Stocker le Sharpe Ratio
-            sharpe_dict[(param1_value, param2_value)].append(row['Sharpe Ratio'])
-            # Stocker la nouvelle métrique Sharpe/AvgCorrelation
-            sharpe_corr_dict[(param1_value, param2_value)].append(combined_df.loc[index, 'Sharpe/AvgCorrelation'])
-
-    # Initialiser les listes pour les valeurs moyennes des Sharpe ratios et Sharpe/AvgCorrelation
-    x_vals = []
-    y_vals = []
-    z_vals = []
-    color_vals = []
-
-    # Calculer les moyennes des Sharpe ratios et de la nouvelle métrique pour chaque combinaison (param1, param2)
-    for (p1, p2), sharpe_list in sharpe_dict.items():
-        x_vals.append(p1)
-        y_vals.append(p2)
-        z_vals.append(np.nanmean(sharpe_list))  # Moyenne des Sharpe ratios
-        color_vals.append(np.nanmean(sharpe_corr_dict[(p1, p2)]))  # Moyenne de Sharpe/AvgCorrelation
-
-    # Utiliser la fonction pour convertir les données en surface
-    X, Y, Z = Common.convert_to_surface_grid(x_vals, y_vals, z_vals)
-    _, _, color_surface = Common.convert_to_surface_grid(x_vals, y_vals, color_vals)
-
-    # Créer une surface 3D avec Plotly, où la couleur est basée sur Sharpe/AvgCorrelation
-    fig = go.Figure(data=[go.Surface(
-        x=X,
-        y=Y,
-        z=Z,
-        surfacecolor=color_surface,  # Utilisation de Sharpe/AvgCorrelation pour coloriser
-        colorscale='Jet_r',
-        showscale=True,
-        colorbar=dict(title='Sharpe/AvgCorrelation'),
-        hovertemplate='Param1: %{x}<br>Param2: %{y}<br>Sharpe Ratio: %{z:.2f}<br>Sharpe/AvgCorrelation: %{surfacecolor:.2f}<extra></extra>'
-    )])
-
-    # Mise à jour de la mise en page du graphique
-    fig.update_layout(
-        title=f'3D Sharpe Ratios Surface with Color Based on Sharpe/AvgCorrelation for {param1} and {param2}',
-        scene=dict(
-            xaxis_title=param1,
-            yaxis_title=param2,
-            zaxis_title='Sharpe Ratio'
-        ),
-        template="plotly_dark",
-        height=800
-    )
-
-    # Afficher le graphique
-    fig.show()
-
-
-def sharpe_correlation_3d_surface_plot(daily_returns: pd.DataFrame, param1: str, param2: str):
-
-    # Calcul de la nouvelle métrique via la fonction calculate_sharpe_correlation_ratio
-    combined_df = Computations.calculate_sharpe_correlation_ratio(daily_returns)
-    
-    # Calcul des Sharpe Ratios pour chaque stratégie
-    sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
-
-    # Initialiser des dictionnaires pour stocker la nouvelle métrique Sharpe/AvgCorrelation et les Sharpe Ratios par (param1, param2)
-    sharpe_corr_dict = defaultdict(list)
-    sharpe_dict = defaultdict(list)
-
-    # Extraire les paramètres et les valeurs des deux métriques
-    for index, row in sharpe_ratios_df.iterrows():
-        param1_value, param2_value = Computations.extract_params_from_name(index, param1, param2)
-
-        if param1_value is not None and param2_value is not None:
-            # Stocker le Sharpe/AvgCorrelation
-            sharpe_corr_dict[(param1_value, param2_value)].append(combined_df.loc[index, 'Sharpe/AvgCorrelation'])
-            # Stocker le Sharpe Ratio
-            sharpe_dict[(param1_value, param2_value)].append(row['Sharpe Ratio'])
-
-    # Initialiser les listes pour les valeurs moyennes des Sharpe/AvgCorrelation (Z) et Sharpe Ratios (coloration)
-    x_vals = []
-    y_vals = []
-    z_vals = []
-    color_vals = []
-
-    # Calculer les moyennes pour chaque combinaison (param1, param2)
-    for (p1, p2), sharpe_corr_list in sharpe_corr_dict.items():
-        x_vals.append(p1)
-        y_vals.append(p2)
-        z_vals.append(np.nanmean(sharpe_corr_list))  # Moyenne de Sharpe/AvgCorrelation (pour l'axe Z)
-        color_vals.append(np.nanmean(sharpe_dict[(p1, p2)]))  # Moyenne du Sharpe Ratio (pour la couleur)
-
-    # Utiliser la fonction pour convertir les données en surface
-    X, Y, Z = Common.convert_to_surface_grid(x_vals, y_vals, z_vals)
-    _, _, color_surface = Common.convert_to_surface_grid(x_vals, y_vals, color_vals)
-
-    # Créer une surface 3D avec Plotly, où la couleur est basée sur le Sharpe Ratio
-    fig = go.Figure(data=[go.Surface(
-        x=X,
-        y=Y,
-        z=Z,  # L'axe Z est maintenant Sharpe/AvgCorrelation
-        surfacecolor=color_surface,  # Couleur basée sur Sharpe Ratio
-        colorscale='Jet_r',
-        showscale=True,
-        colorbar=dict(title='Sharpe Ratio'),  # Légende pour la couleur représentant le Sharpe Ratio
-        hovertemplate='Param1: %{x}<br>Param2: %{y}<br>Sharpe/AvgCorrelation: %{z:.2f}<br>Sharpe Ratio: %{surfacecolor:.2f}<extra></extra>'
-    )])
-
-    # Mise à jour de la mise en page du graphique
-    fig.update_layout(
-        title=f'3D Surface of Sharpe/AvgCorrelation (Z) with Color Based on Sharpe Ratio for {param1} and {param2}',
-        scene=dict(
-            xaxis_title=param1,
-            yaxis_title=param2,
-            zaxis_title='Sharpe/AvgCorrelation'
-        ),
-        template="plotly_dark",
-        height=800
-    )
-
-    # Afficher le graphique
-    fig.show()
-
-
-
-
 def sharpe_ratios_3d_scatter_plot(daily_returns: pd.DataFrame, params: list):
 
-    x_vals, y_vals, z_vals, sharpe_means = Computations.calculate_sharpe_means_from_combination(daily_returns, params)
+    x_vals, y_vals, z_vals, sharpe_means = Format.calculate_sharpe_means_from_combination(daily_returns, params)
 
     # Créer un scatter 3D avec les couleurs basées sur la moyenne du Sharpe Ratio
     fig = go.Figure(data=[go.Scatter3d(
@@ -610,34 +458,10 @@ def sharpe_ratios_3d_scatter_plot(daily_returns: pd.DataFrame, params: list):
 
 def sharpe_ratios_heatmap(daily_returns: pd.DataFrame, param1: str, param2: str):
 
-    # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
-
-    # Initialiser un dictionnaire pour stocker les Sharpe ratios par (param1, param2)
-    sharpe_dict = defaultdict(list)
-
-    # Extraire les paramètres et les ratios de Sharpe à partir de l'index
-    for index, row in sharpe_ratios_df.iterrows():
-        # Extraire les deux paramètres principaux
-        param1_value, param2_value = Computations.extract_params_from_name(index, param1, param2)
-
-        # Si on trouve les deux valeurs de param1 et param2, on stocke le Sharpe ratio
-        if param1_value is not None and param2_value is not None:
-            sharpe_dict[(param1_value, param2_value)].append(row['Sharpe Ratio'])
-
-    # Initialiser les listes pour les valeurs moyennes des Sharpe ratios
-    x_vals = []
-    y_vals = []
-    z_vals = []
-
-    # Calculer les moyennes des Sharpe ratios pour chaque combinaison (param1, param2)
-    for (p1, p2), sharpe_list in sharpe_dict.items():
-        x_vals.append(p1)
-        y_vals.append(p2)
-        z_vals.append(np.nanmean(sharpe_list))  # Moyenne des Sharpe ratios
+    x_vals, y_vals, z_vals = Format.convert_sharpe_to_coordinates(daily_returns, param1, param2)
 
     # Convertir les listes en un grid de type heatmap
-    X, Y, Z = Common.convert_to_surface_grid(x_vals, y_vals, z_vals)
+    X, Y, Z = Format.convert_to_surface_grid(x_vals, y_vals, z_vals)
 
     # Créer une heatmap avec Plotly
     fig = go.Figure(data=go.Heatmap(
@@ -661,48 +485,6 @@ def sharpe_ratios_heatmap(daily_returns: pd.DataFrame, param1: str, param2: str)
     # Affichage du graphique
     fig.show()
 
-
-
-def params_relative_impact_on_sharpe(daily_returns: pd.DataFrame, params: list):
-
-    # Analyse de sensibilité des paramètres (obtenir les coefficients triés)
-    sorted_coefficients = Computations.analyze_param_sensitivity(daily_returns, params)
-
-    title = 'Sorted Regression Coefficients'
-    xlabel = 'Parameters'
-    ylabel = 'Absolute Coefficient Value'
-
-    n_params = len(sorted_coefficients)
-    cmap = Common.get_custom_colormap(n_params)
-    if n_params == 1:
-        colors = ['white']
-    else:
-        colors = [mcolors.to_hex(cmap(i / (n_params - 1))) for i in range(n_params)]
-    
-    fig = go.Figure()
-
-    # Ajout des barres pour chaque coefficient trié
-    for index, (param, coefficient) in enumerate(sorted_coefficients.items()):
-        color = colors[index]
-        Widgets.bar(fig, x=[index], y=[coefficient], label=param, color=color)
-
-    # Mise à jour du layout
-    fig.update_layout(
-        title=title,
-        xaxis=dict(
-            tickvals=list(range(n_params)),
-            ticktext=sorted_coefficients.index
-        ),
-        xaxis_title=xlabel,
-        yaxis_title=ylabel,
-        template="plotly_dark"
-    )
-
-    # Affichage du graphique
-    fig.show()
-
-
-
 def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
 
     # Calculer la nouvelle métrique via la fonction séparée
@@ -720,7 +502,7 @@ def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
     n_strats = len(sorted_combined_df)
 
     # Générer une colormap pour les barres
-    cmap = Common.get_custom_colormap(n_strats)
+    cmap = Format.get_custom_colormap(n_strats)
     if n_strats == 1:
         colors = ['white']
     else:
@@ -751,37 +533,10 @@ def sharpe_correlation_ratio_bar_chart(daily_returns: pd.DataFrame):
 
 def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
 
-    clusters_dict = Portfolio.generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
-
-    def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=None):
-
-        if labels is None:
-            labels = []  # Réinitialisation de la liste à chaque appel
-        if parents is None:
-            parents = []  # Réinitialisation de la liste à chaque appel
-            
-        for key, value in cluster_dict.items():
-            current_label = parent_label + str(key) if parent_label else str(key)  # Construit le label courant
-            if isinstance(value, dict):
-                # Si c'est un sous-cluster, on continue la récursion
-                prepare_sunburst_data(value, current_label, labels, parents)
-            else:
-                # Si on arrive à une liste d'actifs, on les ajoute comme feuilles
-                for asset in value:
-                    labels.append(asset)
-                    parents.append(current_label)
-            # Ajouter le cluster actuel comme nœud s'il a des enfants
-            if parent_label:
-                labels.append(current_label)
-                parents.append(parent_label)
-            else:
-                labels.append(current_label)
-                parents.append("")  # Root node has no parent
-                
-        return labels, parents
+    clusters_dict = generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
 
     # Préparer les données pour le Sunburst
-    labels, parents = prepare_sunburst_data(clusters_dict)
+    labels, parents = Format.prepare_sunburst_data(clusters_dict)
 
     # Créer le Sunburst/Treemap Plot avec Plotly
     fig = px.treemap(

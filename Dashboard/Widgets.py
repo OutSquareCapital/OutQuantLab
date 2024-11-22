@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import pandas as pd
 import numpy as np
-import Dashboard.Common as Common
+import Dashboard.Format as Format
 
 def colored_table(df: pd.DataFrame, title: str, sort_ascending: bool = True, color_high_to_low: bool = True):
 
@@ -14,7 +14,7 @@ def colored_table(df: pd.DataFrame, title: str, sort_ascending: bool = True, col
     avg_performance = df.mean()
     sorted_assets = avg_performance.sort_values(ascending=not color_high_to_low).index
     # Association des couleurs aux actifs triés
-    asset_colors = {asset: mcolors.to_hex(Common.get_color(i, len(sorted_assets))) for i, asset in enumerate(sorted_assets)}
+    asset_colors = {asset: mcolors.to_hex(Format.get_color(i, len(sorted_assets))) for i, asset in enumerate(sorted_assets)}
 
     sorted_values = []
     sorted_colors = []
@@ -102,12 +102,13 @@ def curves(fig: go.Figure, x: list, y: list, label: str, color: str, add_zero_li
 
 def histogram(df: pd.DataFrame, title: str, xlabel: str, ylabel: str):
 
+    df = df*100
     # Flatten the DataFrame for Plotly
     melted_data = df.melt(var_name='Strat', value_name='Returns')
 
     # Create a color map for the assets
     unique_assets = melted_data['Strat'].unique()
-    colors = [Common.get_color(i, len(unique_assets)) for i in range(len(unique_assets))]
+    colors = [Format.get_color(i, len(unique_assets)) for i in range(len(unique_assets))]
     color_map = dict(zip(unique_assets, colors))
 
     # Plot using Plotly Express

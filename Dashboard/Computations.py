@@ -1,11 +1,7 @@
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import StandardScaler
-import statsmodels.api as sm
-from collections import defaultdict
 from scipy.stats import skew
 import Config
-import Dashboard.Common as cmon
 from Process_Data import equity_curves_calculs
 import Metrics as mt
 
@@ -30,6 +26,7 @@ def overall_sortino_ratios_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
     return sortino_ratios_df.round(2)
 
 def rolling_sharpe_ratios_calculs(daily_returns: pd.DataFrame, window_size: int = 1250):
+        
         rolling_sharpe_ratios_df = pd.DataFrame(mt.rolling_sharpe_ratios(daily_returns.values, 
                                                                          window_size, 
                                                                          window_size),
@@ -38,7 +35,7 @@ def rolling_sharpe_ratios_calculs(daily_returns: pd.DataFrame, window_size: int 
         
         return rolling_sharpe_ratios_df.round(2)
 
-def rolling_volatility_calculs(daily_returns, means):
+def rolling_volatility_calculs(daily_returns: pd.DataFrame, means):
     
     if means:
         rolling_volatility_df = pd.DataFrame(mt.hv_composite(daily_returns.values), 
@@ -100,57 +97,6 @@ def average_correlation_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     return average_correlations_df.round(2)
 
-def analyze_param_sensitivity(daily_returns: pd.DataFrame, params: list):
-
-    # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = overall_sharpe_ratios_calculs(daily_returns)
-
-    param_values_list = []
-    sharpe_ratios = []
-
-    # Extraire les paramètres et les ratios de Sharpe
-    for index, row in sharpe_ratios_df.iterrows():
-        param_values = cmon.extract_all_params_from_name(index, params)
-        if all(param_values):  # Vérifie si toutes les valeurs de paramètres sont présentes
-            param_values_list.append(param_values)
-            sharpe_ratios.append(row['Sharpe Ratio'])
-
-    # Création d'un DataFrame pour les paramètres et les Sharpe Ratios
-    param_values_df = pd.DataFrame(param_values_list, columns=params, dtype=np.float32)
-    param_values_df['Sharpe Ratio'] = sharpe_ratios
-
-    # Supprimer les lignes avec des NaN dans Sharpe Ratio
-    param_values_df = param_values_df.dropna(subset=['Sharpe Ratio'])
-
-    # Standardiser les paramètres pour que les échelles soient comparables
-    scaler = StandardScaler()
-    param_values_scaled = scaler.fit_transform(param_values_df[params])
-
-    # Ajouter une constante pour l'ordonnée à l'origine
-    X = sm.add_constant(param_values_scaled)
-    y = param_values_df['Sharpe Ratio']
-
-    # Effectuer la régression linéaire multiple
-    model = sm.OLS(y, X).fit()
-
-    # Résultats de la régression
-    #print("\nRésumé de la régression OLS :")
-    #print(model.summary())
-
-    # Associer les noms de params au modèle
-    param_coeffs = dict(zip(params, model.params[1:]))
-
-    # Convertir en série pour manipulation facile
-    coefficients = pd.Series(param_coeffs)
-
-    # Trier les coefficients par valeur absolue pour voir l'importance relative
-    sorted_coefficients = coefficients.abs().sort_values(ascending=False)
-
-    #print("\nImportance des paramètres (en valeur absolue des coefficients de régression) :")
-    #print(sorted_coefficients)
-
-    return sorted_coefficients
-
 def calculate_sharpe_correlation_ratio(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
     # Calcul des Sharpe Ratios et des Average Correlations
@@ -168,45 +114,6 @@ def calculate_sharpe_correlation_ratio(daily_returns: pd.DataFrame) -> pd.DataFr
     combined_df['Sharpe/AvgCorrelation'] = combined_df['Sharpe Rank'] / combined_df['Correlation Rank']
 
     return combined_df
-
-def calculate_sharpe_means_from_combination(daily_returns, params):
-
-    # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = overall_sharpe_ratios_calculs(daily_returns)
-
-    # Initialiser un dictionnaire pour stocker les Sharpe ratios par combinaison de paramètres
-    sharpe_dict = defaultdict(list)
-
-    # Extraire les paramètres et les ratios de Sharpe à partir de l'index
-    for index, row in sharpe_ratios_df.iterrows():
-        param_values = cmon.extract_all_params_from_name(index, params)
-
-        # Si on trouve toutes les valeurs de paramètres, on les utilise pour la clé du dictionnaire
-        if all(param_values):  # Vérifie si toutes les valeurs de paramètres sont présentes
-            # On utilise les trois premiers paramètres comme clé
-            key = tuple(param_values[:3])
-            sharpe_dict[key].append(row['Sharpe Ratio'])
-
-    # Initialiser les listes pour les valeurs moyennes des Sharpe ratios
-    x_vals = []
-    y_vals = []
-    z_vals = []
-    sharpe_means = []
-
-    # Calculer les moyennes des Sharpe ratios pour chaque combinaison (param1, param2, param3)
-    for (p1, p2, p3), sharpe_list in sharpe_dict.items():
-        x_vals.append(p1)
-        y_vals.append(p2)
-        z_vals.append(p3)
-        sharpe_means.append(np.nanmean(sharpe_list))  # Moyenne des Sharpe ratios pour chaque combinaison
-
-    # Convertir en np.array pour faciliter la manipulation
-    x_vals = np.array(x_vals)
-    y_vals = np.array(y_vals)
-    z_vals = np.array(z_vals)
-    sharpe_means = np.array(sharpe_means)
-
-    return x_vals, y_vals, z_vals, sharpe_means
 
 def sharpe_ratios_yearly_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
 
@@ -230,46 +137,3 @@ def overall_monthly_skew_calculs(returns_df: pd.DataFrame) -> pd.Series:
     skew_series = monthly_returns_df.apply(lambda x: skew(x, nan_policy='omit')).astype(np.float32).round(2)
     
     return skew_series
-
-def calculate_and_group_information_ratio(signals_df: pd.DataFrame, returns_df: pd.DataFrame, by_param=False, by_method=False, by_class=False, by_asset=False) -> pd.DataFrame:
-
-    # Calculate IC values
-    ic_dict = {}
-    future_returns_df = returns_df.shift(-1)
-
-    for col in signals_df.columns:
-        asset_name = col.split('_')[0]
-        if asset_name in returns_df.columns:
-            ic_value = signals_df[col].corr(future_returns_df[asset_name])
-            ic_dict[col] = ic_value
-
-    ic_df = pd.DataFrame(ic_dict, index=['IC'], dtype=np.float32)
-
-    # Calculate averages based on specified grouping options
-    if by_class and by_method:
-        raise ValueError("Calculating averages by both 'class' and 'method' is not supported as methods belong to classes.")
-
-    grouping_keys = []
-    if by_asset:
-        grouping_keys.append(0)  # Asset is in position 0
-    if by_class:
-        grouping_keys.append(1)  # Class is in position 1
-    if by_method:
-        grouping_keys.append(2)  # Method is in position 2
-    if by_param:
-        grouping_keys.append(3)  # Param is in position 3
-
-    if grouping_keys:
-        keys = np.array([tuple(col.split('_')[pos] for pos in grouping_keys) for col in ic_df.columns])
-        unique_keys, inverse_indices = np.unique(keys, return_inverse=True, axis=0)
-
-        grouped_averages = {}
-        for i, unique_key in enumerate(unique_keys):
-            mask = (inverse_indices == i)
-            selected_columns = ic_df.columns[mask]
-            mean_values = ic_df[selected_columns].mean(axis=1)
-            grouped_averages['_'.join(unique_key)] = mean_values
-    
-        return pd.DataFrame(grouped_averages, index=ic_df.index, dtype=np.float32)
-
-    return ic_df
