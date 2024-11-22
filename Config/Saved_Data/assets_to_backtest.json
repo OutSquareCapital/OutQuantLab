@@ -1,9 +1,24 @@
 {
    "assets": [
+      "CORN",
+      "DBB",
+      "DIA",
+      "FXA",
+      "FXB",
+      "FXC",
+      "FXE",
+      "GBTC",
+      "GLD",
+      "IWM",
+      "QQQ",
+      "SLV",
+      "SOYB",
       "SPY",
       "TLT",
+      "UNG",
       "USO",
-      "VIXY"
+      "VIXY",
+      "WEAT"
    ],
    "ratios": [],
    "ensembles": [],
