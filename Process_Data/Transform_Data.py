@@ -14,7 +14,6 @@ def calculate_volatility_adjusted_returns(
     target_volatility: int = 15
     ) -> np.ndarray:
 
-
     vol_adj_position_size_array = ne.evaluate('target_volatility / hv_array')
 
     vol_adj_position_size_shifted = ft.shift_array(vol_adj_position_size_array)

@@ -8,9 +8,10 @@ import Metrics as mt
 def calculate_equity_curves_df(returns_df:pd.DataFrame) -> pd.DataFrame:
 
     return pd.DataFrame(equity_curves_calculs(returns_df.values),
-                                 index=returns_df.index,
-                                 columns=returns_df.columns,
-                                 dtype=np.float32)
+                        index=returns_df.index,
+                        columns=returns_df.columns,
+                        dtype=np.float32
+                        ).round(2)
 
 def calculate_overall_sharpe_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
@@ -44,14 +45,17 @@ def calculate_average_correlation(returns_df: pd.DataFrame) -> pd.DataFrame:
                         dtype=np.float32
                         ).round(2)
 
-def calculate_average_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
+def calculate_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     equity_curves = calculate_equity_curves_df(returns_df)
     
-    # Calculate drawdowns for each equity curve directly
     drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR
 
-    return drawdowns.mean().round(2)
+    return drawdowns.round(2)
+    
+def calculate_average_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
+
+    return calculate_drawdown(returns_df).mean().round(2)
 
 def calculate_overall_sharpe_correlation_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
@@ -75,37 +79,23 @@ def calculate_overall_monthly_skew(returns_df: pd.DataFrame) -> pd.Series:
                                     ).astype(np.float32
                                     ).round(2)
 
-def calculate_overall_correlation_matrix(returns_df: pd.DataFrame):
-    
-    return returns_df.corr().round(2)
+def calculate_overall_correlation_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
+    correlation_matrix = returns_df.corr().round(2)
+    np.fill_diagonal(correlation_matrix.values, np.nan)
+    return correlation_matrix
 
 def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, window_size: int = 1250):
         
-        return pd.DataFrame(mt.rolling_sharpe_ratios(
-                                                    returns_df.values, 
-                                                    window_size, 
-                                                    window_size),
-                                                    index=returns_df.index,
-                                                    columns=returns_df.columns
-                                                    ).round(2)
+    return pd.DataFrame(mt.rolling_sharpe_ratios(
+                        returns_df.values, 
+                        window_size, 
+                        window_size),
+                        index=returns_df.index,
+                        columns=returns_df.columns
+                        ).round(2)
 
-def calculate_rolling_volatility(returns_df: pd.DataFrame, means: bool) -> pd.DataFrame:
-    
-    if means:
-        rolling_volatility_df = pd.DataFrame(mt.hv_composite(returns_df.values), 
-                                             index=returns_df.index, 
-                                             columns=returns_df.columns)
-        return rolling_volatility_df.expanding(min_periods=1).mean().round(2)
-    else:
-        return pd.DataFrame(mt.hv_composite(returns_df.values), 
-                                             index=returns_df.index, 
-                                             columns=returns_df.columns).round(2)
+def calculate_rolling_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-def calculate_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
-
-    equity_curves = calculate_equity_curves_df(returns_df)
-    
-    # Calculate drawdowns for each equity curve directly
-    drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR
-
-    return drawdowns.round(2)
+    return pd.DataFrame(mt.hv_composite(returns_df.values), 
+                        index=returns_df.index, 
+                        columns=returns_df.columns).round(2)

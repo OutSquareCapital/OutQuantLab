@@ -56,7 +56,6 @@ def convert_txt_to_csv(base_dir: str, output_base_dir: str):
 
     print("Conversion terminée pour tous les fichiers.")
 
-
 def combine_csv_files(output_folder, file_names, output_file) -> None:
     dfs = [] 
 
@@ -98,8 +97,6 @@ def random_fill(series: pd.Series) -> pd.Series:
 
     return series
 
-
-@staticmethod
 def adjust_prices_for_negativity(prices_df: pd.DataFrame) -> pd.DataFrame:
 
     # Ajuster les séries de prix pour qu'aucune valeur ne soit négative
@@ -124,7 +121,6 @@ def adjust_prices_for_negativity(prices_df: pd.DataFrame) -> pd.DataFrame:
 
     return prices_df
 
-@staticmethod
 def adjust_prices_for_nans(prices_df: pd.DataFrame) -> pd.DataFrame:
 
     # Calcul des rendements en pourcentage de prices_df
@@ -166,10 +162,9 @@ def adjust_prices_for_nans(prices_df: pd.DataFrame) -> pd.DataFrame:
                         columns=returns_df.columns,
                         dtype=np.float32)
 
-@staticmethod
 def clean_and_process_prices(file_path: str) -> None:
 
-    raw_prices_df, _ = load_prices_from_csv(file_path, dtype=np.float32)
+    raw_prices_df, _ = load_prices_from_csv(file_path)
 
     value_level_adjusted_raw_prices_df = adjust_prices_for_negativity(raw_prices_df)
 
