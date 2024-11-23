@@ -56,9 +56,12 @@ def normalize_returns_distribution_rolling(pct_returns_df: pd.DataFrame,
 
     return normalized_returns
 
-def equity_curves_calculs(daily_returns: pd.DataFrame) -> pd.DataFrame:
-
-    return (1+daily_returns).cumprod() * Config.PERCENTAGE_FACTOR
+def equity_curves_calculs(daily_returns_array: np.ndarray) -> np.ndarray:
+    mask = np.isnan(daily_returns_array)
+    daily_returns_array[mask] = 0
+    cumulative_returns = np.cumprod(1 + daily_returns_array, axis=0)
+    cumulative_returns[mask] = np.nan
+    return cumulative_returns * Config.PERCENTAGE_FACTOR
 
 def pct_returns_np(prices_array: np.ndarray) -> np.ndarray:
 
@@ -92,26 +95,26 @@ def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
     
     return log_returns_array
 
-def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:int) -> Tuple[np.ndarray, 
-                                                                                             np.ndarray, 
-                                                                                             np.ndarray,
-                                                                                             List[str],
-                                                                                             pd.Index]:
+def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame) -> Tuple[np.ndarray, 
+                                                                        np.ndarray, 
+                                                                        np.ndarray,
+                                                                        List[str],
+                                                                        pd.Index]:
 
     # Création de l'array des pct returns
     pct_returns_array = pct_returns_df.to_numpy(dtype=np.float32)
 
     # Création du DataFrame des prix avec des NaN
-    prices_df = equity_curves_calculs(pct_returns_df)
+    prices_df = pd.DataFrame(equity_curves_calculs(pct_returns_df.values),
+                             index=pct_returns_df.index,
+                             columns=pct_returns_df.columns,
+                             dtype=np.float32)
 
-    # Conversion en array
     prices_array = prices_df.to_numpy(dtype=np.float32)
     
-    # Calcul des rendements log
     log_returns_array = log_returns_np(prices_array)
     hv_array = mt.hv_composite(pct_returns_array)
 
-    # Liste des noms des actifs
     asset_names = list(pct_returns_df.columns)
     dates = pct_returns_df.index
 
@@ -121,18 +124,14 @@ def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame, initial_equity:i
 
 def calculate_ratios_returns(returns_df: pd.DataFrame, asset_names: list) -> pd.DataFrame:
 
-    # Création d'une liste pour stocker les DataFrames de chaque paire
     pair_returns_list = []
     
-    # Calcul des ratios de rendements pour toutes les paires
     for asset1, asset2 in combinations(asset_names, 2):
         pair_name = f"{asset1}-{asset2}"
         if asset1 in returns_df.columns and asset2 in returns_df.columns:
-            # Soustraction des rendements des deux actifs
             pair_returns = returns_df[asset1] - returns_df[asset2]
             pair_returns_list.append(pair_returns.rename(f"{asset1}-{asset2}"))
     
-    # Concaténation des résultats dans un seul DataFrame
     ratios_returns_df = pd.concat(pair_returns_list, axis=1)
     
     return ratios_returns_df

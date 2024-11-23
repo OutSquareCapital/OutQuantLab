@@ -5,6 +5,13 @@ import Config
 from Process_Data import equity_curves_calculs
 import Metrics as mt
 
+def calculate_equity_curves_df(returns_df:pd.DataFrame) -> pd.DataFrame:
+
+    return pd.DataFrame(equity_curves_calculs(returns_df.values),
+                                 index=returns_df.index,
+                                 columns=returns_df.columns,
+                                 dtype=np.float32)
+
 def calculate_overall_sharpe_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     sharpe_ratios = returns_df.mean() / returns_df.std() * Config.ANNUALIZATION_FACTOR
@@ -39,7 +46,7 @@ def calculate_average_correlation(returns_df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_average_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    equity_curves = equity_curves_calculs(returns_df)
+    equity_curves = calculate_equity_curves_df(returns_df)
     
     # Calculate drawdowns for each equity curve directly
     drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR
@@ -96,7 +103,7 @@ def calculate_rolling_volatility(returns_df: pd.DataFrame, means: bool) -> pd.Da
 
 def calculate_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    equity_curves = equity_curves_calculs(returns_df)
+    equity_curves = calculate_equity_curves_df(returns_df)
     
     # Calculate drawdowns for each equity curve directly
     drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR

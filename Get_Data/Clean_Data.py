@@ -6,15 +6,7 @@ from Get_Data.Fetch_Data import load_prices_from_csv
 from Process_Data import equity_curves_calculs
 
 def convert_txt_to_csv(base_dir: str, output_base_dir: str):
-    """
-    Parcourt chaque sous-dossier dans `base_dir`, lit tous les fichiers .txt,
-    les convertit en .csv, et les sauvegarde dans un nouveau dossier `output_base_dir`
-    avec des sous-dossiers aux mêmes noms (en majuscules).
-    
-    Parameters:
-    - base_dir (str): Le chemin du dossier contenant les fichiers .txt
-    - output_base_dir (str): Le chemin du dossier où les fichiers .csv seront sauvegardés
-    """
+
     # Création du dossier d'output s'il n'existe pas
     os.makedirs(output_base_dir, exist_ok=True)
 
@@ -66,16 +58,7 @@ def convert_txt_to_csv(base_dir: str, output_base_dir: str):
 
 
 def combine_csv_files(output_folder, file_names, output_file) -> None:
-    """
-    Combine multiple CSV files, ensuring all dates match across assets.
-    Save the combined CSV, and return a corresponding dataframe.
-    
-    Args:
-        output_folder (str): Folder containing the CSV files.
-        file_names (list of str): List of filenames to combine.
-        output_file (str): The name of the final combined CSV.
-    """
-    dfs = []  # Créer une liste pour stocker les DataFrames temporairement
+    dfs = [] 
 
     for file_name in file_names:
         file_path = os.path.join(output_folder, f"{file_name}.csv")
@@ -99,17 +82,7 @@ def combine_csv_files(output_folder, file_names, output_file) -> None:
 
 @staticmethod
 def random_fill(series: pd.Series) -> pd.Series:
-    """
-    Remplit les NaN dans une série en utilisant la moyenne de X rendements aléatoires tirés avec remplacement.
 
-    Args:
-        series (pd.Series): Série de rendements avec potentiels NaNs.
-        num_samples (int): Nombre d'échantillons aléatoires à tirer pour chaque NaN (par défaut 5).
-
-    Returns:
-        pd.Series: Série avec les NaN remplis.
-    """
-    # Index des NaN dans la série
     nan_indices = series[series.isna()].index
     
     # Identifie les rendements non NaN
@@ -128,16 +101,7 @@ def random_fill(series: pd.Series) -> pd.Series:
 
 @staticmethod
 def adjust_prices_for_negativity(prices_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Ajuste les séries de prix pour qu'aucune valeur ne soit négative.
-    Ajoute un ajustement basé sur 1% du minimum absolu si nécessaire.
 
-    Args:
-        prices_df (pd.DataFrame): Un DataFrame contenant les prix des actifs.
-    
-    Returns:
-        pd.DataFrame: Un DataFrame ajusté où toutes les valeurs sont positives.
-    """
     # Ajuster les séries de prix pour qu'aucune valeur ne soit négative
     min_prices = prices_df.min()
     adjustment = abs(min_prices) + (min_prices.abs().max() * 0.01)  # Ajustement basé sur 1% du min absolu max
@@ -162,16 +126,7 @@ def adjust_prices_for_negativity(prices_df: pd.DataFrame) -> pd.DataFrame:
 
 @staticmethod
 def adjust_prices_for_nans(prices_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Transforme les prix en pourcentage, applique le bootstrap sur les NaNs et reconstitue les prix.
-    Imprime des statistiques sur les rendements.
 
-    Args:
-        prices_df (pd.DataFrame): Un DataFrame contenant les prix des actifs.
-    
-    Returns:
-        pd.DataFrame: Un DataFrame des prix reconstruits après avoir traité les rendements.
-    """
     # Calcul des rendements en pourcentage de prices_df
     returns_df = prices_df.pct_change(fill_method=None)
 
@@ -206,21 +161,20 @@ def adjust_prices_for_nans(prices_df: pd.DataFrame) -> pd.DataFrame:
                 f"Médiane absolue des rendements : {absolute_median_returns:.2f}%"
             )
 
-    return equity_curves_calculs(returns_df)
+    return pd.DataFrame(equity_curves_calculs(returns_df.values),
+                        index=returns_df.index,
+                        columns=returns_df.columns,
+                        dtype=np.float32)
 
 @staticmethod
 def clean_and_process_prices(file_path: str) -> None:
 
-    # Charger le data brut
     raw_prices_df, _ = load_prices_from_csv(file_path, dtype=np.float32)
 
-    # Ajuster les prix pour éviter les valeurs négatives
     value_level_adjusted_raw_prices_df = adjust_prices_for_negativity(raw_prices_df)
 
-    # Traiter les rendements, appliquer le bootstrap et reconstituer les prix
     processed_prices_df = adjust_prices_for_nans(value_level_adjusted_raw_prices_df)
 
-    # Sauvegarder le DataFrame final dans un fichier CSV
     processed_prices_df.to_csv(file_path)
 
 

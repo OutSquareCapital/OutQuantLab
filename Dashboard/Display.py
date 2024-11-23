@@ -2,16 +2,15 @@ import pandas as pd
 import Dashboard.Transformations as Transformations
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations
-
-from Process_Data import equity_curves_calculs
 from Portfolio import generate_static_clusters
 
 def plot_equity(returns_df: pd.DataFrame):
 
-    equity_curves = equity_curves_calculs(returns_df)
+    equity_curves = Computations.calculate_equity_curves_df(returns_df)
+    
     sorted_equity_curves = Transformations.sort_dataframe(equity_curves, 
-                                                    use_final=True,
-                                                    ascending=True)
+                                                            use_final=True,
+                                                            ascending=True)
 
     Widgets.curves(x_values=sorted_equity_curves.index,
                    y_values=sorted_equity_curves,
@@ -162,7 +161,7 @@ def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub
     clusters_dict = generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
 
     labels, parents = Transformations.prepare_sunburst_data(clusters_dict)
-    
+
     Widgets.treemap(labels, 
                     parents, 
                     "Visualisation des Clusters")

@@ -21,8 +21,7 @@ category_asset_names,
 dates_index
 ) = Process_Data.process_data(assets_names,
                             data_prices_df, 
-                            assets_to_backtest,
-                            initial_equity=100)
+                            assets_to_backtest)
 
 # Suppression des objets désormais inutiles
 del (

@@ -47,7 +47,10 @@ def raccommoder_prices_futures_etf(data_futures_df, data_etf_df, paires_futures_
     # Concaténer toutes les colonnes raccommodées (rendements)
     raccommodage_returns_df = pd.concat(raccommodage_dfs, axis=1)
 
-    raccommodage_prices_df = equity_curves_calculs(raccommodage_returns_df)
+    raccommodage_prices_df = pd.DataFrame(equity_curves_calculs(raccommodage_returns_df.values),
+                                          index=raccommodage_returns_df.index,
+                                          columns=raccommodage_returns_df.columns,
+                                          dtype=np.float32)
 
     # Remplacer les colonnes raccommodées dans le DataFrame des futures
     final_df = data_futures_df.copy()  # Copie du DataFrame d'origine
@@ -103,4 +106,7 @@ def adjust_prices_with_risk_free_rate(prices_df, risk_free_rate_df):
     # 7. Soustraire les rendements des actifs des rendements journaliers du taux sans risque
     adjusted_returns_df = returns_df.sub(risk_free_daily_expanded, axis=0)
 
-    return equity_curves_calculs(adjusted_returns_df)
+    return pd.DataFrame(equity_curves_calculs(adjusted_returns_df.values),
+                        index=adjusted_returns_df.index,
+                        columns=adjusted_returns_df.columns,
+                        dtype=np.float32)

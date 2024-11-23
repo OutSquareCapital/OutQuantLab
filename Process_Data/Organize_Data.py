@@ -108,7 +108,7 @@ def recombine_categories(category_returns_dfs: Dict[str, pd.DataFrame]) -> Dict[
         combined_category_dfs['canary_all'] = pd.DataFrame(dtype=np.float32)
     return combined_category_dfs
 
-def extract_category_data(category_dfs: Dict[str, pd.DataFrame], initial_equity:int):
+def extract_category_data(category_dfs: Dict[str, pd.DataFrame]):
     # Un dictionnaire pour stocker les résultats pour chaque catégorie
     category_extracted_data = {}
 
@@ -121,7 +121,7 @@ def extract_category_data(category_dfs: Dict[str, pd.DataFrame], initial_equity:
                 log_returns_array,
                 asset_names,
                 dates_index
-            ) = TransformData.extract_data_from_pct_returns(df, initial_equity)
+            ) = TransformData.extract_data_from_pct_returns(df)
 
             # Stocker les résultats dans le dictionnaire
             category_extracted_data[category] = {
@@ -137,8 +137,7 @@ def extract_category_data(category_dfs: Dict[str, pd.DataFrame], initial_equity:
 def process_category_data(
                         assets_names: List[str], 
                         data_prices_df: pd.DataFrame, 
-                        assets_to_backtest: Dict[str, List[str]],
-                        initial_equity = 100
+                        assets_to_backtest: Dict[str, List[str]]
                         ) -> Dict[str, Dict[str, any]]:
 
     # Génération du dictionnaire des catégories
@@ -153,18 +152,16 @@ def process_category_data(
     # Recombiner les catégories en 'returnstreams' et 'canary_all'
     recombined_category_returns_dfs = recombine_categories(all_category_returns_dfs)
 
-    return extract_category_data(recombined_category_returns_dfs, initial_equity)
+    return extract_category_data(recombined_category_returns_dfs)
 
 def process_data(assets_names: List[str], 
                 data_prices_df: pd.DataFrame, 
-                assets_to_backtest: Dict[str, List[str]],
-                initial_equity:int = 100
+                assets_to_backtest: Dict[str, List[str]]
                 ):
 
     data = process_category_data(assets_names,
                                 data_prices_df, 
-                                assets_to_backtest,
-                                initial_equity)   
+                                assets_to_backtest)   
 
     prices_array = data['returnstreams']['prices_array']
     volatility_adjusted_pct_returns_array = data['returnstreams']['volatility_adjusted_pct_returns']
