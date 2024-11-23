@@ -5,14 +5,13 @@ import Metrics as mt
 from Infrastructure import Fast_Tools as ft
 import Signals.Signals_Normalization as sn
 
-
 class Trend :
 
     @staticmethod
     def mean_price_ratio(prices_array: np.ndarray, LenST: int, LenLT: int) -> np.ndarray:
 
         mean_price_ratio_raw = RawTrend.calculate_mean_price_ratio_raw(prices_array, LenST, LenLT)
-        
+    
         return sn.sign_normalization(mean_price_ratio_raw)
 
     @staticmethod
@@ -21,8 +20,7 @@ class Trend :
         median_price_ratio_raw = RawTrend.calculate_median_price_ratio_raw(prices_array, LenST, LenLT)
 
         return sn.sign_normalization(median_price_ratio_raw)
-        
-    
+
     @staticmethod
     def central_price_ratio(prices_array: np.ndarray, LenST: int, LenLT: int) -> np.ndarray:
 

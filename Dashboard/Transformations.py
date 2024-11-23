@@ -1,15 +1,10 @@
 import numpy as np
 import pandas as pd
 import re
-import Dashboard.Computations as Computations
 from collections import defaultdict
 
-def convert_params_to_4d(daily_returns, params):
+def convert_params_to_4d(sharpe_ratios_df, params):
 
-    # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(daily_returns)
-
-    # Initialiser un dictionnaire pour stocker les Sharpe ratios par combinaison de paramètres
     sharpe_dict = defaultdict(list)
 
     # Extraire les paramètres et les ratios de Sharpe à partir de l'index
@@ -43,9 +38,7 @@ def convert_params_to_4d(daily_returns, params):
 
     return x_vals, y_vals, z_vals, sharpe_means
 
-def convert_params_to_3d(daily_returns:pd.DataFrame, param1, param2):
-    # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
+def convert_params_to_3d(sharpe_ratios_df:pd.DataFrame, param1, param2):
 
     # Initialiser un dictionnaire pour stocker les Sharpe ratios par (param1, param2)
     sharpe_dict = defaultdict(list)

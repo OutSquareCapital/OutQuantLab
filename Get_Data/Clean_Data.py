@@ -3,6 +3,7 @@ import numpy as np
 import os
 from datetime import datetime
 from Get_Data.Fetch_Data import load_prices_from_csv
+from Process_Data import equity_curves_calculs
 
 def convert_txt_to_csv(base_dir: str, output_base_dir: str):
     """
@@ -205,10 +206,7 @@ def adjust_prices_for_nans(prices_df: pd.DataFrame) -> pd.DataFrame:
                 f"Médiane absolue des rendements : {absolute_median_returns:.2f}%"
             )
 
-    # Reconstituer les prix après avoir traité les rendements
-    prices_df = (1 + returns_df).cumprod() * 100
-
-    return prices_df
+    return equity_curves_calculs(returns_df)
 
 @staticmethod
 def clean_and_process_prices(file_path: str) -> None:

@@ -1,20 +1,9 @@
 import pandas as pd
 import numpy as np
+from Process_Data import equity_curves_calculs
 
 def raccommoder_prices_futures_etf(data_futures_df, data_etf_df, paires_futures_etf):
-    """
-    Fonction qui remplace les prix manquants des futures par les ETF correspondants en utilisant les rendements
-    en pourcentage, jusqu'au premier index valide des futures. Ensuite, les prix sont reconstruits à partir de 100.
-    Les colonnes des futures qui ont été raccommodées sont remplacées dans le DataFrame final.
 
-    Args:
-    - data_futures_df (pd.DataFrame): DataFrame contenant les prix des futures avec un index de dates.
-    - data_etf_df (pd.DataFrame): DataFrame contenant les prix des ETF avec un index de dates.
-    - paires_futures_etf (list of tuples): Liste de tuples avec les paires futures/ETF sous la forme [(future1, etf1), (future2, etf2), ...]
-
-    Returns:
-    - pd.DataFrame: DataFrame finale avec les prix raccommodés à partir des rendements des ETF et futures, reconstitués avec cumprod.
-    """
     raccommodage_dfs = []
 
     # Calcul des rendements (pct change) pour les futures et ETF
@@ -58,8 +47,7 @@ def raccommoder_prices_futures_etf(data_futures_df, data_etf_df, paires_futures_
     # Concaténer toutes les colonnes raccommodées (rendements)
     raccommodage_returns_df = pd.concat(raccommodage_dfs, axis=1)
 
-    # Reconstituer les prix en utilisant cumprod() en partant de 100 pour les colonnes raccommodées
-    raccommodage_prices_df = (1 + raccommodage_returns_df).cumprod() * 100
+    raccommodage_prices_df = equity_curves_calculs(raccommodage_returns_df)
 
     # Remplacer les colonnes raccommodées dans le DataFrame des futures
     final_df = data_futures_df.copy()  # Copie du DataFrame d'origine
@@ -79,38 +67,10 @@ def raccommoder_prices_futures_etf(data_futures_df, data_etf_df, paires_futures_
 
 
 def reconstruct_bond_price_with_yield(yield_10y_df, maturity_years=10, face_value=100):
-    """
-    Fonction qui simule le prix d'une obligation à maturité constante à partir des taux d'intérêt quotidiens (annualisés).
-    Utilise la formule classique de l'obligation en actualisant les coupons et la valeur nominale.
-    Ne prends pas en compte le versement de dividendes!!
-    Args:
-    - yield_10y_df (pd.DataFrame): DataFrame contenant les taux d'intérêt quotidiens (annualisés) avec un index de dates.
-    - maturity_years (float): Durée de vie constante de l'obligation en années (par défaut 10 ans).
-    - face_value (float): Valeur nominale de l'obligation (par défaut 100).
 
-    Returns:
-    - pd.DataFrame: DataFrame contenant les prix reconstitués de l'obligation.
-    """
-
-    
-    # 2. Pour chaque jour, calculer le prix de l'obligation en utilisant la formule classique
-    bond_price_df = face_value / (1 + yield_10y_df.iloc[:, 0] / 100) ** maturity_years
-
-    return bond_price_df
+    return face_value / (1 + yield_10y_df.iloc[:, 0] / 100) ** maturity_years
 
 def adjust_prices_with_risk_free_rate(prices_df, risk_free_rate_df):
-    """
-    Fonction qui ajuste les prix des actifs en utilisant les taux d'intérêt sans risque (par ex. US 3M)
-    pour simuler la détention de contrats futures. Les rendements des actifs sont ajustés quotidiennement
-    en soustrayant leur rendement du rendement sans risque.
-
-    Args:
-    - prices_df (pd.DataFrame): DataFrame contenant les prix des actifs avec un index de dates.
-    - risk_free_rate_df (pd.DataFrame): DataFrame contenant les valeurs absolues des taux d'intérêt sans risque (annualisés) à une colonne.
-
-    Returns:
-    - pd.DataFrame: DataFrame contenant les prix ajustés des actifs.
-    """
 
     # 1. Filtrer les lignes de risk_free_rate_df dont les dates sont antérieures à la première date de prices_df
     first_price_date = prices_df.index.min()
@@ -143,7 +103,4 @@ def adjust_prices_with_risk_free_rate(prices_df, risk_free_rate_df):
     # 7. Soustraire les rendements des actifs des rendements journaliers du taux sans risque
     adjusted_returns_df = returns_df.sub(risk_free_daily_expanded, axis=0)
 
-    # 8. Reconstituer les prix ajustés à partir des rendements ajustés
-    adjusted_prices_df = (1 + adjusted_returns_df).cumprod() * 100  # On part d'une base de 100
-
-    return adjusted_prices_df
+    return equity_curves_calculs(adjusted_returns_df)

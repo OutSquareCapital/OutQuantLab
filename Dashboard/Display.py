@@ -121,17 +121,8 @@ def plot_overall_sharpe_correlation_ratio(returns_df: pd.DataFrame):
                  xlabel="Strats", 
                  ylabel="Sharpe / Avg Correlation")
 
-def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str):
-    X, Y, Z = Transformations.convert_params_to_3d(returns_df, param1, param2)
-    Widgets.heatmap(
-        z_values=Z,
-        x_labels=X[0].tolist(),  # Les valeurs X en liste
-        y_labels=Y[:, 0].tolist(),  # Les valeurs Y en liste
-        title=f"Heatmap of Sharpe Ratios for {param1} and {param2}",
-        colorbar_title="Sharpe Ratio"
-    )
-
 def plot_correlation_heatmap(returns_df: pd.DataFrame):
+
     correlation_matrix = Computations.calculate_overall_correlation_matrix(returns_df)
 
     Widgets.heatmap(
@@ -139,15 +130,39 @@ def plot_correlation_heatmap(returns_df: pd.DataFrame):
         x_labels=returns_df.columns.tolist(),
         y_labels=returns_df.columns.tolist(),
         title="Correlation Matrix",
-        colorbar_title="Correlation"
-    )
+        colorbar_title="Correlation")
 
+def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str):
+
+    sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(returns_df)
+
+    X, Y, Z = Transformations.convert_params_to_3d(sharpe_ratios_df, param1, param2)
+
+    Widgets.heatmap(z_values=Z,
+                    x_labels=X[0].tolist(),
+                    y_labels=Y[:, 0].tolist(),
+                    title=f"Heatmap of Sharpe Ratios for {param1} and {param2}",
+                    colorbar_title="Sharpe Ratio")
 
 def sharpe_ratios_3d_scatter_plot(returns_df: pd.DataFrame, params: list):
-    x_vals, y_vals, z_vals, sharpe_means = Transformations.convert_params_to_4d(returns_df, params)
-    Widgets.scatter_3d(x_vals, y_vals, z_vals, sharpe_means, params, "Scatter Plot 3D")
+
+    sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(returns_df)
+
+    x_vals, y_vals, z_vals, sharpe_means = Transformations.convert_params_to_4d(sharpe_ratios_df, params)
+
+    Widgets.scatter_3d(x_vals, 
+                       y_vals, 
+                       z_vals, 
+                       sharpe_means, 
+                       params, 
+                       "Scatter Plot 3D")
 
 def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
+
     clusters_dict = generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
+
     labels, parents = Transformations.prepare_sunburst_data(clusters_dict)
-    Widgets.treemap(labels, parents, "Visualisation des Clusters")
+    
+    Widgets.treemap(labels, 
+                    parents, 
+                    "Visualisation des Clusters")
