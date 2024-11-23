@@ -7,7 +7,7 @@ from collections import defaultdict
 def convert_params_to_4d(daily_returns, params):
 
     # Calcul du ratio de Sharpe pour chaque stratégie
-    sharpe_ratios_df = Computations.overall_sharpe_ratios_calculs(daily_returns)
+    sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(daily_returns)
 
     # Initialiser un dictionnaire pour stocker les Sharpe ratios par combinaison de paramètres
     sharpe_dict = defaultdict(list)
