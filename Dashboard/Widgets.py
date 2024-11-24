@@ -76,17 +76,17 @@ def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str, co
 
     fig = go.Figure(data=go.Heatmap(
         z=z_values,
-        x=x_labels,
-        y=y_labels,
-        colorscale="Jet_r",  # Aligné avec la logique existante
+        x=x_labels.tolist(),
+        y=y_labels.tolist(),
+        colorscale="Jet_r",
         colorbar=dict(title=colorbar_title),
         hovertemplate="X: %{x}<br>Y: %{y}<br>Value: %{z}<extra></extra>"
     ))
 
     fig.update_layout(
         title=title,
-        xaxis=dict(title="X Axis", showgrid=False),
-        yaxis=dict(title="Y Axis", showgrid=False, autorange="reversed"),
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=False, autorange="reversed"),
         template="plotly_dark",
         height=800
     )
@@ -127,6 +127,31 @@ def treemap(labels: list, parents: list, title: str):
         names=labels,
         parents=parents,
         title=title,
+        template="plotly_dark",
         maxdepth=-1
+    )
+    fig.show()
+
+def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
+    fig = go.Figure()
+
+    color_map = Common.get_color_map(data.columns.tolist())
+
+    for column in data.columns:
+        fig.add_trace(go.Violin(
+            y=data[column],
+            name=column,
+            box_visible=True,
+            points=False,
+            marker=dict(color=color_map[column]),
+            hoveron="violins"
+        ))
+
+    fig.update_layout(
+        title=title,
+        xaxis_title=xlabel,
+        yaxis_title=ylabel,
+        template="plotly_dark",
+        height=800
     )
     fig.show()

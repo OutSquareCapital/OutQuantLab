@@ -3,6 +3,7 @@ import Dashboard.Transformations as Transformations
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations
 from Portfolio import generate_static_clusters
+import Config
 
 def plot_equity(returns_df: pd.DataFrame):
 
@@ -19,9 +20,9 @@ def plot_equity(returns_df: pd.DataFrame):
                    ylabel='Equity', 
                    log_scale=True)
 
-def plot_rolling_volatility(returns_df: pd.DataFrame, means=False):
+def plot_rolling_volatility(returns_df: pd.DataFrame):
 
-    rolling_volatility_df = Computations.calculate_rolling_volatility(returns_df, means)
+    rolling_volatility_df = Computations.calculate_rolling_volatility(returns_df)
     sorted_rolling_volatility_df = Transformations.sort_dataframe(rolling_volatility_df,
                                                                   ascending=False)
 
@@ -120,14 +121,25 @@ def plot_overall_sharpe_correlation_ratio(returns_df: pd.DataFrame):
                  xlabel="Strats", 
                  ylabel="Sharpe / Avg Correlation")
 
+def plot_returns_distribution(returns_df: pd.DataFrame):
+
+    pct_returns = Computations.format_returns(returns_df)
+
+    Widgets.violin(
+        data=pct_returns,
+        title="Distributions of Monthly % Returns",
+        xlabel="Assets",
+        ylabel="Monthly % Returns"
+    )
+
 def plot_correlation_heatmap(returns_df: pd.DataFrame):
 
     correlation_matrix = Computations.calculate_overall_correlation_matrix(returns_df)
 
     Widgets.heatmap(
         z_values=correlation_matrix.values,
-        x_labels=returns_df.columns.tolist(),
-        y_labels=returns_df.columns.tolist(),
+        x_labels=correlation_matrix.columns,
+        y_labels=correlation_matrix.columns,
         title="Correlation Matrix",
         colorbar_title="Correlation")
 
@@ -138,23 +150,23 @@ def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str
     X, Y, Z = Transformations.convert_params_to_3d(sharpe_ratios_df, param1, param2)
 
     Widgets.heatmap(z_values=Z,
-                    x_labels=X[0].tolist(),
-                    y_labels=Y[:, 0].tolist(),
-                    title=f"Heatmap of Sharpe Ratios for {param1} and {param2}",
+                    x_labels=X[0],
+                    y_labels=Y[:, 0],
+                    title=f"Sharpe Ratios for {param1} and {param2}",
                     colorbar_title="Sharpe Ratio")
 
-def sharpe_ratios_3d_scatter_plot(returns_df: pd.DataFrame, params: list):
+def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list):
 
     sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(returns_df)
 
     x_vals, y_vals, z_vals, sharpe_means = Transformations.convert_params_to_4d(sharpe_ratios_df, params)
 
-    Widgets.scatter_3d(x_vals, 
-                       y_vals, 
-                       z_vals, 
-                       sharpe_means, 
-                       params, 
-                       "Scatter Plot 3D")
+    Widgets.scatter_3d(x_vals=x_vals, 
+                       y_vals=y_vals, 
+                       z_vals=z_vals, 
+                       values=sharpe_means, 
+                       params=params, 
+                       title="Scatter Plot 3D")
 
 def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
 
@@ -162,6 +174,6 @@ def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub
 
     labels, parents = Transformations.prepare_sunburst_data(clusters_dict)
 
-    Widgets.treemap(labels, 
-                    parents, 
-                    "Visualisation des Clusters")
+    Widgets.treemap(labels=labels, 
+                    parents=parents, 
+                    title="Clusters")
