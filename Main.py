@@ -8,7 +8,6 @@ import Backtest
 
 # Re-actualisation du data
 #Get_Data.get_yahoo_finance_data(Config.yahoo_assets, Config.FILE_PATH_YF)
-#Get_Data.clean_and_process_prices(Config.FILE_PATH_YF)
 
 data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Config.FILE_PATH_YF)
 
@@ -17,29 +16,25 @@ indicators_and_params, assets_to_backtest = Config.dynamic_config(assets_names, 
 (prices_array, 
 volatility_adjusted_pct_returns_array, 
 log_returns_array, 
-category_asset_names, 
+category_asset_names,
 dates_index
 ) = Process_Data.process_data(assets_names,
                             data_prices_df, 
                             assets_to_backtest)
 
-# Suppression des objets désormais inutiles
 del (
     assets_to_backtest,
     data_prices_df, 
     assets_names
     )
 
-raw_adjusted_returns_df = Backtest.process_backtest(
-                                                    prices_array,
+raw_adjusted_returns_df = Backtest.process_backtest(prices_array,
                                                     log_returns_array,
                                                     volatility_adjusted_pct_returns_array,
                                                     category_asset_names,
                                                     dates_index,
                                                     indicators_and_params)
 
-
-# Suppression des objets désormais inutiles
 del (
     prices_array,
     log_returns_array,
@@ -48,7 +43,6 @@ del (
     category_asset_names,
     indicators_and_params
     )
-
 
 #portfolio_base_structure = Portfolio.classify_assets(asset_names_test, Config.portfolio_etf)
 
@@ -69,8 +63,8 @@ equal_weights_global_returns = equal_weights_global_returns.rename(columns={equa
 test_returns = equal_weights_asset_returns#.loc['2015-01-01':]
 
 #Dashboard.plot_equity(test_returns)
-#Dashboard.plot_drawdowns(test_returns)
-#Dashboard.plot_rolling_volatility(test_returns, means=False)
+Dashboard.plot_drawdowns(test_returns)
+#Dashboard.plot_rolling_volatility(test_returns)
 #Dashboard.plot_rolling_sharpe_ratio(test_returns)
 
 #Dashboard.plot_overall_sharpe_ratio(test_returns)
@@ -79,8 +73,10 @@ test_returns = equal_weights_asset_returns#.loc['2015-01-01':]
 #Dashboard.plot_average_inverted_correlation(test_returns)
 #Dashboard.plot_overall_sharpe_correlation_ratio(test_returns)
 
-Dashboard.plot_correlation_heatmap(test_returns)
-Dashboard.plot_sharpe_ratio_heatmap(raw_adjusted_returns_df, 'LenVol', 'LenSmooth')
+#Dashboard.plot_correlation_heatmap(test_returns)
+#Dashboard.plot_sharpe_ratio_heatmap(raw_adjusted_returns_df, 'LenST', 'LenLT')
 
-#Dashboard.sharpe_ratios_3d_scatter_plot(raw_adjusted_returns_df, ['LenST', 'LenLT', 'MacdLength'])
-#Dashboard.plot_static_clusters(test_returns, 4, 1, 1)
+#Dashboard.plot_returns_distribution_violin(test_returns, limit=0.00001)
+Dashboard.plot_returns_distribution_histogram(test_returns, limit=0.000001)
+#Dashboard.plot_overall_sharpe_ratio_3d_scatter(raw_adjusted_returns_df, ['LenST', 'LenLT', 'MacdLength'])
+#Dashboard.plot_static_clusters(test_returns, 6, 2, 1)
