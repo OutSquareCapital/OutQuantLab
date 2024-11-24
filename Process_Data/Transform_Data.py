@@ -28,29 +28,21 @@ def normalize_returns_distribution_rolling(pct_returns_df: pd.DataFrame,
                                         dtype=np.float32)
     
     for end in range(window_size - 1, len(pct_returns_df)):
-        # Utiliser une fenêtre roulante qui prend en compte 'window_size' périodes
         window_df = pct_returns_df.iloc[end - window_size + 1 : end + 1]
         
-        # Décaler les données pour éviter le lookahead bias
         window_df_shifted = window_df.shift(1)
         window_df_shifted.fillna(0, inplace=True)
-        # Récupérer les rendements avec NaN remplacés
         returns = window_df_shifted.values
         
-        # Sauvegarder la moyenne et l'écart-type des rendements
         mean_returns = np.mean(returns, axis=0)
         std_returns = np.std(returns, axis=0)
         
-        # Ranker les rendements (préservation de l'ordre)
         ranks = np.apply_along_axis(lambda x: rankdata(x) / (len(x) + 1), axis=0, arr=returns)
         
-        # Transformation inverse normale pour obtenir des rendements à distribution normale
         normalized_returns_window = norm.ppf(ranks)
         
-        # Ajuster pour conserver la moyenne et l'écart-type des rendements originaux
         normalized_returns_window = normalized_returns_window * std_returns + mean_returns
         
-        # Stocker les résultats normalisés dans le DataFrame
         normalized_returns.iloc[end] = normalized_returns_window[-1]
 
     return normalized_returns
@@ -64,7 +56,6 @@ def equity_curves_calculs(daily_returns_array: np.ndarray) -> np.ndarray:
 
 def pct_returns_np(prices_array: np.ndarray) -> np.ndarray:
 
-    # Vérifie si l'array est 1D ou 2D
     if prices_array.ndim == 1:
         # Si c'est 1D, initialisation d'un array pour les rendements
         pct_returns_array = np.empty(prices_array.shape, dtype=np.float32)
@@ -126,7 +117,6 @@ def calculate_ratios_returns(returns_df: pd.DataFrame, asset_names: list) -> pd.
     pair_returns_list = []
     
     for asset1, asset2 in combinations(asset_names, 2):
-        pair_name = f"{asset1}-{asset2}"
         if asset1 in returns_df.columns and asset2 in returns_df.columns:
             pair_returns = returns_df[asset1] - returns_df[asset2]
             pair_returns_list.append(pair_returns.rename(f"{asset1}-{asset2}"))
