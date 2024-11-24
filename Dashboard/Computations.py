@@ -4,6 +4,14 @@ from scipy.stats import skew
 import Config
 from Process_Data import equity_curves_calculs
 import Metrics as mt
+import Config
+
+
+def format_returns(returns_df: pd.DataFrame) -> pd.DataFrame:
+    
+    returns_df = returns_df*Config.PERCENTAGE_FACTOR
+
+    return returns_df.round(2)
 
 def calculate_equity_curves_df(returns_df:pd.DataFrame) -> pd.DataFrame:
 
@@ -80,8 +88,10 @@ def calculate_overall_monthly_skew(returns_df: pd.DataFrame) -> pd.Series:
                                     ).round(2)
 
 def calculate_overall_correlation_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
+
     correlation_matrix = returns_df.corr().round(2)
     np.fill_diagonal(correlation_matrix.values, np.nan)
+
     return correlation_matrix
 
 def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, window_size: int = 1250):
