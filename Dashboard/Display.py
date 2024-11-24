@@ -121,16 +121,28 @@ def plot_overall_sharpe_correlation_ratio(returns_df: pd.DataFrame):
                  xlabel="Strats", 
                  ylabel="Sharpe / Avg Correlation")
 
-def plot_returns_distribution(returns_df: pd.DataFrame):
+def plot_returns_distribution_violin(returns_df: pd.DataFrame, limit:float=0.05):
 
-    pct_returns = Computations.format_returns(returns_df)
+    pct_returns = Computations.format_returns(returns_df, limit)
 
     Widgets.violin(
         data=pct_returns,
-        title="Distributions of Monthly % Returns",
+        title="Violin Plot of % Returns Distribution",
         xlabel="Assets",
-        ylabel="Monthly % Returns"
+        ylabel="% Returns"
     )
+
+def plot_returns_distribution_ridgeline(returns_df: pd.DataFrame, limit: float = 0.05):
+
+    formatted_returns_df = Computations.format_returns(returns_df, limit=limit)
+
+    Widgets.ridgeline(
+        data=formatted_returns_df,
+        title="Ridge Plot of % Returns Distribution",
+        xlabel="Density",
+        ylabel="Assets"
+    )
+
 
 def plot_correlation_heatmap(returns_df: pd.DataFrame):
 

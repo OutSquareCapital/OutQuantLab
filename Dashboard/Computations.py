@@ -7,11 +7,14 @@ import Metrics as mt
 import Config
 
 
-def format_returns(returns_df: pd.DataFrame) -> pd.DataFrame:
+def format_returns(returns_df: pd.DataFrame, limit: int) -> pd.DataFrame:
+    lower_threshold = returns_df.quantile(limit, axis=0)
+    upper_threshold = returns_df.quantile(1-limit, axis=0)
     
-    returns_df = returns_df*Config.PERCENTAGE_FACTOR
-
+    returns_df = returns_df.where((returns_df >= lower_threshold) & (returns_df <= upper_threshold), np.nan)
+    returns_df = returns_df * Config.PERCENTAGE_FACTOR
     return returns_df.round(2)
+
 
 def calculate_equity_curves_df(returns_df:pd.DataFrame) -> pd.DataFrame:
 

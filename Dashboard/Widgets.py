@@ -142,6 +142,7 @@ def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
             y=data[column],
             name=column,
             box_visible=True,
+            box_line_color='white',
             points=False,
             marker=dict(color=color_map[column]),
             hoveron="violins"
@@ -154,4 +155,39 @@ def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
         template="plotly_dark",
         height=800
     )
+    fig.show()
+
+
+def ridgeline(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
+    fig = go.Figure()
+
+    color_map = Common.get_color_map(data.columns.tolist())  # Utilisation stricte de votre colormap
+
+    for i, column in enumerate(data.columns):
+        fig.add_trace(go.Violin(
+            x=data[column],
+            y=[i] * len(data),
+            name=column,
+            line_color=color_map[column],
+            orientation='h',
+            side='positive',
+            width=1.5,
+            points=False,
+        ))
+
+    # Mise à jour du layout
+    fig.update_layout(
+        title=title,
+        xaxis_title=xlabel,
+        yaxis=dict(
+            tickmode='array',
+            tickvals=list(range(len(data.columns))),
+            ticktext=data.columns.tolist(),
+            showgrid=False
+        ),
+        xaxis=dict(showgrid=False, zeroline=False),
+        template="plotly_dark",
+        height=800
+    )
+
     fig.show()
