@@ -3,7 +3,6 @@ import Dashboard.Transformations as Transformations
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations
 from Portfolio import generate_static_clusters
-import Config
 
 def plot_equity(returns_df: pd.DataFrame):
 
@@ -34,15 +33,15 @@ def plot_rolling_volatility(returns_df: pd.DataFrame):
                    add_zero_line=True)
 
 def plot_drawdowns(returns_df: pd.DataFrame):
-
+    
     drawdowns = Computations.calculate_drawdown(returns_df)
     sorted_drawdowns = Transformations.sort_dataframe(drawdowns,
                                                       ascending=True)
 
     Widgets.curves(x_values=sorted_drawdowns.index, 
                    y_values=sorted_drawdowns, 
-                   title="Drawdowns", 
-                   xlabel="Date", 
+                   title="Drawdowns",
+                   xlabel="Date",
                    ylabel="Drawdown (%)", 
                    add_zero_line=True)
 
@@ -58,7 +57,6 @@ def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame):
                    xlabel='Date', 
                    ylabel='Rolling Sharpe Ratio', 
                    add_zero_line=True)
-
 
 def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
 
@@ -100,7 +98,6 @@ def plot_average_inverted_correlation(returns_df: pd.DataFrame):
                  xlabel="Strats", 
                  ylabel="Average Inverted Correlation")
 
-
 def plot_overall_monthly_skew(returns_df: pd.DataFrame):
 
     skew_series = Computations.calculate_overall_monthly_skew(returns_df)
@@ -129,20 +126,17 @@ def plot_returns_distribution_violin(returns_df: pd.DataFrame, limit:float=0.05)
         data=pct_returns,
         title="Violin Plot of % Returns Distribution",
         xlabel="Assets",
-        ylabel="% Returns"
-    )
+        ylabel="% Returns")
 
-def plot_returns_distribution_ridgeline(returns_df: pd.DataFrame, limit: float = 0.05):
+def plot_returns_distribution_histogram(returns_df: pd.DataFrame, limit: float = 0.05):
 
     formatted_returns_df = Computations.format_returns(returns_df, limit=limit)
 
-    Widgets.ridgeline(
+    Widgets.histogram(
         data=formatted_returns_df,
-        title="Ridge Plot of % Returns Distribution",
-        xlabel="Density",
-        ylabel="Assets"
-    )
-
+        title="Histogram Plot of % Returns Distribution",
+        xlabel="Returns %",
+        ylabel="Frequency")
 
 def plot_correlation_heatmap(returns_df: pd.DataFrame):
 
@@ -177,7 +171,7 @@ def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list)
                        y_vals=y_vals, 
                        z_vals=z_vals, 
                        values=sharpe_means, 
-                       params=params, 
+                       params=params,
                        title="Scatter Plot 3D")
 
 def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):

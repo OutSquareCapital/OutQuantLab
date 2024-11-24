@@ -23,3 +23,7 @@ def get_color_map(assets: list) -> dict:
     colors = map_colors_to_columns(n_colors)
     return dict(zip(assets, colors))
 
+def get_heatmap_colorscale(n_colors: int = 100) -> list:
+    colormap = generate_colormap(n_colors)
+    colors = [colormap(i / (n_colors - 1)) for i in range(n_colors)]
+    return [[i / (n_colors - 1), mcolors.to_hex(color)] for i, color in enumerate(colors)]

@@ -117,8 +117,14 @@ def sort_series(data: pd.Series, ascending: bool = True) -> pd.Series:
 
 def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool = True) -> list:
     if use_final:
-        sorted_data = data.sort_values(by=data.index[-1], axis=1, ascending=ascending)
+        return data.sort_values(by=data.index[-1], axis=1, ascending=ascending)
     else:
         sorted_data = data.mean().sort_values(ascending=ascending)
-        sorted_data = data[sorted_data.index]
-    return sorted_data
+        return data[sorted_data.index]
+
+def normalize_data_for_colormap(data: np.ndarray) -> tuple:
+
+    z_min = np.nanmin(data)
+    z_max = np.nanmax(data)
+    normalized_data = (data - z_min) / (z_max - z_min) if z_max > z_min else np.zeros_like(data)
+    return normalized_data

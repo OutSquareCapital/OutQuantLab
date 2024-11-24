@@ -6,23 +6,14 @@ from Process_Data import equity_curves_calculs
 import Metrics as mt
 import Config
 
-
 def format_returns(returns_df: pd.DataFrame, limit: int) -> pd.DataFrame:
     lower_threshold = returns_df.quantile(limit, axis=0)
     upper_threshold = returns_df.quantile(1-limit, axis=0)
     
-    returns_df = returns_df.where((returns_df >= lower_threshold) & (returns_df <= upper_threshold), np.nan)
-    returns_df = returns_df * Config.PERCENTAGE_FACTOR
-    return returns_df.round(2)
+    formatted_returns_df = returns_df.where((returns_df >= lower_threshold) & (returns_df <= upper_threshold), np.nan)
+    formatted_returns_df = formatted_returns_df * Config.PERCENTAGE_FACTOR
 
-
-def calculate_equity_curves_df(returns_df:pd.DataFrame) -> pd.DataFrame:
-
-    return pd.DataFrame(equity_curves_calculs(returns_df.values),
-                        index=returns_df.index,
-                        columns=returns_df.columns,
-                        dtype=np.float32
-                        ).round(2)
+    return formatted_returns_df.round(2)
 
 def calculate_overall_sharpe_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
@@ -58,12 +49,16 @@ def calculate_average_correlation(returns_df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    equity_curves = calculate_equity_curves_df(returns_df)
+    equity_curves = pd.DataFrame(equity_curves_calculs(returns_df.values),
+                                index=returns_df.index,
+                                columns=returns_df.columns,
+                                dtype=np.float32
+                                ).round(2)
     
     drawdowns = (equity_curves - equity_curves.cummax()) / equity_curves.cummax() * Config.PERCENTAGE_FACTOR
 
     return drawdowns.round(2)
-    
+
 def calculate_average_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     return calculate_drawdown(returns_df).mean().round(2)
@@ -93,9 +88,8 @@ def calculate_overall_monthly_skew(returns_df: pd.DataFrame) -> pd.Series:
 def calculate_overall_correlation_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     correlation_matrix = returns_df.corr().round(2)
-    np.fill_diagonal(correlation_matrix.values, np.nan)
 
-    return correlation_matrix
+    return np.fill_diagonal(correlation_matrix.values, np.nan)
 
 def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, window_size: int = 1250):
         
@@ -110,5 +104,5 @@ def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, window_size: int = 
 def calculate_rolling_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     return pd.DataFrame(mt.hv_composite(returns_df.values), 
-                        index=returns_df.index, 
+                        index=returns_df.index,
                         columns=returns_df.columns).round(2)

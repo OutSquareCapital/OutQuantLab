@@ -48,11 +48,18 @@ def normalize_returns_distribution_rolling(pct_returns_df: pd.DataFrame,
     return normalized_returns
 
 def equity_curves_calculs(daily_returns_array: np.ndarray) -> np.ndarray:
-    mask = np.isnan(daily_returns_array)
-    daily_returns_array[mask] = 0
-    cumulative_returns = np.cumprod(1 + daily_returns_array, axis=0)
+
+    temp_array = daily_returns_array.copy()
+
+    mask = np.isnan(temp_array)
+    temp_array[mask] = 0
+
+    cumulative_returns = np.cumprod(1 + temp_array, axis=0)
+
     cumulative_returns[mask] = np.nan
+
     return cumulative_returns * Config.PERCENTAGE_FACTOR
+
 
 def pct_returns_np(prices_array: np.ndarray) -> np.ndarray:
 
