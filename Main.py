@@ -10,7 +10,7 @@ import Backtest
 #Get_Data.get_yahoo_finance_data(Config.yahoo_assets, Config.FILE_PATH_YF)
 #Get_Data.clean_and_process_prices(Config.FILE_PATH_YF)
 
-data_prices_df, assets_names = Get_Data.load_prices_from_csv(Config.FILE_PATH_YF)
+data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Config.FILE_PATH_YF)
 
 indicators_and_params, assets_to_backtest = Config.dynamic_config(assets_names, auto=True)
 
