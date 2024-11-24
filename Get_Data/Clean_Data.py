@@ -1,16 +1,14 @@
 import pandas as pd
-import numpy as np
 import os
 from datetime import datetime
 from Get_Data.Fetch_Data import load_prices_from_csv
-from Process_Data import equity_curves_calculs
 
 def convert_txt_to_csv(base_dir: str, output_base_dir: str):
 
     # Création du dossier d'output s'il n'existe pas
     os.makedirs(output_base_dir, exist_ok=True)
 
-    # Parcourir chaque sous-dossier dans base_dir
+    # Parcourir chaque sous-dossier dans basSe_dir
     for subdir, _, files in os.walk(base_dir):
         if subdir == base_dir:
             continue
@@ -78,8 +76,6 @@ def combine_csv_files(output_folder, file_names, output_file) -> None:
     # Sauvegarder le DataFrame combiné dans un fichier CSV
     combined_df.to_csv(os.path.join(output_folder, output_file))
 
-
-@staticmethod
 def random_fill(series: pd.Series) -> pd.Series:
 
     nan_indices = series[series.isna()].index
@@ -121,14 +117,9 @@ def adjust_prices_for_negativity(prices_df: pd.DataFrame) -> pd.DataFrame:
 
     return prices_df
 
-def adjust_prices_for_nans(prices_df: pd.DataFrame) -> pd.DataFrame:
+def adjust_prices_for_nans(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    # Calcul des rendements en pourcentage de prices_df
-    returns_df = prices_df.pct_change(fill_method=None)
-
-    # Appliquer le forward fill après le premier prix valide pour chaque colonne
     for col in returns_df.columns:
-        # Remplir seulement après avoir trouvé le premier prix valide (forward fill après ce point)
         first_valid_index = returns_df[col].first_valid_index()
         if first_valid_index is not None:
 
@@ -157,10 +148,7 @@ def adjust_prices_for_nans(prices_df: pd.DataFrame) -> pd.DataFrame:
                 f"Médiane absolue des rendements : {absolute_median_returns:.2f}%"
             )
 
-    return pd.DataFrame(equity_curves_calculs(returns_df.values),
-                        index=returns_df.index,
-                        columns=returns_df.columns,
-                        dtype=np.float32)
+    return returns_df
 
 def clean_and_process_prices(file_path: str) -> None:
 

@@ -1,14 +1,9 @@
 import pandas as pd
 import numpy as np
-from Process_Data import equity_curves_calculs
 
-def raccommoder_prices_futures_etf(data_futures_df, data_etf_df, paires_futures_etf):
+def raccommoder_prices_futures_etf(data_futures_returns_df, data_etf_returns_df, paires_futures_etf):
 
     raccommodage_dfs = []
-
-    # Calcul des rendements (pct change) pour les futures et ETF
-    data_futures_returns_df = data_futures_df.pct_change()
-    data_etf_returns_df = data_etf_df.pct_change()
 
     # Parcourir les paires fournies (futures et ETF)
     for future, etf in paires_futures_etf:
@@ -47,53 +42,44 @@ def raccommoder_prices_futures_etf(data_futures_df, data_etf_df, paires_futures_
     # Concaténer toutes les colonnes raccommodées (rendements)
     raccommodage_returns_df = pd.concat(raccommodage_dfs, axis=1)
 
-    raccommodage_prices_df = pd.DataFrame(equity_curves_calculs(raccommodage_returns_df.values),
-                                          index=raccommodage_returns_df.index,
-                                          columns=raccommodage_returns_df.columns,
-                                          dtype=np.float32)
-
     # Remplacer les colonnes raccommodées dans le DataFrame des futures
-    final_df = data_futures_df.copy()  # Copie du DataFrame d'origine
-    final_df.update(raccommodage_prices_df)  # Remplacer uniquement les colonnes raccommodées
+    final_df = data_futures_returns_df.copy()  # Copie du DataFrame d'origine
+    final_df.update(raccommodage_returns_df)  # Remplacer uniquement les colonnes raccommodées
     
     # Vérification que les colonnes non mises à jour sont identiques entre final_df et data_futures_df
-    columns_raccommodated = raccommodage_prices_df.columns  # Colonnes qui ont été raccommodées
+    columns_raccommodated = raccommodage_returns_df.columns  # Colonnes qui ont été raccommodées
 
     # Identifier les colonnes qui n'ont pas été raccommodées
-    columns_non_raccommodated = data_futures_df.columns.difference(columns_raccommodated)
+    columns_non_raccommodated = data_futures_returns_df.columns.difference(columns_raccommodated)
 
     # Vérifier que les dates, valeurs et NaN des colonnes non modifiées sont identiques
     for col in columns_non_raccommodated:
-        assert final_df[col].equals(data_futures_df[col]), f"Colonne {col} a été modifiée alors qu'elle ne devait pas l'être !"
+        assert final_df[col].equals(data_futures_returns_df[col]), f"Colonne {col} a été modifiée alors qu'elle ne devait pas l'être !"
         
     return final_df
-
 
 def reconstruct_bond_price_with_yield(yield_10y_df, maturity_years=10, face_value=100):
 
     return face_value / (1 + yield_10y_df.iloc[:, 0] / 100) ** maturity_years
 
-def adjust_prices_with_risk_free_rate(prices_df, risk_free_rate_df):
+def adjust_prices_with_risk_free_rate(returns_df, risk_free_rate_df):
 
     # 1. Filtrer les lignes de risk_free_rate_df dont les dates sont antérieures à la première date de prices_df
-    first_price_date = prices_df.index.min()
+    first_price_date = returns_df.index.min()
     print(f"First date in prices_df: {first_price_date}")
     risk_free_rate_df = risk_free_rate_df[risk_free_rate_df.index >= first_price_date]
     print(f"First date in risk_free_rate_df after filtering: {risk_free_rate_df.index.min()}")
 
     # 2. Aligner les taux sans risque avec les dates des actifs, avec reindex et ffill pour les valeurs manquantes
-    risk_free_rate_aligned = risk_free_rate_df.reindex(prices_df.index, method='ffill')
+    risk_free_rate_aligned = risk_free_rate_df.reindex(returns_df.index, method='ffill')
 
     # 3. Imprimer les dates où ffill a été appliqué
-    missing_dates = prices_df.index.difference(risk_free_rate_df.index)
+    missing_dates = returns_df.index.difference(risk_free_rate_df.index)
     if not missing_dates.empty:
         print(f"Dates missing in risk_free_rate_df filled by ffill: {missing_dates}")
 
     # 4. Calculer les rendements quotidiens des taux sans risque
     risk_free_daily = (1 + risk_free_rate_aligned.iloc[:, 0] / 100) ** (1 / 252) - 1
-
-    # 5. Calcul des rendements quotidiens des actifs
-    returns_df = prices_df.pct_change()
 
     # 6. Étendre les rendements quotidiens du taux sans risque à toutes les colonnes des actifs
     risk_free_daily_expanded = pd.DataFrame(
@@ -103,10 +89,4 @@ def adjust_prices_with_risk_free_rate(prices_df, risk_free_rate_df):
         dtype=np.float32
     )
 
-    # 7. Soustraire les rendements des actifs des rendements journaliers du taux sans risque
-    adjusted_returns_df = returns_df.sub(risk_free_daily_expanded, axis=0)
-
-    return pd.DataFrame(equity_curves_calculs(adjusted_returns_df.values),
-                        index=adjusted_returns_df.index,
-                        columns=adjusted_returns_df.columns,
-                        dtype=np.float32)
+    return returns_df.sub(risk_free_daily_expanded, axis=0)
