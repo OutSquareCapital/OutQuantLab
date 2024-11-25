@@ -1,9 +1,9 @@
 from typing import Dict, Any
-from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QScrollArea, QPushButton, QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox
-)
-from PySide6.QtCore import Qt, Signal, QPropertyAnimation, QEasingCurve
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QScrollArea, QPushButton, QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox
+from PySide6.QtCore import Qt, Signal
 from .Config_Backend import save_param_config, param_range_values
+from .Widget_Common import create_scroll_area, create_expandable_section, create_apply_button
+
 
 class ParameterWidget(QWidget):
     parameters_saved = Signal()
@@ -16,65 +16,30 @@ class ParameterWidget(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        scroll_area = QScrollArea()
-        scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout()
+        
+        # Create scrollable area using shared function
+        scroll_area, scroll_widget, scroll_layout = create_scroll_area()
 
         for category, params in self.current_config.items():
             self.add_category_widget(category, params, scroll_layout)
 
         scroll_widget.setLayout(scroll_layout)
-        scroll_area.setWidget(scroll_widget)
-        scroll_area.setWidgetResizable(True)
         layout.addWidget(scroll_area)
 
-        # Bouton "Apply"
-        self.apply_button = QPushButton("Apply")
-        self.apply_button.setEnabled(False)  # Grisé au départ
-        self.apply_button.clicked.connect(self.save_configuration)
+        # Create and add Apply button using shared function
+        self.apply_button = create_apply_button(self.save_configuration)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
 
-    def toggle_animation(self, checked: bool, widget: QWidget, animation: QPropertyAnimation):
-        if checked:
-            animation.setStartValue(0)
-            animation.setEndValue(widget.sizeHint().height())
-        else:
-            animation.setStartValue(widget.sizeHint().height())
-            animation.setEndValue(0)
-        animation.start()
-
     def add_category_widget(self, category: str, params: Dict[str, Any], layout: QVBoxLayout):
-        category_box = QGroupBox(category)
-        category_layout = QVBoxLayout()
-        category_content_widget = QWidget()
-        category_content_layout = QVBoxLayout()
-        category_content_widget.setLayout(category_content_layout)
+        # Use shared expandable section
+        category_box, content_widget, content_layout = create_expandable_section(category)
 
-        # Initialisation de l'animation
-        category_content_widget.setMaximumHeight(0)
-        animation = QPropertyAnimation(category_content_widget, b"maximumHeight")
-        animation.setDuration(300)
-        animation.setEasingCurve(QEasingCurve.InOutCubic)
-
-        # Bouton Expand/Collapse
-        expand_button = QPushButton("Expand/Collapse")
-        expand_button.setCheckable(True)
-        expand_button.toggled.connect(
-            lambda checked: self.toggle_animation(checked, category_content_widget, animation)
-        )
-
-        # Ajouter les paramètres dans la catégorie
         for param, values in params.items():
-            self.add_param_widget(category, param, values, category_content_layout)
+            self.add_param_widget(category, param, values, content_layout)
 
-        # Agencer le layout de la catégorie
-        category_box.setLayout(category_layout)
-        category_layout.addWidget(expand_button)
-        category_layout.addWidget(category_content_widget)
         layout.addWidget(category_box)
-
 
     def add_param_widget(self, category: str, param: str, values: list, layout: QVBoxLayout):
         param_box = QGroupBox(param)
@@ -138,12 +103,9 @@ class ParameterWidget(QWidget):
         generated_values_label = QLabel(f"Generated Values: {values}")
         generated_values_label.setWordWrap(False)
 
-        # Scroll area for generated values
-        scroll_area = QScrollArea()
+        # Scroll area for generated values using shared function
+        scroll_area, _, _ = create_scroll_area()
         scroll_area.setWidget(generated_values_label)
-        scroll_area.setWidgetResizable(True)
-        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
-        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll_area.setFixedHeight(50)
 
         return range_info_label, num_values_info_label, scroll_area
@@ -179,9 +141,9 @@ class ParameterWidget(QWidget):
 
     def index_to_value(self, index: int) -> int:
         return 2 ** index
-    
+
     def connect_sliders_to_update(self, category, param, start_slider, end_slider, num_values_slider, mode_combobox,
-                                range_info_label, num_values_info_label, generated_values_label, param_box):
+                                  range_info_label, num_values_info_label, generated_values_label, param_box):
         def update_values():
             start = self.index_to_value(start_slider.value())
             end = self.index_to_value(end_slider.value())
@@ -227,12 +189,10 @@ class ParameterWidget(QWidget):
         num_values_slider.valueChanged.connect(update_values)
         mode_combobox.currentTextChanged.connect(update_values)
 
-
     def save_configuration(self):
         save_param_config(self.current_config)
         self.apply_button.setEnabled(False)
         self.parameters_saved.emit()
-
 
     def get_data(self) -> Dict[str, Any]:
         return self.current_config
