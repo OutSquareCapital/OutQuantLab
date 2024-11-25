@@ -97,10 +97,35 @@
         ]
     },
     "MeanReversionTrend": {
-        "SignalLength": [],
-        "PLength": [],
-        "LenST": [],
-        "LenLT": []
+        "SignalLength": [
+            1,
+            2,
+            4,
+            8,
+            16,
+            32
+        ],
+        "PLength": [
+            64,
+            128,
+            256,
+            512,
+            1024
+        ],
+        "LenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ]
     },
     "ReturnsDistribution": {
         "LenSmooth": [
@@ -110,10 +135,7 @@
             8,
             16,
             32,
-            64,
-            128,
-            256,
-            512
+            64
         ],
         "LenSkew": [
             4,
@@ -144,16 +166,60 @@
         "TrendLenLT": []
     },
     "Volatility": {
-        "LenVol": [],
-        "LenST": [],
-        "LenLT": []
+        "LenVol": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ]
     },
     "VolatilityTrend": {
-        "LenVol": [],
-        "LenST": [],
-        "LenLT": [],
-        "TrendLenST": [],
-        "TrendLenLT": []
+        "LenVol": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ],
+        "TrendLenST": [
+            34
+        ],
+        "TrendLenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ]
     },
     "Seasonality": {
         "GroupBy": [],

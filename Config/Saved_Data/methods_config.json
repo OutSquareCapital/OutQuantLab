@@ -16,28 +16,28 @@
         "central_rate_of_change_macd": true
     },
     "AccelerationTrend": {
-        "mean_price_macd_trend": false,
-        "median_price_macd_trend": false,
-        "central_price_macd_trend": false,
-        "mean_rate_of_change_macd_trend": false,
-        "median_rate_of_change_macd_trend": false,
-        "central_rate_of_change_macd_trend": false
+        "mean_price_macd_trend": true,
+        "median_price_macd_trend": true,
+        "central_price_macd_trend": true,
+        "mean_rate_of_change_macd_trend": true,
+        "median_rate_of_change_macd_trend": true,
+        "central_rate_of_change_macd_trend": true
     },
     "MeanReversion": {
-        "mean_price_ratio_normalised": false,
+        "mean_price_ratio_normalised": true,
         "mean_rate_of_change_normalised": true
     },
     "MeanReversionTrend": {
-        "mean_price_ratio_normalised_trend": false,
-        "mean_rate_of_change_normalised_trend": false
+        "mean_price_ratio_normalised_trend": true,
+        "mean_rate_of_change_normalised_trend": true
     },
     "ReturnsDistribution": {
-        "skewness": false,
-        "relative_skewness": false,
-        "skewness_on_kurtosis_ST": false,
-        "skewness_on_kurtosis_LT": false,
-        "relative_skewness_on_kurtosis_ST": false,
-        "relative_skewness_on_kurtosis_LT": false
+        "skewness": true,
+        "relative_skewness": true,
+        "skewness_on_kurtosis_ST": true,
+        "skewness_on_kurtosis_LT": true,
+        "relative_skewness_on_kurtosis_ST": true,
+        "relative_skewness_on_kurtosis_LT": true
     },
     "ReturnsDistributionTrend": {
         "skewness_trend": false,
