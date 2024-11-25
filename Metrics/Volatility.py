@@ -29,7 +29,6 @@ def hv_composite(returns_array: np.ndarray,
 
     short_term_vol_array = hv_short_term(returns_array, lengths_list=lengths)
 
-    # Calculer la volatilité long terme
     long_term_vol_array = hv_long_term(short_term_vol_array, long_term_lengths=long_term_lengths)
 
     # Pondérer court terme et long terme en fonction de st_weight

@@ -29,12 +29,11 @@ def plot_rolling_volatility(returns_df: pd.DataFrame):
                    y_values=sorted_rolling_volatility_df, 
                    title="Rolling Volatility", 
                    xlabel='Date', 
-                   ylabel='Rolling Volatility (%)', 
-                   add_zero_line=True)
+                   ylabel='Rolling Volatility (%)')
 
-def plot_drawdowns(returns_df: pd.DataFrame):
+def plot_rolling_drawdown(returns_df: pd.DataFrame, length: int):
     
-    drawdowns = Computations.calculate_drawdown(returns_df)
+    drawdowns = Computations.calculate_rolling_drawdown(returns_df, length)
     sorted_drawdowns = Transformations.sort_dataframe(drawdowns,
                                                       ascending=True)
 
@@ -42,12 +41,11 @@ def plot_drawdowns(returns_df: pd.DataFrame):
                    y_values=sorted_drawdowns, 
                    title="Drawdowns",
                    xlabel="Date",
-                   ylabel="Drawdown (%)", 
-                   add_zero_line=True)
+                   ylabel="Drawdown (%)")
 
-def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame):
+def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
 
-    rolling_sharpe_ratio_df = Computations.calculate_rolling_sharpe_ratio(returns_df)
+    rolling_sharpe_ratio_df = Computations.calculate_rolling_sharpe_ratio(returns_df, length)
     sorted_rolling_sharpe_ratio_df = Transformations.sort_dataframe(rolling_sharpe_ratio_df,
                                                                     ascending=True)
 
@@ -56,7 +54,37 @@ def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame):
                    title="Rolling Sharpe Ratios", 
                    xlabel='Date', 
                    ylabel='Rolling Sharpe Ratio', 
-                   add_zero_line=True)
+                   zero_line=True)
+    
+def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int):
+
+    rolling_skewness_df = Computations.calculate_rolling_smoothed_skewness(returns_df, length)
+    sorted_rolling_skewness_df = Transformations.sort_dataframe(rolling_skewness_df,
+                                                                    ascending=True)
+
+    Widgets.curves(x_values=sorted_rolling_skewness_df.index,
+                   y_values=sorted_rolling_skewness_df, 
+                   title="Rolling Smoothed Skewnesss", 
+                   xlabel='Date', 
+                   ylabel='Rolling Skewness', 
+                   zero_line=True)
+    
+def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: int):
+    rolling_correlations = Computations.calculate_rolling_average_correlation(returns_df, length)
+
+    inverted_correlations = rolling_correlations * -1
+
+    sorted_correlations = Transformations.sort_dataframe(inverted_correlations, ascending=True)
+
+    Widgets.curves(
+        x_values=sorted_correlations.index,
+        y_values=sorted_correlations,
+        title=f"Rolling Average Inverted Correlation",
+        xlabel="Date",
+        ylabel="Inverted Correlation",
+        zero_line=True
+    )
+
 
 def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
 
@@ -68,29 +96,29 @@ def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
                  xlabel="Strats", 
                  ylabel="Sharpe Ratio")
 
-def plot_overall_sortino_ratios(returns_df: pd.DataFrame):
+def plot_overall_volatility(daily_returns: pd.DataFrame):
 
-    sortino_ratios = Computations.calculate_overall_sortino_ratio(returns_df).squeeze()
-    sorted_sortino_ratios = Transformations.sort_series(sortino_ratios, ascending=True)
+    volatility = Computations.calculate_overall_volatility(daily_returns).squeeze()
+    sorted_volatility = Transformations.sort_series(volatility, ascending=True)
 
-    Widgets.bars(series=sorted_sortino_ratios, 
-                 title="Sortino Ratios", 
+    Widgets.bars(series=sorted_volatility, 
+                 title="Volatility", 
                  xlabel="Strats", 
-                 ylabel="Sortino Ratio")
+                 ylabel="Volatility %")
+    
+def plot_overall_average_drawdown(returns_df: pd.DataFrame, length: int):
 
-def plot_average_drawdown(returns_df: pd.DataFrame):
-
-    drawdowns = Computations.calculate_average_drawdown(returns_df)
+    drawdowns = Computations.calculate_overall_average_drawdown(returns_df, length).squeeze()
     sorted_drawdowns = Transformations.sort_series(drawdowns, ascending=True)
 
     Widgets.bars(series=sorted_drawdowns, 
-                 title="Mean Drawdowns", 
+                 title="Average Drawdowns", 
                  xlabel="Strats", 
-                 ylabel="Mean Drawdown (%)")
+                 ylabel="Average Drawdown (%)")
 
-def plot_average_inverted_correlation(returns_df: pd.DataFrame):
+def plot_overall_average_inverted_correlation(returns_df: pd.DataFrame):
 
-    average_correlations = Computations.calculate_average_correlation(returns_df).squeeze() * -1
+    average_correlations = Computations.calculate_overall_average_correlation(returns_df).squeeze() * -1
     sorted_correlations = Transformations.sort_series(average_correlations, ascending=True)
 
     Widgets.bars(series=sorted_correlations, 
@@ -107,16 +135,6 @@ def plot_overall_monthly_skew(returns_df: pd.DataFrame):
                  title="Monthly Skew", 
                  xlabel="Strats", 
                  ylabel="Skew")
-    
-def plot_overall_sharpe_correlation_ratio(returns_df: pd.DataFrame):
-
-    sharpe_correlation_ratio = Computations.calculate_overall_sharpe_correlation_ratio(returns_df)['Sharpe/AvgCorrelation']
-    sorted_sharpe_correlation_ratio = Transformations.sort_series(sharpe_correlation_ratio, ascending=True)
-
-    Widgets.bars(series=sorted_sharpe_correlation_ratio, 
-                 title="Sharpe Ratio Rank / Average Correlation Rank", 
-                 xlabel="Strats", 
-                 ylabel="Sharpe / Avg Correlation")
 
 def plot_returns_distribution_violin(returns_df: pd.DataFrame, limit:float=0.05):
 
@@ -146,8 +164,7 @@ def plot_correlation_heatmap(returns_df: pd.DataFrame):
         z_values=correlation_matrix.values,
         x_labels=correlation_matrix.columns,
         y_labels=correlation_matrix.columns,
-        title="Correlation Matrix",
-        colorbar_title="Correlation")
+        title="Correlation Matrix")
 
 def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str):
 
@@ -158,8 +175,7 @@ def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str
     Widgets.heatmap(z_values=Z,
                     x_labels=X[0],
                     y_labels=Y[:, 0],
-                    title=f"Sharpe Ratios for {param1} and {param2}",
-                    colorbar_title="Sharpe Ratio")
+                    title=f"Sharpe Ratios for {param1} and {param2}")
 
 def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list):
 

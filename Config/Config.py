@@ -16,7 +16,9 @@ METHODS_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_config.json")
 
 FILE_PATH_YF = os.path.join(SAVED_DATA_FOLDER, "price_data.parquet")
 
-
+DEFAULT_TEMPLATE = "plotly_white"
+COLOR_ADJUSTMENT = 'black'
+DEFAULT_HEIGHT = 800
 
 portfolio_etf = {
     'Equities': {

@@ -16,7 +16,6 @@ from .Volatility import (rolling_volatility,
                         separate_volatility)
 
 from .Performance import (rolling_sharpe_ratios,
-                         rolling_sortino_ratios, 
                          expanding_sharpe_ratios)
 
 #import numpy as np
