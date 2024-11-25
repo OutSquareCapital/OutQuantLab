@@ -24,8 +24,8 @@
         "central_rate_of_change_macd_trend": false
     },
     "MeanReversion": {
-        "mean_price_ratio_normalised": false,
-        "mean_rate_of_change_normalised": false
+        "mean_price_ratio_normalised": true,
+        "mean_rate_of_change_normalised": true
     },
     "MeanReversionTrend": {
         "mean_price_ratio_normalised_trend": false,
