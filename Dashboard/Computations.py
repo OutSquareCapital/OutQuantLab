@@ -87,9 +87,11 @@ def calculate_overall_monthly_skew(returns_df: pd.DataFrame) -> pd.Series:
 
 def calculate_overall_correlation_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    correlation_matrix = returns_df.corr().round(2)
+    correlation_matrix = returns_df.corr()
 
-    return np.fill_diagonal(correlation_matrix.values, np.nan)
+    np.fill_diagonal(correlation_matrix.values, np.nan)
+
+    return correlation_matrix.round(2)
 
 def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, window_size: int = 1250):
         
@@ -105,4 +107,5 @@ def calculate_rolling_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     return pd.DataFrame(mt.hv_composite(returns_df.values), 
                         index=returns_df.index,
-                        columns=returns_df.columns).round(2)
+                        columns=returns_df.columns
+                        ).round(2)

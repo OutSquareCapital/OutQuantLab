@@ -154,7 +154,8 @@ def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
             box_line_color='white',
             points=False,
             marker=dict(color=color_map[column]),
-            hoveron="violins"
+            hoveron="violins",
+            hoverinfo="y" 
         ))
 
     y_min = data.min().min()
@@ -185,7 +186,7 @@ def histogram(data: pd.DataFrame, title: str, xlabel: str, ylabel: str, bins: in
                 color=color_map[column],
                 line=dict(color='white', width=1)
             ),
-            hoverinfo="x+y+name",
+            hoverinfo="y",
             showlegend=True
         ))
     fig.update_layout(
