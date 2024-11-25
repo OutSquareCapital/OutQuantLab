@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QScrollArea, QPushButton, QLabel, QGroupBox, QHBoxLayout,
     QLineEdit, QSpinBox, QComboBox
 )
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, QPropertyAnimation, QEasingCurve
 from .Config_Backend import save_param_config, param_range_values
 
 class ParameterWidget(QWidget):
@@ -75,11 +75,42 @@ class ParameterWidget(QWidget):
         category_box = QGroupBox(category)
         category_layout = QVBoxLayout()
 
+        # Conteneur pour le contenu expansible
+        category_content_widget = QWidget()
+        category_content_layout = QVBoxLayout()
+        category_content_widget.setLayout(category_content_layout)
+
+        # Initialiser à 0 pour qu'il soit caché
+        category_content_widget.setMaximumHeight(0)
+        animation = QPropertyAnimation(category_content_widget, b"maximumHeight")
+        animation.setDuration(300)
+        animation.setEasingCurve(QEasingCurve.InOutCubic)
+
+        # Bouton Expand/Collapse
+        expand_button = QPushButton("Expand/Collapse")
+        expand_button.setCheckable(True)
+        expand_button.toggled.connect(
+            lambda checked, widget=category_content_widget, anim=animation: self.toggle_animation(checked, widget, anim)
+        )
+        category_layout.addWidget(expand_button)
+
+        # Ajouter les paramètres au contenu expansible
         for param, values in params.items():
-            self.add_param_widget(category, param, values, category_layout)
+            self.add_param_widget(category, param, values, category_content_layout)
 
         category_box.setLayout(category_layout)
+        category_layout.addWidget(category_content_widget)
         layout.addWidget(category_box)
+
+    def toggle_animation(self, checked: bool, widget: QWidget, animation: QPropertyAnimation):
+        if checked:
+            animation.setStartValue(0)
+            animation.setEndValue(widget.sizeHint().height())
+        else:
+            animation.setStartValue(widget.sizeHint().height())
+            animation.setEndValue(0)
+        animation.start()
+
 
     def add_param_widget(self, category: str, param: str, values: list, layout: QVBoxLayout):
         param_box = QGroupBox(param)
