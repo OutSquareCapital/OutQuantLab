@@ -1,4 +1,3 @@
-import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
@@ -126,17 +125,6 @@ def scatter_3d(x_vals, y_vals, z_vals, values, params, title: str):
     setup_figure_layout(fig, title)
     fig.show()
 
-def treemap(labels: list, parents: list, title: str):
-    fig = px.treemap(
-        names=labels,
-        parents=parents,
-        maxdepth=-1
-    )
-    
-    setup_figure_layout(fig, title)
-    
-    fig.show()
-
 def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
     fig = go.Figure()
 
@@ -190,4 +178,16 @@ def histogram(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
         barmode="overlay"
     )
     setup_figure_layout(fig,  title)
+    fig.show()
+
+def icicle(labels: list, parents: list, title: str):
+    fig = go.Figure(
+        go.Icicle(
+            labels=labels,            
+            parents=parents,          
+            tiling=dict(orientation="v"),
+        )
+    )
+    setup_figure_layout(fig, title)
+    
     fig.show()

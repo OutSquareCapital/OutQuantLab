@@ -1,9 +1,9 @@
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 from plotly.graph_objects import Figure
+import plotly.graph_objects as go
 from Config import DEFAULT_TEMPLATE, DEFAULT_HEIGHT, COLOR_ADJUSTMENT
 import pandas as pd
-import plotly.graph_objects as go
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
     base_colors = ["red", "yellow", "green", "lime", "blue", "cyan"]

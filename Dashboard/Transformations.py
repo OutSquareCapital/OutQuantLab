@@ -2,6 +2,24 @@ import numpy as np
 import pandas as pd
 import re
 from collections import defaultdict
+from scipy.spatial.distance import squareform
+from scipy.cluster.hierarchy import linkage, leaves_list
+
+def compute_linkage_matrix(corr_matrix: pd.DataFrame) -> np.ndarray:
+
+    pairwise_distances = 1 - corr_matrix.abs()
+    condensed_distances = squareform(pairwise_distances.values)
+    return linkage(condensed_distances, method='average')
+
+def sort_correlation_matrix(corr_matrix: pd.DataFrame) -> pd.DataFrame:
+
+    linkage_matrix = compute_linkage_matrix(corr_matrix)
+    ordered_indices = leaves_list(linkage_matrix)
+
+    sorted_corr_matrix = corr_matrix.iloc[ordered_indices, ordered_indices]
+    np.fill_diagonal(sorted_corr_matrix.values, np.nan)
+
+    return sorted_corr_matrix
 
 def convert_params_to_3d(sharpe_ratios_df:pd.DataFrame, param1, param2):
 

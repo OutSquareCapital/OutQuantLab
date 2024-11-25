@@ -159,12 +159,22 @@ def plot_returns_distribution_histogram(returns_df: pd.DataFrame, limit: float =
 def plot_correlation_heatmap(returns_df: pd.DataFrame):
 
     correlation_matrix = Computations.calculate_overall_correlation_matrix(returns_df)
+    sorted_correlation_matrix = Transformations.sort_correlation_matrix(correlation_matrix)
 
     Widgets.heatmap(
-        z_values=correlation_matrix.values,
-        x_labels=correlation_matrix.columns,
-        y_labels=correlation_matrix.columns,
+        z_values=sorted_correlation_matrix.values,
+        x_labels=sorted_correlation_matrix.columns,
+        y_labels=sorted_correlation_matrix.columns,
         title="Correlation Matrix")
+
+def plot_clusters_icicle(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
+    
+    clusters_dict = generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
+    labels, parents = Transformations.prepare_sunburst_data(clusters_dict)
+
+    Widgets.icicle(labels=labels, 
+                   parents=parents, 
+                   title="Clusters")
 
 def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str):
 
@@ -189,13 +199,3 @@ def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list)
                        values=sharpe_means, 
                        params=params,
                        title="Scatter Plot 3D")
-
-def plot_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
-
-    clusters_dict = generate_static_clusters(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
-
-    labels, parents = Transformations.prepare_sunburst_data(clusters_dict)
-
-    Widgets.treemap(labels=labels, 
-                    parents=parents, 
-                    title="Clusters")

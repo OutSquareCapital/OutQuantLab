@@ -44,11 +44,7 @@ def calculate_overall_average_correlation(returns_df: pd.DataFrame) -> pd.DataFr
 
 def calculate_overall_correlation_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    correlation_matrix = returns_df.corr()
-
-    np.fill_diagonal(correlation_matrix.values, np.nan)
-
-    return correlation_matrix.round(2)
+    return returns_df.corr().round(2)
 
 def calculate_overall_average_drawdown(returns_df: pd.DataFrame, length: int) -> pd.DataFrame:
 
