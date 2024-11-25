@@ -1,7 +1,6 @@
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Signal
-from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QGroupBox, QCheckBox, QPushButton, QScrollArea, QLabel
-)
+from .Widget_Common import create_scroll_area, add_category_widget_shared, create_apply_button, select_all_items, unselect_all_items, create_checkbox_item
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox
+from PySide6.QtCore import Signal
 from typing import Dict, List
 from .Config_Backend import save_assets_to_backtest_config
 
@@ -14,130 +13,77 @@ class AssetSelectionWidget(QWidget):
         self.current_config = current_config
         self.assets_names = assets_names
         self.category_vars = {}
-        self.select_all_buttons = {}
-        self.unselect_all_buttons = {}
         self.warning_labels = {}
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
-        scroll_area = QScrollArea()
-        scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout()
 
+        # Create scroll area for assets
+        scroll_area, _, scroll_layout = create_scroll_area()
+
+        # Add categories to the scroll area
         for category in self.current_config.keys():
             self.add_category_widget(category, scroll_layout)
 
-        scroll_widget.setLayout(scroll_layout)
-        scroll_area.setWidget(scroll_widget)
-        scroll_area.setWidgetResizable(True)
         layout.addWidget(scroll_area)
 
-        # Labels d'avertissement spécifiques
-        for category in ["ratios", "ensembles"]:
-            warning_label = QLabel(f"At least two assets must be selected in '{category}'")
-            warning_label.setStyleSheet("color: red;")
-            warning_label.setVisible(False)
-            self.warning_labels[category] = warning_label
-            layout.addWidget(warning_label)
-
-        # Bouton "Apply"
-        self.apply_button = QPushButton("Apply selection")
-        self.apply_button.setEnabled(False)
-        self.apply_button.clicked.connect(self.save_selection)
+        # Add Apply button
+        self.apply_button = create_apply_button(self.save_selection)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
 
     def add_category_widget(self, category: str, layout: QVBoxLayout):
-        category_box = QGroupBox(category)
-        category_layout = QVBoxLayout()
-        category_content_widget = QWidget()
-        category_content_layout = QVBoxLayout()
-        category_content_widget.setLayout(category_content_layout)
+        if category not in self.category_vars:
+            self.category_vars[category] = {}
 
-        # Ajout d'une animation pour replier/étendre
-        category_content_widget.setMaximumHeight(0)
-        animation = QPropertyAnimation(category_content_widget, b"maximumHeight")
-        animation.setDuration(300)
-        animation.setEasingCurve(QEasingCurve.InOutCubic)
+        def create_checkbox(category: str, asset: str, is_checked: bool) -> QCheckBox:
+            checkbox = create_checkbox_item(
+                self, category, asset, is_checked, 
+                lambda _: self.check_asset_count()
+            )
+            self.category_vars[category][asset] = checkbox
+            return checkbox
 
-        edit_button = QPushButton("Expand/Collapse")
-        edit_button.setCheckable(True)
-        edit_button.toggled.connect(
-            lambda checked: self.toggle_animation(checked, category_content_widget, animation)
+        add_category_widget_shared(
+            parent=self,
+            category=category,
+            items={asset: asset in self.current_config.get(category, []) for asset in self.assets_names},
+            layout=layout,
+            create_checkbox=create_checkbox,
+            select_all_callback=self.select_all,
+            unselect_all_callback=self.unselect_all,
         )
-
-        # Boutons "Select All" et "Unselect All"
-        button_layout = QHBoxLayout()
-        select_all_button = QPushButton("Select All")
-        unselect_all_button = QPushButton("Unselect All")
-        button_layout.addWidget(select_all_button)
-        button_layout.addWidget(unselect_all_button)
-
-        select_all_button.clicked.connect(lambda _, c=category: self.select_all(c))
-        unselect_all_button.clicked.connect(lambda _, c=category: self.unselect_all(c))
-
-        # Checkboxes pour les actifs
-        self.category_vars[category] = {}
-        for asset in self.assets_names:
-            asset_checkbox = self.create_asset_checkbox(category, asset)
-            category_content_layout.addWidget(asset_checkbox)
-
-        category_box.setLayout(category_layout)
-        category_layout.addWidget(edit_button)
-        category_layout.addLayout(button_layout)
-        category_layout.addWidget(category_content_widget)
-        layout.addWidget(category_box)
-
-    def create_asset_checkbox(self, category: str, asset: str) -> QCheckBox:
-        asset_checkbox = QCheckBox(asset)
-        asset_checkbox.setChecked(asset in self.current_config.get(category, []))
-        asset_checkbox.stateChanged.connect(self.check_asset_count)
-        self.category_vars[category][asset] = asset_checkbox
-        return asset_checkbox
-
-    def toggle_animation(self, checked: bool, widget: QWidget, animation: QPropertyAnimation):
-        if checked:
-            animation.setStartValue(0)
-            animation.setEndValue(widget.sizeHint().height())
-        else:
-            animation.setStartValue(widget.sizeHint().height())
-            animation.setEndValue(0)
-        animation.start()
 
     def check_asset_count(self):
         warnings_active = False
         for category in ["ratios", "ensembles"]:
             if category in self.category_vars:
                 selected_assets = sum(
-                    1 for asset, checkbox in self.category_vars[category].items() if checkbox.isChecked()
+                    1 for _, checkbox in self.category_vars[category].items() if checkbox.isChecked()
                 )
-                if selected_assets == 1:
-                    self.warning_labels[category].setVisible(True)
+                if selected_assets == 1:  # Disable Apply button if only one is selected
                     warnings_active = True
-                else:
-                    self.warning_labels[category].setVisible(False)
+                    break
         self.apply_button.setEnabled(not warnings_active)
 
     def save_selection(self):
         if not any(label.isVisible() for label in self.warning_labels.values()):
             for category, asset_vars in self.category_vars.items():
                 self.current_config[category] = [
-                    asset for asset, var in asset_vars.items() if var.isChecked()
+                    asset for asset, checkbox in asset_vars.items() if checkbox.isChecked()
                 ]
             save_assets_to_backtest_config(self.current_config)
             self.apply_button.setEnabled(False)
             self.assets_saved.emit()
 
     def select_all(self, category: str):
-        for var in self.category_vars[category].values():
-            var.setChecked(True)
+        select_all_items(category, self.category_vars[category])
         self.check_asset_count()
 
     def unselect_all(self, category: str):
-        for var in self.category_vars[category].values():
-            var.setChecked(False)
+        unselect_all_items(category, self.category_vars[category])
         self.check_asset_count()
 
     def get_data(self) -> Dict[str, List[str]]:

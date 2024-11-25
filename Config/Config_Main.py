@@ -34,13 +34,13 @@ class MainWindow(QMainWindow):
         self.method_widget = MethodSelectionWidget(self.methods_config)
 
         self.tabs.addTab(self.param_widget, "Edit Parameters")
-        self.tabs.addTab(self.asset_widget, "Select Assets")
-        self.tabs.addTab(self.method_widget, "Manage Indicators")
+        self.tabs.addTab(self.asset_widget, "Edit Assets")
+        self.tabs.addTab(self.method_widget, "Edit Indicators")
         main_layout.addWidget(self.tabs)
 
         # Bouton Save & Exit
         button_layout = QHBoxLayout()
-        save_exit_button = QPushButton("Save & Exit")
+        save_exit_button = QPushButton("Exit")
         save_exit_button.setEnabled(False)
         save_exit_button.clicked.connect(self.save_and_exit)
         button_layout.addStretch()

@@ -2,9 +2,8 @@ from typing import Dict, Any
 from PySide6.QtWidgets import (
     QWidget, QVBoxLayout, QScrollArea, QPushButton, QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox
 )
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QPropertyAnimation, QEasingCurve
 from .Config_Backend import save_param_config, param_range_values
-
 
 class ParameterWidget(QWidget):
     parameters_saved = Signal()
@@ -37,15 +36,45 @@ class ParameterWidget(QWidget):
 
         self.setLayout(layout)
 
+    def toggle_animation(self, checked: bool, widget: QWidget, animation: QPropertyAnimation):
+        if checked:
+            animation.setStartValue(0)
+            animation.setEndValue(widget.sizeHint().height())
+        else:
+            animation.setStartValue(widget.sizeHint().height())
+            animation.setEndValue(0)
+        animation.start()
+
     def add_category_widget(self, category: str, params: Dict[str, Any], layout: QVBoxLayout):
         category_box = QGroupBox(category)
         category_layout = QVBoxLayout()
+        category_content_widget = QWidget()
+        category_content_layout = QVBoxLayout()
+        category_content_widget.setLayout(category_content_layout)
 
+        # Initialisation de l'animation
+        category_content_widget.setMaximumHeight(0)
+        animation = QPropertyAnimation(category_content_widget, b"maximumHeight")
+        animation.setDuration(300)
+        animation.setEasingCurve(QEasingCurve.InOutCubic)
+
+        # Bouton Expand/Collapse
+        expand_button = QPushButton("Expand/Collapse")
+        expand_button.setCheckable(True)
+        expand_button.toggled.connect(
+            lambda checked: self.toggle_animation(checked, category_content_widget, animation)
+        )
+
+        # Ajouter les paramètres dans la catégorie
         for param, values in params.items():
-            self.add_param_widget(category, param, values, category_layout)
+            self.add_param_widget(category, param, values, category_content_layout)
 
+        # Agencer le layout de la catégorie
         category_box.setLayout(category_layout)
+        category_layout.addWidget(expand_button)
+        category_layout.addWidget(category_content_widget)
         layout.addWidget(category_box)
+
 
     def add_param_widget(self, category: str, param: str, values: list, layout: QVBoxLayout):
         param_box = QGroupBox(param)
@@ -136,7 +165,7 @@ class ParameterWidget(QWidget):
     def create_num_values_slider(self, num_values: int):
         num_values_slider = QSlider(Qt.Horizontal)
         num_values_slider.setMinimum(1)
-        num_values_slider.setMaximum(50)
+        num_values_slider.setMaximum(10)
         num_values_slider.setValue(num_values)
         return num_values_slider
 
@@ -150,9 +179,9 @@ class ParameterWidget(QWidget):
 
     def index_to_value(self, index: int) -> int:
         return 2 ** index
-
+    
     def connect_sliders_to_update(self, category, param, start_slider, end_slider, num_values_slider, mode_combobox,
-                                  range_info_label, num_values_info_label, generated_values_label, param_box):
+                                range_info_label, num_values_info_label, generated_values_label, param_box):
         def update_values():
             start = self.index_to_value(start_slider.value())
             end = self.index_to_value(end_slider.value())
@@ -187,15 +216,23 @@ class ParameterWidget(QWidget):
             num_values_info_label.setText(f"Num Values: {num_values}")
             generated_values_label.setText(f"Generated Values: {unique_values}")
 
+            # Mettre à jour self.current_config
+            self.current_config[category][param] = unique_values
+
+            # Activer le bouton Apply
+            self.apply_button.setEnabled(True)
+
         start_slider.valueChanged.connect(update_values)
         end_slider.valueChanged.connect(update_values)
         num_values_slider.valueChanged.connect(update_values)
         mode_combobox.currentTextChanged.connect(update_values)
 
+
     def save_configuration(self):
         save_param_config(self.current_config)
         self.apply_button.setEnabled(False)
         self.parameters_saved.emit()
+
 
     def get_data(self) -> Dict[str, Any]:
         return self.current_config

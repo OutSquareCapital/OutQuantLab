@@ -1,123 +1,78 @@
-from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QGroupBox, QCheckBox, QPushButton, QHBoxLayout, QScrollArea
-)
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Signal
+from .Widget_Common import create_scroll_area, add_category_widget_shared, create_apply_button, select_all_items, unselect_all_items, create_checkbox_item
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox
+from PySide6.QtCore import Signal
+from typing import Dict
 from .Config_Backend import save_methods_config, get_active_methods
-from typing import List, Callable
 
 
 class MethodSelectionWidget(QWidget):
     methods_saved = Signal()
 
-    def __init__(self, current_config: dict):
+    def __init__(self, current_config: Dict[str, Dict[str, bool]]):
         super().__init__()
         self.current_config = current_config
-        self.category_widgets = {}
+        self.category_vars = {}
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
-        scroll_area = QScrollArea()
-        scroll_widget = QWidget()
-        scroll_layout = QVBoxLayout()
 
+        # Create scroll area for methods
+        scroll_area, _, scroll_layout = create_scroll_area()
+
+        # Add categories to the scroll area
         for category, methods in self.current_config.items():
             self.add_category_widget(category, methods, scroll_layout)
 
-        scroll_widget.setLayout(scroll_layout)
-        scroll_area.setWidget(scroll_widget)
-        scroll_area.setWidgetResizable(True)
         layout.addWidget(scroll_area)
 
-        self.apply_button = QPushButton("Apply")
-        self.apply_button.setEnabled(False)
-        self.apply_button.clicked.connect(self.save_configuration)
+        # Add Apply button
+        self.apply_button = create_apply_button(self.save_configuration)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
 
-    def save_configuration(self):
-        save_methods_config(self.current_config)
-        self.apply_button.setEnabled(False)
-        self.methods_saved.emit()
+    def add_category_widget(self, category: str, methods: Dict[str, bool], layout: QVBoxLayout):
+        if category not in self.category_vars:
+            self.category_vars[category] = {}
 
-    def add_category_widget(self, category: str, methods: dict, layout: QVBoxLayout):
-        category_box = QGroupBox(category)
-        category_layout = QVBoxLayout()
-        category_content_widget = QWidget()
-        category_content_layout = QVBoxLayout()
-        category_content_widget.setLayout(category_content_layout)
+        def create_checkbox(category: str, method: str, is_checked: bool) -> QCheckBox:
+            checkbox = create_checkbox_item(
+                self, category, method, is_checked, 
+                lambda _: self.update_method_state(category, method, checkbox.isChecked())
+            )
+            self.category_vars[category][method] = checkbox
+            return checkbox
 
-        category_content_widget.setMaximumHeight(0)
-        animation = QPropertyAnimation(category_content_widget, b"maximumHeight")
-        animation.setDuration(300)
-        animation.setEasingCurve(QEasingCurve.InOutCubic)
-
-        edit_button = QPushButton("Expand/Collapse")
-        edit_button.setCheckable(True)
-        edit_button.toggled.connect(
-            lambda checked, widget=category_content_widget, anim=animation: self.toggle_animation(checked, widget, anim)
+        add_category_widget_shared(
+            parent=self,
+            category=category,
+            items=methods,
+            layout=layout,
+            create_checkbox=create_checkbox,
+            select_all_callback=self.select_all,
+            unselect_all_callback=self.unselect_all,
         )
-
-        button_layout = QHBoxLayout()
-        select_all_button = QPushButton("Select All")
-        unselect_all_button = QPushButton("Unselect All")
-        button_layout.addWidget(select_all_button)
-        button_layout.addWidget(unselect_all_button)
-
-        select_all_button.clicked.connect(lambda _, c=category: self.select_all(c))
-        unselect_all_button.clicked.connect(lambda _, c=category: self.unselect_all(c))
-
-        for method, is_checked in methods.items():
-            self.add_method_checkbox(category, method, is_checked, category_content_layout)
-
-        category_box.setLayout(category_layout)
-        category_layout.addWidget(edit_button)
-        category_layout.addLayout(button_layout)
-        category_layout.addWidget(category_content_widget)
-        layout.addWidget(category_box)
-
-    def add_method_checkbox(self, category: str, method: str, is_checked: bool, layout: QVBoxLayout):
-        checkbox = QCheckBox(method)
-        checkbox.setChecked(is_checked)
-        checkbox.stateChanged.connect(lambda _: self.update_method_state(category, method, checkbox.isChecked()))
-        layout.addWidget(checkbox)
-
-    def toggle_animation(self, checked: bool, widget: QWidget, animation: QPropertyAnimation):
-        if checked:
-            animation.setStartValue(0)
-            animation.setEndValue(widget.sizeHint().height())
-        else:
-            animation.setStartValue(widget.sizeHint().height())
-            animation.setEndValue(0)
-        animation.start()
 
     def update_method_state(self, category: str, method: str, is_checked: bool):
         self.current_config[category][method] = is_checked
         self.apply_button.setEnabled(True)
 
     def select_all(self, category: str):
-        for method in self.current_config[category]:
-            self.current_config[category][method] = True
-        self.refresh_category_checkboxes(category)
+        select_all_items(category, self.category_vars[category])
         self.apply_button.setEnabled(True)
 
     def unselect_all(self, category: str):
-        for method in self.current_config[category]:
-            self.current_config[category][method] = False
-        self.refresh_category_checkboxes(category)
+        unselect_all_items(category, self.category_vars[category])
         self.apply_button.setEnabled(True)
 
-    def refresh_category_checkboxes(self, category: str):
-        for checkbox in self.findChildren(QCheckBox):
-            if checkbox.text() in self.current_config[category]:
-                checkbox.setChecked(self.current_config[category][checkbox.text()])
+    def save_configuration(self):
+        save_methods_config(self.current_config)
+        self.apply_button.setEnabled(False)
+        self.methods_saved.emit()
 
-    def get_data(self) -> dict:
+    def get_data(self) -> Dict[str, Dict[str, bool]]:
         return self.current_config
-    
-    def get_active_methods(self) -> List[Callable]:
+
+    def get_active_methods(self):
         return get_active_methods(self.current_config)
-        
-
-
