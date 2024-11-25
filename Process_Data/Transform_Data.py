@@ -47,9 +47,9 @@ def normalize_returns_distribution_rolling(pct_returns_df: pd.DataFrame,
 
     return normalized_returns
 
-def equity_curves_calculs(daily_returns_array: np.ndarray) -> np.ndarray:
+def equity_curves_calculs(returns_array: np.ndarray) -> np.ndarray:
 
-    temp_array = daily_returns_array.copy()
+    temp_array = returns_array.copy()
 
     mask = np.isnan(temp_array)
     temp_array[mask] = 0
