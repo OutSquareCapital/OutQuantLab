@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QGroupBox, QCheckBox, QPushButton, QHBoxLayout, QScrollArea, QLabel
+    QWidget, QVBoxLayout, QGroupBox, QCheckBox, QPushButton, QHBoxLayout, QScrollArea
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Signal
 from .Config_Backend import save_methods_config, get_active_methods
