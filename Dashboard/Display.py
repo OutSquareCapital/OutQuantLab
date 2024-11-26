@@ -199,3 +199,81 @@ def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list)
                        values=sharpe_means, 
                        params=params,
                        title="Scatter Plot 3D")
+
+
+
+def generate_dashboard_plots(
+    test_returns_df: pd.DataFrame,
+    raw_adjusted_returns_df: pd.DataFrame,
+    limit: float = 0.01,
+    rolling_window: int = 1250,
+    cluster_params: tuple[int, int, int] = (6, 2, 1),
+    scatter_params: list[str] = None,
+    equity: bool = False,
+    rolling_sharpe_ratio: bool = False,
+    rolling_drawdown: bool = False,
+    rolling_smoothed_skewness: bool = False,
+    rolling_average_inverted_correlation: bool = False,
+    rolling_volatility: bool = False,
+    overall_sharpe_ratio: bool = False,
+    overall_average_drawdown: bool = False,
+    overall_monthly_skew: bool = False,
+    overall_average_inverted_correlation: bool = False,
+    overall_volatility: bool = False,
+    returns_distribution_violin: bool = False,
+    returns_distribution_histogram: bool = False,
+    correlation_heatmap: bool = False,
+    clusters_icicle: bool = False,
+    sharpe_ratio_heatmap: bool = False,
+    overall_sharpe_ratio_3d_scatter: bool = False,
+):
+    if equity:
+        plot_equity(test_returns_df)
+    
+    if rolling_sharpe_ratio:
+        plot_rolling_sharpe_ratio(test_returns_df, rolling_window)
+    
+    if rolling_drawdown:
+        plot_rolling_drawdown(test_returns_df, rolling_window)
+    
+    if rolling_smoothed_skewness:
+        plot_rolling_smoothed_skewness(test_returns_df, rolling_window)
+    
+    if rolling_average_inverted_correlation:
+        plot_rolling_average_inverted_correlation(test_returns_df, rolling_window)
+    
+    if rolling_volatility:
+        plot_rolling_volatility(test_returns_df)
+    
+    if overall_sharpe_ratio:
+        plot_overall_sharpe_ratio(test_returns_df)
+    
+    if overall_average_drawdown:
+        plot_overall_average_drawdown(test_returns_df, rolling_window)
+    
+    if overall_monthly_skew:
+        plot_overall_monthly_skew(test_returns_df)
+    
+    if overall_average_inverted_correlation:
+        plot_overall_average_inverted_correlation(test_returns_df)
+    
+    if overall_volatility:
+        plot_overall_volatility(test_returns_df)
+    
+    if returns_distribution_violin:
+        plot_returns_distribution_violin(test_returns_df, limit=limit)
+    
+    if returns_distribution_histogram:
+        plot_returns_distribution_histogram(test_returns_df, limit=limit)
+    
+    if correlation_heatmap:
+        plot_correlation_heatmap(test_returns_df)
+    
+    if clusters_icicle:
+        plot_clusters_icicle(test_returns_df, *cluster_params)
+    
+    if sharpe_ratio_heatmap:
+        plot_sharpe_ratio_heatmap(raw_adjusted_returns_df, 'LenST', 'LenLT')
+    
+    if overall_sharpe_ratio_3d_scatter:
+        plot_overall_sharpe_ratio_3d_scatter(raw_adjusted_returns_df, scatter_params)

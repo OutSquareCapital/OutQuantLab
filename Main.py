@@ -11,7 +11,7 @@ import Backtest
 
 data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Config.FILE_PATH_YF)
 
-indicators_and_params, assets_to_backtest = Config.dynamic_config(assets_names, auto=True)
+indicators_and_params, assets_to_backtest = Config.dynamic_config(assets_names, auto=False)
 
 (prices_array, 
 volatility_adjusted_pct_returns_array, 
@@ -40,11 +40,10 @@ del (
     log_returns_array,
     volatility_adjusted_pct_returns_array,
     dates_index,
-    category_asset_names,
     indicators_and_params
     )
 
-#portfolio_base_structure = Portfolio.classify_assets(asset_names_test, Config.portfolio_etf)
+portfolio_base_structure = Portfolio.classify_assets(category_asset_names, Config.portfolio_etf)
 
 #relativized_sharpes_df = Portfolio.relative_sharpe_on_confidence_period(raw_adjusted_returns_df, sharpe_lookback = 5000, confidence_lookback=2500)
 #optimized_returns_rltv = raw_adjusted_returns_df * relativized_sharpes_df.shift(1)
@@ -62,21 +61,6 @@ equal_weights_global_returns = equal_weights_global_returns.rename(columns={equa
 
 test_returns = equal_weights_asset_returns#.loc['2015-01-01':]
 
-#Dashboard.plot_equity(test_returns)
-Dashboard.plot_drawdowns(test_returns)
-#Dashboard.plot_rolling_volatility(test_returns)
-#Dashboard.plot_rolling_sharpe_ratio(test_returns)
-
-#Dashboard.plot_overall_sharpe_ratio(test_returns)
-#Dashboard.plot_average_drawdown(test_returns)
-#Dashboard.plot_overall_monthly_skew(test_returns)
-#Dashboard.plot_average_inverted_correlation(test_returns)
-#Dashboard.plot_overall_sharpe_correlation_ratio(test_returns)
-
-#Dashboard.plot_correlation_heatmap(test_returns)
-#Dashboard.plot_sharpe_ratio_heatmap(raw_adjusted_returns_df, 'LenST', 'LenLT')
-
-#Dashboard.plot_returns_distribution_violin(test_returns, limit=0.00001)
-Dashboard.plot_returns_distribution_histogram(test_returns, limit=0.000001)
-#Dashboard.plot_overall_sharpe_ratio_3d_scatter(raw_adjusted_returns_df, ['LenST', 'LenLT', 'MacdLength'])
-#Dashboard.plot_static_clusters(test_returns, 6, 2, 1)
+Dashboard.generate_dashboard_plots(equal_weights_asset_returns, 
+                                   raw_adjusted_returns_df,
+                                   plot_equity=True)
