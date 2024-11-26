@@ -31,3 +31,8 @@ test.py
 
 #ignore jupyter
 *.ipynb
+
+#ignore json updates
+assets_to_backtest.json
+methods_config.json
+param_values.json
