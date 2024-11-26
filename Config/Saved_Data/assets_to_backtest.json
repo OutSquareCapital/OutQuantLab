@@ -1,6 +1,5 @@
 {
    "assets": [
-      "CORN",
       "DBB",
       "DIA",
       "FXA",
@@ -20,7 +19,12 @@
       "VIXY",
       "WEAT"
    ],
-   "ratios": [],
+   "ratios": [
+      "DIA",
+      "IWM",
+      "QQQ",
+      "SPY"
+   ],
    "ensembles": [],
    "canary_assets": [],
    "canary_ratios": [],

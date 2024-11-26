@@ -1,7 +1,7 @@
 {
     "RiskPremium": {
         "Bias": [
-            1
+            4
         ]
     },
     "Trend": {
@@ -211,7 +211,11 @@
             256
         ],
         "TrendLenST": [
-            34
+            4,
+            8,
+            16,
+            32,
+            64
         ],
         "TrendLenLT": [
             16,
