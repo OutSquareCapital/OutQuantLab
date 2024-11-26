@@ -208,7 +208,8 @@ def generate_dashboard_plots(
     limit: float = 0.01,
     rolling_window: int = 1250,
     cluster_params: tuple[int, int, int] = (6, 2, 1),
-    scatter_params: list[str] = None,
+    heatmap_params: list[str] = ['LenST', 'LenLT'],
+    scatter_params: list[str] = ['LenST', 'LenLT', 'MacdLength'],
     equity: bool = False,
     rolling_sharpe_ratio: bool = False,
     rolling_drawdown: bool = False,
@@ -273,7 +274,7 @@ def generate_dashboard_plots(
         plot_clusters_icicle(test_returns_df, *cluster_params)
     
     if sharpe_ratio_heatmap:
-        plot_sharpe_ratio_heatmap(raw_adjusted_returns_df, 'LenST', 'LenLT')
+        plot_sharpe_ratio_heatmap(raw_adjusted_returns_df, heatmap_params)
     
     if overall_sharpe_ratio_3d_scatter:
         plot_overall_sharpe_ratio_3d_scatter(raw_adjusted_returns_df, scatter_params)

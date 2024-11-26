@@ -1,12 +1,10 @@
 import Config
-from Signals import *
 import Portfolio
 import Get_Data
 import Process_Data
 import Dashboard
 import Backtest
 
-# Re-actualisation du data
 Get_Data.get_yahoo_finance_data(Config.yahoo_assets, Config.FILE_PATH_YF)
 
 data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Config.FILE_PATH_YF)

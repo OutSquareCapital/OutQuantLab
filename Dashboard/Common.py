@@ -2,18 +2,17 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 from plotly.graph_objects import Figure
 import plotly.graph_objects as go
-from Config import DEFAULT_TEMPLATE, DEFAULT_HEIGHT, COLOR_ADJUSTMENT
+from Config import DEFAULT_TEMPLATE, DEFAULT_HEIGHT, COLOR_ADJUSTMENT, BASE_COLORS
 import pandas as pd
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
-    base_colors = ["red", "yellow", "green", "lime", "blue", "cyan"]
     cmap_name = "custom_colormap"
     if n_colors == 1:
-        return LinearSegmentedColormap.from_list(cmap_name, [base_colors[0], base_colors[0]], N=2)
-    elif n_colors <= len(base_colors):
-        return LinearSegmentedColormap.from_list(cmap_name, base_colors[:n_colors], N=n_colors)
+        return LinearSegmentedColormap.from_list(cmap_name, [BASE_COLORS[0], BASE_COLORS[0]], N=2)
+    elif n_colors <= len(BASE_COLORS):
+        return LinearSegmentedColormap.from_list(cmap_name, BASE_COLORS[:n_colors], N=n_colors)
     else:
-        return LinearSegmentedColormap.from_list(cmap_name, base_colors, N=n_colors)
+        return LinearSegmentedColormap.from_list(cmap_name, BASE_COLORS, N=n_colors)
     
 def map_colors_to_columns(n_colors: int) -> list:
 
