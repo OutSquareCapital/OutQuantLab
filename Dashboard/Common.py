@@ -15,7 +15,8 @@ def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
         return LinearSegmentedColormap.from_list(cmap_name, BASE_COLORS, N=n_colors)
     
 def map_colors_to_columns(n_colors: int) -> list:
-
+    if n_colors == 1:
+        return [mcolors.to_hex(COLOR_ADJUSTMENT)]
     cmap = generate_colormap(n_colors)
     return [mcolors.to_hex(cmap(i / (n_colors - 1))) for i in range(n_colors)]
 

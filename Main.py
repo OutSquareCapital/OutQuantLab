@@ -11,11 +11,13 @@ from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QVBoxLayout, QDialog
 from PySide6.QtCore import QUrl
 import tempfile
+import os
 
 class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Main Application")
+        self.temp_files = []
         self.init_ui()
 
     def init_ui(self):
@@ -40,17 +42,19 @@ class MainApp(QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
-    def show_plot_in_memory(self, fig):
-        """Affiche un graphique Plotly directement depuis la mémoire dans PySide6."""
+    def show_plot(self, fig):
         # Génère le HTML avec Plotly inclus
         html_content = fig.to_html(full_html=True, include_plotlyjs=True)
 
-        # Utilise un fichier temporaire pour le HTML
+        # Crée un fichier temporaire pour le HTML
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
         with open(temp_file.name, 'w', encoding='utf-8') as f:
             f.write(html_content)
 
-        # Crée un QWebEngineView et charge le fichier HTML
+        # Stocke le fichier temporaire pour suppression ultérieure
+        self.temp_files.append(temp_file.name)
+
+        # Crée un QWebEngineView et charge le fichier
         dialog = QDialog(self)
         dialog.setWindowTitle("Graphique")
         layout = QVBoxLayout(dialog)
@@ -59,9 +63,22 @@ class MainApp(QMainWindow):
         dialog.setLayout(layout)
         web_view.load(QUrl.fromLocalFile(temp_file.name))
 
-        # Affiche la fenêtre
+        # Affiche le graphique
         dialog.resize(800, 600)
         dialog.exec()
+
+    def cleanup_temp_files(self):
+        """Supprime tous les fichiers temporaires stockés."""
+        for temp_file in self.temp_files:
+            try:
+                os.remove(temp_file)
+            except Exception as e:
+                print(f"Erreur lors de la suppression du fichier temporaire {temp_file} : {e}")
+
+    def closeEvent(self, event):
+        """Nettoie les fichiers temporaires avant la fermeture."""
+        self.cleanup_temp_files()
+        super().closeEvent(event)
 
     def open_config(self):
         UI.dynamic_config(Config.yahoo_assets, auto=False, parent=self)
@@ -103,8 +120,8 @@ class MainApp(QMainWindow):
 
         fig = Dashboard.plot_equity(test_returns_df)
         fig2 = Dashboard.plot_correlation_heatmap(test_returns_df)
-        self.show_plot_in_memory(fig)
-        self.show_plot_in_memory(fig2)
+        self.show_plot(fig)
+        self.show_plot(fig2)
         self.close()
 
 if __name__ == "__main__":
