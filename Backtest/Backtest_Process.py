@@ -1,6 +1,7 @@
 from joblib import Parallel, delayed
 import numpy as np
-from .Backtest_Initialization import create_progress_bar, initialize_returns_array
+from .Backtest_Initialization import initialize_backtest, initialize_returns_array
+
 
 def process_param(func, data_array, adjusted_returns_array, param):
 
@@ -13,38 +14,27 @@ def process_param(func, data_array, adjusted_returns_array, param):
 def calculate_strategy_returns(signals_array: np.ndarray,
                              data_arrays: dict,
                              indicators_and_params: dict,
-                             adjusted_returns_array: np.ndarray,
-                             num_indicators: int
+                             adjusted_returns_array: np.ndarray
                              ) -> np.ndarray:
 
     signal_col_index = 0
 
-    # Créer la barre de progression
-    pbar, update_progress = create_progress_bar(num_indicators, description="Calculating signals")
+    # Parallélisation des calculs sur les paramètres
+    for func, array_type, params in indicators_and_params.values():
+        # Récupérer le tableau réel via `array_type`
+        data_array = data_arrays[array_type]
 
-    try:
-        # Parallélisation des calculs sur les paramètres
-        for func, array_type, params in indicators_and_params.values():
-            # Récupérer le tableau réel via `array_type`
-            data_array = data_arrays[array_type]
+        # Paralléliser sur les paramètres de cet indicateur
+        results = Parallel(n_jobs=-1, backend='threading')(delayed(process_param)(
+            func, data_array, adjusted_returns_array, param) for param in params)
 
-            # Paralléliser sur les paramètres de cet indicateur
-            results = Parallel(n_jobs=-1, backend='threading')(delayed(process_param)(
-                func, data_array, adjusted_returns_array, param) for param in params)
+        # Empiler les résultats et les insérer dans l'array final
+        results_stacked = np.hstack(results)
+        num_cols = results_stacked.shape[1]
+        signals_array[:, signal_col_index:signal_col_index + num_cols] = results_stacked
 
-            # Empiler les résultats et les insérer dans l'array final
-            results_stacked = np.hstack(results)
-            num_cols = results_stacked.shape[1]
-            signals_array[:, signal_col_index:signal_col_index + num_cols] = results_stacked
-
-            # Mise à jour de l'index de colonne
-            signal_col_index += num_cols
-
-            # Mettre à jour la progression après chaque indic (pour tous les actifs)
-            update_progress()
-
-    finally:
-        pbar.close()
+        # Mise à jour de l'index de colonne
+        signal_col_index += num_cols
 
     return signals_array
 
@@ -56,16 +46,16 @@ def transform_signals_into_returns(prices_array: np.ndarray,
                                     indicators_and_params: dict
                                     ) -> np.ndarray:
     
-    (
-    signals_array, 
-    data_arrays, 
-    num_indicators) = initialize_returns_array(prices_array, 
-                                                log_returns_array, 
-                                                indicators_and_params, 
-                                                asset_names)
+    total_days, total_returns_streams = initialize_backtest(indicators_and_params,
+                                                            asset_names,
+                                                            prices_array)
+
+    signals_array, data_arrays = initialize_returns_array(prices_array, 
+                                                            log_returns_array, 
+                                                            total_days, 
+                                                            total_returns_streams)
 
     return calculate_strategy_returns(signals_array,
-                                    data_arrays,
-                                    indicators_and_params,
-                                    volatility_adjusted_pct_returns_array,
-                                    num_indicators)
+                                        data_arrays,
+                                        indicators_and_params,
+                                        volatility_adjusted_pct_returns_array)
