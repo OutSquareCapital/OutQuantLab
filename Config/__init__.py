@@ -1,2 +1,2 @@
 from .Config import *
-from .Config_Main import dynamic_config
+from .Strategy_Params_Generation import automatic_generation

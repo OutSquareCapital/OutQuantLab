@@ -1,52 +1,93 @@
 import Config
+import UI   
 import Portfolio
 import Get_Data
 import Process_Data
 import Dashboard
 import Backtest
+import sys
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QWidget
 
-Get_Data.get_yahoo_finance_data(Config.yahoo_assets, Config.FILE_PATH_YF)
 
-data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Config.FILE_PATH_YF)
+class MainApp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Main Application")
+        self.init_ui()
 
-indicators_and_params, assets_to_backtest = Config.dynamic_config(assets_names, auto=False)
+    def init_ui(self):
+        main_widget = QWidget()
+        main_layout = QVBoxLayout()
 
-(prices_array, 
-volatility_adjusted_pct_returns_array, 
-log_returns_array, 
-category_asset_names,
-dates_index
-) = Process_Data.process_data(assets_names,
-                            data_prices_df, 
-                            assets_to_backtest)
+        # Bouton Run Backtest
+        backtest_button = QPushButton("Run Backtest")
+        backtest_button.clicked.connect(self.run_backtest)
+        main_layout.addWidget(backtest_button)
 
-del (
-    assets_to_backtest,
-    data_prices_df, 
-    assets_names
-    )
+        # Bouton Open Config
+        config_button = QPushButton("Open Config")
+        config_button.clicked.connect(self.open_config)
+        main_layout.addWidget(config_button)
 
-raw_adjusted_returns_df = Backtest.process_backtest(prices_array,
-                                                    log_returns_array,
-                                                    volatility_adjusted_pct_returns_array,
-                                                    category_asset_names,
-                                                    dates_index,
-                                                    indicators_and_params)
+        # Bouton Refresh Data
+        refresh_button = QPushButton("Refresh Data")
+        refresh_button.clicked.connect(self.refresh_data)
+        main_layout.addWidget(refresh_button)
 
-del (
-    prices_array,
-    log_returns_array,
-    volatility_adjusted_pct_returns_array,
-    dates_index,
-    indicators_and_params
-    )
+        main_widget.setLayout(main_layout)
+        self.setCentralWidget(main_widget)
 
-equal_weights_asset_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_asset=True)
-equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_asset_returns, global_avg=True)
-equal_weights_global_returns = equal_weights_global_returns.rename(columns={equal_weights_global_returns.columns[0]: 'equal_weights'})
+    def open_config(self):
+        UI.dynamic_config(Config.yahoo_assets, auto=False, parent=self)
 
-test_returns = equal_weights_asset_returns#.loc['2015-01-01':]
+    def refresh_data(self):
+        Get_Data.get_yahoo_finance_data(Config.yahoo_assets, Config.FILE_PATH_YF)
 
-Dashboard.generate_dashboard_plots(equal_weights_asset_returns, 
-                                   raw_adjusted_returns_df,
-                                   plot_equity=True)
+    def run_backtest(self):
+        
+        # Étape 1 : Charger les données
+        data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Config.FILE_PATH_YF)
+
+        # Étape 2 : Charger les configurations dynamiques
+        indicators_and_params, assets_to_backtest = UI.dynamic_config(assets_names, auto=True)
+
+        # Étape 3 : Traiter les données
+        (
+            prices_array,
+            volatility_adjusted_pct_returns_array,
+            log_returns_array,
+            category_asset_names,
+            dates_index,
+        ) = Process_Data.process_data(
+            assets_names,
+            data_prices_df,
+            assets_to_backtest,
+        )
+
+        # Étape 4 : Backtest
+        raw_adjusted_returns_df = Backtest.process_backtest(
+            prices_array,
+            log_returns_array,
+            volatility_adjusted_pct_returns_array,
+            category_asset_names,
+            dates_index,
+            indicators_and_params,
+        )
+
+        equal_weights_asset_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_asset=True)
+        equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_asset_returns, global_avg=True)
+        equal_weights_global_returns = equal_weights_global_returns.rename(columns={equal_weights_global_returns.columns[0]: 'equal_weights'})
+
+        test_returns = equal_weights_asset_returns#.loc['2015-01-01':]
+
+        Dashboard.generate_dashboard_plots(equal_weights_asset_returns, 
+                                        raw_adjusted_returns_df,
+                                        equity=True)
+        self.close()
+
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    main_window = MainApp()
+    main_window.show()
+    sys.exit(app.exec())

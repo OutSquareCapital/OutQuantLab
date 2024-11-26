@@ -1,19 +1,19 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QTabWidget, QPushButton, QWidget, QHBoxLayout
+from PySide6.QtWidgets import QMainWindow, QVBoxLayout, QTabWidget, QPushButton, QWidget, QHBoxLayout
 from .Config_Params import ParameterWidget
 from .Config_Assets import AssetSelectionWidget
 from .Config_Indicators import MethodSelectionWidget
 from .Config_Backend import (
-                             load_param_config, 
-                             load_assets_to_backtest_config, 
-                             load_methods_config,
-                             get_active_methods
-                            )
-from .Strategy_Params_Generation import automatic_generation
+    load_param_config, 
+    load_assets_to_backtest_config, 
+    load_methods_config,
+    get_active_methods
+)
+from Config import automatic_generation
 
-class MainWindow(QMainWindow):
-    def __init__(self, param_config, asset_config, assets_names, methods_config):
-        super().__init__()
-        self.setWindowTitle("Main Configuration")
+class ConfigApp(QMainWindow):
+    def __init__(self, param_config, asset_config, assets_names, methods_config, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Configuration")
         self.param_config = param_config
         self.asset_config = asset_config
         self.assets_names = assets_names
@@ -40,17 +40,16 @@ class MainWindow(QMainWindow):
 
         # Bouton Save & Exit
         button_layout = QHBoxLayout()
-        save_exit_button = QPushButton("Exit")
-        save_exit_button.setEnabled(False)
-        save_exit_button.clicked.connect(self.save_and_exit)
+        exit_button = QPushButton("Close")
+        exit_button.clicked.connect(self.close)
         button_layout.addStretch()
-        button_layout.addWidget(save_exit_button)
+        button_layout.addWidget(exit_button)
         main_layout.addLayout(button_layout)
 
         # Connecter les signaux des widgets
-        self.param_widget.parameters_saved.connect(lambda: self.check_all_saved(save_exit_button))
-        self.asset_widget.assets_saved.connect(lambda: self.check_all_saved(save_exit_button))
-        self.method_widget.methods_saved.connect(lambda: self.check_all_saved(save_exit_button))
+        self.param_widget.parameters_saved.connect(lambda: self.check_all_saved(exit_button))
+        self.asset_widget.assets_saved.connect(lambda: self.check_all_saved(exit_button))
+        self.method_widget.methods_saved.connect(lambda: self.check_all_saved(exit_button))
 
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
@@ -63,18 +62,11 @@ class MainWindow(QMainWindow):
         ):
             button.setEnabled(True)
 
-    def save_and_exit(self):
-        self.param_config = self.param_widget.get_data()
-        self.asset_config = self.asset_widget.get_data()
-        self.methods_config = self.method_widget.get_data()
-        self.active_methods = self.method_widget.get_active_methods()
-        self.close()
-
     def get_results(self):
-        return self.param_config, self.asset_config, self.active_methods
+        return self.param_widget.get_data(), self.asset_widget.get_data(), self.method_widget.get_active_methods()
 
-def dynamic_config(assets_names, auto=True):
-    
+
+def dynamic_config(assets_names, auto=True, parent=None):
     param_config = load_param_config()
     asset_config = load_assets_to_backtest_config()
     methods_config = load_methods_config()
@@ -84,11 +76,5 @@ def dynamic_config(assets_names, auto=True):
         indicators_and_params = automatic_generation(active_methods, param_config)
         return indicators_and_params, asset_config
 
-    app = QApplication([])
-    window = MainWindow(param_config, asset_config, assets_names, methods_config)
+    window = ConfigApp(param_config, asset_config, assets_names, methods_config, parent=parent)
     window.show()
-    app.exec()
-
-    active_methods = get_active_methods(window.methods_config)
-    indicators_and_params = automatic_generation(active_methods, param_config)
-    return indicators_and_params, window.asset_config

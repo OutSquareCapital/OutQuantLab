@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox
+    QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QProgressBar, QLabel
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve
 from typing import Callable
@@ -110,3 +110,35 @@ def create_checkbox_item(parent, category: str, item: str, is_checked: bool, cal
     checkbox.setChecked(is_checked)
     checkbox.stateChanged.connect(lambda: callback(checkbox.isChecked()))
     return checkbox
+
+class ProgressWidget(QWidget):
+    def __init__(self, description="Processing...", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Progress")
+        self.setFixedSize(300, 100)
+
+        layout = QVBoxLayout()
+
+        self.label = QLabel(description)
+        layout.addWidget(self.label)
+
+        self.progress_bar = QProgressBar()
+        layout.addWidget(self.progress_bar)
+
+        self.setLayout(layout)
+
+    def set_progress(self, value: int, max_value: int):
+        self.progress_bar.setMaximum(max_value)
+        self.progress_bar.setValue(value)
+
+    def update_description(self, description: str):
+        self.label.setText(description)
+
+def create_progress_widget(total: int, description: str, progress_widget: ProgressWidget):
+    progress_widget.update_description(description)
+    progress_widget.set_progress(0, total)
+
+    def update_progress(current: int):
+        progress_widget.set_progress(current, total)
+
+    return update_progress
