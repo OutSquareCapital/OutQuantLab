@@ -13,7 +13,6 @@ class AssetSelectionWidget(QWidget):
         self.current_config = current_config
         self.assets_names = assets_names
         self.category_vars = {}
-        self.warning_labels = {}
         self.init_ui()
 
     def init_ui(self):
@@ -69,14 +68,13 @@ class AssetSelectionWidget(QWidget):
         self.apply_button.setEnabled(not warnings_active)
 
     def save_selection(self):
-        if not any(label.isVisible() for label in self.warning_labels.values()):
-            for category, asset_vars in self.category_vars.items():
-                self.current_config[category] = [
-                    asset for asset, checkbox in asset_vars.items() if checkbox.isChecked()
-                ]
-            save_assets_to_backtest_config(self.current_config)
-            self.apply_button.setEnabled(False)
-            self.assets_saved.emit()
+        for category, asset_vars in self.category_vars.items():
+            self.current_config[category] = [
+                asset for asset, checkbox in asset_vars.items() if checkbox.isChecked()
+            ]
+        save_assets_to_backtest_config(self.current_config)
+        self.apply_button.setEnabled(False)
+        self.assets_saved.emit()
 
     def select_all(self, category: str):
         select_all_items(category, self.category_vars[category])
