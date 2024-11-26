@@ -24,20 +24,20 @@
         "central_rate_of_change_macd_trend": false
     },
     "MeanReversion": {
-        "mean_price_ratio_normalised": true,
-        "mean_rate_of_change_normalised": true
+        "mean_price_ratio_normalised": false,
+        "mean_rate_of_change_normalised": false
     },
     "MeanReversionTrend": {
         "mean_price_ratio_normalised_trend": false,
         "mean_rate_of_change_normalised_trend": false
     },
     "ReturnsDistribution": {
-        "skewness": true,
-        "relative_skewness": true,
-        "skewness_on_kurtosis_ST": true,
-        "skewness_on_kurtosis_LT": true,
-        "relative_skewness_on_kurtosis_ST": true,
-        "relative_skewness_on_kurtosis_LT": true
+        "skewness": false,
+        "relative_skewness": false,
+        "skewness_on_kurtosis_ST": false,
+        "skewness_on_kurtosis_LT": false,
+        "relative_skewness_on_kurtosis_ST": false,
+        "relative_skewness_on_kurtosis_LT": false
     },
     "ReturnsDistributionTrend": {
         "skewness_trend": false,
@@ -48,8 +48,8 @@
         "relative_skewness_on_kurtosis_LT_trend": false
     },
     "Volatility": {
-        "relative_directional_volatility": true,
-        "normalised_directional_volatility": true
+        "relative_directional_volatility": false,
+        "normalised_directional_volatility": false
     },
     "VolatilityTrend": {
         "relative_directional_volatility_trend": false,
