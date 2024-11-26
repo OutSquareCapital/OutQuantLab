@@ -7,6 +7,9 @@ import Dashboard
 import Backtest
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QWidget
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWidgets import QVBoxLayout, QDialog
+
 
 class MainApp(QMainWindow):
     def __init__(self):
@@ -35,7 +38,26 @@ class MainApp(QMainWindow):
 
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
+    def show_plot_in_memory(self, fig):
+        """Affiche un graphique Plotly directement depuis la mémoire dans PySide6."""
+        # Convertir le graphique Plotly en HTML
+        html_content = fig.to_html(full_html=False, include_plotlyjs=True)
+        print(html_content)
 
+        # Créer une vue QWebEngineView
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Graphique")
+        layout = QVBoxLayout(dialog)
+        web_view = QWebEngineView(dialog)
+        layout.addWidget(web_view)
+        dialog.setLayout(layout)
+
+        # Charger le HTML en mémoire
+        web_view.setHtml(html_content)
+
+        # Afficher la fenêtre de dialogue
+        dialog.resize(800, 600)
+        dialog.exec()
     def open_config(self):
         UI.dynamic_config(Config.yahoo_assets, auto=False, parent=self)
 
@@ -73,14 +95,10 @@ class MainApp(QMainWindow):
         equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_asset_returns, global_avg=True)
         equal_weights_global_returns = equal_weights_global_returns.rename(columns={equal_weights_global_returns.columns[0]: 'equal_weights'})
         test_returns_df = equal_weights_asset_returns
-        self.close()
 
-        Dashboard.generate_dashboard_plots(
-        test_returns_df,
-        raw_adjusted_returns_df,
-        equity=True)
-
-
+        fig = Dashboard.plot_equity(test_returns_df)
+        self.show_plot_in_memory(fig)  # Affiche directement dans une vue PySide6
+        #self.close()
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     main_window = MainApp()

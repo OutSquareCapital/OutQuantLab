@@ -1,1 +1,1 @@
-from .Display import generate_dashboard_plots
+from .Display import *

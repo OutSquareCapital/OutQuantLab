@@ -40,7 +40,7 @@ def curves( x_values: pd.Index,
     
     setup_figure_layout(fig, title)
 
-    fig.show()
+    return fig
 
 def bars(series: pd.Series, title: str, xlabel: str, ylabel: str):
     # Gestion des couleurs avec votre méthode
@@ -68,7 +68,7 @@ def bars(series: pd.Series, title: str, xlabel: str, ylabel: str):
 
     setup_figure_layout(fig, title)
 
-    fig.show()
+    return fig
 
 
 
@@ -96,7 +96,7 @@ def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str):
 
     setup_figure_layout(fig, title)
 
-    fig.show()
+    return fig
 
 def scatter_3d(x_vals, y_vals, z_vals, values, params, title: str):
     fig = go.Figure(data=[go.Scatter3d(
@@ -123,7 +123,7 @@ def scatter_3d(x_vals, y_vals, z_vals, values, params, title: str):
     )
 
     setup_figure_layout(fig, title)
-    fig.show()
+    return fig
 
 def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
     fig = go.Figure()
@@ -156,7 +156,7 @@ def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
     
     setup_figure_layout(fig, title)
 
-    fig.show()
+    return fig
 
 def histogram(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
 
@@ -178,7 +178,7 @@ def histogram(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
         barmode="overlay"
     )
     setup_figure_layout(fig,  title)
-    fig.show()
+    return fig
 
 def icicle(labels: list, parents: list, title: str):
     fig = go.Figure(
@@ -190,4 +190,4 @@ def icicle(labels: list, parents: list, title: str):
     )
     setup_figure_layout(fig, title)
     
-    fig.show()
+    return fig
