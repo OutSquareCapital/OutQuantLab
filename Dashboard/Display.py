@@ -15,8 +15,6 @@ def plot_equity(returns_df: pd.DataFrame):
     return Widgets.curves(x_values=sorted_equity_curves.index,
                    y_values=sorted_equity_curves,
                    title="Equity Curves", 
-                   xlabel='Date', 
-                   ylabel='Equity', 
                    log_scale=True)
 
 def plot_rolling_volatility(returns_df: pd.DataFrame):
@@ -27,9 +25,7 @@ def plot_rolling_volatility(returns_df: pd.DataFrame):
 
     return Widgets.curves(x_values=sorted_rolling_volatility_df.index,
                    y_values=sorted_rolling_volatility_df, 
-                   title="Rolling Volatility", 
-                   xlabel='Date', 
-                   ylabel='Rolling Volatility (%)')
+                   title="Rolling Volatility %", )
 
 def plot_rolling_drawdown(returns_df: pd.DataFrame, length: int):
     
@@ -39,9 +35,7 @@ def plot_rolling_drawdown(returns_df: pd.DataFrame, length: int):
 
     return Widgets.curves(x_values=sorted_drawdowns.index, 
                    y_values=sorted_drawdowns, 
-                   title="Drawdowns",
-                   xlabel="Date",
-                   ylabel="Drawdown (%)")
+                   title="Drawdowns %")
 
 def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
 
@@ -51,9 +45,7 @@ def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
 
     return Widgets.curves(x_values=sorted_rolling_sharpe_ratio_df.index,
                    y_values=sorted_rolling_sharpe_ratio_df, 
-                   title="Rolling Sharpe Ratios", 
-                   xlabel='Date', 
-                   ylabel='Rolling Sharpe Ratio', 
+                   title="Rolling Sharpe Ratios",
                    zero_line=True)
     
 def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int):
@@ -65,8 +57,6 @@ def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int):
     return Widgets.curves(x_values=sorted_rolling_skewness_df.index,
                    y_values=sorted_rolling_skewness_df, 
                    title="Rolling Smoothed Skewnesss", 
-                   xlabel='Date', 
-                   ylabel='Rolling Skewness', 
                    zero_line=True)
     
 def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: int):
@@ -80,8 +70,6 @@ def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: 
         x_values=sorted_correlations.index,
         y_values=sorted_correlations,
         title=f"Rolling Average Inverted Correlation",
-        xlabel="Date",
-        ylabel="Inverted Correlation",
         zero_line=True
     )
 

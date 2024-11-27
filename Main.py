@@ -17,9 +17,11 @@ class MainApp(QMainWindow):
         super().__init__()
         self.temp_files = []
         self.backtest_result = None
+        self.global_result = None
         self.show_home_page()
         if not os.path.exists(Config.FILE_PATH_YF):
             self.refresh_data()
+        self.showMaximized()
 
     def show_home_page(self):
         del self.backtest_result
@@ -83,12 +85,12 @@ class MainApp(QMainWindow):
         equal_weights_global_returns = equal_weights_global_returns.rename(columns={equal_weights_global_returns.columns[0]: 'equal_weights'})
         self.update_progress(90, "Create Portfolio...")
         self.backtest_result = equal_weights_asset_returns
+        self.global_result = equal_weights_global_returns
         self.update_progress(100, "Backtest Done !")
 
         self.show_results_page()
 
     def show_results_page(self):
-
         plots = {
             "Equity Curves": lambda: self.show_plot(Dashboard.plot_equity(self.backtest_result)),
             "Rolling Volatility": lambda: self.show_plot(Dashboard.plot_rolling_volatility(self.backtest_result)),
@@ -119,7 +121,7 @@ class MainApp(QMainWindow):
         )
 
     def closeEvent(self, event):
-        cleanup_temp_files(self.temp_files)
+        cleanup_temp_files()
         super().closeEvent(event)
 
 

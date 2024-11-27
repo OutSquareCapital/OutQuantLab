@@ -8,8 +8,6 @@ from UI import COLOR_ADJUSTMENT
 def curves( x_values: pd.Index,
             y_values: pd.DataFrame,  
             title: str,
-            xlabel: str,
-            ylabel: str,
             log_scale: bool = False, 
             zero_line: bool = False):
 
@@ -33,11 +31,6 @@ def curves( x_values: pd.Index,
     if log_scale:
         fig.update_layout(yaxis=dict(type="log"))
 
-    fig.update_layout(       
-        xaxis_title=xlabel,
-        yaxis_title=ylabel
-        )
-    
     setup_figure_layout(fig, title)
 
     return fig
@@ -177,7 +170,7 @@ def histogram(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
         yaxis_title=ylabel,
         barmode="overlay"
     )
-    setup_figure_layout(fig,  title)
+    setup_figure_layout(fig, title)
     return fig
 
 def icicle(labels: list, parents: list, title: str):

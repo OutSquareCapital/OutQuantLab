@@ -1,10 +1,24 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QProgressBar, QTextEdit, QDialog, QPushButton, QMainWindow, QApplication
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QProgressBar, QTextEdit, QDialog, QPushButton, QMainWindow, QApplication, QLineEdit, QGridLayout
 from PySide6.QtGui import QPalette, QBrush, QPixmap, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
 import tempfile
 import os
 import UI
+import Dashboard
+
+def generate_plot_widget(fig):
+
+    fig.update_layout(autosize=True)
+    html_content = fig.to_html(full_html=True, include_plotlyjs='True', config={"responsive": True})
+    html_content = html_content.replace("<body>", f"<body style='background-color: {UI.BACKGROUND_GRAPH_DARK};'>")
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix="outquant.html")
+    with open(temp_file.name, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    plot_widget = QWebEngineView()
+    plot_widget.load(QUrl.fromLocalFile(temp_file.name))
+    return plot_widget
+
 
 def apply_global_styles(app:QApplication):
     app.setWindowIcon(QIcon(UI.APP_ICON_PHOTO)) 
@@ -16,40 +30,26 @@ def apply_global_styles(app:QApplication):
         }}
     """)
 
-def cleanup_temp_files(temp_files: list):
-    for temp_file in temp_files:
-        try:
-            os.remove(temp_file)
-        except Exception as e:
-            print(f"Erreur lors de la suppression du fichier temporaire {temp_file} : {e}")
+def cleanup_temp_files():
+    # Supprimer tous les fichiers avec le suffixe 'outquant.html' dans le répertoire temporaire
+    temp_dir = tempfile.gettempdir()
+    for file_name in os.listdir(temp_dir):
+        if file_name.endswith("outquant.html"):
+            file_path = os.path.join(temp_dir, file_name)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"Erreur lors de la suppression du fichier temporaire {file_path} : {e}")
+
 
 def display_plot_dialog(parent, fig, window_title: str):
-
-    # Génère le HTML avec Plotly inclus
-    html_content = fig.to_html(full_html=True, include_plotlyjs='True', config={"responsive": True})
-    html_content = html_content.replace("<body>", f"<body style='background-color: {UI.BACKGROUND_GRAPH_WHITE};'>")
-
-    # Crée un fichier temporaire pour le HTML
-    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
-    with open(temp_file.name, 'w', encoding='utf-8') as f:
-        f.write(html_content)
-
-    # Crée un QWebEngineView et charge le fichier
+    plot_widget = generate_plot_widget(fig)
     dialog = QDialog(parent)
     dialog.setWindowTitle(window_title)
     layout = QVBoxLayout(dialog)
-    web_view = QWebEngineView(dialog)
-    layout.addWidget(web_view)
+    layout.addWidget(plot_widget)
     dialog.setLayout(layout)
-    web_view.load(QUrl.fromLocalFile(temp_file.name))
-
-    # Configure la taille et affiche le dialogue
-    dialog.resize(UI.DEFAULT_WIDTH + 30, UI.DEFAULT_HEIGHT + 40)
     dialog.exec()
-
-    # Ajouter le fichier temporaire à la liste pour nettoyage ultérieur
-    if hasattr(parent, 'temp_files'):
-        parent.temp_files.append(temp_file.name)
 
 def set_background_image(widget: QWidget, image_path: str):
     palette = QPalette()
@@ -60,7 +60,6 @@ def set_background_image(widget: QWidget, image_path: str):
 
 def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_callback, refresh_data_callback):
 
-    parent.resize(UI.DEFAULT_WIDTH, UI.DEFAULT_HEIGHT)
     parent.setWindowTitle("OutQuantLab")
     
     main_widget = QWidget()
@@ -108,33 +107,72 @@ def setup_loading_page(parent):
     parent.setCentralWidget(loading_widget)
     return progress_bar, log_output
 
-def create_results_page(dashboard_plots, back_to_home_callback):
-
+def create_results_page(dashboard_plots, back_to_home_callback, parent):
     results_widget = QWidget()
-    results_layout = QVBoxLayout()
-
+    results_layout = QHBoxLayout(results_widget)  # Layout principal horizontal
     # Définir l'image de fond
     set_background_image(results_widget, UI.DASHBOARD_PAGE_PHOTO)
+    # Section gauche : Boutons de graphiques
+    left_layout = QVBoxLayout()
 
-    # Ajouter le bouton "Back to Home Page"
-    back_to_home_button = QPushButton("Back to Home Page")
-    back_to_home_button.clicked.connect(back_to_home_callback)
-    results_layout.addWidget(back_to_home_button)
-
-    # Ajouter les boutons pour chaque graphique
     for title, plot_func in dashboard_plots.items():
         button = QPushButton(title, results_widget)
         button.clicked.connect(plot_func)
-        results_layout.addWidget(button)
+        left_layout.addWidget(button)
 
-    results_widget.setLayout(results_layout)
+    equity_plot = generate_plot_widget(
+        Dashboard.plot_equity(parent.global_result))
+    sharpe_plot = generate_plot_widget(
+        Dashboard.plot_rolling_sharpe_ratio(parent.global_result, length=1250))
+    drawdown_plot = generate_plot_widget(
+        Dashboard.plot_rolling_drawdown(parent.global_result, length=1250))
+    vol_plot = generate_plot_widget(
+        Dashboard.plot_rolling_volatility(parent.global_result))
+
+    # Layout droit : champs de saisie et graphiques
+    right_top_layout = QVBoxLayout()
+    back_to_home_button = QPushButton("Back to Home Page")
+    back_to_home_button.clicked.connect(back_to_home_callback)
+    right_top_layout.addWidget(back_to_home_button)
+    length_input = QLineEdit(results_widget)
+    length_input.setPlaceholderText("Rolling length (e.g., 1250)")
+    right_top_layout.addWidget(length_input)
+
+    max_clusters_input = QLineEdit(results_widget)
+    max_clusters_input.setPlaceholderText("Max Clusters (e.g., 5)")
+    right_top_layout.addWidget(max_clusters_input)
+
+    max_sub_clusters_input = QLineEdit(results_widget)
+    max_sub_clusters_input.setPlaceholderText("Max Sub Clusters (e.g., 3)")
+    right_top_layout.addWidget(max_sub_clusters_input)
+
+    max_sub_sub_clusters_input = QLineEdit(results_widget)
+    max_sub_sub_clusters_input.setPlaceholderText("Max Sub Sub Clusters (e.g., 2)")
+    right_top_layout.addWidget(max_sub_sub_clusters_input)
+
+    # Grille pour les graphiques
+    right_bottom_layout = QGridLayout()
+    plots = [equity_plot, sharpe_plot, drawdown_plot, vol_plot]
+    for i, plot in enumerate(plots):
+        right_bottom_layout.addWidget(plot, i // 2, i % 2)  # Ajouter dans une grille 2x2
+
+    # Layout principal pour la section droite
+    right_layout = QVBoxLayout()
+    right_layout.addLayout(right_top_layout)  # Boutons et champs de saisie en haut
+    right_layout.addLayout(right_bottom_layout)  # Grille des graphiques en bas
+
+    # Ajouter les layouts gauche et droite au layout principal
+    results_layout.addLayout(left_layout)
+    results_layout.addLayout(right_layout)
     return results_widget
+
 
 def setup_results_page(parent, plots, back_to_home_callback):
 
     results_widget = create_results_page(
         dashboard_plots=plots,
         back_to_home_callback=back_to_home_callback,
+        parent=parent
     )
     parent.setCentralWidget(results_widget)
 
@@ -152,7 +190,6 @@ def setup_progress_bar(parent, title: str, max_value: int = 100):
     layout.addWidget(progress_bar)
 
     widget.setLayout(layout)
-    progress_window.resize(400, 200)
 
     return progress_window, progress_bar
 
