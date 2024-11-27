@@ -5,6 +5,7 @@ from PySide6.QtCore import QPropertyAnimation, QEasingCurve
 from typing import Callable
 from typing import Dict
 
+
 def create_scroll_area() ->tuple[QScrollArea, QWidget, QVBoxLayout]:
     """
     Creates a scrollable area with a vertical layout.

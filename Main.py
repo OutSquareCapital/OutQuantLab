@@ -1,10 +1,8 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QProgressBar, QTextEdit, QPushButton
-from PySide6.QtWidgets import QVBoxLayout, QDialog
-from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtCore import QUrl
-from PySide6.QtGui import QPalette, QBrush, QPixmap, QIcon
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QProgressBar, QPushButton
+from PySide6.QtGui import QIcon
 import Config
+from Main_UI import set_background_image, create_loading_page, update_progress, create_plot_dialog, cleanup_temp_files
 
 class MainApp(QMainWindow):
     def __init__(self):
@@ -30,7 +28,7 @@ class MainApp(QMainWindow):
         
         main_widget = QWidget()
         main_layout = QVBoxLayout()
-        self.set_background_image(main_widget, Config.HOME_PAGE_PHOTO)
+        set_background_image(main_widget, Config.HOME_PAGE_PHOTO)
 
         # Bouton Run Backtest
         backtest_button = QPushButton("Run Backtest")
@@ -52,83 +50,26 @@ class MainApp(QMainWindow):
 
     def show_loading_page(self):
         """Affiche une page de chargement avec une image de fond."""
-        self.loading_widget = QWidget()
-        self.loading_layout = QVBoxLayout(self.loading_widget)
-        self.set_background_image(self.loading_widget, Config.LOADING_PAGE_PHOTO)
-
-        # Ajouter un espace pour pousser les éléments vers le bas
-        self.loading_layout.addStretch()
-
-        # Barre de progression
-        self.progress_bar = QProgressBar(self.loading_widget)
-        self.progress_bar.setRange(0, 100)
-        self.loading_layout.addWidget(self.progress_bar)
-
-        # Zone de texte pour afficher les logs
-        self.log_output = QTextEdit(self.loading_widget)
-        self.log_output.setReadOnly(True)
-        self.log_output.setFixedHeight(100)
-        self.loading_layout.addWidget(self.log_output)
-
-        # Appliquer le layout
-        self.loading_widget.setLayout(self.loading_layout)
+        self.loading_widget, self.progress_bar, self.log_output = create_loading_page(Config.LOADING_PAGE_PHOTO)
         self.setCentralWidget(self.loading_widget)
 
     def update_progress(self, value, message=None):
-        """Met à jour la barre de progression et remplace le message."""
-        self.progress_bar.setValue(value)
-        if message:
-            self.log_output.clear()  # Efface les anciens messages
-            self.log_output.append(message)  # Affiche uniquement le nouveau message
-
-    def set_background_image(self, widget, image_path):
-        palette = QPalette()
-        pixmap = QPixmap(image_path)
-        palette.setBrush(QPalette.Window, QBrush(pixmap))
-        widget.setPalette(palette)
-        widget.setAutoFillBackground(True)
+        update_progress(self.progress_bar, self.log_output, value, message)
 
     def show_plot(self, fig):
-        # Génère le HTML avec Plotly inclus
-        html_content = fig.to_html(full_html=True, include_plotlyjs='True', config={"responsive": True})
-
-        html_content = html_content.replace(
-            "<body>",
-            f"<body style='background-color: {Config.BACKGROUND_GRAPH_WHITE};'>"
+        temp_file = create_plot_dialog(
+            fig,
+            window_title="Graph",
+            default_width=Config.DEFAULT_WIDTH,
+            default_height=Config.DEFAULT_HEIGHT,
+            background_color=Config.BACKGROUND_GRAPH_WHITE,
         )
-
-        # Crée un fichier temporaire pour le HTML
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
-        with open(temp_file.name, 'w', encoding='utf-8') as f:
-            f.write(html_content)
-
         # Stocke le fichier temporaire pour suppression ultérieure
-        self.temp_files.append(temp_file.name)
-
-        # Crée un QWebEngineView et charge le fichier
-        dialog = QDialog(self)
-        dialog.setWindowTitle("Graph")
-        layout = QVBoxLayout(dialog)
-        web_view = QWebEngineView(dialog)
-        layout.addWidget(web_view)
-        dialog.setLayout(layout)
-        web_view.load(QUrl.fromLocalFile(temp_file.name))
-
-        # Affiche le graphique
-        dialog.resize(Config.DEFAULT_WIDTH+30, Config.DEFAULT_HEIGHT+40)
-        dialog.exec()
-
-    def cleanup_temp_files(self):
-        """Supprime tous les fichiers temporaires stockés."""
-        for temp_file in self.temp_files:
-            try:
-                os.remove(temp_file)
-            except Exception as e:
-                print(f"Erreur lors de la suppression du fichier temporaire {temp_file} : {e}")
+        self.temp_files.append(temp_file)
 
     def closeEvent(self, event):
         """Nettoie les fichiers temporaires avant la fermeture."""
-        self.cleanup_temp_files()
+        cleanup_temp_files(self.temp_files)
         super().closeEvent(event)
 
     def open_config(self):
@@ -196,7 +137,7 @@ class MainApp(QMainWindow):
         """Affiche une page avec les boutons pour afficher les graphiques."""
         self.results_widget = QWidget()
         self.results_layout = QVBoxLayout()
-        self.set_background_image(self.results_widget, Config.DASHBOARD_PAGE_PHOTO)
+        set_background_image(self.results_widget, Config.DASHBOARD_PAGE_PHOTO)
         # Bouton Back to Home Page
         back_to_home_button = QPushButton("Back to Home Page")
         back_to_home_button.clicked.connect(self.init_ui)
@@ -269,7 +210,6 @@ if __name__ == "__main__":
     progress_bar.setValue(70)
     import UI
     progress_bar.setValue(80)
-    import tempfile
     import os
     progress_bar.setValue(90)
 
