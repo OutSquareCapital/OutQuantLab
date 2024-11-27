@@ -1,28 +1,21 @@
-import Config
-import UI   
-import Portfolio
-import Get_Data
-import Process_Data
-import Dashboard
-import Backtest
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QPushButton, QWidget, QProgressBar, QTextEdit
-from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QProgressBar, QTextEdit, QPushButton
 from PySide6.QtWidgets import QVBoxLayout, QDialog
+from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
-import tempfile
-import os
-from PySide6.QtGui import QPalette, QBrush, QPixmap
+from PySide6.QtGui import QPalette, QBrush, QPixmap, QIcon
+import Config
 
 class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.setWindowIcon(QIcon(Config.APP_ICON_PHOTO)) 
         self.setWindowTitle("Main Application")
         self.temp_files = []
         self.backtest_result = None
         self.all_strategies_results = None
         self.init_ui()
-        self.resize(Config.DEFAULT_WIDTH+5, Config.DEFAULT_HEIGHT+5) 
+        self.resize(Config.DEFAULT_WIDTH, Config.DEFAULT_HEIGHT) 
         self.setStyleSheet("""
             * {
                 font-family: 'QuickSand';
@@ -237,8 +230,55 @@ class MainApp(QMainWindow):
         self.results_widget.setLayout(self.results_layout)
         self.setCentralWidget(self.results_widget)
 
+
+
 if __name__ == "__main__":
+    # Initialisation de l'application Qt
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(Config.APP_ICON_PHOTO))  # Définir l'icône de l'application
+
+    # Création de la fenêtre de chargement temporaire
+    loading_window = QMainWindow()
+    loading_window.setWindowTitle("Launching App..")
+    loading_layout = QVBoxLayout()
+    loading_widget = QWidget(loading_window)
+    loading_window.setCentralWidget(loading_widget)
+
+    progress_bar = QProgressBar()
+    progress_bar.setRange(0, 100)
+    loading_layout.addWidget(progress_bar)
+    loading_widget.setLayout(loading_layout)
+
+    loading_window.resize(400, 200)
+    loading_window.show()
+
+    # Mise à jour de la progression pendant le chargement
+    QApplication.processEvents()
+    progress_bar.setValue(10)
+
+    # Importations différées avec progression
+    import Get_Data
+    progress_bar.setValue(30)
+    import Process_Data
+    progress_bar.setValue(40)
+    import Backtest
+    progress_bar.setValue(50)
+    import Portfolio
+    progress_bar.setValue(60)
+    import Dashboard
+    progress_bar.setValue(70)
+    import UI
+    progress_bar.setValue(80)
+    import tempfile
+    import os
+    progress_bar.setValue(90)
+
+    # Initialisation de la fenêtre principale
     main_window = MainApp()
+    progress_bar.setValue(100)
+
+    # Fermeture de la fenêtre de chargement et affichage de l'application principale
+    loading_window.close()
     main_window.show()
+
     sys.exit(app.exec())

@@ -18,6 +18,7 @@ MEDIAS_FOLDER = os.path.join(os.path.dirname(__file__), "Medias")
 HOME_PAGE_PHOTO = os.path.join(MEDIAS_FOLDER, "home_page.webp")
 LOADING_PAGE_PHOTO = os.path.join(MEDIAS_FOLDER, "loading_page.png")
 DASHBOARD_PAGE_PHOTO = os.path.join(MEDIAS_FOLDER, "dashboard_page.png")
+APP_ICON_PHOTO = os.path.join(MEDIAS_FOLDER, "app_logo.jpg")
 
 FILE_PATH_YF = os.path.join(SAVED_DATA_FOLDER, "price_data.parquet")
 
