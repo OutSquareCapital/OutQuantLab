@@ -30,6 +30,8 @@ class MainApp(QMainWindow):
                 font: bold;
             }
         """)
+        if not os.path.exists(Config.FILE_PATH_YF):
+            self.refresh_data()
 
     def init_ui(self):
         
@@ -224,7 +226,7 @@ class MainApp(QMainWindow):
             "Correlation Heatmap": lambda: self.show_plot(Dashboard.plot_correlation_heatmap(self.backtest_result)),
             "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(self.backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2)),
             "Sharpe Ratio Heatmap": lambda: self.show_plot(Dashboard.plot_sharpe_ratio_heatmap(self.all_strategies_results, param1='LenST', param2='LenLT')),
-            "Overall Sharpe Ratio 3D Scatter": lambda: self.show_plot(Dashboard.plot_overall_sharpe_ratio_3d_scatter(self.all_strategies_results, params=['LenST', 'LenLT', 'MacLength'])),
+            #"Overall Sharpe Ratio 3D Scatter": lambda: self.show_plot(Dashboard.plot_overall_sharpe_ratio_3d_scatter(self.all_strategies_results, params=['LenST', 'LenLT', 'MacLength'])),
         }
 
         for title, func in plots.items():
