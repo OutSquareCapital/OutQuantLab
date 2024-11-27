@@ -17,14 +17,12 @@ class MainApp(QMainWindow):
         super().__init__()
         self.temp_files = []
         self.backtest_result = None
-        self.all_strategies_results = None
         self.show_home_page()
         if not os.path.exists(Config.FILE_PATH_YF):
             self.refresh_data()
 
     def show_home_page(self):
         del self.backtest_result
-        del self.all_strategies_results
         setup_home_page(
             parent=self,
             run_backtest_callback=self.run_backtest,
@@ -85,7 +83,6 @@ class MainApp(QMainWindow):
         equal_weights_global_returns = equal_weights_global_returns.rename(columns={equal_weights_global_returns.columns[0]: 'equal_weights'})
         self.update_progress(90, "Create Portfolio...")
         self.backtest_result = equal_weights_asset_returns
-        self.all_strategies_results=raw_adjusted_returns_df
         self.update_progress(100, "Backtest Done !")
 
         self.show_results_page()
@@ -107,8 +104,7 @@ class MainApp(QMainWindow):
             "Returns Distribution Violin": lambda: self.show_plot(Dashboard.plot_returns_distribution_violin(self.backtest_result)),
             "Returns Distribution Histogram": lambda: self.show_plot(Dashboard.plot_returns_distribution_histogram(self.backtest_result)),
             "Correlation Heatmap": lambda: self.show_plot(Dashboard.plot_correlation_heatmap(self.backtest_result)),
-            "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(self.backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2)),
-            "Sharpe Ratio Heatmap": lambda: self.show_plot(Dashboard.plot_sharpe_ratio_heatmap(self.all_strategies_results, param1='LenST', param2='LenLT')),
+            "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(self.backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2))
         }
 
         setup_results_page(parent=self, 

@@ -4,7 +4,6 @@ from scipy.stats import skew
 import Config
 from Process_Data import equity_curves_calculs
 import Metrics as mt
-import Config
 
 def calculate_equity_curves_df(returns_df: pd.DataFrame):
 
