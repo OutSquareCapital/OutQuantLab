@@ -1,4 +1,16 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QProgressBar, QTextEdit, QDialog, QPushButton, QMainWindow, QApplication, QLineEdit, QGridLayout
+from PySide6.QtWidgets import (QWidget, 
+                               QHBoxLayout, 
+                               QVBoxLayout, 
+                               QProgressBar, 
+                               QTextEdit, 
+                               QDialog, 
+                               QPushButton, 
+                               QMainWindow, 
+                               QApplication, 
+                               QLineEdit, 
+                               QGridLayout, 
+                               QSizePolicy, 
+                               QSpacerItem)
 from PySide6.QtGui import QPalette, QBrush, QPixmap, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
@@ -116,50 +128,65 @@ def setup_results_page(parent, plots, back_to_home_callback):
         button.clicked.connect(plot_func)
         left_layout.addWidget(button)
 
-    equity_plot = generate_plot_widget(
-        Dashboard.plot_equity(parent.global_result), False)
-    sharpe_plot = generate_plot_widget(
-        Dashboard.plot_rolling_sharpe_ratio(parent.global_result, length=1250), False)
-    drawdown_plot = generate_plot_widget(
-        Dashboard.plot_rolling_drawdown(parent.global_result, length=1250), False)
-    vol_plot = generate_plot_widget(
-        Dashboard.plot_rolling_volatility(parent.global_result), False)
+    # Graphiques générés
+    equity_plot = generate_plot_widget(Dashboard.plot_equity(parent.global_result), show_legend=False)
+    sharpe_plot = generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(parent.global_result, length=1250), show_legend=False)
+    drawdown_plot = generate_plot_widget(Dashboard.plot_rolling_drawdown(parent.global_result, length=1250), show_legend=False)
+    vol_plot = generate_plot_widget(Dashboard.plot_rolling_volatility(parent.global_result), show_legend=False)
 
-    # Layout droit : champs de saisie et graphiques
-    right_top_layout = QVBoxLayout()
-    back_to_home_button = QPushButton("Back to Home Page")
-    back_to_home_button.clicked.connect(back_to_home_callback)
-    right_top_layout.addWidget(back_to_home_button)
+    # Layout pour la section supérieure droite
+    right_top_layout = QHBoxLayout()
+
+    # 1ère colonne : Horizontal Empty Space
+    horizontal_empty_layout = QVBoxLayout()
+    right_top_layout.addLayout(horizontal_empty_layout, stretch=6.5)  # Large espace vide
+
+    # 2ème colonne : Input Fields Layout
+    input_fields_layout = QVBoxLayout()
     length_input = QLineEdit(results_widget)
     length_input.setPlaceholderText("Rolling length (e.g., 1250)")
-    right_top_layout.addWidget(length_input)
+    input_fields_layout.addWidget(length_input)
 
     max_clusters_input = QLineEdit(results_widget)
     max_clusters_input.setPlaceholderText("Max Clusters (e.g., 5)")
-    right_top_layout.addWidget(max_clusters_input)
+    input_fields_layout.addWidget(max_clusters_input)
 
     max_sub_clusters_input = QLineEdit(results_widget)
     max_sub_clusters_input.setPlaceholderText("Max Sub Clusters (e.g., 3)")
-    right_top_layout.addWidget(max_sub_clusters_input)
+    input_fields_layout.addWidget(max_sub_clusters_input)
 
     max_sub_sub_clusters_input = QLineEdit(results_widget)
     max_sub_sub_clusters_input.setPlaceholderText("Max Sub Sub Clusters (e.g., 2)")
-    right_top_layout.addWidget(max_sub_sub_clusters_input)
+    input_fields_layout.addWidget(max_sub_sub_clusters_input)
+
+    right_top_layout.addLayout(input_fields_layout, stretch=1)  # Section centrale (champs de saisie)
+
+    # 3ème colonne : Back Home Layout
+    back_home_layout = QVBoxLayout()
+    back_to_home_button = QPushButton("Home Page")
+    back_to_home_button.clicked.connect(back_to_home_callback)
+    back_to_home_button.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)  # Dynamique mais fixe en hauteur
+    back_home_layout.addWidget(back_to_home_button)
+    # Ajouter un espace extensible sous le bouton
+    spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    back_home_layout.addItem(spacer)
+    
+    right_top_layout.addLayout(back_home_layout, stretch=0.5)
 
     # Grille pour les graphiques
     right_bottom_layout = QGridLayout()
     plots = [equity_plot, sharpe_plot, drawdown_plot, vol_plot]
     for i, plot in enumerate(plots):
-        right_bottom_layout.addWidget(plot, i // 2, i % 2)  # Ajouter dans une grille 2x2
+        right_bottom_layout.addWidget(plot, i // 2, i % 2)  # Grille 2x2 pour les graphiques
 
     # Layout principal pour la section droite
     right_layout = QVBoxLayout()
-    right_layout.addLayout(right_top_layout)  # Boutons et champs de saisie en haut
-    right_layout.addLayout(right_bottom_layout)  # Grille des graphiques en bas
+    right_layout.addLayout(right_top_layout)  # Ajoute la division supérieure
+    right_layout.addLayout(right_bottom_layout)  # Grille des graphiques
 
     # Ajouter les layouts gauche et droite au layout principal
-    results_layout.addLayout(left_layout)
-    results_layout.addLayout(right_layout)
+    results_layout.addLayout(left_layout)  # Layout gauche
+    results_layout.addLayout(right_layout)  # Layout droit
 
     parent.setCentralWidget(results_widget)
 
