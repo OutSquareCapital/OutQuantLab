@@ -44,6 +44,12 @@ class MainApp(QMainWindow):
     def show_loading_page(self):
         self.progress_bar, self.log_output = setup_loading_page(self)
 
+    def show_plot(self, fig):
+        display_plot_dialog(
+            parent=self,
+            fig=fig,
+            window_title="Graph"
+        )
     def run_backtest(self):
         self.show_loading_page()
 
@@ -86,7 +92,7 @@ class MainApp(QMainWindow):
         self.update_progress(90, "Create Portfolio...")
         self.backtest_result = equal_weights_asset_returns
         self.global_result = equal_weights_global_returns
-        self.update_progress(100, "Backtest Done !")
+        self.update_progress(100, "Plotting Results...")
 
         self.show_results_page()
 
@@ -113,13 +119,6 @@ class MainApp(QMainWindow):
                            plots=plots,
                            back_to_home_callback=self.show_home_page)
 
-    def show_plot(self, fig):
-        display_plot_dialog(
-            parent=self,
-            fig=fig,
-            window_title="Graph"
-        )
-
     def closeEvent(self, event):
         cleanup_temp_files()
         super().closeEvent(event)
@@ -130,6 +129,7 @@ if __name__ == "__main__":
     apply_global_styles(app)
 
     progress_window, progress_bar = setup_progress_bar(None, "Launching App..")
+    progress_window.resize(400, 200)
     progress_window.show()
 
     QApplication.processEvents()

@@ -74,27 +74,51 @@ def set_background_image(widget: QWidget, image_path: str):
     widget.setAutoFillBackground(True)
 
 def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_callback, refresh_data_callback):
-
     parent.setWindowTitle("OutQuantLab")
-    
-    main_widget = QWidget()
-    main_layout = QVBoxLayout()
-    set_background_image(main_widget, UI.HOME_PAGE_PHOTO,)
 
+    # Widget principal et layout principal horizontal
+    main_widget = QWidget()
+    main_layout = QHBoxLayout(main_widget)
+
+    # Moitié gauche
+    left_layout = QVBoxLayout()
+
+    # Layout pour les 80% de la hauteur gauche (vide)
+    left_top_layout = QVBoxLayout()
+    spacer_left_top = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+    left_top_layout.addItem(spacer_left_top)
+
+    # Layout pour les boutons en haut à gauche
+    buttons_layout = QVBoxLayout()
     backtest_button = QPushButton("Run Backtest")
     backtest_button.clicked.connect(run_backtest_callback)
-    main_layout.addWidget(backtest_button)
+    buttons_layout.addWidget(backtest_button)
 
     config_button = QPushButton("Open Config")
     config_button.clicked.connect(open_config_callback)
-    main_layout.addWidget(config_button)
+    buttons_layout.addWidget(config_button)
 
     refresh_button = QPushButton("Refresh Data")
     refresh_button.clicked.connect(refresh_data_callback)
-    main_layout.addWidget(refresh_button)
+    buttons_layout.addWidget(refresh_button)
 
-    main_widget.setLayout(main_layout)
+    # Ajouter les boutons en haut et l'espace vide en dessous
+    left_layout.addLayout(buttons_layout)
+    left_layout.addLayout(left_top_layout, stretch=4)
+
+    # Moitié droite (vide, pleine hauteur)
+    right_layout = QVBoxLayout()
+    spacer_right = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
+    right_layout.addItem(spacer_right)
+
+    # Ajouter les layouts gauche et droite au layout principal
+    main_layout.addLayout(left_layout, stretch=1)  # Moitié gauche
+    main_layout.addLayout(right_layout, stretch=9)  # Moitié droite
+
+    # Appliquer le layout principal au widget
+    set_background_image(main_widget, UI.HOME_PAGE_PHOTO)
     parent.setCentralWidget(main_widget)
+
 
 def setup_loading_page(parent):
     loading_widget = QWidget()
