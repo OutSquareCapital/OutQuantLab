@@ -26,14 +26,16 @@ def process_backtest(prices_array: np.ndarray,
                     volatility_adjusted_pct_returns_array: np.ndarray,
                     asset_names: list,
                     dates_index: pd.Index,
-                    indicators_and_params: dict
+                    indicators_and_params: dict,
+                    progress_callback: callable
                     ) -> tuple[pd.DataFrame, pd.DataFrame]:
 
     raw_adjusted_returns_array = transform_signals_into_returns(prices_array,
                                                                 log_returns_array,
                                                                 volatility_adjusted_pct_returns_array,
                                                                 asset_names,
-                                                                indicators_and_params)
+                                                                indicators_and_params,
+                                                                progress_callback)
 
     return data_arrays_to_dataframe(raw_adjusted_returns_array, 
                                     dates_index, 

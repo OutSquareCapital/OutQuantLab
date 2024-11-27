@@ -8,12 +8,12 @@
         "central_rate_of_change": true
     },
     "Acceleration": {
-        "mean_price_macd": true,
-        "median_price_macd": true,
-        "central_price_macd": true,
-        "mean_rate_of_change_macd": true,
-        "median_rate_of_change_macd": true,
-        "central_rate_of_change_macd": true
+        "mean_price_macd": false,
+        "median_price_macd": false,
+        "central_price_macd": false,
+        "mean_rate_of_change_macd": false,
+        "median_rate_of_change_macd": false,
+        "central_rate_of_change_macd": false
     },
     "AccelerationTrend": {
         "mean_price_macd_trend": false,

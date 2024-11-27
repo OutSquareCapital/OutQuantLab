@@ -12,3 +12,4 @@ plotly
 numexpr
 PySide6
 pyarrow
+orjson

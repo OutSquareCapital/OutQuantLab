@@ -2,7 +2,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 from plotly.graph_objects import Figure
 import plotly.graph_objects as go
-from Config import DEFAULT_TEMPLATE, DEFAULT_HEIGHT, COLOR_ADJUSTMENT, BASE_COLORS
+from Config import DEFAULT_TEMPLATE, DEFAULT_HEIGHT, DEFAULT_WIDTH, COLOR_ADJUSTMENT, BASE_COLORS
 import pandas as pd
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
@@ -37,8 +37,9 @@ def setup_figure_layout(fig: Figure,
     fig.update_layout(
         title=title,
         template=DEFAULT_TEMPLATE,
-        height=DEFAULT_HEIGHT
-    )
+        height=DEFAULT_HEIGHT,
+        width=DEFAULT_WIDTH
+        )
 
 def add_zero_line(fig: go.Figure, x_values: pd.Index):
     fig.add_trace(go.Scatter(
