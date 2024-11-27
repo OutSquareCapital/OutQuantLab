@@ -1,7 +1,7 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
-from PySide6.QtGui import QIcon
 import Config
+
 from Main_UI import (apply_global_styles,
                     setup_home_page, 
                     setup_loading_page,
@@ -16,13 +16,10 @@ class MainApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowIcon(QIcon(Config.APP_ICON_PHOTO)) 
-        self.setWindowTitle("Main Application")
         self.temp_files = []
         self.backtest_result = None
         self.all_strategies_results = None
         self.show_home_page()
-        self.resize(Config.DEFAULT_WIDTH, Config.DEFAULT_HEIGHT) 
         if not os.path.exists(Config.FILE_PATH_YF):
             self.refresh_data()
 
@@ -31,8 +28,7 @@ class MainApp(QMainWindow):
             parent=self,
             run_backtest_callback=self.run_backtest,
             open_config_callback=self.open_config,
-            refresh_data_callback=self.refresh_data,
-            background_image=Config.HOME_PAGE_PHOTO,
+            refresh_data_callback=self.refresh_data
         )
 
     def open_config(self):
@@ -42,7 +38,7 @@ class MainApp(QMainWindow):
         Get_Data.get_yahoo_finance_data(Config.yahoo_assets, Config.FILE_PATH_YF)
 
     def show_loading_page(self):
-        self.progress_bar, self.log_output = setup_loading_page(self, Config.LOADING_PAGE_PHOTO)
+        self.progress_bar, self.log_output = setup_loading_page(self)
 
     def update_progress(self, value, message=None):
         update_progress(self.progress_bar, self.log_output, value, message)
@@ -122,18 +118,14 @@ class MainApp(QMainWindow):
         }
 
         setup_results_page(parent=self, 
-                           plots=plots, 
-                           background_image=Config.DASHBOARD_PAGE_PHOTO, 
+                           plots=plots,
                            back_to_home_callback=self.show_home_page)
 
     def show_plot(self, fig):
         display_plot_dialog(
             parent=self,
             fig=fig,
-            window_title="Graph",
-            default_width=Config.DEFAULT_WIDTH,
-            default_height=Config.DEFAULT_HEIGHT,
-            background_color=Config.BACKGROUND_GRAPH_WHITE,
+            window_title="Graph"
         )
 
     def closeEvent(self, event):
@@ -144,7 +136,6 @@ class MainApp(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     apply_global_styles(app)
-    app.setWindowIcon(QIcon(Config.APP_ICON_PHOTO))
 
     progress_window, progress_bar = setup_progress_bar(None, "Launching App..")
     progress_window.show()

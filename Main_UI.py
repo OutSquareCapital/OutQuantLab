@@ -1,14 +1,16 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QProgressBar, QTextEdit, QDialog, QPushButton, QMainWindow, QApplication
-from PySide6.QtGui import QPalette, QBrush, QPixmap
+from PySide6.QtGui import QPalette, QBrush, QPixmap, QIcon
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtCore import QUrl
 import tempfile
 import os
+import UI
 
 def apply_global_styles(app:QApplication):
     """
     Applique les styles globaux à l'application.
     """
+    app.setWindowIcon(QIcon(UI.APP_ICON_PHOTO)) 
     app.setStyleSheet("""
         * {
             font-family: 'QuickSand';
@@ -16,7 +18,6 @@ def apply_global_styles(app:QApplication):
             font: bold;
         }
     """)
-
 def cleanup_temp_files(temp_files: list):
     for temp_file in temp_files:
         try:
@@ -24,13 +25,13 @@ def cleanup_temp_files(temp_files: list):
         except Exception as e:
             print(f"Erreur lors de la suppression du fichier temporaire {temp_file} : {e}")
 
-def display_plot_dialog(parent, fig, window_title: str, default_width: int, default_height: int, background_color: str):
+def display_plot_dialog(parent, fig, window_title: str):
     """
     Crée et affiche un graphique Plotly dans un QDialog, tout en gérant les fichiers temporaires.
     """
     # Génère le HTML avec Plotly inclus
     html_content = fig.to_html(full_html=True, include_plotlyjs='True', config={"responsive": True})
-    html_content = html_content.replace("<body>", f"<body style='background-color: {background_color};'>")
+    html_content = html_content.replace("<body>", f"<body style='background-color: {UI.BACKGROUND_GRAPH_WHITE};'>")
 
     # Crée un fichier temporaire pour le HTML
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".html")
@@ -47,7 +48,7 @@ def display_plot_dialog(parent, fig, window_title: str, default_width: int, defa
     web_view.load(QUrl.fromLocalFile(temp_file.name))
 
     # Configure la taille et affiche le dialogue
-    dialog.resize(default_width + 30, default_height + 40)
+    dialog.resize(UI.DEFAULT_WIDTH + 30, UI.DEFAULT_HEIGHT + 40)
     dialog.exec()
 
     # Ajouter le fichier temporaire à la liste pour nettoyage ultérieur
@@ -68,14 +69,14 @@ def update_progress(progress_bar: QProgressBar, log_output: QTextEdit, value: in
         log_output.clear()
         log_output.append(message)
 
-def setup_home_page(parent, run_backtest_callback, open_config_callback, refresh_data_callback, background_image):
-    """
-    Configure la page d'accueil avec les boutons nécessaires.
-    """
+def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_callback, refresh_data_callback):
+
+    parent.resize(UI.DEFAULT_WIDTH, UI.DEFAULT_HEIGHT)
+    parent.setWindowTitle("OutQuantLab")
+    
     main_widget = QWidget()
     main_layout = QVBoxLayout()
-
-    set_background_image(main_widget, background_image)
+    set_background_image(main_widget, UI.HOME_PAGE_PHOTO,)
 
     # Bouton Run Backtest
     backtest_button = QPushButton("Run Backtest")
@@ -112,19 +113,19 @@ def create_loading_page(image_path: str):
 
     return loading_widget, progress_bar, log_output
 
-def setup_loading_page(parent, image_path):
+def setup_loading_page(parent):
 
-    loading_widget, progress_bar, log_output = create_loading_page(image_path)
+    loading_widget, progress_bar, log_output = create_loading_page(UI.LOADING_PAGE_PHOTO)
     parent.setCentralWidget(loading_widget)
     return progress_bar, log_output
 
-def create_results_page(dashboard_plots, background_image, back_to_home_callback):
+def create_results_page(dashboard_plots, back_to_home_callback):
 
     results_widget = QWidget()
     results_layout = QVBoxLayout()
 
     # Définir l'image de fond
-    set_background_image(results_widget, background_image)
+    set_background_image(results_widget, UI.DASHBOARD_PAGE_PHOTO)
 
     # Ajouter le bouton "Back to Home Page"
     back_to_home_button = QPushButton("Back to Home Page")
@@ -140,11 +141,10 @@ def create_results_page(dashboard_plots, background_image, back_to_home_callback
     results_widget.setLayout(results_layout)
     return results_widget
 
-def setup_results_page(parent, plots, background_image, back_to_home_callback):
+def setup_results_page(parent, plots, back_to_home_callback):
 
     results_widget = create_results_page(
         dashboard_plots=plots,
-        background_image=background_image,
         back_to_home_callback=back_to_home_callback,
     )
     parent.setCentralWidget(results_widget)
