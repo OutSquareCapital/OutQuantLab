@@ -7,17 +7,15 @@ import os
 import UI
 
 def apply_global_styles(app:QApplication):
-    """
-    Applique les styles globaux à l'application.
-    """
     app.setWindowIcon(QIcon(UI.APP_ICON_PHOTO)) 
-    app.setStyleSheet("""
-        * {
-            font-family: 'QuickSand';
-            font-size: 10px;
-            font: bold;
-        }
+    app.setStyleSheet(f"""
+        * {{
+            font-family: '{UI.FONT_FAMILY}';
+            font-size: {UI.FONT_SIZE};
+            font: {UI.FONT_TYPE};
+        }}
     """)
+
 def cleanup_temp_files(temp_files: list):
     for temp_file in temp_files:
         try:
@@ -26,9 +24,7 @@ def cleanup_temp_files(temp_files: list):
             print(f"Erreur lors de la suppression du fichier temporaire {temp_file} : {e}")
 
 def display_plot_dialog(parent, fig, window_title: str):
-    """
-    Crée et affiche un graphique Plotly dans un QDialog, tout en gérant les fichiers temporaires.
-    """
+
     # Génère le HTML avec Plotly inclus
     html_content = fig.to_html(full_html=True, include_plotlyjs='True', config={"responsive": True})
     html_content = html_content.replace("<body>", f"<body style='background-color: {UI.BACKGROUND_GRAPH_WHITE};'>")
@@ -61,13 +57,6 @@ def set_background_image(widget: QWidget, image_path: str):
     palette.setBrush(QPalette.Window, QBrush(pixmap))
     widget.setPalette(palette)
     widget.setAutoFillBackground(True)
-
-def update_progress(progress_bar: QProgressBar, log_output: QTextEdit, value: int, message: str = None):
-
-    progress_bar.setValue(value)
-    if message:
-        log_output.clear()
-        log_output.append(message)
 
 def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_callback, refresh_data_callback):
 
@@ -150,9 +139,7 @@ def setup_results_page(parent, plots, back_to_home_callback):
     parent.setCentralWidget(results_widget)
 
 def setup_progress_bar(parent, title: str, max_value: int = 100):
-    """
-    Configure une barre de progression générique pour le chargement.
-    """
+
     progress_window = QMainWindow(parent)
     progress_window.setWindowTitle(title)
 
@@ -168,3 +155,10 @@ def setup_progress_bar(parent, title: str, max_value: int = 100):
     progress_window.resize(400, 200)
 
     return progress_window, progress_bar
+
+def update_progress_with_events(progress_bar: QProgressBar, log_output: QTextEdit, value: int, message: str = None):
+    progress_bar.setValue(value)
+    if message:
+        log_output.clear()
+        log_output.append(message)
+    QApplication.processEvents()

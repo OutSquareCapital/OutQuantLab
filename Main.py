@@ -1,13 +1,12 @@
 import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
-import Config
 
 from Main_UI import (apply_global_styles,
                     setup_home_page, 
                     setup_loading_page,
                     setup_results_page,
                     setup_progress_bar,
-                    update_progress, 
+                    update_progress_with_events, 
                     display_plot_dialog, 
                     cleanup_temp_files
                      )
@@ -24,6 +23,8 @@ class MainApp(QMainWindow):
             self.refresh_data()
 
     def show_home_page(self):
+        del self.backtest_result
+        del self.all_strategies_results
         setup_home_page(
             parent=self,
             run_backtest_callback=self.run_backtest,
@@ -37,16 +38,14 @@ class MainApp(QMainWindow):
     def refresh_data(self):
         Get_Data.get_yahoo_finance_data(Config.yahoo_assets, Config.FILE_PATH_YF)
 
+    def update_progress(self, value, message=None):
+        update_progress_with_events(self.progress_bar, self.log_output, value, message)
+
     def show_loading_page(self):
         self.progress_bar, self.log_output = setup_loading_page(self)
 
-    def update_progress(self, value, message=None):
-        update_progress(self.progress_bar, self.log_output, value, message)
-
     def run_backtest(self):
         self.show_loading_page()
-
-        QApplication.processEvents()
 
         self.update_progress(1, "Loading Data...")
         data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Config.FILE_PATH_YF)
@@ -54,7 +53,6 @@ class MainApp(QMainWindow):
         indicators_and_params, assets_to_backtest = UI.dynamic_config(assets_names, auto=True)
 
         self.update_progress(5, "Prepare Data...")
-        QApplication.processEvents()
 
         (
             prices_array,
@@ -69,7 +67,6 @@ class MainApp(QMainWindow):
         )
 
         self.update_progress(10, "Process Backtest...")
-        QApplication.processEvents()
 
         raw_adjusted_returns_df = Backtest.process_backtest(
             prices_array,
@@ -82,14 +79,11 @@ class MainApp(QMainWindow):
         )
 
         self.update_progress(70, "Create Portfolio...")
-        QApplication.processEvents()
         equal_weights_asset_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_asset=True)
         self.update_progress(80, "Create Portfolio...")
-        QApplication.processEvents()
         equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_asset_returns, global_avg=True)
         equal_weights_global_returns = equal_weights_global_returns.rename(columns={equal_weights_global_returns.columns[0]: 'equal_weights'})
         self.update_progress(90, "Create Portfolio...")
-        QApplication.processEvents()
         self.backtest_result = equal_weights_asset_returns
         self.all_strategies_results=raw_adjusted_returns_df
         self.update_progress(100, "Backtest Done !")
@@ -141,6 +135,7 @@ if __name__ == "__main__":
     progress_window.show()
 
     QApplication.processEvents()
+    import Config
     progress_bar.setValue(15)
     import Get_Data
     progress_bar.setValue(30)

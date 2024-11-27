@@ -10,7 +10,9 @@ DEFAULT_TEMPLATE = "plotly_white"
 COLOR_ADJUSTMENT = 'black'
 BACKGROUND_GRAPH_WHITE = 'rgba(17, 17, 17, 1)'
 BACKGROUND_GRAPH_DARK = 'rgba(255, 255, 255, 1)'
-
+FONT_FAMILY = 'QuickSand'
+FONT_SIZE = '10px'
+FONT_TYPE = 'bold'
 DEFAULT_HEIGHT = 800
 DEFAULT_WIDTH = 1200
 BASE_COLORS = ["brown", "red","orange", "yellow", "green", "lime", "blue", "cyan"]
