@@ -66,17 +66,14 @@ def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_call
     main_layout = QVBoxLayout()
     set_background_image(main_widget, UI.HOME_PAGE_PHOTO,)
 
-    # Bouton Run Backtest
     backtest_button = QPushButton("Run Backtest")
     backtest_button.clicked.connect(run_backtest_callback)
     main_layout.addWidget(backtest_button)
 
-    # Bouton Open Config
     config_button = QPushButton("Open Config")
     config_button.clicked.connect(open_config_callback)
     main_layout.addWidget(config_button)
 
-    # Bouton Refresh Data
     refresh_button = QPushButton("Refresh Data")
     refresh_button.clicked.connect(refresh_data_callback)
     main_layout.addWidget(refresh_button)
@@ -84,11 +81,11 @@ def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_call
     main_widget.setLayout(main_layout)
     parent.setCentralWidget(main_widget)
 
-def create_loading_page(image_path: str):
+def setup_loading_page(parent):
     loading_widget = QWidget()
     loading_layout = QVBoxLayout(loading_widget)
 
-    set_background_image(loading_widget, image_path)
+    set_background_image(loading_widget, UI.LOADING_PAGE_PHOTO)
     loading_layout.addStretch()
     progress_bar = QProgressBar(loading_widget)
     progress_bar.setRange(0, 100)
@@ -99,15 +96,11 @@ def create_loading_page(image_path: str):
     log_output.setFixedHeight(100)
     loading_layout.addWidget(log_output)
 
-    return loading_widget, progress_bar, log_output
-
-def setup_loading_page(parent):
-
-    loading_widget, progress_bar, log_output = create_loading_page(UI.LOADING_PAGE_PHOTO)
     parent.setCentralWidget(loading_widget)
+
     return progress_bar, log_output
 
-def create_results_page(dashboard_plots, back_to_home_callback, parent):
+def setup_results_page(parent, plots, back_to_home_callback):
     results_widget = QWidget()
     results_layout = QHBoxLayout(results_widget)  # Layout principal horizontal
     # Définir l'image de fond
@@ -115,7 +108,7 @@ def create_results_page(dashboard_plots, back_to_home_callback, parent):
     # Section gauche : Boutons de graphiques
     left_layout = QVBoxLayout()
 
-    for title, plot_func in dashboard_plots.items():
+    for title, plot_func in plots.items():
         button = QPushButton(title, results_widget)
         button.clicked.connect(plot_func)
         left_layout.addWidget(button)
@@ -164,16 +157,7 @@ def create_results_page(dashboard_plots, back_to_home_callback, parent):
     # Ajouter les layouts gauche et droite au layout principal
     results_layout.addLayout(left_layout)
     results_layout.addLayout(right_layout)
-    return results_widget
 
-
-def setup_results_page(parent, plots, back_to_home_callback):
-
-    results_widget = create_results_page(
-        dashboard_plots=plots,
-        back_to_home_callback=back_to_home_callback,
-        parent=parent
-    )
     parent.setCentralWidget(results_widget)
 
 def setup_progress_bar(parent, title: str, max_value: int = 100):
