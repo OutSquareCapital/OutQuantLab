@@ -55,8 +55,7 @@ def bars(series: pd.Series, title: str, xlabel: str, ylabel: str):
     fig.update_layout(
         xaxis_title=xlabel,
         yaxis_title=ylabel,
-        xaxis=dict(showticklabels=False),
-        showlegend=True
+        xaxis=dict(showticklabels=False)
     )
 
     setup_figure_layout(fig, title)

@@ -7,9 +7,10 @@ import os
 import UI
 import Dashboard
 
-def generate_plot_widget(fig):
+def generate_plot_widget(fig, show_legend:bool=True):
+    if not show_legend:
+        fig.update_layout(showlegend=False)
 
-    fig.update_layout(autosize=True)
     html_content = fig.to_html(full_html=True, include_plotlyjs='True', config={"responsive": True})
     html_content = html_content.replace("<body>", f"<body style='background-color: {UI.BACKGROUND_GRAPH_DARK};'>")
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix="outquant.html")
@@ -44,11 +45,13 @@ def cleanup_temp_files():
 
 def display_plot_dialog(parent, fig, window_title: str):
     plot_widget = generate_plot_widget(fig)
+    plot_widget.showMaximized
     dialog = QDialog(parent)
     dialog.setWindowTitle(window_title)
     layout = QVBoxLayout(dialog)
     layout.addWidget(plot_widget)
     dialog.setLayout(layout)
+    dialog.resize(1200, 800)
     dialog.exec()
 
 def set_background_image(widget: QWidget, image_path: str):
@@ -114,13 +117,13 @@ def setup_results_page(parent, plots, back_to_home_callback):
         left_layout.addWidget(button)
 
     equity_plot = generate_plot_widget(
-        Dashboard.plot_equity(parent.global_result))
+        Dashboard.plot_equity(parent.global_result), False)
     sharpe_plot = generate_plot_widget(
-        Dashboard.plot_rolling_sharpe_ratio(parent.global_result, length=1250))
+        Dashboard.plot_rolling_sharpe_ratio(parent.global_result, length=1250), False)
     drawdown_plot = generate_plot_widget(
-        Dashboard.plot_rolling_drawdown(parent.global_result, length=1250))
+        Dashboard.plot_rolling_drawdown(parent.global_result, length=1250), False)
     vol_plot = generate_plot_widget(
-        Dashboard.plot_rolling_volatility(parent.global_result))
+        Dashboard.plot_rolling_volatility(parent.global_result), False)
 
     # Layout droit : champs de saisie et graphiques
     right_top_layout = QVBoxLayout()

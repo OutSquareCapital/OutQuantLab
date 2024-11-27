@@ -36,7 +36,12 @@ def setup_figure_layout(fig: Figure,
     
     fig.update_layout(
         title=title,
-        template=DEFAULT_TEMPLATE)
+        template=DEFAULT_TEMPLATE,
+        autosize=True,
+        margin=dict(l=30, r=30, t=40, b=30)
+        )
+    fig.update_yaxes(automargin=True)
+    fig.update_xaxes(automargin=True)
 
 def add_zero_line(fig: go.Figure, x_values: pd.Index):
     fig.add_trace(go.Scatter(

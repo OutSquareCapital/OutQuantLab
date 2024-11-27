@@ -82,7 +82,7 @@ class MainApp(QMainWindow):
         equal_weights_asset_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_asset=True)
         self.update_progress(80, "Create Portfolio...")
         equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_asset_returns, global_avg=True)
-        equal_weights_global_returns = equal_weights_global_returns.rename(columns={equal_weights_global_returns.columns[0]: 'equal_weights'})
+        equal_weights_global_returns = equal_weights_global_returns.rename(columns={equal_weights_global_returns.columns[0]: 'All'})
         self.update_progress(90, "Create Portfolio...")
         self.backtest_result = equal_weights_asset_returns
         self.global_result = equal_weights_global_returns
