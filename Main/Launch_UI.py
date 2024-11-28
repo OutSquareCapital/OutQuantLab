@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import (QWidget, 
+from PySide6.QtWidgets import (QApplication,
+                               QWidget, 
                                QHBoxLayout, 
                                QVBoxLayout, 
                                QProgressBar, 
@@ -14,8 +15,6 @@ from Files import (APP_ICON_PHOTO,
                     FONT_FAMILY, 
                     FONT_SIZE, 
                     FONT_TYPE)
-
-from PySide6.QtWidgets import QApplication
 
 
 def apply_global_styles(app:QApplication):

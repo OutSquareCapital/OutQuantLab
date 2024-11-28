@@ -9,13 +9,15 @@ from PySide6.QtWidgets import (QWidget,
                                QSizePolicy, 
                                QSpacerItem,
                                QLineEdit, 
-                               QGridLayout
+                               QGridLayout,
+                               QFrame
                                )
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from Files import ( 
-                    LOADING_PAGE_PHOTO,
+                    BACKTEST_PAGE_PHOTO,
                     HOME_PAGE_PHOTO,
-                    DASHBOARD_PAGE_PHOTO
+                    DASHBOARD_PAGE_PHOTO,
+                    BACKGROUND_APP_DARK
                     )
 
 
@@ -75,22 +77,60 @@ def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_call
 
 def setup_backtest_page(parent):
     loading_widget = QWidget()
-    loading_layout = QVBoxLayout(loading_widget)
+    main_layout = QVBoxLayout(loading_widget)
+    set_background_image(loading_widget, BACKTEST_PAGE_PHOTO)
+    # Premier layout horizontal (80% de la hauteur)
+    top_layout = QHBoxLayout()
+    main_layout.addLayout(top_layout, stretch=9)
 
-    set_background_image(loading_widget, LOADING_PAGE_PHOTO)
-    loading_layout.addStretch()
-    progress_bar = QProgressBar(loading_widget)
+    bottom_layout = QHBoxLayout()
+
+    left_layout = QVBoxLayout()
+    center_layout = QVBoxLayout()
+    right_layout = QVBoxLayout()
+
+    # Création du QFrame central
+    center_frame = QFrame()
+    center_frame.setFrameShape(QFrame.StyledPanel)
+    center_frame.setFrameShadow(QFrame.Raised)
+    center_frame.setStyleSheet(f"""
+        QFrame {{
+            border-radius: 15px;
+            background-color: {BACKGROUND_APP_DARK};
+        }}
+    """)
+
+    center_frame_layout = QVBoxLayout(center_frame)
+
+    # Layout séparé pour la barre de progression
+    progress_bar_layout = QVBoxLayout()
+    progress_bar = QProgressBar()
     progress_bar.setRange(0, 100)
-    loading_layout.addWidget(progress_bar)
+    progress_bar_layout.addWidget(progress_bar)
 
-    log_output = QTextEdit(loading_widget)
+    # Layout séparé pour la zone de logs
+    log_output_layout = QVBoxLayout()
+    log_output = QTextEdit()
     log_output.setReadOnly(True)
-    log_output.setFixedHeight(100)
-    loading_layout.addWidget(log_output)
+    log_output_layout.addWidget(log_output)
+
+    # Ajouter les deux sous-layouts au layout du QFrame central
+    center_frame_layout.addLayout(progress_bar_layout)
+    center_frame_layout.addLayout(log_output_layout)
+
+    # Ajouter le QFrame central au layout central
+    center_layout.addWidget(center_frame)
+
+    # Ajouter les layouts verticaux au layout horizontal
+    bottom_layout.addLayout(left_layout, stretch=1)
+    bottom_layout.addLayout(center_layout, stretch=4)
+    bottom_layout.addLayout(right_layout, stretch=1)
+    # Ajouter le layout horizontal inférieur au layout principal
+    main_layout.addLayout(bottom_layout, stretch=1)
 
     parent.setCentralWidget(loading_widget)
-
     return progress_bar, log_output
+
 
 def setup_results_page(parent, plots, back_to_home_callback):
     results_widget = QWidget()
