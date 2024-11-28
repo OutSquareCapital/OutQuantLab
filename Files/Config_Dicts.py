@@ -1,5 +1,3 @@
-import os
-
 TRADING_DAYS_PER_WEEK = 5
 TRADING_DAYS_PER_MONTH = 21
 TRADING_DAYS_PER_YEAR = 256
@@ -7,14 +5,6 @@ TRADING_DAYS_PER_5_YEARS = 1280
 ANNUALIZATION_FACTOR = 16
 PERCENTAGE_FACTOR = 100
 ANNUALIZED_PERCENTAGE_FACTOR = ANNUALIZATION_FACTOR * PERCENTAGE_FACTOR
-
-SAVED_DATA_FOLDER = os.path.join(os.path.dirname(__file__), "Saved_Data")
-
-ASSETS_TO_TEST_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "assets_to_backtest.json")
-PARAM_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "param_values.json")
-METHODS_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_config.json")
-
-FILE_PATH_YF = os.path.join(SAVED_DATA_FOLDER, "price_data.parquet")
 
 portfolio_etf = {
     'Equities': {
