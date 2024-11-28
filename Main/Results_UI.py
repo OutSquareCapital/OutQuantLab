@@ -3,26 +3,26 @@ from PySide6.QtWidgets import (
                                QDialog
                                )
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtCore import QUrl
+from PySide6.QtCore import QUrl, Qt
 import tempfile
 import os
-from Files import (BACKGROUND_GRAPH_DARK)
+from Files import BACKGROUND_APP_DARK
 
 def generate_plot_widget(fig, show_legend:bool=True):
     if not show_legend:
         fig.update_layout(showlegend=False)
 
     html_content = fig.to_html(full_html=True, include_plotlyjs='True', config={"responsive": True})
-    html_content = html_content.replace("<body>", f"<body style='background-color: {BACKGROUND_GRAPH_DARK};'>")
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix="outquant.html")
     with open(temp_file.name, 'w', encoding='utf-8') as f:
         f.write(html_content)
     plot_widget = QWebEngineView()
+    page = plot_widget.page()
+    page.setBackgroundColor(BACKGROUND_APP_DARK)
     plot_widget.load(QUrl.fromLocalFile(temp_file.name))
     return plot_widget
 
 def cleanup_temp_files():
-    # Supprimer tous les fichiers avec le suffixe 'outquant.html' dans le répertoire temporaire
     temp_dir = tempfile.gettempdir()
     for file_name in os.listdir(temp_dir):
         if file_name.endswith("outquant.html"):

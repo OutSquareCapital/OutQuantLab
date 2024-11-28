@@ -35,7 +35,7 @@ def curves( x_values: pd.Index,
 
     return fig
 
-def bars(series: pd.Series, title: str, xlabel: str, ylabel: str):
+def bars(series: pd.Series, title: str):
     # Gestion des couleurs avec votre méthode
     color_map = get_color_map(series.index.tolist())
 
@@ -47,14 +47,11 @@ def bars(series: pd.Series, title: str, xlabel: str, ylabel: str):
             y=[value],
             name=item,
             marker=get_marker_config(color_map[item]),
-            showlegend=True,
-            hovertemplate=f"<b>{item}</b><br>Value: {value:.2f}<extra></extra>"
+            showlegend=True
         ))
 
     # Configuration générale du graphique
     fig.update_layout(
-        xaxis_title=xlabel,
-        yaxis_title=ylabel,
         xaxis=dict(showticklabels=False)
     )
 
@@ -78,11 +75,9 @@ def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str):
         showscale=False,
         zmin=0,
         zmax=1,
-        hovertemplate="X: %{x}<br>Y: %{y}<br>Value: %{customdata}<extra></extra>",
         customdata=z_values
     ))
     fig.update_layout(
-        xaxis=dict(showgrid=False),
         yaxis=dict(showgrid=False, autorange="reversed")
     )
 
@@ -117,7 +112,7 @@ def scatter_3d(x_vals, y_vals, z_vals, values, params, title: str):
     setup_figure_layout(fig, title)
     return fig
 
-def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
+def violin(data: pd.DataFrame, title: str):
     fig = go.Figure()
 
     color_map = get_color_map(data.columns.tolist())
@@ -137,12 +132,9 @@ def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
     y_min = data.min().min()
     y_max = data.max().max()
     fig.update_layout(
-        xaxis_title=xlabel,
-        yaxis_title=ylabel,
         yaxis=dict(range=[y_min, y_max], showgrid=False),
         xaxis=dict(
             showticklabels=False,
-            showgrid=False
             )
         )
     
@@ -150,7 +142,7 @@ def violin(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
 
     return fig
 
-def histogram(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
+def histogram(data: pd.DataFrame, title: str):
 
     fig = go.Figure()
 
@@ -161,12 +153,9 @@ def histogram(data: pd.DataFrame, title: str, xlabel: str, ylabel: str):
             x=data[column],
             name=column,
             marker=get_marker_config(color_map[column]),
-            hoverinfo="y",
             showlegend=True
         ))
     fig.update_layout(
-        xaxis_title=xlabel,
-        yaxis_title=ylabel,
         barmode="overlay"
     )
     setup_figure_layout(fig, title)

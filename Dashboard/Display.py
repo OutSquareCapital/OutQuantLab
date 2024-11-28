@@ -14,7 +14,7 @@ def plot_equity(returns_df: pd.DataFrame):
 
     return Widgets.curves(x_values=sorted_equity_curves.index,
                    y_values=sorted_equity_curves,
-                   title="Equity Curves", 
+                   title="Equity Curve", 
                    log_scale=True)
 
 def plot_rolling_volatility(returns_df: pd.DataFrame):
@@ -35,7 +35,7 @@ def plot_rolling_drawdown(returns_df: pd.DataFrame, length: int):
 
     return Widgets.curves(x_values=sorted_drawdowns.index, 
                    y_values=sorted_drawdowns, 
-                   title="Drawdowns %")
+                   title="Drawdown %")
 
 def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
 
@@ -45,7 +45,7 @@ def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
 
     return Widgets.curves(x_values=sorted_rolling_sharpe_ratio_df.index,
                    y_values=sorted_rolling_sharpe_ratio_df, 
-                   title="Rolling Sharpe Ratios",
+                   title="Rolling Sharpe Ratio",
                    zero_line=True)
     
 def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int):
@@ -80,9 +80,7 @@ def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
     sorted_sharpe_ratios = Transformations.sort_series(sharpe_ratios, ascending=True)
 
     return Widgets.bars(series=sorted_sharpe_ratios, 
-                 title="Sharpe Ratios", 
-                 xlabel="Strats", 
-                 ylabel="Sharpe Ratio")
+                 title="Sharpe Ratio")
 
 def plot_overall_volatility(daily_returns: pd.DataFrame):
 
@@ -90,9 +88,7 @@ def plot_overall_volatility(daily_returns: pd.DataFrame):
     sorted_volatility = Transformations.sort_series(volatility, ascending=True)
 
     return Widgets.bars(series=sorted_volatility, 
-                 title="Volatility", 
-                 xlabel="Strats", 
-                 ylabel="Volatility %")
+                 title="Volatility %")
     
 def plot_overall_average_drawdown(returns_df: pd.DataFrame, length: int):
 
@@ -100,9 +96,7 @@ def plot_overall_average_drawdown(returns_df: pd.DataFrame, length: int):
     sorted_drawdowns = Transformations.sort_series(drawdowns, ascending=True)
 
     return Widgets.bars(series=sorted_drawdowns, 
-                 title="Average Drawdowns", 
-                 xlabel="Strats", 
-                 ylabel="Average Drawdown (%)")
+                 title="Average Drawdowns %")
 
 def plot_overall_average_inverted_correlation(returns_df: pd.DataFrame):
 
@@ -110,9 +104,7 @@ def plot_overall_average_inverted_correlation(returns_df: pd.DataFrame):
     sorted_correlations = Transformations.sort_series(average_correlations, ascending=True)
 
     return Widgets.bars(series=sorted_correlations, 
-                 title="Average Inverted Correlation",
-                 xlabel="Strats", 
-                 ylabel="Average Inverted Correlation")
+                 title="Average Inverted Correlation")
 
 def plot_overall_monthly_skew(returns_df: pd.DataFrame):
 
@@ -120,9 +112,7 @@ def plot_overall_monthly_skew(returns_df: pd.DataFrame):
     sorted_skew_series = Transformations.sort_series(skew_series, ascending=True)
 
     return Widgets.bars(series=sorted_skew_series, 
-                 title="Monthly Skew", 
-                 xlabel="Strats", 
-                 ylabel="Skew")
+                 title="Monthly Skew")
 
 def plot_returns_distribution_violin(returns_df: pd.DataFrame, limit:float=0.05):
 
@@ -130,9 +120,7 @@ def plot_returns_distribution_violin(returns_df: pd.DataFrame, limit:float=0.05)
 
     return Widgets.violin(
         data=pct_returns,
-        title="Violin Plot of % Returns Distribution",
-        xlabel="Assets",
-        ylabel="% Returns")
+        title="Violin of % Returns Distribution")
 
 def plot_returns_distribution_histogram(returns_df: pd.DataFrame, limit: float = 0.05):
 
@@ -140,9 +128,7 @@ def plot_returns_distribution_histogram(returns_df: pd.DataFrame, limit: float =
 
     return Widgets.histogram(
         data=formatted_returns_df,
-        title="Histogram Plot of % Returns Distribution",
-        xlabel="Returns %",
-        ylabel="Frequency")
+        title="Histogram of % Returns Distribution")
 
 def plot_correlation_heatmap(returns_df: pd.DataFrame):
 

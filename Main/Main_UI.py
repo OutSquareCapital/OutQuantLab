@@ -10,7 +10,9 @@ from PySide6.QtWidgets import (QWidget,
                                QSpacerItem,
                                QLineEdit, 
                                QGridLayout,
-                               QFrame
+                               QFrame,
+                               QTableWidget,
+                               QTableWidgetItem
                                )
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from Files import ( 
@@ -164,34 +166,51 @@ def setup_results_page(parent, plots, back_to_home_callback):
     max_sub_sub_clusters_input.setPlaceholderText("Max Sub Sub Clusters (e.g., 2)")
     input_fields_layout.addWidget(max_sub_sub_clusters_input)
 
-    right_top_layout.addLayout(input_fields_layout, stretch=1)
-
     # Bouton pour revenir à la page d'accueil
     back_home_layout = QVBoxLayout()
     back_to_home_button = QPushButton("Home Page")
     back_to_home_button.clicked.connect(back_to_home_callback)
     back_home_layout.addWidget(back_to_home_button)
 
-    spacer = QSpacerItem(20, 20, QSizePolicy.Minimum, QSizePolicy.Expanding)
-    back_home_layout.addItem(spacer)
+    table_widget = QTableWidget(2, 7)  # 2 lignes, 7 colonnes
+    table_widget.setEditTriggers(QTableWidget.NoEditTriggers)  # Désactiver l'édition
+    for i in range(2):
+        for j in range(7):
+            table_widget.setItem(i, j, QTableWidgetItem("1"))
+
+            
+    right_top_layout.addWidget(table_widget, stretch=4)  # Le tableau à gauche
+    right_top_layout.addLayout(input_fields_layout, stretch=1)  # Les champs de saisie à droite
     right_top_layout.addLayout(back_home_layout, stretch=0.5)
 
-    # Layout pour les graphiques (grille vide)
-    right_bottom_layout = QGridLayout()
+    # Création d'un QFrame pour right_bottom
+    right_bottom_frame = QFrame()
+    right_bottom_frame.setFrameShape(QFrame.StyledPanel)
+    right_bottom_frame.setFrameShadow(QFrame.Raised)
+    right_bottom_frame.setStyleSheet(f"""
+        QFrame {{
+            border-radius: 15px;
+            background-color: {BACKGROUND_APP_DARK};
+        }}
+    """)
+
+    # Layout interne pour le QFrame
+    right_bottom_layout = QGridLayout(right_bottom_frame)
+
     
-    for i in range(2):  # 2 lignes
+    for i in range(3):  # 3 lignes
         for j in range(2):  # 2 colonnes
             placeholder = QWidget()
             right_bottom_layout.addWidget(placeholder, i, j)
 
     # Layout principal pour la section droite
     right_layout = QVBoxLayout()
-    right_layout.addLayout(right_top_layout)
-    right_layout.addLayout(right_bottom_layout)
+    right_layout.addLayout(right_top_layout, stretch=1)
+    right_layout.addWidget(right_bottom_frame, stretch=16)
 
     # Ajouter les layouts gauche et droit au layout principal
-    results_layout.addLayout(left_layout)  # Layout gauche (boutons)
-    results_layout.addLayout(right_layout)  # Layout droit (graphiques et champs)
+    results_layout.addLayout(left_layout, stretch=1)  # Layout gauche (boutons)
+    results_layout.addLayout(right_layout, stretch=9)  # Layout droit (graphiques et champs)
 
     parent.setCentralWidget(results_widget)
     return right_bottom_layout  # Retourne la grille des graphiques

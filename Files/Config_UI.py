@@ -1,10 +1,8 @@
-DEFAULT_TEMPLATE = "plotly_dark"
 COLOR_ADJUSTMENT = 'white'
 COLOR_PLOT_UNIQUE = '#fc6400'
-BACKGROUND_GRAPH_DARK = 'rgba(16, 16, 16, 1)'
-BACKGROUND_GRAPH_WHITE = 'rgba(255, 255, 255, 1)'
 BACKGROUND_APP_DARK = '#2A2A2A'
-FONT_FAMILY = 'QuickSand'
-FONT_SIZE = '10px'
+
+FONT_FAMILY = 'Arial'
+FONT_SIZE = 10
 FONT_TYPE = 'bold'
-BASE_COLORS = ["brown", "red","orange", "yellow", "green", "lime", "blue", "cyan"]
+BASE_COLORS = ["black", "brown", "red","orange", "yellow", "green", "lime", "blue", "cyan", "white"]

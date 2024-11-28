@@ -120,11 +120,15 @@ class MainApp(QMainWindow):
         sharpe_plot = m.generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(self.global_result, length=1250), show_legend=False)
         drawdown_plot = m.generate_plot_widget(Dashboard.plot_rolling_drawdown(self.global_result, length=1250), show_legend=False)
         vol_plot = m.generate_plot_widget(Dashboard.plot_rolling_volatility(self.global_result), show_legend=False)
+        distribution_plot = m.generate_plot_widget(Dashboard.plot_returns_distribution_histogram(self.global_result), show_legend=False)
+        violin_plot = m.generate_plot_widget(Dashboard.plot_returns_distribution_violin(self.global_result), show_legend=False)
 
         right_bottom_layout.addWidget(equity_plot, 0, 0)
         right_bottom_layout.addWidget(sharpe_plot, 0, 1)
         right_bottom_layout.addWidget(drawdown_plot, 1, 0)
         right_bottom_layout.addWidget(vol_plot, 1, 1)
+        right_bottom_layout.addWidget(distribution_plot, 2, 0)
+        right_bottom_layout.addWidget(violin_plot, 2, 1)
 
     def closeEvent(self, event):
         m.cleanup_temp_files()
@@ -136,7 +140,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     m.apply_global_styles(app)
-    progress_window, progress_bar = m.setup_launch_page(None, "Launching App..")
+    progress_window, progress_bar = m.setup_launch_page(None)
 
     QApplication.processEvents()
 

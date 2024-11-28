@@ -1,8 +1,7 @@
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
-from plotly.graph_objects import Figure
 import plotly.graph_objects as go
-from Files import DEFAULT_TEMPLATE, COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE
+from Files import FONT_FAMILY, FONT_SIZE, COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK
 import pandas as pd
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
@@ -31,17 +30,41 @@ def get_heatmap_colorscale(n_colors: int = 100) -> list:
     colors = [colormap(i / (n_colors - 1)) for i in range(n_colors)]
     return [[i / (n_colors - 1), mcolors.to_hex(color)] for i, color in enumerate(colors)]
 
-def setup_figure_layout(fig: Figure, 
-                        title: str):
-    
+def setup_figure_layout(fig: go.Figure, 
+                        figtitle: str):
     fig.update_layout(
-        title=title,
-        template=DEFAULT_TEMPLATE,
+        font={
+            'family': FONT_FAMILY,
+            'color': COLOR_ADJUSTMENT,
+            'size': FONT_SIZE
+        },
+        title={
+            'text': figtitle,
+            'font': {'size': FONT_SIZE*1.4, 
+                     'family': FONT_FAMILY}
+        },
         autosize=True,
-        margin=dict(l=30, r=30, t=40, b=30)
-        )
-    fig.update_yaxes(automargin=True)
-    fig.update_xaxes(automargin=True)
+        margin=dict(l=30, r=30, t=40, b=30),
+        paper_bgcolor=BACKGROUND_APP_DARK,
+        plot_bgcolor=BACKGROUND_APP_DARK,
+        legend={
+            'title_font': {'size': FONT_SIZE*1.2,
+                           'family': FONT_FAMILY}
+        }
+    )
+
+    fig.update_yaxes(
+        automargin=True,
+        gridcolor=COLOR_ADJUSTMENT
+    )
+
+    fig.update_xaxes(
+        showgrid=False,
+        automargin=True,
+        gridcolor=COLOR_ADJUSTMENT
+    )
+
+    
 
 def add_zero_line(fig: go.Figure, x_values: pd.Index):
     fig.add_trace(go.Scatter(

@@ -22,16 +22,15 @@ def apply_global_styles(app:QApplication):
     app.setStyleSheet(f"""
         * {{
             font-family: '{FONT_FAMILY}';
-            font-size: {FONT_SIZE};
+            font-size: {FONT_SIZE}px;
             font: {FONT_TYPE};
         }}
     """)
 
-
-def setup_launch_page(parent, title: str):
+def setup_launch_page(parent):
     # Fenêtre principale
     progress_window = QMainWindow(parent)
-    progress_window.setWindowTitle(title)
+    progress_window.setWindowTitle('OutQuantLab')
 
     # Widget principal
     main_widget = QWidget(progress_window)
