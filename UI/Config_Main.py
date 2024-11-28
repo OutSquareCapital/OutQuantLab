@@ -8,7 +8,7 @@ from .Config_Backend import (
     load_methods_config,
     get_active_methods
 )
-from Config import automatic_generation
+from .Strategy_Params_Generation import automatic_generation
 
 class ConfigApp(QMainWindow):
     def __init__(self, param_config, asset_config, assets_names, methods_config, parent=None):

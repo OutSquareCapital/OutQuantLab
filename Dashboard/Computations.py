@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.stats import skew
-import Config
+import Files
 from Process_Data import equity_curves_calculs
 import Metrics as mt
 
@@ -15,7 +15,7 @@ def calculate_equity_curves_df(returns_df: pd.DataFrame):
 
 def calculate_overall_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    volatility = returns_df.std() * Config.ANNUALIZED_PERCENTAGE_FACTOR
+    volatility = returns_df.std() * Files.ANNUALIZED_PERCENTAGE_FACTOR
 
     return pd.DataFrame(volatility, 
                         columns=['Volatility'], 
@@ -24,7 +24,7 @@ def calculate_overall_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_overall_sharpe_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    sharpe_ratios = returns_df.mean() / returns_df.std() * Config.ANNUALIZATION_FACTOR
+    sharpe_ratios = returns_df.mean() / returns_df.std() * Files.ANNUALIZATION_FACTOR
 
     return pd.DataFrame(sharpe_ratios, 
                         columns=['Sharpe Ratio'], 
@@ -54,7 +54,7 @@ def format_returns(returns_df: pd.DataFrame, limit: int) -> pd.DataFrame:
     upper_threshold = returns_df.quantile(1-limit, axis=0)
     
     formatted_returns_df = returns_df.where((returns_df >= lower_threshold) & (returns_df <= upper_threshold), np.nan)
-    formatted_returns_df = formatted_returns_df * Config.PERCENTAGE_FACTOR
+    formatted_returns_df = formatted_returns_df * Files.PERCENTAGE_FACTOR
 
     return formatted_returns_df.round(2)
 
@@ -91,7 +91,7 @@ def calculate_rolling_drawdown(returns_df: pd.DataFrame, length: int) -> pd.Data
                                 ).round(2)
     
     rolling_max = equity_curves.rolling(window=length, min_periods=1).max()
-    drawdowns = (equity_curves - rolling_max) / rolling_max * Config.PERCENTAGE_FACTOR
+    drawdowns = (equity_curves - rolling_max) / rolling_max * Files.PERCENTAGE_FACTOR
 
     return drawdowns.round(2)
 

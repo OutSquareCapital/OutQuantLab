@@ -1,5 +1,5 @@
 import json
-from Config import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_CONFIG_FILE
+from Files import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_CONFIG_FILE
 from typing import Dict, List, Callable
 import numpy as np
 import importlib

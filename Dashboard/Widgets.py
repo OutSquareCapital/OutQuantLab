@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, add_zero_line, get_marker_config
 import Dashboard.Transformations as Transformations
-from UI import COLOR_ADJUSTMENT
+from Files import COLOR_ADJUSTMENT
 
 def curves( x_values: pd.Index,
             y_values: pd.DataFrame,  

@@ -2,7 +2,7 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 from plotly.graph_objects import Figure
 import plotly.graph_objects as go
-from UI import DEFAULT_TEMPLATE, COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE
+from Files import DEFAULT_TEMPLATE, COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE
 import pandas as pd
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
