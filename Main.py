@@ -1,15 +1,8 @@
-import sys
 from PySide6.QtWidgets import QApplication, QMainWindow
-
-from Main_UI import (apply_global_styles,
-                    setup_home_page, 
-                    setup_loading_page,
-                    setup_results_page,
-                    setup_progress_bar,
-                    update_progress_with_events, 
-                    display_plot_dialog, 
-                    cleanup_temp_files
-                     )
+import sys
+from Launch_UI import apply_global_styles, setup_launch_page
+from Main_UI import setup_home_page, setup_results_page, setup_backtest_page, update_progress_with_events
+from Results_UI import generate_plot_widget, display_plot_dialog, cleanup_temp_files
 
 class MainApp(QMainWindow):
 
@@ -18,10 +11,12 @@ class MainApp(QMainWindow):
         self.temp_files = []
         self.backtest_result = None
         self.global_result = None
+
+    def initialize(self):
         self.show_home_page()
-        if not os.path.exists(Config.FILE_PATH_YF):
-            self.refresh_data()
         self.showMaximized()
+        if not os.path.exists(Files.FILE_PATH_YF):
+            self.refresh_data()
 
     def show_home_page(self):
         del self.backtest_result
@@ -30,19 +25,19 @@ class MainApp(QMainWindow):
             run_backtest_callback=self.run_backtest,
             open_config_callback=self.open_config,
             refresh_data_callback=self.refresh_data
-        )
+            )
 
     def open_config(self):
-        UI.dynamic_config(Config.yahoo_assets, auto=False, parent=self)
+        UI.dynamic_config(Files.yahoo_assets, auto=False, parent=self)
 
     def refresh_data(self):
-        Get_Data.get_yahoo_finance_data(Config.yahoo_assets, Config.FILE_PATH_YF)
+        Get_Data.get_yahoo_finance_data(Files.yahoo_assets, Files.FILE_PATH_YF)
 
     def update_progress(self, value, message=None):
         update_progress_with_events(self.progress_bar, self.log_output, value, message)
 
-    def show_loading_page(self):
-        self.progress_bar, self.log_output = setup_loading_page(self)
+    def show_backtest_page(self):
+        self.progress_bar, self.log_output = setup_backtest_page(self)
 
     def show_plot(self, fig):
         display_plot_dialog(
@@ -50,11 +45,11 @@ class MainApp(QMainWindow):
             fig=fig,
             window_title="Graph"
         )
-    def run_backtest(self):
-        self.show_loading_page()
 
+    def run_backtest(self):
+        self.show_backtest_page()
         self.update_progress(1, "Loading Data...")
-        data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Config.FILE_PATH_YF)
+        data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Files.FILE_PATH_YF)
 
         indicators_and_params, assets_to_backtest = UI.dynamic_config(assets_names, auto=True)
 
@@ -115,9 +110,23 @@ class MainApp(QMainWindow):
             "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(self.backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2))
         }
 
-        setup_results_page(parent=self, 
-                           plots=plots,
-                           back_to_home_callback=self.show_home_page)
+        # Appelle setup_results_page et récupère la grille des graphiques
+        right_bottom_layout = setup_results_page(
+            parent=self,
+            plots=plots,
+            back_to_home_callback=self.show_home_page
+        )
+
+        # Génération et insertion dynamique des graphiques
+        equity_plot = generate_plot_widget(Dashboard.plot_equity(self.global_result), show_legend=False)
+        sharpe_plot = generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(self.global_result, length=1250), show_legend=False)
+        drawdown_plot = generate_plot_widget(Dashboard.plot_rolling_drawdown(self.global_result, length=1250), show_legend=False)
+        vol_plot = generate_plot_widget(Dashboard.plot_rolling_volatility(self.global_result), show_legend=False)
+
+        right_bottom_layout.addWidget(equity_plot, 0, 0)
+        right_bottom_layout.addWidget(sharpe_plot, 0, 1)
+        right_bottom_layout.addWidget(drawdown_plot, 1, 0)
+        right_bottom_layout.addWidget(vol_plot, 1, 1)
 
     def closeEvent(self, event):
         cleanup_temp_files()
@@ -125,32 +134,34 @@ class MainApp(QMainWindow):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    apply_global_styles(app)
 
-    progress_window, progress_bar = setup_progress_bar(None, "Launching App..")
-    progress_window.resize(400, 200)
-    progress_window.show()
+    app = QApplication(sys.argv)
+
+    apply_global_styles(app)
+    progress_window, progress_bar = setup_launch_page(None, "Launching App..")
 
     QApplication.processEvents()
-    import Config
-    progress_bar.setValue(15)
-    import Get_Data
+
+    import os
+    progress_bar.setValue(20)
+    import Files
     progress_bar.setValue(30)
+    import Get_Data
+    progress_bar.setValue(40)
     import Process_Data
-    progress_bar.setValue(45)
+    progress_bar.setValue(50)
     import Backtest
     progress_bar.setValue(60)
     import Portfolio
-    progress_bar.setValue(75)
+    progress_bar.setValue(70)
     import Dashboard
-    progress_bar.setValue(90)
+    progress_bar.setValue(80)
     import UI
-    progress_bar.setValue(95)
-    import os
-    progress_bar.setValue(100)
+    progress_bar.setValue(90)
     main_window = MainApp()
-    progress_window.close()
-    main_window.show()
+    progress_bar.setValue(100)
 
+    main_window.initialize()
+    progress_window.close()
+    
     sys.exit(app.exec())
