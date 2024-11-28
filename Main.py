@@ -1,8 +1,6 @@
 from PySide6.QtWidgets import QApplication, QMainWindow
 import sys
-from Launch_UI import apply_global_styles, setup_launch_page
-from Main_UI import setup_home_page, setup_results_page, setup_backtest_page, update_progress_with_events
-from Results_UI import generate_plot_widget, display_plot_dialog, cleanup_temp_files
+import Main as m
 
 class MainApp(QMainWindow):
 
@@ -20,7 +18,7 @@ class MainApp(QMainWindow):
 
     def show_home_page(self):
         del self.backtest_result
-        setup_home_page(
+        m.setup_home_page(
             parent=self,
             run_backtest_callback=self.run_backtest,
             open_config_callback=self.open_config,
@@ -28,19 +26,19 @@ class MainApp(QMainWindow):
             )
 
     def open_config(self):
-        UI.dynamic_config(Files.yahoo_assets, auto=False, parent=self)
+        Config.dynamic_config(Files.yahoo_assets, auto=False, parent=self)
 
     def refresh_data(self):
         Get_Data.get_yahoo_finance_data(Files.yahoo_assets, Files.FILE_PATH_YF)
 
     def update_progress(self, value, message=None):
-        update_progress_with_events(self.progress_bar, self.log_output, value, message)
+        m.update_progress_with_events(self.progress_bar, self.log_output, value, message)
 
     def show_backtest_page(self):
-        self.progress_bar, self.log_output = setup_backtest_page(self)
+        self.progress_bar, self.log_output = m.setup_backtest_page(self)
 
     def show_plot(self, fig):
-        display_plot_dialog(
+        m.display_plot_dialog(
             parent=self,
             fig=fig,
             window_title="Graph"
@@ -51,7 +49,7 @@ class MainApp(QMainWindow):
         self.update_progress(1, "Loading Data...")
         data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Files.FILE_PATH_YF)
 
-        indicators_and_params, assets_to_backtest = UI.dynamic_config(assets_names, auto=True)
+        indicators_and_params, assets_to_backtest = Config.dynamic_config(assets_names, auto=True)
 
         self.update_progress(5, "Prepare Data...")
 
@@ -111,17 +109,17 @@ class MainApp(QMainWindow):
         }
 
         # Appelle setup_results_page et récupère la grille des graphiques
-        right_bottom_layout = setup_results_page(
+        right_bottom_layout = m.setup_results_page(
             parent=self,
             plots=plots,
             back_to_home_callback=self.show_home_page
         )
 
         # Génération et insertion dynamique des graphiques
-        equity_plot = generate_plot_widget(Dashboard.plot_equity(self.global_result), show_legend=False)
-        sharpe_plot = generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(self.global_result, length=1250), show_legend=False)
-        drawdown_plot = generate_plot_widget(Dashboard.plot_rolling_drawdown(self.global_result, length=1250), show_legend=False)
-        vol_plot = generate_plot_widget(Dashboard.plot_rolling_volatility(self.global_result), show_legend=False)
+        equity_plot = m.generate_plot_widget(Dashboard.plot_equity(self.global_result), show_legend=False)
+        sharpe_plot = m.generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(self.global_result, length=1250), show_legend=False)
+        drawdown_plot = m.generate_plot_widget(Dashboard.plot_rolling_drawdown(self.global_result, length=1250), show_legend=False)
+        vol_plot = m.generate_plot_widget(Dashboard.plot_rolling_volatility(self.global_result), show_legend=False)
 
         right_bottom_layout.addWidget(equity_plot, 0, 0)
         right_bottom_layout.addWidget(sharpe_plot, 0, 1)
@@ -129,7 +127,7 @@ class MainApp(QMainWindow):
         right_bottom_layout.addWidget(vol_plot, 1, 1)
 
     def closeEvent(self, event):
-        cleanup_temp_files()
+        m.cleanup_temp_files()
         super().closeEvent(event)
 
 
@@ -137,8 +135,8 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    apply_global_styles(app)
-    progress_window, progress_bar = setup_launch_page(None, "Launching App..")
+    m.apply_global_styles(app)
+    progress_window, progress_bar = m.setup_launch_page(None, "Launching App..")
 
     QApplication.processEvents()
 
@@ -156,7 +154,7 @@ if __name__ == "__main__":
     progress_bar.setValue(70)
     import Dashboard
     progress_bar.setValue(80)
-    import UI
+    import Config
     progress_bar.setValue(90)
     main_window = MainApp()
     progress_bar.setValue(100)
