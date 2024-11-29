@@ -2,9 +2,16 @@ from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve
+from PySide6.QtGui import QPalette, QBrush, QPixmap
 from typing import Callable
 from typing import Dict
 
+def set_background_image(widget: QWidget, image_path: str):
+    palette = QPalette()
+    pixmap = QPixmap(image_path)
+    palette.setBrush(QPalette.Window, QBrush(pixmap))
+    widget.setPalette(palette)
+    widget.setAutoFillBackground(True)
 
 def create_scroll_area() ->tuple[QScrollArea, QWidget, QVBoxLayout]:
     """
@@ -18,26 +25,12 @@ def create_scroll_area() ->tuple[QScrollArea, QWidget, QVBoxLayout]:
     scroll_area.setWidgetResizable(True)
     return scroll_area, scroll_widget, scroll_layout
 
+def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidget, animation_duration: int = 300) -> QPropertyAnimation:
 
-def create_expandable_section(category_name: str, animation_duration: int = 300) -> tuple[QGroupBox, QPushButton, QWidget]:
-    """
-    Creates an expandable/collapsible group box with a toggle button and animation.
-    """
-    category_box = QGroupBox(category_name)
-    category_layout = QVBoxLayout()
-    category_box.setLayout(category_layout)
-
-    content_widget = QWidget()
-    content_layout = QVBoxLayout()
-    content_widget.setLayout(content_layout)
     content_widget.setMaximumHeight(0)
-
     animation = QPropertyAnimation(content_widget, b"maximumHeight")
     animation.setDuration(animation_duration)
     animation.setEasingCurve(QEasingCurve.InOutCubic)
-
-    expand_button = QPushButton("Expand/Collapse")
-    expand_button.setCheckable(True)
 
     def toggle_animation(checked: bool):
         if checked:
@@ -48,11 +41,25 @@ def create_expandable_section(category_name: str, animation_duration: int = 300)
             animation.setEndValue(0)
         animation.start()
 
-    expand_button.toggled.connect(toggle_animation)
+    toggle_button.setCheckable(True)
+    toggle_button.toggled.connect(toggle_animation)
+    return animation
 
+def create_expandable_section(category_name: str, animation_duration: int = 300) -> tuple[QGroupBox, QPushButton, QWidget]:
+
+    category_box = QGroupBox(category_name)
+    category_layout = QVBoxLayout()
+    category_box.setLayout(category_layout)
+
+    content_widget = QWidget()
+    content_layout = QVBoxLayout()
+    content_widget.setLayout(content_layout)
+
+    expand_button = QPushButton("Expand/Collapse")
     category_layout.addWidget(expand_button)
     category_layout.addWidget(content_widget)
 
+    setup_expandable_animation(expand_button, content_widget, animation_duration)
     return category_box, content_widget, content_layout
 
 
