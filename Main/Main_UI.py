@@ -93,8 +93,6 @@ def setup_backtest_page(parent):
 
     # Création du QFrame central
     center_frame = QFrame()
-    center_frame.setFrameShape(QFrame.StyledPanel)
-    center_frame.setFrameShadow(QFrame.Raised)
     center_frame.setStyleSheet(f"""
         QFrame {{
             border-radius: 15px;
@@ -172,21 +170,18 @@ def setup_results_page(parent, plots, back_to_home_callback):
     back_to_home_button.clicked.connect(back_to_home_callback)
     back_home_layout.addWidget(back_to_home_button)
 
-    table_widget = QTableWidget(2, 7)  # 2 lignes, 7 colonnes
+    table_widget = QTableWidget(1, 7)  # 2 lignes, 7 colonnes
     table_widget.setEditTriggers(QTableWidget.NoEditTriggers)  # Désactiver l'édition
-    for i in range(2):
-        for j in range(7):
-            table_widget.setItem(i, j, QTableWidgetItem("1"))
+    for i in range(7):
+        table_widget.setItem(1, i, QTableWidgetItem("1"))
 
             
-    right_top_layout.addWidget(table_widget, stretch=4)  # Le tableau à gauche
-    right_top_layout.addLayout(input_fields_layout, stretch=1)  # Les champs de saisie à droite
-    right_top_layout.addLayout(back_home_layout, stretch=0.5)
+    right_top_layout.addWidget(table_widget, stretch=8)  # Le tableau à gauche
+    right_top_layout.addLayout(input_fields_layout, stretch=2)  # Les champs de saisie à droite
+    right_top_layout.addLayout(back_home_layout, stretch=1)
 
     # Création d'un QFrame pour right_bottom
     right_bottom_frame = QFrame()
-    right_bottom_frame.setFrameShape(QFrame.StyledPanel)
-    right_bottom_frame.setFrameShadow(QFrame.Raised)
     right_bottom_frame.setStyleSheet(f"""
         QFrame {{
             border-radius: 15px;
@@ -196,17 +191,13 @@ def setup_results_page(parent, plots, back_to_home_callback):
 
     # Layout interne pour le QFrame
     right_bottom_layout = QGridLayout(right_bottom_frame)
-
-    
-    for i in range(3):  # 3 lignes
-        for j in range(2):  # 2 colonnes
-            placeholder = QWidget()
-            right_bottom_layout.addWidget(placeholder, i, j)
+    right_bottom_layout.setHorizontalSpacing(0)
+    right_bottom_layout.setVerticalSpacing(0)
 
     # Layout principal pour la section droite
     right_layout = QVBoxLayout()
     right_layout.addLayout(right_top_layout, stretch=1)
-    right_layout.addWidget(right_bottom_frame, stretch=16)
+    right_layout.addWidget(right_bottom_frame, stretch=9)
 
     # Ajouter les layouts gauche et droit au layout principal
     results_layout.addLayout(left_layout, stretch=1)  # Layout gauche (boutons)

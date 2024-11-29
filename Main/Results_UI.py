@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
                                QDialog
                                )
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtCore import QUrl, Qt
+from PySide6.QtCore import QUrl
 import tempfile
 import os
 from Files import BACKGROUND_APP_DARK
@@ -20,6 +20,7 @@ def generate_plot_widget(fig, show_legend:bool=True):
     page = plot_widget.page()
     page.setBackgroundColor(BACKGROUND_APP_DARK)
     plot_widget.load(QUrl.fromLocalFile(temp_file.name))
+
     return plot_widget
 
 def cleanup_temp_files():

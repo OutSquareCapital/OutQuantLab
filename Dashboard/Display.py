@@ -35,7 +35,7 @@ def plot_rolling_drawdown(returns_df: pd.DataFrame, length: int):
 
     return Widgets.curves(x_values=sorted_drawdowns.index, 
                    y_values=sorted_drawdowns, 
-                   title="Drawdown %")
+                   title="Rolling Drawdown %")
 
 def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
 

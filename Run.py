@@ -110,6 +110,7 @@ class MainApp(QMainWindow):
 
         # Appelle setup_results_page et récupère la grille des graphiques
         right_bottom_layout = m.setup_results_page(
+
             parent=self,
             plots=plots,
             back_to_home_callback=self.show_home_page
@@ -122,13 +123,13 @@ class MainApp(QMainWindow):
         vol_plot = m.generate_plot_widget(Dashboard.plot_rolling_volatility(self.global_result), show_legend=False)
         distribution_plot = m.generate_plot_widget(Dashboard.plot_returns_distribution_histogram(self.global_result), show_legend=False)
         violin_plot = m.generate_plot_widget(Dashboard.plot_returns_distribution_violin(self.global_result), show_legend=False)
-
+        
         right_bottom_layout.addWidget(equity_plot, 0, 0)
-        right_bottom_layout.addWidget(sharpe_plot, 0, 1)
         right_bottom_layout.addWidget(drawdown_plot, 1, 0)
+        right_bottom_layout.addWidget(sharpe_plot, 0, 1)
         right_bottom_layout.addWidget(vol_plot, 1, 1)
-        right_bottom_layout.addWidget(distribution_plot, 2, 0)
-        right_bottom_layout.addWidget(violin_plot, 2, 1)
+        right_bottom_layout.addWidget(distribution_plot, 0, 2)
+        right_bottom_layout.addWidget(violin_plot, 1, 2)
 
     def closeEvent(self, event):
         m.cleanup_temp_files()
