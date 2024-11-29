@@ -12,7 +12,9 @@ from PySide6.QtWidgets import (QWidget,
                                QGridLayout,
                                QFrame,
                                QTableWidget,
-                               QTableWidgetItem
+                               QTableWidgetItem,
+                               QLabel,
+                               QSlider
                                )
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from Files import ( 
@@ -21,6 +23,7 @@ from Files import (
                     DASHBOARD_PAGE_PHOTO,
                     BACKGROUND_APP_DARK
                     )
+from PySide6.QtCore import Qt
 
 
 def set_background_image(widget: QWidget, image_path: str):
@@ -132,7 +135,7 @@ def setup_backtest_page(parent):
     return progress_bar, log_output
 
 
-def setup_results_page(parent, plots, back_to_home_callback):
+def setup_results_page(parent, plots, back_to_home_callback, metrics):
     results_widget = QWidget()
     results_layout = QHBoxLayout(results_widget)  # Layout principal horizontal
     set_background_image(results_widget, DASHBOARD_PAGE_PHOTO)
@@ -146,23 +149,37 @@ def setup_results_page(parent, plots, back_to_home_callback):
 
     # Layout pour la section supérieure droite (champs de saisie)
     right_top_layout = QHBoxLayout()
-    input_fields_layout = QVBoxLayout()
+    # Section droite : Sliders
+    sliders_layout = QVBoxLayout()
 
-    length_input = QLineEdit(results_widget)
-    length_input.setPlaceholderText("Rolling length (e.g., 1250)")
-    input_fields_layout.addWidget(length_input)
+    # Cluster sliders
+    for i, label_text in enumerate(["Max Clusters", "Max Sub Clusters", "Max Sub-Sub Clusters"], 1):
+        cluster_slider = QSlider(Qt.Horizontal)
+        cluster_slider.setRange(0, 10)
+        cluster_slider.setValue(5)  # Valeur par défaut
+        cluster_label = QLabel(f"{label_text}: {cluster_slider.value()}")
+        cluster_slider.valueChanged.connect(lambda value, lbl=cluster_label, lbl_txt=label_text: lbl.setText(f"{lbl_txt}: {value}"))
+        sliders_layout.addWidget(cluster_label)
+        sliders_layout.addWidget(cluster_slider)
 
-    max_clusters_input = QLineEdit(results_widget)
-    max_clusters_input.setPlaceholderText("Max Clusters (e.g., 5)")
-    input_fields_layout.addWidget(max_clusters_input)
+    # Rolling length slider
+    rolling_slider = QSlider(Qt.Horizontal)
+    rolling_slider.setRange(6, 12)  # Log base 2 de 64 à 4096 (6 = log2(64), 12 = log2(4096))
+    rolling_slider.setValue(10)  # log2(1024) comme valeur par défaut
+    rolling_label = QLabel(f"Rolling Length: {2 ** rolling_slider.value()}")
+    rolling_slider.valueChanged.connect(lambda value: rolling_label.setText(f"Rolling Length: {2 ** value}"))
+    sliders_layout.addWidget(rolling_label)
+    sliders_layout.addWidget(rolling_slider)
 
-    max_sub_clusters_input = QLineEdit(results_widget)
-    max_sub_clusters_input.setPlaceholderText("Max Sub Clusters (e.g., 3)")
-    input_fields_layout.addWidget(max_sub_clusters_input)
+    # Leverage slider
+    leverage_slider = QSlider(Qt.Horizontal)
+    leverage_slider.setRange(1, 100)  # 0.1 à 10 avec des pas de 0.1 (100 * 0.1 = 10)
+    leverage_slider.setValue(10)  # Par défaut, 1.0
+    leverage_label = QLabel(f"Leverage: {leverage_slider.value() / 10:.1f}")
+    leverage_slider.valueChanged.connect(lambda value: leverage_label.setText(f"Leverage: {value / 10:.1f}"))
+    sliders_layout.addWidget(leverage_label)
+    sliders_layout.addWidget(leverage_slider)
 
-    max_sub_sub_clusters_input = QLineEdit(results_widget)
-    max_sub_sub_clusters_input.setPlaceholderText("Max Sub Sub Clusters (e.g., 2)")
-    input_fields_layout.addWidget(max_sub_sub_clusters_input)
 
     # Bouton pour revenir à la page d'accueil
     back_home_layout = QVBoxLayout()
@@ -170,14 +187,23 @@ def setup_results_page(parent, plots, back_to_home_callback):
     back_to_home_button.clicked.connect(back_to_home_callback)
     back_home_layout.addWidget(back_to_home_button)
 
-    table_widget = QTableWidget(1, 7)  # 2 lignes, 7 colonnes
-    table_widget.setEditTriggers(QTableWidget.NoEditTriggers)  # Désactiver l'édition
-    for i in range(7):
-        table_widget.setItem(1, i, QTableWidgetItem("1"))
+    table_widget = QTableWidget(1, 5)
+    results = [
+        "Total Return %",
+        "Average Rolling Drawdown",
+        "Sharpe Ratio",
+        "Volatility %",
+        "Skewness"
+    ]
+    table_widget.setHorizontalHeaderLabels(results)
 
-            
-    right_top_layout.addWidget(table_widget, stretch=8)  # Le tableau à gauche
-    right_top_layout.addLayout(input_fields_layout, stretch=2)  # Les champs de saisie à droite
+    for i, value in enumerate(metrics):
+        item = QTableWidgetItem(f"{value}")
+        item.setTextAlignment(Qt.AlignCenter)
+        table_widget.setItem(0, i, item)
+
+    right_top_layout.addWidget(table_widget, stretch=10)  # Le tableau à gauche
+    right_top_layout.addLayout(sliders_layout, stretch=2)
     right_top_layout.addLayout(back_home_layout, stretch=1)
 
     # Création d'un QFrame pour right_bottom

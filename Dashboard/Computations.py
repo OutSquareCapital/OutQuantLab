@@ -5,6 +5,47 @@ import Files
 from Process_Data import equity_curves_calculs
 import Metrics as mt
 
+def calculate_overall_returns(returns_df: pd.DataFrame) -> pd.Series:
+
+    equity_curves = pd.DataFrame(equity_curves_calculs(returns_df.values),
+                                              index=returns_df.index,
+                                              columns=returns_df.columns,
+                                              dtype=np.float32
+                                              )
+
+    return pd.Series((equity_curves.iloc[-1]-100),
+                    index=returns_df.columns,
+                    dtype=np.float32
+                    ).round(2)                                                                                          
+
+def calculate_overall_volatility(returns_df: pd.DataFrame) -> pd.Series:
+
+    return (returns_df.std() * Files.ANNUALIZED_PERCENTAGE_FACTOR).round(2)
+
+def calculate_overall_sharpe_ratio(returns_df: pd.DataFrame) -> pd.Series:
+
+    return ((returns_df.mean() / returns_df.std()
+            ) * Files.ANNUALIZATION_FACTOR
+            ).round(2)
+
+def calculate_overall_average_drawdown(returns_df: pd.DataFrame, length: int) -> pd.Series:
+
+    return calculate_rolling_drawdown(returns_df, length).mean().round(2)
+
+
+def calculate_overall_monthly_skew(returns_df: pd.DataFrame) -> pd.Series:
+
+    monthly_returns_df = returns_df.resample('ME').mean()
+    
+    return monthly_returns_df.apply(lambda x: skew(x, nan_policy='omit')
+                                    ).astype(np.float32
+                                    ).round(2)
+
+def calculate_overall_average_correlation(returns_df: pd.DataFrame) -> pd.Series:
+
+    return returns_df.corr().mean().round(2)
+
+
 def calculate_equity_curves_df(returns_df: pd.DataFrame):
 
     return pd.DataFrame(equity_curves_calculs(returns_df.values),
@@ -12,42 +53,6 @@ def calculate_equity_curves_df(returns_df: pd.DataFrame):
                                               columns=returns_df.columns,
                                               dtype=np.float32
                                               ).round(2)
-
-def calculate_overall_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
-
-    volatility = returns_df.std() * Files.ANNUALIZED_PERCENTAGE_FACTOR
-
-    return pd.DataFrame(volatility, 
-                        columns=['Volatility'], 
-                        dtype=np.float32
-                        ).round(2)
-
-def calculate_overall_sharpe_ratio(returns_df: pd.DataFrame) -> pd.DataFrame:
-
-    sharpe_ratios = returns_df.mean() / returns_df.std() * Files.ANNUALIZATION_FACTOR
-
-    return pd.DataFrame(sharpe_ratios, 
-                        columns=['Sharpe Ratio'], 
-                        dtype=np.float32
-                        ).round(2)
-
-def calculate_overall_average_correlation(returns_df: pd.DataFrame) -> pd.DataFrame:
-
-    correlation_matrix = returns_df.corr()
-    average_correlations = correlation_matrix.mean()
-
-    return pd.DataFrame(average_correlations, 
-                        columns=['Average Correlation'], 
-                        dtype=np.float32
-                        ).round(2)
-
-def calculate_overall_correlation_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
-
-    return returns_df.corr().round(2)
-
-def calculate_overall_average_drawdown(returns_df: pd.DataFrame, length: int) -> pd.DataFrame:
-
-    return calculate_rolling_drawdown(returns_df, length).mean().round(2)
 
 def format_returns(returns_df: pd.DataFrame, limit: int) -> pd.DataFrame:
     lower_threshold = returns_df.quantile(limit, axis=0)
@@ -57,14 +62,6 @@ def format_returns(returns_df: pd.DataFrame, limit: int) -> pd.DataFrame:
     formatted_returns_df = formatted_returns_df * Files.PERCENTAGE_FACTOR
 
     return formatted_returns_df.round(2)
-
-def calculate_overall_monthly_skew(returns_df: pd.DataFrame) -> pd.Series:
-
-    monthly_returns_df = returns_df.resample('ME').mean()
-    
-    return monthly_returns_df.apply(lambda x: skew(x, nan_policy='omit')
-                                    ).astype(np.float32
-                                    ).round(2)
 
 def calculate_rolling_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
 
@@ -84,6 +81,7 @@ def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
                         ).round(2)
 
 def calculate_rolling_drawdown(returns_df: pd.DataFrame, length: int) -> pd.DataFrame:
+    
     equity_curves = pd.DataFrame(equity_curves_calculs(returns_df.values),
                                 index=returns_df.index,
                                 columns=returns_df.columns,
@@ -96,11 +94,18 @@ def calculate_rolling_drawdown(returns_df: pd.DataFrame, length: int) -> pd.Data
     return drawdowns.round(2)
 
 def calculate_rolling_average_correlation(returns_df: pd.DataFrame, length: int) -> pd.DataFrame:
-    correlation_matrices = returns_df.rolling(window=length, min_periods=length).corr()
-    rolling_average_correlation = correlation_matrices.groupby(level=0).mean()
 
-    return rolling_average_correlation.astype(np.float32).round(2)
+    return returns_df.rolling(window=length, min_periods=length
+                                                                ).corr(
+                                                                ).groupby(level=0
+                                                                ).mean(
+                                                                ).astype(np.float32
+                                                                ).round(2)
 
+
+def calculate_correlation_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
+
+    return returns_df.corr().round(2)
 
 def calculate_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int) -> pd.DataFrame:
 

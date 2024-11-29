@@ -60,6 +60,7 @@ def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int):
                    zero_line=True)
     
 def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: int):
+    
     rolling_correlations = Computations.calculate_rolling_average_correlation(returns_df, length)
 
     inverted_correlations = rolling_correlations * -1
@@ -76,15 +77,15 @@ def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: 
 
 def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
 
-    sharpe_ratios = Computations.calculate_overall_sharpe_ratio(daily_returns).squeeze()
+    sharpe_ratios = Computations.calculate_overall_sharpe_ratio(daily_returns)
     sorted_sharpe_ratios = Transformations.sort_series(sharpe_ratios, ascending=True)
 
     return Widgets.bars(series=sorted_sharpe_ratios, 
-                 title="Sharpe Ratio")
+                        title="Sharpe Ratio")
 
 def plot_overall_volatility(daily_returns: pd.DataFrame):
 
-    volatility = Computations.calculate_overall_volatility(daily_returns).squeeze()
+    volatility = Computations.calculate_overall_volatility(daily_returns)
     sorted_volatility = Transformations.sort_series(volatility, ascending=True)
 
     return Widgets.bars(series=sorted_volatility, 
@@ -92,7 +93,7 @@ def plot_overall_volatility(daily_returns: pd.DataFrame):
     
 def plot_overall_average_drawdown(returns_df: pd.DataFrame, length: int):
 
-    drawdowns = Computations.calculate_overall_average_drawdown(returns_df, length).squeeze()
+    drawdowns = Computations.calculate_overall_average_drawdown(returns_df, length)
     sorted_drawdowns = Transformations.sort_series(drawdowns, ascending=True)
 
     return Widgets.bars(series=sorted_drawdowns, 
@@ -100,7 +101,7 @@ def plot_overall_average_drawdown(returns_df: pd.DataFrame, length: int):
 
 def plot_overall_average_inverted_correlation(returns_df: pd.DataFrame):
 
-    average_correlations = Computations.calculate_overall_average_correlation(returns_df).squeeze() * -1
+    average_correlations = Computations.calculate_overall_average_correlation(returns_df) * -1
     sorted_correlations = Transformations.sort_series(average_correlations, ascending=True)
 
     return Widgets.bars(series=sorted_correlations, 

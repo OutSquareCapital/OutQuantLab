@@ -3,13 +3,11 @@ import numpy as np
 from .Backtest_Initialization import initialize_data_array, initialize_signals_array
 
 
-def process_param(func, data_array, adjusted_returns_array, param):
+def process_param(func, data_array, volatility_adjusted_pct_returns_array, param):
 
-    # Calculer le signal
     signal = func(data_array, **param)
 
-    # Multiplier le signal par les adjusted returns
-    return signal * adjusted_returns_array
+    return signal * volatility_adjusted_pct_returns_array
 
 def calculate_strategy_returns(
                             signals_array: np.ndarray,
