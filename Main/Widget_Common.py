@@ -1,11 +1,20 @@
 from PySide6.QtWidgets import (
-    QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox
+QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame      
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from typing import Callable
 from typing import Dict
 
+def set_frame_design(background_color):
+    frame = QFrame()
+    frame.setStyleSheet(f"""
+        QFrame {{
+            border-radius: 15px;
+            background-color: {background_color};
+        }}
+    """)
+    return frame
 def set_background_image(widget: QWidget, image_path: str):
     palette = QPalette()
     pixmap = QPixmap(image_path)
