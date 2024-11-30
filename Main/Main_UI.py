@@ -5,9 +5,7 @@ from PySide6.QtWidgets import (QWidget,
                                QTextEdit,
                                QPushButton, 
                                QMainWindow, 
-                               QApplication, 
-                               QSizePolicy, 
-                               QSpacerItem,
+                               QApplication,
                                QGridLayout,
                                QLabel,
                                QSlider
@@ -25,46 +23,51 @@ from Files import (
                     )
 
 from PySide6.QtCore import Qt, QDate
-from .Widget_Common import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
+from UI_Common import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
+from Config import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget
 
-def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_callback, refresh_data_callback):
-
+def setup_home_page(
+    parent: QMainWindow, 
+    run_backtest_callback, 
+    refresh_data_callback, 
+    param_config, 
+    asset_config, 
+    methods_config, 
+    assets_names
+):
     parent.setWindowTitle("OutQuantLab")
     main_widget = QWidget()
     main_layout = QHBoxLayout(main_widget)
     set_background_image(main_widget, HOME_PAGE_PHOTO)
 
     left_layout = QVBoxLayout()
-
-    left_top_layout = QVBoxLayout()
-    spacer_left_top = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-    left_top_layout.addItem(spacer_left_top)
-
     buttons_layout = QVBoxLayout()
+
     backtest_button = QPushButton("Run Backtest")
     backtest_button.clicked.connect(run_backtest_callback)
     buttons_layout.addWidget(backtest_button)
-
-    config_button = QPushButton("Open Config")
-    config_button.clicked.connect(open_config_callback)
-    buttons_layout.addWidget(config_button)
 
     refresh_button = QPushButton("Refresh Data")
     refresh_button.clicked.connect(refresh_data_callback)
     buttons_layout.addWidget(refresh_button)
 
     left_layout.addLayout(buttons_layout)
-    left_layout.addLayout(left_top_layout, stretch=4)
 
-    right_layout = QVBoxLayout()
-    spacer_right = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-    right_layout.addItem(spacer_right)
+    # Right layout for configuration widgets
+    right_layout = QHBoxLayout()
+
+    param_widget = ParameterWidget(param_config)
+    asset_widget = AssetSelectionWidget(asset_config, assets_names)
+    method_widget = MethodSelectionWidget(methods_config)
+
+    right_layout.addWidget(param_widget)
+    right_layout.addWidget(asset_widget)
+    right_layout.addWidget(method_widget)
 
     main_layout.addLayout(left_layout, stretch=1)
     main_layout.addLayout(right_layout, stretch=9)
 
     parent.setCentralWidget(main_widget)
-
 
 def setup_backtest_page(parent):
     loading_widget = QWidget()
@@ -110,7 +113,6 @@ def setup_backtest_page(parent):
 
     parent.setCentralWidget(loading_widget)
     return progress_bar, log_output
-
 
 def setup_results_page(parent, plots, back_to_home_callback, metrics):
 

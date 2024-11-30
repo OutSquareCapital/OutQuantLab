@@ -15,12 +15,12 @@ class MainApp(QMainWindow):
         m.setup_home_page(
             parent=self,
             run_backtest_callback=self.run_backtest,
-            open_config_callback=self.open_config,
-            refresh_data_callback=self.refresh_data
-            )
-
-    def open_config(self):
-        Config.dynamic_config(Files.yahoo_assets, auto=False, parent=self)
+            refresh_data_callback=self.refresh_data,
+            param_config=Config.load_param_config(),
+            asset_config=Config.load_assets_to_backtest_config(),
+            methods_config=Config.load_methods_config(),
+            assets_names=Files.yahoo_assets
+        )
 
     def refresh_data(self):
         Get_Data.get_yahoo_finance_data(Files.yahoo_assets, Files.FILE_PATH_YF)
@@ -41,9 +41,10 @@ class MainApp(QMainWindow):
     def run_backtest(self):
         self.show_backtest_page()
         self.update_progress(1, "Loading Data...")
+
         data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Files.FILE_PATH_YF)
 
-        indicators_and_params, assets_to_backtest = Config.dynamic_config(assets_names, auto=True)
+        indicators_and_params, assets_to_backtest = Config.dynamic_config()
 
         self.update_progress(5, "Preparing Data...")
 
@@ -84,10 +85,10 @@ class MainApp(QMainWindow):
         metrics = [
             round(Dashboard.calculate_overall_returns(global_result).item(
                                                                         ), 2),
-            round(Dashboard.calculate_overall_average_drawdown(global_result, length=1250
-                                                               ).item(), 2),
             round(Dashboard.calculate_overall_sharpe_ratio(global_result
                                                            ).item(), 2),
+            round(Dashboard.calculate_overall_average_drawdown(global_result, length=1250
+                                                               ).item(), 2),
             round(Dashboard.calculate_overall_volatility(global_result
                                                          ).item(), 2),
             round(Dashboard.calculate_overall_monthly_skew(global_result
@@ -125,6 +126,7 @@ class MainApp(QMainWindow):
                                             back_to_home_callback=self.show_home_page,
                                             metrics=metrics
                                             )
+
         #'''
         # Génération et insertion dynamique des graphiques
         equity_plot = m.generate_plot_widget(Dashboard.plot_equity(global_result), show_legend=False)
@@ -141,6 +143,7 @@ class MainApp(QMainWindow):
         bottom_layout.addWidget(distribution_plot, 0, 2)
         bottom_layout.addWidget(violin_plot, 1, 2)
         #'''
+
     def closeEvent(self, event):
         m.cleanup_temp_files()
         super().closeEvent(event)
@@ -149,12 +152,13 @@ class MainApp(QMainWindow):
 if __name__ == "__main__":
 
     import sys
+    import UI_Common
     import Main as m
     from PySide6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)
-    m.apply_global_styles(app)
-    progress_window, progress_bar = m.setup_launch_page(None)
+    UI_Common.apply_global_styles(app)
+    progress_window, progress_bar = UI_Common.setup_launch_page(None)
 
     QApplication.processEvents()
 
