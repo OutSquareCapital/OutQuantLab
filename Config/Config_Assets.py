@@ -62,7 +62,7 @@ class AssetSelectionWidget(QWidget):
                 selected_assets = sum(
                     1 for _, checkbox in self.category_vars[category].items() if checkbox.isChecked()
                 )
-                if selected_assets == 1:  # Disable Apply button if only one is selected
+                if selected_assets == 1:
                     warnings_active = True
                     break
         self.apply_button.setEnabled(not warnings_active)

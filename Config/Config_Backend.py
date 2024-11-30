@@ -1,6 +1,6 @@
 import json
 from Files import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_CONFIG_FILE
-from typing import Dict, List, Callable
+from typing import List, Callable
 import numpy as np
 import importlib
 from .Strategy_Params_Generation import automatic_generation
