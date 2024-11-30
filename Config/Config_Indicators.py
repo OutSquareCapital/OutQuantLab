@@ -2,8 +2,8 @@ from UI_Common import create_scroll_area, add_category_widget_shared, create_app
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox
 from PySide6.QtCore import Signal
 from typing import Dict
-from .Config_Backend import save_methods_config, get_active_methods
-
+from .Config_Backend import save_config_file
+from Files import METHODS_CONFIG_FILE
 
 class MethodSelectionWidget(QWidget):
     methods_saved = Signal()
@@ -67,12 +67,6 @@ class MethodSelectionWidget(QWidget):
         self.apply_button.setEnabled(True)
 
     def save_configuration(self):
-        save_methods_config(self.current_config)
+        save_config_file(METHODS_CONFIG_FILE, self.current_config, 4)
         self.apply_button.setEnabled(False)
         self.methods_saved.emit()
-
-    def get_data(self) -> Dict[str, Dict[str, bool]]:
-        return self.current_config
-
-    def get_active_methods(self):
-        return get_active_methods(self.current_config)

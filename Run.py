@@ -16,9 +16,9 @@ class MainApp(QMainWindow):
             parent=self,
             run_backtest_callback=self.run_backtest,
             refresh_data_callback=self.refresh_data,
-            param_config=Config.load_param_config(),
-            asset_config=Config.load_assets_to_backtest_config(),
-            methods_config=Config.load_methods_config(),
+            param_config=Config.load_config_file(Files.PARAM_CONFIG_FILE),
+            asset_config=Config.load_config_file(Files.ASSETS_TO_TEST_CONFIG_FILE),
+            methods_config=Config.load_config_file(Files.METHODS_CONFIG_FILE),
             assets_names=Files.yahoo_assets
         )
 
@@ -147,7 +147,6 @@ class MainApp(QMainWindow):
     def closeEvent(self, event):
         m.cleanup_temp_files()
         super().closeEvent(event)
-
 
 if __name__ == "__main__":
 

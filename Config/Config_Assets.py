@@ -2,8 +2,8 @@ from UI_Common import create_scroll_area, add_category_widget_shared, create_app
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox
 from PySide6.QtCore import Signal
 from typing import Dict, List
-from .Config_Backend import save_assets_to_backtest_config
-
+from .Config_Backend import save_config_file
+from Files import ASSETS_TO_TEST_CONFIG_FILE
 
 class AssetSelectionWidget(QWidget):
     assets_saved = Signal()
@@ -72,7 +72,8 @@ class AssetSelectionWidget(QWidget):
             self.current_config[category] = [
                 asset for asset, checkbox in asset_vars.items() if checkbox.isChecked()
             ]
-        save_assets_to_backtest_config(self.current_config)
+        
+        save_config_file(ASSETS_TO_TEST_CONFIG_FILE, self.current_config, 3)
         self.apply_button.setEnabled(False)
         self.assets_saved.emit()
 
@@ -83,6 +84,3 @@ class AssetSelectionWidget(QWidget):
     def unselect_all(self, category: str):
         unselect_all_items(category, self.category_vars[category])
         self.check_asset_count()
-
-    def get_data(self) -> Dict[str, List[str]]:
-        return self.current_config

@@ -1,4 +1,4 @@
-from .Config_Backend import load_param_config, load_assets_to_backtest_config, load_methods_config, dynamic_config
+from .Config_Backend import dynamic_config, load_config_file
 from .Config_Assets import AssetSelectionWidget
 from .Config_Indicators import MethodSelectionWidget
 from .Config_Params import ParameterWidget

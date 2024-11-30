@@ -5,41 +5,16 @@ import numpy as np
 import importlib
 from .Strategy_Params_Generation import automatic_generation
 
-def load_assets_to_backtest_config():
+def load_config_file(file_path:str):
     try:
-        with open(ASSETS_TO_TEST_CONFIG_FILE, "r") as file:
+        with open(file_path, "r") as file:
             return json.load(file)
     except json.JSONDecodeError:
         print("define new config, saved file corrupted")
 
-def save_assets_to_backtest_config(config: Dict[str, List[str]]):
-    with open(ASSETS_TO_TEST_CONFIG_FILE, "w") as file:
-        json.dump(config, file, indent=3)
-
-def load_param_config() -> dict:
-    try:
-        with open(PARAM_CONFIG_FILE, "r") as file:
-            return json.load(file)
-    except (json.JSONDecodeError):
-        print("define new config, saved file corrupted")
-
-def save_param_config(config: dict):
-    with open(PARAM_CONFIG_FILE, "w") as file:
-        json.dump(config, file, indent=4)
-
-def load_methods_config() -> Dict[str, Dict[str, bool]]:
-
-    try:
-        with open(METHODS_CONFIG_FILE, "r") as file:
-            return json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        print("define new config, saved file corrupted")
-        return {}
-
-def save_methods_config(config: Dict[str, Dict[str, bool]]) -> None:
-
-    with open(METHODS_CONFIG_FILE, "w") as file:
-        json.dump(config, file, indent=4)
+def save_config_file(file_path:str, dict_to_save: dict, indent: int):
+    with open(file_path, "w") as file:
+        json.dump(dict_to_save, file, indent=indent)
 
 def param_range_values(start: int, end: int, num_values: int, linear: bool = False) -> list:
     if num_values == 1:
@@ -69,9 +44,9 @@ def get_active_methods(current_config: dict, module_name: str = "Signals.Signals
     return active_methods
 
 def dynamic_config():
-    param_config = load_param_config()
-    asset_config = load_assets_to_backtest_config()
-    methods_config = load_methods_config()
+    param_config = load_config_file(PARAM_CONFIG_FILE)
+    asset_config = load_config_file(ASSETS_TO_TEST_CONFIG_FILE)
+    methods_config = load_config_file(METHODS_CONFIG_FILE)
     active_methods = get_active_methods(methods_config)
     indicators_and_params = automatic_generation(active_methods, param_config)
     return indicators_and_params, asset_config

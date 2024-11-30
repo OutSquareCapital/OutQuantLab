@@ -1,9 +1,9 @@
 from typing import Dict, Any
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox
 from PySide6.QtCore import Qt, Signal
-from .Config_Backend import save_param_config, param_range_values
+from .Config_Backend import param_range_values, save_config_file
 from UI_Common import create_scroll_area, create_expandable_section, create_apply_button
-
+from Files import PARAM_CONFIG_FILE
 
 class ParameterWidget(QWidget):
     parameters_saved = Signal()
@@ -190,9 +190,6 @@ class ParameterWidget(QWidget):
         mode_combobox.currentTextChanged.connect(update_values)
 
     def save_configuration(self):
-        save_param_config(self.current_config)
+        save_config_file(PARAM_CONFIG_FILE, self.current_config, 4)
         self.apply_button.setEnabled(False)
         self.parameters_saved.emit()
-
-    def get_data(self) -> Dict[str, Any]:
-        return self.current_config
