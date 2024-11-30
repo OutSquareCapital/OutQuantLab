@@ -74,6 +74,15 @@ def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: 
         zero_line=True
     )
 
+def plot_overall_returns(returns_df: pd.DataFrame):
+
+    total_returns = Computations.calculate_overall_returns(returns_df)
+    
+    sorted_total_returns = Transformations.sort_series(total_returns, 
+                                                        ascending=True)
+
+    return Widgets.bars(series=sorted_total_returns,
+                        title="Total Returns")
 
 def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
 
@@ -133,7 +142,7 @@ def plot_returns_distribution_histogram(returns_df: pd.DataFrame, limit: float =
 
 def plot_correlation_heatmap(returns_df: pd.DataFrame):
 
-    correlation_matrix = Computations.calculate_overall_correlation_matrix(returns_df)
+    correlation_matrix = Computations.calculate_correlation_matrix(returns_df)
     sorted_correlation_matrix = Transformations.sort_correlation_matrix(correlation_matrix)
 
     return Widgets.heatmap(
