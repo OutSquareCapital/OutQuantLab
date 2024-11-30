@@ -25,7 +25,7 @@ def create_scroll_area() ->tuple[QScrollArea, QWidget, QVBoxLayout]:
     scroll_area.setWidgetResizable(True)
     return scroll_area, scroll_widget, scroll_layout
 
-def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidget, animation_duration: int = 300) -> QPropertyAnimation:
+def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidget, animation_duration: int = 500) -> QPropertyAnimation:
 
     content_widget.setMaximumHeight(0)
     animation = QPropertyAnimation(content_widget, b"maximumHeight")
@@ -45,7 +45,7 @@ def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidg
     toggle_button.toggled.connect(toggle_animation)
     return animation
 
-def create_expandable_section(category_name: str, animation_duration: int = 300) -> tuple[QGroupBox, QPushButton, QWidget]:
+def create_expandable_section(category_name: str) -> tuple[QGroupBox, QPushButton, QWidget]:
 
     category_box = QGroupBox(category_name)
     category_layout = QVBoxLayout()
@@ -59,7 +59,7 @@ def create_expandable_section(category_name: str, animation_duration: int = 300)
     category_layout.addWidget(expand_button)
     category_layout.addWidget(content_widget)
 
-    setup_expandable_animation(expand_button, content_widget, animation_duration)
+    setup_expandable_animation(expand_button, content_widget)
     return category_box, content_widget, content_layout
 
 

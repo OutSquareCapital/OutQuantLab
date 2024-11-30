@@ -2,7 +2,7 @@ from typing import Dict, Any
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox
 from PySide6.QtCore import Qt, Signal
 from .Config_Backend import save_param_config, param_range_values
-from .Widget_Common import create_scroll_area, create_expandable_section, create_apply_button
+from Main import create_scroll_area, create_expandable_section, create_apply_button
 
 
 class ParameterWidget(QWidget):

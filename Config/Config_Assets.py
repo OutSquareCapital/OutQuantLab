@@ -1,4 +1,4 @@
-from .Widget_Common import create_scroll_area, add_category_widget_shared, create_apply_button, select_all_items, unselect_all_items, create_checkbox_item
+from Main import create_scroll_area, add_category_widget_shared, create_apply_button, select_all_items, unselect_all_items, create_checkbox_item
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox
 from PySide6.QtCore import Signal
 from typing import Dict, List
