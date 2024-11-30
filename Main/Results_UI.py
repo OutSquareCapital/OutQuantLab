@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
                                QDialog
                                )
 from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtCore import QUrl
 import tempfile
 import os
@@ -18,6 +19,7 @@ def generate_plot_widget(fig, show_legend:bool=True):
         f.write(html_content)
     plot_widget = QWebEngineView()
     page = plot_widget.page()
+    page.settings().setAttribute(QWebEngineSettings.ShowScrollBars, False)
     page.setBackgroundColor(BACKGROUND_APP_DARK)
     plot_widget.load(QUrl.fromLocalFile(temp_file.name))
 

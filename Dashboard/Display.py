@@ -45,8 +45,7 @@ def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
 
     return Widgets.curves(x_values=sorted_rolling_sharpe_ratio_df.index,
                    y_values=sorted_rolling_sharpe_ratio_df, 
-                   title="Rolling Sharpe Ratio",
-                   zero_line=True)
+                   title="Rolling Sharpe Ratio")
     
 def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int):
 
@@ -56,8 +55,7 @@ def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int):
 
     return Widgets.curves(x_values=sorted_rolling_skewness_df.index,
                    y_values=sorted_rolling_skewness_df, 
-                   title="Rolling Smoothed Skewnesss", 
-                   zero_line=True)
+                   title="Rolling Smoothed Skewnesss")
     
 def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: int):
     
@@ -70,8 +68,7 @@ def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: 
     return Widgets.curves(
         x_values=sorted_correlations.index,
         y_values=sorted_correlations,
-        title=f"Rolling Average Inverted Correlation",
-        zero_line=True
+        title=f"Rolling Average Inverted Correlation"
     )
 
 def plot_overall_returns(returns_df: pd.DataFrame):

@@ -1,15 +1,14 @@
 import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
-from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, add_zero_line, get_marker_config
+from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
 import Dashboard.Transformations as Transformations
 from Files import COLOR_ADJUSTMENT
 
 def curves( x_values: pd.Index,
             y_values: pd.DataFrame,  
             title: str,
-            log_scale: bool = False, 
-            zero_line: bool = False):
+            log_scale: bool = False):
 
     fig = go.Figure()
 
@@ -24,9 +23,6 @@ def curves( x_values: pd.Index,
             line=dict(width=2, color=color_map[column]),
             showlegend=True
         ))
-
-    if zero_line:
-        add_zero_line(fig, x_values)
 
     if log_scale:
         fig.update_layout(yaxis=dict(type="log"))

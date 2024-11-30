@@ -135,11 +135,12 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
         "Max Sub Clusters", 
         "Max Sub-Sub Clusters"]
     overall_buttons = [
-        "Sharpe Ratio", 
-        "Volatility", 
+        "Total Returns %",
+        "Overall Sharpe Ratio",
         "Average Drawdown", 
-        "Average Decorrelation", 
-        "Monthly Skew"]
+        "Overall Volatility", 
+        "Monthly Skew",
+        "Overall Average Decorrelation"]
     advanced_buttons = [
         "Correlation Heatmap", 
         "Clusters Icicle", 
@@ -147,9 +148,9 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
         "Distribution Violin"]
     results = [
         "Total Return %",
+        "Sharpe Ratio",
         "Average Drawdown %",
         "Volatility %",
-        "Sharpe Ratio",
         "Skewness"]
     
     rolling_toggle_button = QPushButton("Rolling Metrics")

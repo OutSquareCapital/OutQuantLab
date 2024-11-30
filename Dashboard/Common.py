@@ -64,18 +64,6 @@ def setup_figure_layout(fig: go.Figure,
         gridcolor=COLOR_ADJUSTMENT
     )
 
-    
-
-def add_zero_line(fig: go.Figure, x_values: pd.Index):
-    fig.add_trace(go.Scatter(
-        x=x_values,
-        y=[0] * len(x_values),
-        mode='lines',
-        name='Zero Line',
-        line=dict(width=1, color=COLOR_ADJUSTMENT, dash="dot"),
-        showlegend=False
-    ))
-
 def get_marker_config(color: str) -> dict:
     return dict(
         color=color,
