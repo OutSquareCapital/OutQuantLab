@@ -6,3 +6,10 @@ FONT_FAMILY = 'Arial'
 FONT_SIZE = 12
 FONT_TYPE = 'bold'
 BASE_COLORS = ["black", "brown", "red","orange", "yellow", "green", "lime", "blue", "cyan", "white"]
+
+FRAME_STYLE = f"""
+        QFrame {{
+            border-radius: 15px;
+            background-color: {BACKGROUND_APP_DARK};
+        }}
+    """
