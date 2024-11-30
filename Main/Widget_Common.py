@@ -1,25 +1,14 @@
 from PySide6.QtWidgets import (
 QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame      
 )
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve
+from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from typing import Callable
 from typing import Dict
 
-def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: list):
-    for btn_text in buttons_names:
-        button = QPushButton(btn_text)
-        button.clicked.connect(buttons_actions.get(btn_text, lambda: None))
-        layout.addWidget(button)
-
-def set_frame_design(background_color):
+def set_frame_design(frame_style):
     frame = QFrame()
-    frame.setStyleSheet(f"""
-        QFrame {{
-            border-radius: 15px;
-            background-color: {background_color};
-        }}
-    """)
+    frame.setStyleSheet(frame_style)
     return frame
 
 def set_background_image(widget: QWidget, image_path: str):
@@ -30,9 +19,6 @@ def set_background_image(widget: QWidget, image_path: str):
     widget.setAutoFillBackground(True)
 
 def create_scroll_area() ->tuple[QScrollArea, QWidget, QVBoxLayout]:
-    """
-    Creates a scrollable area with a vertical layout.
-    """
     scroll_area = QScrollArea()
     scroll_widget = QWidget()
     scroll_layout = QVBoxLayout()
@@ -61,6 +47,26 @@ def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidg
     toggle_button.toggled.connect(toggle_animation)
     return animation
 
+def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: list):
+    for btn_text in buttons_names:
+        button = QPushButton(btn_text)
+        button.clicked.connect(buttons_actions.get(btn_text, lambda: None))
+        layout.addWidget(button)
+
+def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list, buttons_actions: list, open_on_launch: bool = False):
+    toggle_button = QPushButton(toggle_button_name)
+    outer_layout = QVBoxLayout()
+    outer_layout.setAlignment(Qt.AlignTop)
+    buttons_widget = QWidget()
+    inner_layout = QVBoxLayout(buttons_widget)
+    create_buttons_from_list(inner_layout, buttons_names, buttons_actions)
+    outer_layout.addWidget(toggle_button)
+    outer_layout.addWidget(buttons_widget)
+    setup_expandable_animation(toggle_button, buttons_widget)
+    if open_on_launch:
+        toggle_button.setChecked(True)
+    return outer_layout
+
 def create_expandable_section(category_name: str) -> tuple[QGroupBox, QPushButton, QWidget]:
 
     category_box = QGroupBox(category_name)
@@ -80,9 +86,7 @@ def create_expandable_section(category_name: str) -> tuple[QGroupBox, QPushButto
 
 
 def create_apply_button(apply_callback: Callable[[], None]) -> QPushButton:
-    """
-    Creates an 'Apply' button, initially disabled.
-    """
+
     apply_button = QPushButton("Apply")
     apply_button.setEnabled(False)
     apply_button.clicked.connect(apply_callback)
@@ -119,17 +123,14 @@ def add_category_widget_shared(
     layout.addWidget(category_box)
 
 def select_all_items(category: str, items: Dict[str, QCheckBox]):
-    """Active toutes les checkboxes d'une catégorie."""
     for checkbox in items.values():
         checkbox.setChecked(True)
 
 def unselect_all_items(category: str, items: Dict[str, QCheckBox]):
-    """Désactive toutes les checkboxes d'une catégorie."""
     for checkbox in items.values():
         checkbox.setChecked(False)
 
 def create_checkbox_item(parent, category: str, item: str, is_checked: bool, callback: Callable[[bool], None]) -> QCheckBox:
-    """Crée une checkbox avec un état initial et un callback."""
     checkbox = QCheckBox(item)
     checkbox.setChecked(is_checked)
     checkbox.stateChanged.connect(lambda: callback(checkbox.isChecked()))
