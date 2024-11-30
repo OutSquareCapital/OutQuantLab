@@ -26,4 +26,4 @@ BACKTEST_STATS_RESULTS = [
     "Sharpe Ratio",
     "Average Drawdown %",
     "Volatility %",
-    "Skewness"]
+    "Monthly Skewness"]

@@ -3,6 +3,7 @@ from Files import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_CONFIG_
 from typing import Dict, List, Callable
 import numpy as np
 import importlib
+from .Strategy_Params_Generation import automatic_generation
 
 def load_assets_to_backtest_config():
     try:
@@ -66,3 +67,11 @@ def get_active_methods(current_config: dict, module_name: str = "Signals.Signals
                 if callable(method_ref):
                     active_methods.append(method_ref)
     return active_methods
+
+def dynamic_config():
+    param_config = load_param_config()
+    asset_config = load_assets_to_backtest_config()
+    methods_config = load_methods_config()
+    active_methods = get_active_methods(methods_config)
+    indicators_and_params = automatic_generation(active_methods, param_config)
+    return indicators_and_params, asset_config
