@@ -6,6 +6,12 @@ from PySide6.QtGui import QPalette, QBrush, QPixmap
 from typing import Callable
 from typing import Dict
 
+def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: list):
+    for btn_text in buttons_names:
+        button = QPushButton(btn_text)
+        button.clicked.connect(buttons_actions.get(btn_text, lambda: None))
+        layout.addWidget(button)
+
 def set_frame_design(background_color):
     frame = QFrame()
     frame.setStyleSheet(f"""
@@ -15,6 +21,7 @@ def set_frame_design(background_color):
         }}
     """)
     return frame
+
 def set_background_image(widget: QWidget, image_path: str):
     palette = QPalette()
     pixmap = QPixmap(image_path)

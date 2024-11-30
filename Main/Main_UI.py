@@ -19,7 +19,7 @@ from Files import (
                     BACKGROUND_APP_DARK
                     )
 from PySide6.QtCore import Qt, QDate
-from .Widget_Common import setup_expandable_animation, set_background_image, set_frame_design
+from .Widget_Common import setup_expandable_animation, set_background_image, set_frame_design, create_buttons_from_list
 
 def setup_home_page(parent: QMainWindow, run_backtest_callback, open_config_callback, refresh_data_callback):
     parent.setWindowTitle("OutQuantLab")
@@ -123,29 +123,29 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
     bottom_frame = set_frame_design(BACKGROUND_APP_DARK)
     top_layout = QHBoxLayout(top_frame)
     bottom_layout = QGridLayout(bottom_frame)
-    rolling_buttons = [
+    rolling_buttons_names = [
         "Equity", 
         "Sharpe Ratio", 
         "Drawdown", 
         "Volatility", 
         "Smoothed Skewness", 
         "Average Inverted Correlation"]
-    cluster_parameters = [
-        "Max Clusters", 
-        "Max Sub Clusters", 
-        "Max Sub-Sub Clusters"]
-    overall_buttons = [
+    overall_buttons_names = [
         "Total Returns %",
         "Overall Sharpe Ratio",
         "Average Drawdown", 
         "Overall Volatility", 
         "Monthly Skew",
         "Overall Average Decorrelation"]
-    advanced_buttons = [
+    advanced_buttons_names = [
         "Correlation Heatmap", 
         "Clusters Icicle", 
         "Distribution Histogram", 
         "Distribution Violin"]
+    cluster_parameters = [
+        "Max Clusters", 
+        "Max Sub Clusters", 
+        "Max Sub-Sub Clusters"]
     results = [
         "Total Return %",
         "Sharpe Ratio",
@@ -158,12 +158,7 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
     rolling_metrics_layout.setAlignment(Qt.AlignTop)  # Alignement en haut
     rolling_buttons_widget = QWidget()
     rolling_buttons_inner_layout = QVBoxLayout(rolling_buttons_widget)
-
-    for btn_text in rolling_buttons:
-        button = QPushButton(btn_text)
-        button.clicked.connect(plots.get(btn_text, lambda: None))  # Connecter aux graphes associés
-        rolling_buttons_inner_layout.addWidget(button)
-
+    create_buttons_from_list(rolling_buttons_inner_layout, rolling_buttons_names, plots)
     rolling_metrics_layout.addWidget(rolling_toggle_button)
     rolling_metrics_layout.addWidget(rolling_buttons_widget)
 
@@ -175,10 +170,7 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
     overall_buttons_widget = QWidget()
     overall_buttons_inner_layout = QVBoxLayout(overall_buttons_widget)
 
-    for btn_text in overall_buttons:
-        button = QPushButton(btn_text)
-        button.clicked.connect(plots.get(btn_text, lambda: None))
-        overall_buttons_inner_layout.addWidget(button)
+    create_buttons_from_list(overall_buttons_inner_layout, overall_buttons_names, plots)
 
     overall_metrics_layout.addWidget(overall_toggle_button)
     overall_metrics_layout.addWidget(overall_buttons_widget)
@@ -192,10 +184,7 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
     advanced_buttons_widget = QWidget()
     advanced_buttons_inner_layout = QVBoxLayout(advanced_buttons_widget)
 
-    for btn_text in advanced_buttons:
-        button = QPushButton(btn_text)
-        button.clicked.connect(plots.get(btn_text, lambda: None))
-        advanced_buttons_inner_layout.addWidget(button)
+    create_buttons_from_list(advanced_buttons_inner_layout, advanced_buttons_names, plots)
 
     advanced_metrics_layout.addWidget(advanced_toggle_button)
     advanced_metrics_layout.addWidget(advanced_buttons_widget)
