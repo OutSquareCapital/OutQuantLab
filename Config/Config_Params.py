@@ -70,14 +70,12 @@ class ParameterWidget(QWidget):
         num_values_layout.addWidget(num_values_slider)
         param_layout.addLayout(num_values_layout)
 
-        # Mode sélection
         mode_combobox = self.create_mode_combobox()
         mode_layout = QHBoxLayout()
         mode_layout.addWidget(QLabel("Mode:"))
         mode_layout.addWidget(mode_combobox)
         param_layout.addLayout(mode_layout)
 
-        # Connect sliders to update
         self.connect_sliders_to_update(
             category, param, start_slider, end_slider, num_values_slider, mode_combobox,
             range_info_label, num_values_info_label, scroll_area.widget(), param_box
@@ -99,11 +97,8 @@ class ParameterWidget(QWidget):
         range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")
         num_values_info_label = QLabel(f"Num Values: {len(values)}")
 
-        # Generated values label
         generated_values_label = QLabel(f"Generated Values: {values}")
         generated_values_label.setWordWrap(False)
-
-        # Scroll area for generated values using shared function
         scroll_area, _, _ = create_scroll_area()
         scroll_area.setWidget(generated_values_label)
         scroll_area.setFixedHeight(50)
@@ -150,7 +145,6 @@ class ParameterWidget(QWidget):
             num_values = num_values_slider.value()
             mode = mode_combobox.currentText()
 
-            # Enforce the 2x constraint: end >= 2 * start
             if start * 2 > end:
                 if start_slider.hasFocus():
                     end_slider.setValue(self.value_to_index(start * 2))
@@ -159,7 +153,6 @@ class ParameterWidget(QWidget):
                     start_slider.setValue(self.value_to_index(end // 2))
                     start = self.index_to_value(start_slider.value())
 
-            # Generate values and ensure uniqueness
             linear = (mode == "Linear")
             generated_values = param_range_values(start, end, num_values, linear=linear)
 
@@ -173,15 +166,10 @@ class ParameterWidget(QWidget):
             if num_values < num_values_slider.value():
                 num_values_slider.setValue(num_values)
 
-            # Update labels
             range_info_label.setText(f"Range: {start} - {end}")
             num_values_info_label.setText(f"Num Values: {num_values}")
             generated_values_label.setText(f"Generated Values: {unique_values}")
-
-            # Mettre à jour self.current_config
             self.current_config[category][param] = unique_values
-
-            # Activer le bouton Apply
             self.apply_button.setEnabled(True)
 
         start_slider.valueChanged.connect(update_values)
