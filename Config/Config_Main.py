@@ -1,7 +1,6 @@
 from UI_Common import create_scroll_area, add_category_widget_shared, create_apply_button, select_all_items, unselect_all_items, create_checkbox_item, create_expandable_section, create_apply_button
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
 from PySide6.QtCore import Qt, Signal
-from .Config_Backend import save_config_file
 from typing import Dict, List, Any
 from Files import METHODS_CONFIG_FILE, ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE
 from .Config_Backend import param_range_values, save_config_file
@@ -306,3 +305,106 @@ class ParameterWidget(QWidget):
         save_config_file(PARAM_CONFIG_FILE, self.current_config, 4)
         self.apply_button.setEnabled(False)
         self.parameters_saved.emit()
+
+class TreeStructureWidget(QWidget):
+    def __init__(self, assets: List[str], parent=None):
+        super().__init__(parent)
+        self.assets = set(assets)  # Utiliser un ensemble pour vérifier rapidement si un élément est un actif
+        self.tree = QTreeWidget()
+        self.tree.setHeaderHidden(True)
+        self.tree.setDragDropMode(QTreeWidget.InternalMove)
+        self.tree.setSelectionMode(QTreeWidget.ExtendedSelection)
+        self.tree.itemClicked.connect(self.handle_item_click)
+        self.tree.setSelectionMode(QTreeWidget.ExtendedSelection)
+
+        self.init_ui()
+
+    def init_ui(self):
+        layout = QVBoxLayout()
+
+        # Ajouter les actifs au niveau supérieur
+        for asset in self.assets:
+            item = QTreeWidgetItem(self.tree, [asset])
+            item.setFlags(item.flags() & ~Qt.ItemIsDropEnabled)  # Actifs ne peuvent pas contenir d'autres éléments
+
+        layout.addWidget(self.tree)
+
+        buttons_layout = QHBoxLayout()
+
+        add_button = QPushButton("Add Category")
+        delete_button = QPushButton("Delete Category")
+        save_button = QPushButton("Save")
+
+        add_button.clicked.connect(self.add_category)
+        delete_button.clicked.connect(self.delete_category)
+        save_button.clicked.connect(self.save_structure)
+
+        buttons_layout.addWidget(add_button)
+        buttons_layout.addWidget(delete_button)
+        buttons_layout.addWidget(save_button)
+
+        layout.addLayout(buttons_layout)
+
+        self.setLayout(layout)
+
+    def add_category(self):
+        selected_item = self.tree.currentItem()
+        category_name, ok = QInputDialog.getText(self, "New Category", "Category Name:")
+        if ok and category_name:
+            new_category = QTreeWidgetItem([category_name])
+            new_category.setFlags(new_category.flags() | Qt.ItemIsDropEnabled)  # Catégories peuvent contenir des enfants
+
+            if selected_item and selected_item.text(0) not in self.assets:
+                # Ajouter comme sous-catégorie
+                selected_item.addChild(new_category)
+                selected_item.setExpanded(True)
+            else:
+                # Ajouter au niveau supérieur
+                self.tree.addTopLevelItem(new_category)
+
+    def delete_category(self):
+        selected_item = self.tree.currentItem()
+        if selected_item and selected_item.text(0) not in self.assets:
+            parent = selected_item.parent()
+            if parent:
+                parent.removeChild(selected_item)
+            else:
+                index = self.tree.indexOfTopLevelItem(selected_item)
+                self.tree.takeTopLevelItem(index)
+    def select_all(self):
+        for i in range(self.tree.topLevelItemCount()):
+            self.tree.topLevelItem(i).setSelected(True)
+
+    def handle_item_click(self, item, column):
+        if Qt.ControlModifier & QApplication.keyboardModifiers():
+            item.setSelected(not item.isSelected())
+        elif Qt.ShiftModifier & QApplication.keyboardModifiers():
+            current_items = self.tree.selectedItems()
+            if current_items:
+                start = self.tree.indexOfTopLevelItem(current_items[0])
+                end = self.tree.indexOfTopLevelItem(item)
+                if start != -1 and end != -1:
+                    for i in range(min(start, end), max(start, end) + 1):
+                        self.tree.topLevelItem(i).setSelected(True)
+
+    def save_structure(self):
+        def traverse_tree(item):
+            structure = {}
+            for i in range(item.childCount()):
+                child = item.child(i)
+                if child.text(0) in self.assets:
+                    structure.setdefault("elements", []).append(child.text(0))
+                else:
+                    structure[child.text(0)] = traverse_tree(child)
+            return structure
+
+        result = {}
+        for i in range(self.tree.topLevelItemCount()):
+            item = self.tree.topLevelItem(i)
+            if item.text(0) in self.assets:
+                result.setdefault("elements", []).append(item.text(0))
+            else:
+                result[item.text(0)] = traverse_tree(item)
+
+        print(result)  # À remplacer par une fonction de sauvegarde
+

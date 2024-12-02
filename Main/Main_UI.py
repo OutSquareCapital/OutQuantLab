@@ -24,7 +24,7 @@ from Files import (
 
 from PySide6.QtCore import Qt, QDate
 from UI_Common import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
-from Config import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget
+from Config import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget, TreeStructureWidget, get_active_methods
 
 def setup_home_page(
     parent: QMainWindow, 
@@ -53,18 +53,31 @@ def setup_home_page(
 
     left_layout.addLayout(buttons_layout)
 
-    right_layout = QHBoxLayout()
+    right_layout = QVBoxLayout()
+    
+    top_frame = set_frame_design(FRAME_STYLE)
+    bottom_frame = set_frame_design(FRAME_STYLE)
+    right_upper_layout = QHBoxLayout(top_frame)
+    right_lower_layout = QHBoxLayout(bottom_frame)
 
     param_widget = ParameterWidget(param_config)
     asset_widget = AssetSelectionWidget(asset_config, assets_names)
     method_widget = MethodSelectionWidget(methods_config)
+    right_upper_layout.addWidget(param_widget)
+    right_upper_layout.addWidget(asset_widget)
+    right_upper_layout.addWidget(method_widget)
 
-    right_layout.addWidget(param_widget)
-    right_layout.addWidget(asset_widget)
-    right_layout.addWidget(method_widget)
+    method_names = get_active_methods(methods_config)
+    asset_tree_widget = TreeStructureWidget(assets_names)
+    method_tree_widget = TreeStructureWidget(methods_config)
+    right_lower_layout.addWidget(asset_tree_widget)
+    right_lower_layout.addWidget(method_tree_widget)
+
+    right_layout.addWidget(top_frame, stretch=2)
+    right_layout.addWidget(bottom_frame, stretch=1)
 
     main_layout.addLayout(left_layout, stretch=1)
-    main_layout.addLayout(right_layout, stretch=9)
+    main_layout.addLayout(right_layout, stretch=19)
 
     parent.setCentralWidget(main_widget)
 
