@@ -5,7 +5,8 @@ class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.methods_names=Config.get_all_methods_from_module('Signals.Signals_Normalized')
-    
+        self.assets_names=Get_Data.load_asset_names(Files.FILE_PATH_YF)
+
     def initialize(self):
         self.show_home_page()
         self.showMaximized()
@@ -20,11 +21,11 @@ class MainApp(QMainWindow):
             param_config=Config.load_config_file(Files.PARAM_CONFIG_FILE),
             asset_config=Config.load_config_file(Files.ASSETS_TO_TEST_CONFIG_FILE),
             methods_config=Config.load_config_file(Files.METHODS_CONFIG_FILE),
-            assets_names=Files.yahoo_assets,
+            assets_names=self.assets_names,
             methods_names=list(self.methods_names.keys()))
 
     def refresh_data(self):
-        Get_Data.get_yahoo_finance_data(Files.yahoo_assets, Files.FILE_PATH_YF)
+        Get_Data.get_yahoo_finance_data(self.assets_names, Files.FILE_PATH_YF)
 
     def update_progress(self, value, message=None):
         Main.update_progress_with_events(self.progress_bar, self.log_output, value, message)
@@ -43,10 +44,11 @@ class MainApp(QMainWindow):
         self.show_backtest_page()
         self.update_progress(1, "Loading Data...")
 
-        data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Files.FILE_PATH_YF)
+        data_prices_df = Get_Data.load_prices(Files.FILE_PATH_YF, self.assets_names)
 
         indicators_and_params, assets_to_backtest = Config.dynamic_config(self.methods_names)
 
+        print (assets_to_backtest)
         self.update_progress(5, "Preparing Data...")
 
         (
@@ -56,7 +58,7 @@ class MainApp(QMainWindow):
             category_asset_names,
             dates_index,
         ) = Process_Data.process_data(
-            assets_names,
+            self.assets_names,
             data_prices_df,
             assets_to_backtest,
         )
@@ -153,6 +155,7 @@ if __name__ == "__main__":
     import UI_Common
     import Main
     from PySide6.QtWidgets import QApplication
+    import Get_Data
 
     app = QApplication(sys.argv)
     UI_Common.apply_global_styles(app)
@@ -161,10 +164,8 @@ if __name__ == "__main__":
     QApplication.processEvents()
 
     import os
-    progress_bar.setValue(20)
-    import Files
     progress_bar.setValue(30)
-    import Get_Data
+    import Files
     progress_bar.setValue(40)
     import Process_Data
     progress_bar.setValue(50)
