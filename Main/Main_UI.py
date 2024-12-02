@@ -19,7 +19,9 @@ from Files import (
                     ADVANCED_BUTTONS_NAMES,
                     BACKTEST_STATS_RESULTS,
                     CLUSTERS_PARAMETERS,
-                    FRAME_STYLE
+                    FRAME_STYLE,
+                    ASSETS_CLASSES_FILE, 
+                    METHODS_CLASSES_FILE
                     )
 
 from PySide6.QtCore import Qt, QDate
@@ -68,12 +70,12 @@ def setup_home_page(
     right_upper_layout.addWidget(asset_widget)
     right_upper_layout.addWidget(method_widget)
 
-    asset_tree_widget = TreeStructureWidget(assets_names)
-    method_tree_widget = TreeStructureWidget(methods_names)
+    asset_tree_widget = TreeStructureWidget(ASSETS_CLASSES_FILE, assets_names)
+    method_tree_widget = TreeStructureWidget(METHODS_CLASSES_FILE, methods_names)
     right_lower_layout.addWidget(asset_tree_widget)
     right_lower_layout.addWidget(method_tree_widget)
 
-    right_layout.addWidget(top_frame, stretch=2)
+    right_layout.addWidget(top_frame, stretch=1)
     right_layout.addWidget(bottom_frame, stretch=1)
 
     main_layout.addLayout(left_layout, stretch=1)

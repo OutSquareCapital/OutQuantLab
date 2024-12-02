@@ -6,27 +6,6 @@ ANNUALIZATION_FACTOR = 16
 PERCENTAGE_FACTOR = 100
 ANNUALIZED_PERCENTAGE_FACTOR = ANNUALIZATION_FACTOR * PERCENTAGE_FACTOR
 
-portfolio_etf = {
-    'Equities': {
-        'Large Caps': ['SPY', 'DIA', 'QQQ'],
-        'Small Caps': ['IWM'],
-        'Volatility': ['VIXY'],
-    },
-    'Bonds': {
-        'US':['TLT'],
-    },
-    'Currencies': {
-        'Precious Metals': ['GLD', 'SLV'],
-        'FX': ['FXA', 'FXE', 'FXB', 'FXC'],
-        'Crypto': ['GBTC'],
-    },
-    'Commodities': {
-    'Agricultural': ['CORN', 'WEAT', 'SOYB'],
-    'Energy': ['USO', 'UNG'],
-    'Base Metals': ['DBB'],
-    }
-}
-
 portfolio_futures = {
     'Equities': {
         'Large Caps': ['ES', 'YM', 'NQ'],
@@ -45,82 +24,6 @@ portfolio_futures = {
     'Agricultural': ['ZC', 'ZW', 'ZS'],
     'Energy': ['CL', 'NG'],
     'Base Metals': ['HG'],
-    }
-}
-
-portfolio_strategies = {
-    'RiskPremium': {
-        'PriceBased': [
-            'FixedBias'
-        ]
-    },
-    'Divergent': {
-        'Direction': {  
-            'Trend': [
-                'Trend_MeanPriceRatio',
-                'Trend_MedianPriceRatio',
-                'Trend_CentralPriceRatio',
-                'Trend_MeanRateOfChange',
-                'Trend_MedianRateOfChange',
-                'Trend_CentralRateOfChange',
-            ]
-        },
-        'Speed': {
-            'Acceleration': [
-                'Acceleration_MeanPriceMacd',
-                'Acceleration_MedianPriceMacd',
-                'Acceleration_CentralPriceMacd',
-                'Acceleration_MeanRateOfChangeMacd',
-                'Acceleration_MedianRateOfChangeMacd',
-                'Acceleration_CentralRateOfChangeMacd',
-            ],
-            'AccelerationTrend': [
-                'AccelerationTrend_MeanPriceMacdTrend',
-                'AccelerationTrend_MedianPriceMacdTrend',
-                'AccelerationTrend_CentralPriceMacdTrend',
-                'AccelerationTrend_MeanRateOfChangeMacdTrend',
-                'AccelerationTrend_MedianRateOfChangeMacdTrend',
-                'AccelerationTrend_CentralRateOfChangeMacdTrend',
-            ]
-        }
-    },
-    'Convergent': {
-        'MeanReversion': {
-            'MR': [
-                'MeanReversion_MeanPriceRatioNormalised',
-                'MeanReversion_MeanRateOfChangeNormalised',
-            ],
-            'MRTrend': [
-                'MeanReversionTrend_MeanPriceRatioNormalisedTrend',
-                'MeanReversionTrend_MeanRateOfChangeNormalisedTrend',
-            ],
-        },
-        'Stats': {
-            'ReturnsDistribution': [
-                'ReturnsDistribution_Skewness',
-                'ReturnsDistribution_RelativeSkewness',
-                'ReturnsDistribution_SkewnessOnKurtosis_ST',
-                'ReturnsDistribution_SkewnessOnKurtosis_LT',
-                'ReturnsDistribution_RelativeSkewnessOnKurtosis_ST',
-                'ReturnsDistribution_RelativeSkewnessOnKurtosis_LT',
-            ],
-            'ReturnsDistributionTrend': [
-                'ReturnsDistributionTrend_Skewness',
-                'ReturnsDistributionTrend_RelativeSkewness',
-                'ReturnsDistributionTrend_SkewnessOnKurtosis_ST_Trend',
-                'ReturnsDistributionTrend_SkewnessOnKurtosis_LT_Trend',
-                'ReturnsDistributionTrend_RelativeSkewnessOnKurtosis_ST_Trend',
-                'ReturnsDistributionTrend_RelativeSkewnessOnKurtosis_LT_Trend',
-            ],
-            'Volatility': [
-                'Volatility_RelativeDirectionalVolatility',
-                'Volatility_NormalisedDirectionalVolatility',
-            ],
-            'VolatilityTrend': [
-                'VolatilityTrend_RelativeDirectionalVolatilityTrend',
-                'VolatilityTrend_NormalisedDirectionalVolatilityTrend',
-            ]
-        }
     }
 }
 

@@ -4,7 +4,7 @@ class MainApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.methods_names=Config.get_all_methods_from_module('Signals.Signals_Normalized')
+        self.methods_names=Config.get_all_methods_from_module('Signals')
         self.assets_names=Get_Data.load_asset_names(Files.FILE_PATH_YF)
 
     def initialize(self):
