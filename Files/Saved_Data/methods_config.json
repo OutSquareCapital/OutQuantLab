@@ -1,6 +1,6 @@
 {
     "Trend": {
-        "mean_price_ratio": false,
+        "mean_price_ratio": true,
         "median_price_ratio": false,
         "central_price_ratio": false,
         "mean_rate_of_change": false,
@@ -34,14 +34,14 @@
     "ReturnsDistribution": {
         "skewness": false,
         "relative_skewness": false,
-        "skewness_on_kurtosis": true,
-        "relative_skewness_on_kurtosis": true
+        "skewness_on_kurtosis": false,
+        "relative_skewness_on_kurtosis": false
     },
     "ReturnsDistributionTrend": {
         "skewness_trend": false,
         "relative_skewness_trend": false,
-        "skewness_on_kurtosis_trend": true,
-        "relative_skewness_on_kurtosis_trend": true
+        "skewness_on_kurtosis_trend": false,
+        "relative_skewness_on_kurtosis_trend": false
     },
     "Volatility": {
         "relative_directional_volatility": false,
