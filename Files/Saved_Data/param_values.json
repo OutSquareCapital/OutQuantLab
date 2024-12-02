@@ -149,10 +149,16 @@
         ]
     },
     "ReturnsDistributionTrend": {
-        "LenSmooth": [],
-        "LenSkew": [
+        "LenSmooth": [
             1,
             2,
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenSkew": [
             4,
             8,
             16,
@@ -162,8 +168,20 @@
             256,
             512
         ],
-        "TrendLenST": [],
-        "TrendLenLT": []
+        "TrendLenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "TrendLenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ]
     },
     "Volatility": {
         "LenVol": [
