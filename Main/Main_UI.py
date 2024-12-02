@@ -53,7 +53,6 @@ def setup_home_page(
 
     left_layout.addLayout(buttons_layout)
 
-    # Right layout for configuration widgets
     right_layout = QHBoxLayout()
 
     param_widget = ParameterWidget(param_config)
@@ -85,30 +84,24 @@ def setup_backtest_page(parent):
     center_frame = set_frame_design(FRAME_STYLE)
     center_frame_layout = QVBoxLayout(center_frame)
 
-    # Layout séparé pour la barre de progression
     progress_bar_layout = QVBoxLayout()
     progress_bar = QProgressBar()
     progress_bar.setRange(0, 100)
     progress_bar_layout.addWidget(progress_bar)
 
-    # Layout séparé pour la zone de logs
     log_output_layout = QVBoxLayout()
     log_output = QTextEdit()
     log_output.setReadOnly(True)
     log_output_layout.addWidget(log_output)
 
-    # Ajouter les deux sous-layouts au layout du QFrame central
     center_frame_layout.addLayout(progress_bar_layout)
     center_frame_layout.addLayout(log_output_layout)
-
-    # Ajouter le QFrame central au layout central
     center_layout.addWidget(center_frame)
 
-    # Ajouter les layouts verticaux au layout horizontal
     bottom_layout.addLayout(left_layout, stretch=1)
     bottom_layout.addLayout(center_layout, stretch=4)
     bottom_layout.addLayout(right_layout, stretch=1)
-    # Ajouter le layout horizontal inférieur au layout principal
+
     main_layout.addLayout(bottom_layout, stretch=1)
 
     parent.setCentralWidget(loading_widget)

@@ -310,56 +310,32 @@ class ReturnsDistribution :
         return sn.sign_normalization(relative_skew)
 
     @staticmethod
-    def skewness_on_kurtosis_ST(returns_array: np.ndarray, LenSmooth: int, LenSkew: int) -> np.ndarray:
+    def skewness_on_kurtosis(returns_array: np.ndarray, LenSmooth: int, LenSkew: int) -> np.ndarray:
 
         skewness_array = RawReturnsDistribution.smoothed_skewness(returns_array, LenSmooth, LenSkew)
         kurtosis_array = RawReturnsDistribution.smoothed_kurtosis(returns_array, LenSmooth, LenSkew)
         
         relative_kurt = sn.relative_normalization(kurtosis_array, 2500)
 
-        #TF quand kurt haute, MR quand kurt basse
-        skew_on_kurt_signal = np.where(relative_kurt < 0, -skewness_array, skewness_array)
+        if LenSkew <= 64:
+            skew_on_kurt_signal = np.where(relative_kurt < 0, -skewness_array, skewness_array)
+        else:
+            skew_on_kurt_signal = np.where(relative_kurt < 0, skewness_array, -skewness_array)
 
         return sn.sign_normalization(skew_on_kurt_signal)
 
-
     @staticmethod
-    def skewness_on_kurtosis_LT(returns_array: np.ndarray, LenSmooth: int, LenSkew: int) -> np.ndarray:
-
-        skewness_array = RawReturnsDistribution.smoothed_skewness(returns_array, LenSmooth, LenSkew)
-        kurtosis_array = RawReturnsDistribution.smoothed_kurtosis(returns_array, LenSmooth, LenSkew)
-
-        relative_kurt = sn.relative_normalization(kurtosis_array, 2500)
-
-        #MR quand kurt haute, TF quand kurt basse
-
-        skew_on_kurt_signal = np.where(relative_kurt < 0, skewness_array, -skewness_array)
-
-        return sn.sign_normalization(skew_on_kurt_signal)
-    
-    @staticmethod
-    def relative_skewness_on_kurtosis_ST(returns_array: np.ndarray, LenSmooth: int, LenSkew: int) -> np.ndarray:
+    def relative_skewness_on_kurtosis(returns_array: np.ndarray, LenSmooth: int, LenSkew: int) -> np.ndarray:
 
         skewness_array = RawReturnsDistribution.smoothed_skewness(returns_array, LenSmooth, LenSkew)
         kurtosis_array = RawReturnsDistribution.smoothed_kurtosis(returns_array, LenSmooth, LenSkew)
         
         relative_skew = sn.relative_normalization(skewness_array, 2500)
         relative_kurt = sn.relative_normalization(kurtosis_array, 2500)
-
-        relative_skew_on_kurt_signal = np.where(relative_kurt < 0, -relative_skew, relative_skew)
-
-        return sn.sign_normalization(relative_skew_on_kurt_signal)
-
-    @staticmethod
-    def relative_skewness_on_kurtosis_LT(returns_array: np.ndarray, LenSmooth: int, LenSkew: int) -> np.ndarray:
-
-        skewness_array = RawReturnsDistribution.smoothed_skewness(returns_array, LenSmooth, LenSkew)
-        kurtosis_array = RawReturnsDistribution.smoothed_kurtosis(returns_array, LenSmooth, LenSkew)
-        
-        relative_skew = sn.relative_normalization(skewness_array, 2500)
-        relative_kurt = sn.relative_normalization(kurtosis_array, 2500)
-
-        relative_skew_on_kurt_signal = np.where(relative_kurt < 0, relative_skew, -relative_skew)
+        if LenSkew <= 64:
+            relative_skew_on_kurt_signal = np.where(relative_kurt < 0, -relative_skew, relative_skew)
+        else:
+            relative_skew_on_kurt_signal = np.where(relative_kurt < 0, relative_skew, -relative_skew)
 
         return sn.sign_normalization(relative_skew_on_kurt_signal)
 
@@ -384,36 +360,18 @@ class ReturnsDistributionTrend :
         return sn.calculate_indicator_on_trend_signal(trend_signal, relative_skewness_signal)
 
     @staticmethod
-    def skewness_on_kurtosis_ST_trend(returns_array: np.ndarray, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> np.ndarray:
+    def skewness_on_kurtosis_trend(returns_array: np.ndarray, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> np.ndarray:
 
-        skew_on_kurt_signal = ReturnsDistribution.skewness_on_kurtosis_ST(returns_array, LenSmooth, LenSkew)
-
-        trend_signal = Trend.mean_rate_of_change(returns_array, TrendLenST, TrendLenLT)
-
-        return sn.calculate_indicator_on_trend_signal(trend_signal, skew_on_kurt_signal)
-
-    @staticmethod
-    def skewness_on_kurtosis_LT_trend(returns_array: np.ndarray, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> np.ndarray:
-
-        skew_on_kurt_signal = ReturnsDistribution.skewness_on_kurtosis_LT(returns_array, LenSmooth, LenSkew)
+        skew_on_kurt_signal = ReturnsDistribution.skewness_on_kurtosis(returns_array, LenSmooth, LenSkew)
 
         trend_signal = Trend.mean_rate_of_change(returns_array, TrendLenST, TrendLenLT)
 
         return sn.calculate_indicator_on_trend_signal(trend_signal, skew_on_kurt_signal)
-    
-    @staticmethod
-    def relative_skewness_on_kurtosis_ST_trend(returns_array: np.ndarray, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> np.ndarray:
-
-        relative_skew_on_kurt_signal = ReturnsDistribution.relative_skewness_on_kurtosis_ST(returns_array, LenSmooth, LenSkew)
-
-        trend_signal = Trend.mean_rate_of_change(returns_array, TrendLenST, TrendLenLT)
-
-        return sn.calculate_indicator_on_trend_signal(trend_signal, relative_skew_on_kurt_signal)
 
     @staticmethod
-    def relative_skewness_on_kurtosis_LT_trend(returns_array: np.ndarray, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> np.ndarray:
+    def relative_skewness_on_kurtosis_trend(returns_array: np.ndarray, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> np.ndarray:
 
-        relative_skew_on_kurt_signal = ReturnsDistribution.relative_skewness_on_kurtosis_LT(returns_array, LenSmooth, LenSkew)
+        relative_skew_on_kurt_signal = ReturnsDistribution.relative_skewness_on_kurtosis(returns_array, LenSmooth, LenSkew)
 
         trend_signal = Trend.mean_rate_of_change(returns_array, TrendLenST, TrendLenLT)
 
