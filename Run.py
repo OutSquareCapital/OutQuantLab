@@ -4,7 +4,8 @@ class MainApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-
+        self.methods_names=Config.get_all_methods_from_module('Signals.Signals_Normalized')
+    
     def initialize(self):
         self.show_home_page()
         self.showMaximized()
@@ -19,8 +20,8 @@ class MainApp(QMainWindow):
             param_config=Config.load_config_file(Files.PARAM_CONFIG_FILE),
             asset_config=Config.load_config_file(Files.ASSETS_TO_TEST_CONFIG_FILE),
             methods_config=Config.load_config_file(Files.METHODS_CONFIG_FILE),
-            assets_names=Files.yahoo_assets
-        )
+            assets_names=Files.yahoo_assets,
+            methods_names=list(self.methods_names.keys()))
 
     def refresh_data(self):
         Get_Data.get_yahoo_finance_data(Files.yahoo_assets, Files.FILE_PATH_YF)
@@ -44,7 +45,7 @@ class MainApp(QMainWindow):
 
         data_prices_df, assets_names = Get_Data.load_prices_from_parquet(Files.FILE_PATH_YF)
 
-        indicators_and_params, assets_to_backtest = Config.dynamic_config()
+        indicators_and_params, assets_to_backtest = Config.dynamic_config(self.methods_names)
 
         self.update_progress(5, "Preparing Data...")
 

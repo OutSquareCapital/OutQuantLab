@@ -24,7 +24,7 @@ from Files import (
 
 from PySide6.QtCore import Qt, QDate
 from UI_Common import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
-from Config import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget, TreeStructureWidget, get_active_methods
+from Config import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget, TreeStructureWidget
 
 def setup_home_page(
     parent: QMainWindow, 
@@ -33,7 +33,8 @@ def setup_home_page(
     param_config, 
     asset_config, 
     methods_config, 
-    assets_names
+    assets_names,
+    methods_names
 ):
     parent.setWindowTitle("OutQuantLab")
     main_widget = QWidget()
@@ -67,9 +68,8 @@ def setup_home_page(
     right_upper_layout.addWidget(asset_widget)
     right_upper_layout.addWidget(method_widget)
 
-    method_names = get_active_methods(methods_config)
     asset_tree_widget = TreeStructureWidget(assets_names)
-    method_tree_widget = TreeStructureWidget(methods_config)
+    method_tree_widget = TreeStructureWidget(methods_names)
     right_lower_layout.addWidget(asset_tree_widget)
     right_lower_layout.addWidget(method_tree_widget)
 
