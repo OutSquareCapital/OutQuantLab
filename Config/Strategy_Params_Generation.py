@@ -31,14 +31,25 @@ def is_valid_combination(param_dict: Dict[str, int]) -> bool:
     
     return True
 
-def extract_options_by_class(methods: List[Callable], param_options: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+def extract_class_and_method_names(method: Callable) -> Tuple[str, str]:
+    method_str = str(method)
+    class_name, method_name = method_str.split()[1].split('.')
+    return class_name, method_name
+
+
+def extract_options_by_class(
+    methods: List[Callable], 
+    param_options: Dict[str, Dict[str, Any]]
+) -> Dict[str, Dict[str, Any]]:
     options_by_class = {}
     
     for method in methods:
-        class_name, method_name = extract_class_and_method_names(method)
+        # Extraire la catégorie depuis le paramètre
+        class_name = method.__name__.split('.')[0]  # La catégorie est ajoutée dans `get_active_methods`
         if class_name not in options_by_class:
             options_by_class[class_name] = {}
 
+        # Obtenir les paramètres de la méthode
         params = inspect.signature(method).parameters
         for param in params:
             if param not in ['returns_array', 'prices_array']:
@@ -48,11 +59,6 @@ def extract_options_by_class(methods: List[Callable], param_options: Dict[str, D
 
     return options_by_class
 
-def extract_class_and_method_names(method: Callable) -> Tuple[str, str]:
-    method_str = str(method)
-    class_name, method_name = method_str.split()[1].split('.')
-    return class_name, method_name
-
 def determine_array_type(method: Callable) -> str:
     if 'returns_array' in method.__code__.co_varnames:
         return 'returns_array'
@@ -60,34 +66,50 @@ def determine_array_type(method: Callable) -> str:
 
 def generate_all_indicators_params(
     methods: List[Callable], 
-    options_by_class: Dict[str, Dict[str, Any]]
+    options_by_class: Dict[str, Dict[str, Any]], 
+    method_to_category: Dict[Callable, str]
 ) -> Dict[str, Tuple[Callable, str, List[Dict[str, int]]]]:
-
     all_indicators_params = {}
     
     for method in methods:
-        class_name, method_name = extract_class_and_method_names(method)
+        # Obtenir la catégorie de la méthode
+        class_name = method_to_category.get(method)
+        if not class_name:
+            continue
+        
+        method_name = method.__name__.split('.')[-1]  # Extraire le vrai nom
         formatted_method_name = ''.join([word.title() for word in method_name.split('_')])
 
-        # Stocker le type de tableau (pas le tableau lui-même)
+        # Déterminer le type d'entrée
         array_type = determine_array_type(method)
         
-        # Extraire les paramètres valides
+        # Extraire les paramètres valides pour la catégorie
         class_params = options_by_class.get(class_name, {})
         params = filter_valid_pairs(class_params) if class_params else []
 
-        # Clé finale pour le dictionnaire
+        # Clé finale
         key = f"{class_name}_{formatted_method_name}"
         all_indicators_params[key] = (method, array_type, params)
 
     return all_indicators_params
 
-def automatic_generation(methods: List[Callable], 
-                            param_options: Dict[str, Dict[str, Any]],
-                        ) -> Dict[str, Tuple[Callable, str, List[Dict[str, int]]]]:
-    
+def automatic_generation(
+    methods: List[Callable], 
+    param_options: Dict[str, Dict[str, Any]], 
+    methods_config: Dict[str, Dict[str, bool]]
+) -> Dict[str, Tuple[Callable, str, List[Dict[str, int]]]]:
+    # Étape 1 : Créer un mapping méthode -> catégorie
+    method_to_category = {
+        method: category
+        for category, methods_dict in methods_config.items()
+        for method_name, is_checked in methods_dict.items()
+        if is_checked
+        for method in methods
+        if method.__name__.endswith(method_name)
+    }
+
+    # Étape 2 : Extraire les options par catégorie
     options_by_class = extract_options_by_class(methods, param_options)
 
-    return generate_all_indicators_params(  methods, 
-                                            options_by_class
-                                            )
+    # Étape 3 : Générer les paramètres
+    return generate_all_indicators_params(methods, options_by_class, method_to_category)

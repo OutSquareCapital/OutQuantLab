@@ -32,14 +32,13 @@ def get_active_methods(current_config: dict, module_name: str = "Signals.Signals
         return []
 
     for category, methods in current_config.items():
-        cls = getattr(module, category, None)
-        if cls is None:
-            continue
-
-        for method, is_checked in methods.items():
+        for method_name, is_checked in methods.items():
             if is_checked:
-                method_ref = getattr(cls, method, None)
+                # Recherche de la méthode dans le module
+                method_ref = getattr(module, method_name, None)
                 if callable(method_ref):
+                    # Ajouter dynamiquement la catégorie dans le nom
+                    method_ref.__name__ = f"{category}.{method_name}"
                     active_methods.append(method_ref)
     return active_methods
 
@@ -48,5 +47,5 @@ def dynamic_config():
     asset_config = load_config_file(ASSETS_TO_TEST_CONFIG_FILE)
     methods_config = load_config_file(METHODS_CONFIG_FILE)
     active_methods = get_active_methods(methods_config)
-    indicators_and_params = automatic_generation(active_methods, param_config)
+    indicators_and_params = automatic_generation(active_methods, param_config, methods_config)
     return indicators_and_params, asset_config

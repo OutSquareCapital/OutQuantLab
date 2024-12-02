@@ -12,7 +12,7 @@ class MainApp(QMainWindow):
             self.refresh_data()
 
     def show_home_page(self):
-        m.setup_home_page(
+        Main.setup_home_page(
             parent=self,
             run_backtest_callback=self.run_backtest,
             refresh_data_callback=self.refresh_data,
@@ -26,13 +26,13 @@ class MainApp(QMainWindow):
         Get_Data.get_yahoo_finance_data(Files.yahoo_assets, Files.FILE_PATH_YF)
 
     def update_progress(self, value, message=None):
-        m.update_progress_with_events(self.progress_bar, self.log_output, value, message)
+        Main.update_progress_with_events(self.progress_bar, self.log_output, value, message)
 
     def show_backtest_page(self):
-        self.progress_bar, self.log_output = m.setup_backtest_page(self)
+        self.progress_bar, self.log_output = Main.setup_backtest_page(self)
 
     def show_plot(self, fig):
-        m.display_plot_dialog(
+        Main.display_plot_dialog(
             parent=self,
             fig=fig,
             window_title="Graph"
@@ -73,11 +73,11 @@ class MainApp(QMainWindow):
         )
 
         self.update_progress(70, "Creating Portfolio...")
-        equal_weights_asset_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_asset=True)
+        equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_class=True, by_asset=True)
         self.update_progress(80, "Creating Portfolio...")
-        equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_asset_returns, global_avg=True)
+        equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_method_returns, global_avg=True)
         
-        backtest_result = equal_weights_asset_returns
+        backtest_result = equal_weights_method_returns
         global_result = equal_weights_global_returns
 
         self.update_progress(90, "Calculating Metrics...")
@@ -119,16 +119,14 @@ class MainApp(QMainWindow):
             "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2))
         }
 
-        # Appelle setup_results_page et récupère la grille des graphiques
-        bottom_layout = m.setup_results_page(
+        bottom_layout = Main.setup_results_page(
                                             parent=self,
                                             plots=plots,
                                             back_to_home_callback=self.show_home_page,
                                             metrics=metrics
                                             )
 
-        #'''
-        # Génération et insertion dynamique des graphiques
+        '''
         equity_plot = m.generate_plot_widget(Dashboard.plot_equity(global_result), show_legend=False)
         sharpe_plot = m.generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(global_result, length=1250), show_legend=False)
         drawdown_plot = m.generate_plot_widget(Dashboard.plot_rolling_drawdown(global_result, length=1250), show_legend=False)
@@ -142,17 +140,17 @@ class MainApp(QMainWindow):
         bottom_layout.addWidget(vol_plot, 1, 1)
         bottom_layout.addWidget(distribution_plot, 0, 2)
         bottom_layout.addWidget(violin_plot, 1, 2)
-        #'''
+        '''
 
     def closeEvent(self, event):
-        m.cleanup_temp_files()
+        Main.cleanup_temp_files()
         super().closeEvent(event)
 
 if __name__ == "__main__":
 
     import sys
     import UI_Common
-    import Main as m
+    import Main
     from PySide6.QtWidgets import QApplication
 
     app = QApplication(sys.argv)

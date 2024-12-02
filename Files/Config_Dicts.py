@@ -6,6 +6,28 @@ ANNUALIZATION_FACTOR = 16
 PERCENTAGE_FACTOR = 100
 ANNUALIZED_PERCENTAGE_FACTOR = ANNUALIZATION_FACTOR * PERCENTAGE_FACTOR
 
+yahoo_assets = [
+'SPY',
+'IWM', 
+'DIA', 
+'QQQ',
+'VIXY',
+'TLT',
+'CORN',
+'WEAT',
+'SOYB', 
+'USO',
+'UNG',
+'DBB',
+'GLD',
+'SLV',
+'FXA',
+'FXE',
+'FXB',
+'FXC',
+'GBTC',
+]
+
 portfolio_etf = {
     'Equities': {
         'Large Caps': ['SPY', 'DIA', 'QQQ'],
@@ -140,26 +162,4 @@ paires_futures_etf = [
 ("ES", "SP"),
 ("ZB", "US"),
 ("ZF", "FV"),
-]
-
-yahoo_assets = [
-'SPY',
-'IWM', 
-'DIA', 
-'QQQ',
-'VIXY',
-'TLT',
-'CORN',
-'WEAT',
-'SOYB', 
-'USO',
-'UNG',
-'DBB',
-'GLD',
-'SLV',
-'FXA',
-'FXE',
-'FXB',
-'FXC',
-'GBTC',
 ]

@@ -1,1 +1,1 @@
-from Signals.Signals_Normalized import *
+from .Signals_Normalized import *
