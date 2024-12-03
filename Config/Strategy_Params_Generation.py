@@ -31,34 +31,6 @@ def is_valid_combination(param_dict: Dict[str, int]) -> bool:
     
     return True
 
-def extract_class_and_method_names(method: Callable) -> Tuple[str, str]:
-    method_str = str(method)
-    class_name, method_name = method_str.split()[1].split('.')
-    return class_name, method_name
-
-
-def extract_options_by_class(
-    methods: List[Callable], 
-    param_options: Dict[str, Dict[str, Any]]
-) -> Dict[str, Dict[str, Any]]:
-    options_by_class = {}
-    
-    for method in methods:
-        # Extraire la catégorie depuis le paramètre
-        class_name = method.__name__.split('.')[0]  # La catégorie est ajoutée dans `get_active_methods`
-        if class_name not in options_by_class:
-            options_by_class[class_name] = {}
-
-        # Obtenir les paramètres de la méthode
-        params = inspect.signature(method).parameters
-        for param in params:
-            if param not in ['returns_array', 'prices_array']:
-                param_option = param_options.get(class_name, {}).get(param, None)
-                if param_option is not None:
-                    options_by_class[class_name].setdefault(param, param_option)
-
-    return options_by_class
-
 def determine_array_type(method: Callable) -> str:
     if 'returns_array' in method.__code__.co_varnames:
         return 'returns_array'
