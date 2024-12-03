@@ -66,50 +66,41 @@ def determine_array_type(method: Callable) -> str:
 
 def generate_all_indicators_params(
     methods: List[Callable], 
-    options_by_class: Dict[str, Dict[str, Any]], 
-    method_to_category: Dict[Callable, str]
+    options_by_method: Dict[str, Any]
 ) -> Dict[str, Tuple[Callable, str, List[Dict[str, int]]]]:
     all_indicators_params = {}
     
     for method in methods:
-        # Obtenir la catégorie de la méthode
-        class_name = method_to_category.get(method)
-        if not class_name:
-            continue
-        
-        method_name = method.__name__.split('.')[-1]  # Extraire le vrai nom
+        method_name = method.__name__  # Utilisation directe du nom de la méthode
         formatted_method_name = ''.join([word.title() for word in method_name.split('_')])
 
         # Déterminer le type d'entrée
         array_type = determine_array_type(method)
         
-        # Extraire les paramètres valides pour la catégorie
-        class_params = options_by_class.get(class_name, {})
-        params = filter_valid_pairs(class_params) if class_params else []
+        # Extraire les paramètres valides pour la méthode
+        method_params = options_by_method.get(method_name, {})
+        params = filter_valid_pairs(method_params) if method_params else []
 
         # Clé finale
-        key = f"{class_name}_{formatted_method_name}"
+        key = f"{formatted_method_name}"
         all_indicators_params[key] = (method, array_type, params)
 
     return all_indicators_params
 
 def automatic_generation(
     methods: List[Callable], 
-    param_options: Dict[str, Dict[str, Any]], 
-    methods_config: Dict[str, Dict[str, bool]]
+    param_options: Dict[str, Any], 
+    methods_config: Dict[str, bool]
 ) -> Dict[str, Tuple[Callable, str, List[Dict[str, int]]]]:
-    # Étape 1 : Créer un mapping méthode -> catégorie
-    method_to_category = {
-        method: category
-        for category, methods_dict in methods_config.items()
-        for method_name, is_checked in methods_dict.items()
-        if is_checked
-        for method in methods
-        if method.__name__.endswith(method_name)
+    # Étape 1 : Filtrer les méthodes actives uniquement
+    active_methods = [
+        method for method in methods if methods_config.get(method.__name__, False)
+    ]
+
+    # Étape 2 : Extraire les options par méthode
+    options_by_method = {
+        method.__name__: param_options.get(method.__name__, {}) for method in active_methods
     }
 
-    # Étape 2 : Extraire les options par catégorie
-    options_by_class = extract_options_by_class(methods, param_options)
-
     # Étape 3 : Générer les paramètres
-    return generate_all_indicators_params(methods, options_by_class, method_to_category)
+    return generate_all_indicators_params(active_methods, options_by_method)

@@ -70,48 +70,103 @@ class GenericSelectionWidget(QWidget):
     def unselect_all(self, category: str):
         unselect_all_items(category, self.category_vars[category])
 
-class MethodSelectionWidget(GenericSelectionWidget):
-    def __init__(self, current_config: Dict[str, Dict[str, bool]]):
-        super().__init__(current_config, [], METHODS_CONFIG_FILE)
+class MethodSelectionWidget(QWidget):
+    saved_signal = Signal()
 
-    def add_category_widget(self, category: str, layout: QVBoxLayout):
-        if category not in self.category_vars:
-            self.category_vars[category] = {}
+    def __init__(self, methods_list: List[str], config_file: str, parent=None):
+        super().__init__(parent)
+        self.config_file = config_file
 
-        def create_checkbox(category: str, method: str, is_checked: bool) -> QCheckBox:
+        # Charger la configuration actuelle
+        self.current_config = self.sync_methods_with_file(methods_list)
+        self.init_ui()
+
+    def sync_methods_with_file(self, methods_list: List[str]) -> Dict[str, bool]:
+        """
+        Synchronise le fichier JSON avec la liste des méthodes.
+        - Supprime les éléments obsolètes.
+        - Ajoute les nouvelles méthodes avec une valeur par défaut.
+        """
+        try:
+            # Charger le fichier JSON
+            config = load_config_file(self.config_file)
+            if config is None:
+                config = {}
+        except FileNotFoundError:
+            config = {}
+
+        # Synchroniser les méthodes
+        updated_config = {method: config.get(method, False) for method in methods_list}
+
+        # Sauvegarder le fichier mis à jour
+        save_config_file(self.config_file, updated_config, 4)
+        return updated_config
+
+    def init_ui(self):
+        layout = QVBoxLayout()
+
+        # Zone de défilement pour les cases à cocher
+        scroll_area, _, scroll_layout = create_scroll_area()
+
+        # Ajout des cases à cocher
+        self.add_methods_section(scroll_layout)
+
+        layout.addWidget(scroll_area)
+
+        # Bouton pour sauvegarder
+        self.apply_button = create_apply_button(self.save_selection)
+        layout.addWidget(self.apply_button)
+
+        self.setLayout(layout)
+
+    def add_methods_section(self, layout: QVBoxLayout):
+        # Création des cases à cocher pour chaque méthode
+        for method_name, is_checked in self.current_config.items():
             checkbox = create_checkbox_item(
-                self, category, method, is_checked,
-                lambda _: self.update_method_state(category, method, checkbox.isChecked())
+                parent=self,
+                category="",
+                item=method_name,
+                is_checked=is_checked,
+                callback=lambda state, name=method_name: self.update_method_state(name, state)
             )
-            self.category_vars[category][method] = checkbox
-            return checkbox
+            layout.addWidget(checkbox)
 
-        add_category_widget_shared(
-            parent=self,
-            category=category,
-            items=self.current_config[category],
-            layout=layout,
-            create_checkbox=create_checkbox,
-            select_all_callback=self.select_all,
-            unselect_all_callback=self.unselect_all,
-        )
+        # Ajout des boutons "Select All" et "Unselect All"
+        select_buttons_layout = QHBoxLayout()
+        select_all_button = QPushButton("Select All")
+        unselect_all_button = QPushButton("Unselect All")
 
-    def update_method_state(self, category: str, method: str, is_checked: bool):
-        self.current_config[category][method] = is_checked
+        select_all_button.clicked.connect(self.select_all_methods)
+        unselect_all_button.clicked.connect(self.unselect_all_methods)
+
+        select_buttons_layout.addWidget(select_all_button)
+        select_buttons_layout.addWidget(unselect_all_button)
+        layout.addLayout(select_buttons_layout)
+
+    def update_method_state(self, method_name: str, is_checked: bool):
+        self.current_config[method_name] = is_checked
+        self.apply_button.setEnabled(True)
+
+    def select_all_methods(self):
+        # Activer toutes les méthodes
+        for method_name in self.current_config.keys():
+            self.current_config[method_name] = True
+        self.init_ui()  # Met à jour l'affichage des cases à cocher
+        self.apply_button.setEnabled(True)
+
+    def unselect_all_methods(self):
+        # Désactiver toutes les méthodes
+        for method_name in self.current_config.keys():
+            self.current_config[method_name] = False
+        self.init_ui()  # Met à jour l'affichage des cases à cocher
         self.apply_button.setEnabled(True)
 
     def save_selection(self):   
+        # Sauvegarde dans le fichier
         save_config_file(self.config_file, self.current_config, 4)
         self.apply_button.setEnabled(False)
         self.saved_signal.emit()
 
-    def select_all(self, category: str):
-        select_all_items(category, self.category_vars[category])
-        self.apply_button.setEnabled(True)
-
-    def unselect_all(self, category: str):
-        unselect_all_items(category, self.category_vars[category])
-        self.apply_button.setEnabled(True)
 
 class AssetSelectionWidget(GenericSelectionWidget):
     def __init__(self, current_config: Dict[str, List[str]], assets_names: List[str]):
@@ -132,52 +187,88 @@ class AssetSelectionWidget(GenericSelectionWidget):
 class ParameterWidget(QWidget):
     parameters_saved = Signal()
 
-    def __init__(self, current_config: Dict[str, Any]):
+    def __init__(self, methods_with_params: Dict[str, Dict[str, list]], config_file: str):
         super().__init__()
-        self.current_config = current_config
+        self.config_file = config_file
+
+        # Synchronisation initiale du JSON avec les données
+        self.current_config = self.sync_with_json(methods_with_params)
         self.param_widgets = {}
         self.init_ui()
 
+    def sync_with_json(self, methods_with_params: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, list]]:
+
+        try:
+            # Charger la configuration existante
+            existing_config = load_config_file(self.config_file) or {}
+        except FileNotFoundError:
+            existing_config = {}
+
+        # Filtrer les méthodes avec leurs arguments, supprimer la clé 'function'
+        filtered_methods_with_params = {
+            method: params.get("args", {}) for method, params in methods_with_params.items()
+        }
+
+        # Mettre à jour la configuration pour correspondre aux méthodes fournies
+        updated_config = {}
+        for method, params in filtered_methods_with_params.items():
+            if method not in existing_config:
+                # Nouvelle méthode
+                updated_config[method] = {param: values if values else [1] for param, values in params.items()}
+            else:
+                # Méthode existante, mise à jour des paramètres
+                updated_config[method] = {
+                    param: existing_config[method].get(param, values if values else [1])
+                    for param, values in params.items()
+                }
+
+        # Sauvegarder la configuration mise à jour
+        save_config_file(self.config_file, updated_config, indent=4)
+        return updated_config
+
     def init_ui(self):
         layout = QVBoxLayout()
-        
-        # Create scrollable area using shared function
+
+        # Créer une zone de défilement
         scroll_area, scroll_widget, scroll_layout = create_scroll_area()
 
-        for category, params in self.current_config.items():
-            self.add_category_widget(category, params, scroll_layout)
+        # Ajouter une section pour chaque méthode
+        for method, params in self.current_config.items():
+            self.add_method_widget(method, params, scroll_layout)
 
         scroll_widget.setLayout(scroll_layout)
         layout.addWidget(scroll_area)
 
-        # Create and add Apply button using shared function
+        # Bouton pour sauvegarder
         self.apply_button = create_apply_button(self.save_configuration)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
 
-    def add_category_widget(self, category: str, params: Dict[str, Any], layout: QVBoxLayout):
-        # Use shared expandable section
-        category_box, content_widget, content_layout = create_expandable_section(category)
+    def add_method_widget(self, method: str, params: Dict[str, list], layout: QVBoxLayout):
+        # Section extensible par méthode
+        method_box, content_widget, content_layout = create_expandable_section(method)
 
         for param, values in params.items():
-            self.add_param_widget(category, param, values, content_layout)
+            self.add_param_widget(method, param, values, content_layout)
 
-        layout.addWidget(category_box)
+        layout.addWidget(method_box)
 
-    def add_param_widget(self, category: str, param: str, values: list, layout: QVBoxLayout):
+    def add_param_widget(self, method: str, param: str, values: list, layout: QVBoxLayout):
         param_box = QGroupBox(param)
         param_layout = QVBoxLayout()
 
+        # Valeurs par défaut
         if not values:
             values = [1]
 
-        # Informations dynamiques
+        # Créer les étiquettes d'informations
         range_info_label, num_values_info_label, scroll_area = self.create_info_labels(values)
         param_layout.addWidget(range_info_label)
         param_layout.addWidget(num_values_info_label)
         param_layout.addWidget(scroll_area)
 
+        # Créer les sliders pour ajuster les paramètres
         start_slider, end_slider = self.create_range_sliders(values)
         num_values_slider = self.create_num_values_slider(len(values))
 
@@ -193,6 +284,7 @@ class ParameterWidget(QWidget):
         num_values_layout.addWidget(num_values_slider)
         param_layout.addLayout(num_values_layout)
 
+        # Ajouter le mode linéaire ou ratio
         mode_combobox = self.create_mode_combobox()
         mode_layout = QHBoxLayout()
         mode_layout.addWidget(QLabel("Mode:"))
@@ -200,14 +292,14 @@ class ParameterWidget(QWidget):
         param_layout.addLayout(mode_layout)
 
         self.connect_sliders_to_update(
-            category, param, start_slider, end_slider, num_values_slider, mode_combobox,
+            method, param, start_slider, end_slider, num_values_slider, mode_combobox,
             range_info_label, num_values_info_label, scroll_area.widget(), param_box
         )
 
         param_box.setLayout(param_layout)
         layout.addWidget(param_box)
 
-        self.param_widgets.setdefault(category, {})[param] = {
+        self.param_widgets.setdefault(method, {})[param] = {
             "start_slider": start_slider,
             "end_slider": end_slider,
             "num_values_slider": num_values_slider,
@@ -260,7 +352,7 @@ class ParameterWidget(QWidget):
     def index_to_value(self, index: int) -> int:
         return 2 ** index
 
-    def connect_sliders_to_update(self, category, param, start_slider, end_slider, num_values_slider, mode_combobox,
+    def connect_sliders_to_update(self, method, param, start_slider, end_slider, num_values_slider, mode_combobox,
                                   range_info_label, num_values_info_label, generated_values_label, param_box):
         def update_values():
             start = self.index_to_value(start_slider.value())
@@ -279,20 +371,11 @@ class ParameterWidget(QWidget):
             linear = (mode == "Linear")
             generated_values = param_range_values(start, end, num_values, linear=linear)
 
-            # Limiter les doublons
             unique_values = list(sorted(set(generated_values)))
-            while len(unique_values) < num_values:
-                num_values -= 1
-                unique_values = list(sorted(set(param_range_values(start, end, num_values, linear=linear))))
-
-            # Update the num_values slider if reduced
-            if num_values < num_values_slider.value():
-                num_values_slider.setValue(num_values)
-
             range_info_label.setText(f"Range: {start} - {end}")
-            num_values_info_label.setText(f"Num Values: {num_values}")
+            num_values_info_label.setText(f"Num Values: {len(unique_values)}")
             generated_values_label.setText(f"Generated Values: {unique_values}")
-            self.current_config[category][param] = unique_values
+            self.current_config[method][param] = unique_values
             self.apply_button.setEnabled(True)
 
         start_slider.valueChanged.connect(update_values)
@@ -301,9 +384,10 @@ class ParameterWidget(QWidget):
         mode_combobox.currentTextChanged.connect(update_values)
 
     def save_configuration(self):
-        save_config_file(PARAM_CONFIG_FILE, self.current_config, 4)
+        save_config_file(self.config_file, self.current_config, 4)
         self.apply_button.setEnabled(False)
         self.parameters_saved.emit()
+
 
 class TreeStructureWidget(QWidget):
     def __init__(self, json_file_path: str, data: List[str], parent=None):

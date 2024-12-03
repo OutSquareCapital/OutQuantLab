@@ -23,7 +23,9 @@ from Files import (
                     CLUSTERS_PARAMETERS,
                     FRAME_STYLE,
                     ASSETS_CLASSES_FILE, 
-                    METHODS_CLASSES_FILE
+                    METHODS_CLASSES_FILE,
+                    METHODS_CONFIG_FILE,
+                    PARAM_CONFIG_FILE
                     )
 
 from PySide6.QtCore import Qt, QDate
@@ -34,11 +36,10 @@ def setup_home_page(
     parent: QMainWindow, 
     run_backtest_callback,
     refresh_data_callback,
-    param_config,
     asset_config,
-    methods_config,
     assets_names,
-    methods_names
+    methods_names,
+    methods_args
     ):
 
     parent.setWindowTitle("OutQuantLab")
@@ -66,9 +67,9 @@ def setup_home_page(
     right_upper_layout = QHBoxLayout(top_frame)
     right_lower_layout = QHBoxLayout(bottom_frame)
 
-    param_widget = ParameterWidget(param_config)
+    param_widget = ParameterWidget(methods_args, PARAM_CONFIG_FILE)
     asset_widget = AssetSelectionWidget(asset_config, assets_names)
-    method_widget = MethodSelectionWidget(methods_config)
+    method_widget = MethodSelectionWidget(methods_names, METHODS_CONFIG_FILE)
     right_upper_layout.addWidget(param_widget)
     right_upper_layout.addWidget(asset_widget)
     right_upper_layout.addWidget(method_widget)

@@ -6,6 +6,7 @@ class MainApp(QMainWindow):
         super().__init__()
         self.methods_names=Config.get_all_methods_from_module('Signals')
         self.assets_names=Get_Data.load_asset_names(FILE_PATH_YF)
+        self.methods_with_args = Config.get_all_methods_with_args_from_module('Signals')
 
     def initialize(self):
         self.show_home_page()
@@ -18,11 +19,10 @@ class MainApp(QMainWindow):
             parent=self,
             run_backtest_callback=self.run_backtest,
             refresh_data_callback=self.refresh_data,
-            param_config=Config.load_config_file(PARAM_CONFIG_FILE),
             asset_config=Config.load_config_file(ASSETS_TO_TEST_CONFIG_FILE),
-            methods_config=Config.load_config_file(METHODS_CONFIG_FILE),
             assets_names=self.assets_names,
-            methods_names=list(self.methods_names.keys()))
+            methods_names=list(self.methods_names.keys()),
+            methods_args=self.methods_with_args)
 
     def refresh_data(self):
         Get_Data.get_yahoo_finance_data(self.assets_names, FILE_PATH_YF)
@@ -74,15 +74,15 @@ class MainApp(QMainWindow):
             progress_callback=self.update_progress
         )
 
-        self.update_progress(70, "Creating Portfolio...")
-        equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_method=True, by_asset=True)
         self.update_progress(80, "Creating Portfolio...")
+        equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_method=True, by_asset=True)
+        self.update_progress(90, "Creating Portfolio...")
         equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_method_returns, global_avg=True)
 
         backtest_result = equal_weights_method_returns
         global_result = equal_weights_global_returns
 
-        self.update_progress(90, "Calculating Metrics...")
+        self.update_progress(95, "Calculating Metrics...")
 
         metrics = [
             round(Dashboard.calculate_overall_returns(global_result).item(

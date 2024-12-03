@@ -1,2 +1,2 @@
-from .Config_Backend import dynamic_config, load_config_file, get_all_methods_from_module
+from .Config_Backend import dynamic_config, load_config_file, get_all_methods_from_module, get_all_methods_with_args_from_module
 from .Config_Main import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget, TreeStructureWidget
