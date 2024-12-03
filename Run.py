@@ -48,7 +48,6 @@ class MainApp(QMainWindow):
 
         indicators_and_params, assets_to_backtest = Config.dynamic_config(self.methods_names)
 
-        print (assets_to_backtest)
         self.update_progress(5, "Preparing Data...")
 
         (
@@ -76,10 +75,10 @@ class MainApp(QMainWindow):
         )
 
         self.update_progress(70, "Creating Portfolio...")
-        equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_class=True, by_asset=True)
+        equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_method=True, by_asset=True)
         self.update_progress(80, "Creating Portfolio...")
         equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_method_returns, global_avg=True)
-        
+
         backtest_result = equal_weights_method_returns
         global_result = equal_weights_global_returns
 

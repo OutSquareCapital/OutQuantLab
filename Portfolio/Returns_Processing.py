@@ -60,8 +60,7 @@ def generate_recursive_strategy_means(returns_df, strategy_tree):
 
 def calculate_daily_average_returns(returns_df: pd.DataFrame, 
                                     global_avg=False, 
-                                    by_asset=False, 
-                                    by_class=False, 
+                                    by_asset=False,
                                     by_method=False, 
                                     by_param=False,
                                     common_start_date=False
@@ -77,32 +76,18 @@ def calculate_daily_average_returns(returns_df: pd.DataFrame,
                             columns=['Daily_Average_Returns'], 
                             dtype=np.float32)
 
-    grouping_keys = []
+    grouping_levels = []
     if by_asset:
-        grouping_keys.append(0)
-    if by_class:
-        grouping_keys.append(1)
+        grouping_levels.append("Asset")
     if by_method:
-        grouping_keys.append(2)
+        grouping_levels.append("Indicator")
     if by_param:
-        grouping_keys.append(3)
+        grouping_levels.append("Param")
 
+    if grouping_levels:
+        grouped = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T
 
-    
-    if grouping_keys:
-        keys = np.array([tuple(col.split('_')[pos] for pos in grouping_keys) for col in returns_df.columns])
-        unique_keys, inverse_indices = np.unique(keys, return_inverse=True, axis=0)
-
-        grouped_averages = {}
-        for i, unique_key in enumerate(unique_keys):
-            mask = (inverse_indices == i)
-            selected_columns = returns_df.columns[mask]
-            mean_values = bn.nanmean(returns_df[selected_columns].values, axis=1)
-            grouped_averages['_'.join(unique_key)] = mean_values
-
-        return pd.DataFrame(grouped_averages, 
-                            index=returns_df.index, 
-                            dtype=np.float32)
+        return grouped
 
     return returns_df
 

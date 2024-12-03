@@ -6,19 +6,25 @@ def data_arrays_to_dataframe(raw_adjusted_returns_array: np.ndarray,
                                 dates_index: pd.Index, 
                                 indicators_and_params: dict, 
                                 asset_names: list
-                                ) -> tuple[pd.DataFrame, pd.DataFrame]:
+                                ) -> pd.DataFrame:
 
-    column_names = []
-    # Générer les noms de colonnes basés sur les actifs et les stratégies
+    multiindex_tuples = []
     for indicator_name, (_, _, params) in indicators_and_params.items():
         for param in params:
             param_str = ''.join([f"{k}{v}" for k, v in param.items()])
             for asset in asset_names:
-                column_names.append(f"{asset}_{indicator_name}_{param_str}")
+                multiindex_tuples.append((asset, indicator_name, param_str))
+
+    multiindex = pd.MultiIndex.from_tuples(multiindex_tuples, names=["Asset", "Indicator", "Param"])
+    multiindex = multiindex.set_levels(
+        [pd.CategoricalIndex(multiindex.levels[0]),
+         pd.CategoricalIndex(multiindex.levels[1]),
+         multiindex.levels[2]]
+    )
 
     return pd.DataFrame(raw_adjusted_returns_array, 
                         index=dates_index, 
-                        columns=column_names, 
+                        columns=multiindex, 
                         dtype=np.float32)
 
 def process_backtest(prices_array: np.ndarray, 

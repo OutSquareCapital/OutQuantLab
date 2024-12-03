@@ -5,6 +5,20 @@ from collections import defaultdict
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import linkage, leaves_list
 
+def convert_series_multiindex_labels(series: pd.Series) -> pd.Series:
+    if isinstance(series.index, pd.MultiIndex):
+        series.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in series.index]
+    return series
+
+def convert_dataframe_multiindex_labels(df: pd.DataFrame) -> pd.DataFrame:
+    if isinstance(df.columns, pd.MultiIndex):
+        df.columns = ["_".join(map(str, col)) if isinstance(col, tuple) else str(col) for col in df.columns]
+    if isinstance(df.index, pd.MultiIndex):
+        df.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in df.index]
+    return df
+
+
+
 def compute_linkage_matrix(corr_matrix: pd.DataFrame) -> np.ndarray:
 
     pairwise_distances = 1 - corr_matrix.abs()
