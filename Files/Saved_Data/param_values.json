@@ -46,37 +46,27 @@
     "AccelerationTrend": {
         "LenST": [
             4,
-            8,
             16,
-            32,
             64
         ],
         "LenLT": [
             16,
-            32,
             64,
-            128,
             256
         ],
         "MacdLength": [
             4,
-            8,
             16,
-            32,
             64
         ],
         "TrendLenST": [
             4,
-            8,
             16,
-            32,
             64
         ],
         "TrendLenLT": [
             16,
-            32,
             64,
-            128,
             256
         ]
     },

@@ -44,7 +44,7 @@
         "relative_skewness_on_kurtosis_trend": false
     },
     "Volatility": {
-        "relative_directional_volatility": false,
+        "relative_directional_volatility": true,
         "normalised_directional_volatility": false
     },
     "VolatilityTrend": {

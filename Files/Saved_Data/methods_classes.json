@@ -45,16 +45,16 @@
             "mean_rate_of_change_normalised",
             "mean_rate_of_change_normalised_trend"
         ],
-        "Volatility": [
-            "normalised_directional_volatility",
-            "normalised_directional_volatility_trend"
-        ],
         "Distribution": [
             "skewness_trend",
             "skewness"
+        ],
+        "Volatility": [
+            "normalised_directional_volatility",
+            "normalised_directional_volatility_trend"
         ]
     },
-    "Uncategorized": [
+    "Dynamic": [
         "relative_skewness_on_kurtosis",
         "skewness_on_kurtosis_trend",
         "relative_skewness_on_kurtosis_trend",
