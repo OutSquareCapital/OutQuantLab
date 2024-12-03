@@ -113,7 +113,6 @@ class MethodSelectionWidget(GenericSelectionWidget):
         unselect_all_items(category, self.category_vars[category])
         self.apply_button.setEnabled(True)
 
-
 class AssetSelectionWidget(GenericSelectionWidget):
     def __init__(self, current_config: Dict[str, List[str]], assets_names: List[str]):
         super().__init__(current_config, assets_names, ASSETS_TO_TEST_CONFIG_FILE)
@@ -179,7 +178,6 @@ class ParameterWidget(QWidget):
         param_layout.addWidget(num_values_info_label)
         param_layout.addWidget(scroll_area)
 
-        # Sliders
         start_slider, end_slider = self.create_range_sliders(values)
         num_values_slider = self.create_num_values_slider(len(values))
 

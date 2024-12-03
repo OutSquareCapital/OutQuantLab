@@ -5,12 +5,12 @@ class MainApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.methods_names=Config.get_all_methods_from_module('Signals')
-        self.assets_names=Get_Data.load_asset_names(Files.FILE_PATH_YF)
+        self.assets_names=Get_Data.load_asset_names(FILE_PATH_YF)
 
     def initialize(self):
         self.show_home_page()
         self.showMaximized()
-        if not os.path.exists(Files.FILE_PATH_YF):
+        if not os.path.exists(FILE_PATH_YF):
             self.refresh_data()
 
     def show_home_page(self):
@@ -18,14 +18,14 @@ class MainApp(QMainWindow):
             parent=self,
             run_backtest_callback=self.run_backtest,
             refresh_data_callback=self.refresh_data,
-            param_config=Config.load_config_file(Files.PARAM_CONFIG_FILE),
-            asset_config=Config.load_config_file(Files.ASSETS_TO_TEST_CONFIG_FILE),
-            methods_config=Config.load_config_file(Files.METHODS_CONFIG_FILE),
+            param_config=Config.load_config_file(PARAM_CONFIG_FILE),
+            asset_config=Config.load_config_file(ASSETS_TO_TEST_CONFIG_FILE),
+            methods_config=Config.load_config_file(METHODS_CONFIG_FILE),
             assets_names=self.assets_names,
             methods_names=list(self.methods_names.keys()))
 
     def refresh_data(self):
-        Get_Data.get_yahoo_finance_data(self.assets_names, Files.FILE_PATH_YF)
+        Get_Data.get_yahoo_finance_data(self.assets_names, FILE_PATH_YF)
 
     def update_progress(self, value, message=None):
         Main.update_progress_with_events(self.progress_bar, self.log_output, value, message)
@@ -44,7 +44,7 @@ class MainApp(QMainWindow):
         self.show_backtest_page()
         self.update_progress(1, "Loading Data...")
 
-        data_prices_df = Get_Data.load_prices(Files.FILE_PATH_YF, self.assets_names)
+        data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_names)
 
         indicators_and_params, assets_to_backtest = Config.dynamic_config(self.methods_names)
 
@@ -162,10 +162,9 @@ if __name__ == "__main__":
     progress_window, progress_bar = UI_Common.setup_launch_page(None)
 
     QApplication.processEvents()
-
+    from Files import FILE_PATH_YF, PARAM_CONFIG_FILE, ASSETS_TO_TEST_CONFIG_FILE, METHODS_CONFIG_FILE
     import os
     progress_bar.setValue(30)
-    import Files
     progress_bar.setValue(40)
     import Process_Data
     progress_bar.setValue(50)

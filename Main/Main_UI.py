@@ -1,16 +1,18 @@
-from PySide6.QtWidgets import (QWidget, 
-                               QHBoxLayout, 
-                               QVBoxLayout, 
-                               QProgressBar, 
-                               QTextEdit,
-                               QPushButton, 
-                               QMainWindow, 
-                               QApplication,
-                               QGridLayout,
-                               QLabel,
-                               QSlider
-                               )
-from Files import ( 
+from PySide6.QtWidgets import (
+                            QWidget,
+                            QHBoxLayout,
+                            QVBoxLayout,
+                            QProgressBar, 
+                            QTextEdit,
+                            QPushButton,
+                            QMainWindow,
+                            QApplication,
+                            QGridLayout,
+                            QLabel,
+                            QSlider
+                            )
+
+from Files import (
                     BACKTEST_PAGE_PHOTO,
                     HOME_PAGE_PHOTO,
                     DASHBOARD_PAGE_PHOTO,
@@ -30,14 +32,15 @@ from Config import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget,
 
 def setup_home_page(
     parent: QMainWindow, 
-    run_backtest_callback, 
-    refresh_data_callback, 
-    param_config, 
-    asset_config, 
-    methods_config, 
+    run_backtest_callback,
+    refresh_data_callback,
+    param_config,
+    asset_config,
+    methods_config,
     assets_names,
     methods_names
-):
+    ):
+
     parent.setWindowTitle("OutQuantLab")
     main_widget = QWidget()
     main_layout = QHBoxLayout(main_widget)
@@ -57,7 +60,7 @@ def setup_home_page(
     left_layout.addLayout(buttons_layout)
 
     right_layout = QVBoxLayout()
-    
+
     top_frame = set_frame_design(FRAME_STYLE)
     bottom_frame = set_frame_design(FRAME_STYLE)
     right_upper_layout = QHBoxLayout(top_frame)
@@ -92,9 +95,9 @@ def setup_backtest_page(parent):
 
     bottom_layout = QHBoxLayout()
 
-    left_layout = QVBoxLayout()
+    left_layout =   QVBoxLayout()
     center_layout = QVBoxLayout()
-    right_layout = QVBoxLayout()
+    right_layout =  QVBoxLayout()
 
     center_frame = set_frame_design(FRAME_STYLE)
     center_frame_layout = QVBoxLayout(center_frame)
