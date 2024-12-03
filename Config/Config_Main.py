@@ -2,14 +2,13 @@ from UI_Common import create_scroll_area, add_category_widget_shared, create_app
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
 from PySide6.QtCore import Qt, Signal
 from typing import Dict, List, Any
-from Files import METHODS_CONFIG_FILE, ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE
 from .Config_Backend import param_range_values, save_config_file, load_config_file
 from PySide6.QtGui import QFont
 
-class GenericSelectionWidget(QWidget):
+class AssetSelectionWidget(QWidget):
     saved_signal = Signal()
 
-    def __init__(self, current_config: Dict, items: List[str], config_file: str, parent=None):
+    def __init__(self, current_config: Dict[str, List[str]], items: List[str], config_file: str, parent=None):
         super().__init__(parent)
         self.current_config = current_config
         self.items = items
@@ -38,7 +37,7 @@ class GenericSelectionWidget(QWidget):
 
         def create_checkbox(category: str, item: str, is_checked: bool) -> QCheckBox:
             checkbox = create_checkbox_item(
-                self, category, item, is_checked, 
+                self, category, item, is_checked,
                 lambda _: self.check_item_count()
             )
             self.category_vars[category][item] = checkbox
@@ -59,7 +58,7 @@ class GenericSelectionWidget(QWidget):
             self.current_config[category] = [
                 item for item, checkbox in item_vars.items() if checkbox.isChecked()
             ]
-        
+
         save_config_file(self.config_file, self.current_config, 3)
         self.apply_button.setEnabled(False)
         self.saved_signal.emit()
@@ -69,6 +68,19 @@ class GenericSelectionWidget(QWidget):
 
     def unselect_all(self, category: str):
         unselect_all_items(category, self.category_vars[category])
+
+    def check_item_count(self):
+        warnings_active = False
+        for category in ["ratios", "ensembles"]:
+            if category in self.category_vars:
+                selected_items = sum(
+                    1 for _, checkbox in self.category_vars[category].items() if checkbox.isChecked()
+                )
+                if selected_items == 1:
+                    warnings_active = True
+                    break
+        self.apply_button.setEnabled(not warnings_active)
+
 
 class MethodSelectionWidget(QWidget):
     saved_signal = Signal()
@@ -168,21 +180,6 @@ class MethodSelectionWidget(QWidget):
         self.saved_signal.emit()
 
 
-class AssetSelectionWidget(GenericSelectionWidget):
-    def __init__(self, current_config: Dict[str, List[str]], assets_names: List[str]):
-        super().__init__(current_config, assets_names, ASSETS_TO_TEST_CONFIG_FILE)
-
-    def check_item_count(self):
-        warnings_active = False
-        for category in ["ratios", "ensembles"]:
-            if category in self.category_vars:
-                selected_items = sum(
-                    1 for _, checkbox in self.category_vars[category].items() if checkbox.isChecked()
-                )
-                if selected_items == 1:
-                    warnings_active = True
-                    break
-        self.apply_button.setEnabled(not warnings_active)
 
 class ParameterWidget(QWidget):
     parameters_saved = Signal()

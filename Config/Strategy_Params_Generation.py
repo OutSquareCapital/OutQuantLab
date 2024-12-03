@@ -1,6 +1,5 @@
 from typing import List, Dict, Any, Callable, Tuple
 from itertools import product
-import inspect
 
 def filter_valid_pairs(params: Dict[str, List[int]]) -> List[Dict[str, int]]:
     param_names = list(params.keys())
@@ -43,17 +42,14 @@ def generate_all_indicators_params(
     all_indicators_params = {}
     
     for method in methods:
-        method_name = method.__name__  # Utilisation directe du nom de la méthode
+        method_name = method.__name__ 
         formatted_method_name = ''.join([word.title() for word in method_name.split('_')])
 
-        # Déterminer le type d'entrée
         array_type = determine_array_type(method)
         
-        # Extraire les paramètres valides pour la méthode
         method_params = options_by_method.get(method_name, {})
         params = filter_valid_pairs(method_params) if method_params else []
 
-        # Clé finale
         key = f"{formatted_method_name}"
         all_indicators_params[key] = (method, array_type, params)
 
@@ -64,15 +60,13 @@ def automatic_generation(
     param_options: Dict[str, Any], 
     methods_config: Dict[str, bool]
 ) -> Dict[str, Tuple[Callable, str, List[Dict[str, int]]]]:
-    # Étape 1 : Filtrer les méthodes actives uniquement
+    
     active_methods = [
         method for method in methods if methods_config.get(method.__name__, False)
     ]
 
-    # Étape 2 : Extraire les options par méthode
     options_by_method = {
         method.__name__: param_options.get(method.__name__, {}) for method in active_methods
     }
 
-    # Étape 3 : Générer les paramètres
     return generate_all_indicators_params(active_methods, options_by_method)

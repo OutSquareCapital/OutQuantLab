@@ -25,7 +25,8 @@ from Files import (
                     ASSETS_CLASSES_FILE, 
                     METHODS_CLASSES_FILE,
                     METHODS_CONFIG_FILE,
-                    PARAM_CONFIG_FILE
+                    PARAM_CONFIG_FILE,
+                    ASSETS_TO_TEST_CONFIG_FILE
                     )
 
 from PySide6.QtCore import Qt, QDate
@@ -68,11 +69,11 @@ def setup_home_page(
     right_lower_layout = QHBoxLayout(bottom_frame)
 
     param_widget = ParameterWidget(methods_args, PARAM_CONFIG_FILE)
-    asset_widget = AssetSelectionWidget(asset_config, assets_names)
+    asset_widget = AssetSelectionWidget(asset_config, assets_names, ASSETS_TO_TEST_CONFIG_FILE)
     method_widget = MethodSelectionWidget(methods_names, METHODS_CONFIG_FILE)
-    right_upper_layout.addWidget(param_widget)
-    right_upper_layout.addWidget(asset_widget)
-    right_upper_layout.addWidget(method_widget)
+    right_upper_layout.addWidget(param_widget, stretch=2)
+    right_upper_layout.addWidget(asset_widget, stretch=1)
+    right_upper_layout.addWidget(method_widget, stretch=1)
 
     asset_tree_widget = TreeStructureWidget(ASSETS_CLASSES_FILE, assets_names)
     method_tree_widget = TreeStructureWidget(METHODS_CLASSES_FILE, methods_names)

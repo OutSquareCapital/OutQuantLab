@@ -39,7 +39,6 @@ def get_all_methods_with_args_from_module(module_name: str) -> Dict[str, Dict[st
     methods_with_args = {}
     for name, func in vars(module).items():
         if callable(func):
-            # Récupération des arguments de la fonction
             signature = inspect.signature(func)
             args = {
                 param_name: param.default if param.default is not inspect.Parameter.empty else None
