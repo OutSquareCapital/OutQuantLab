@@ -1,262 +1,419 @@
 {
-    "RiskPremium": {
+    "mean_price_ratio": {
+        "LenST": [
+            4,
+            8,
+            16,
+            32,
+            64
+        ],
+        "LenLT": [
+            16,
+            32,
+            64,
+            128,
+            256
+        ]
+    },
+    "median_price_ratio": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ]
+    },
+    "central_price_ratio": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ]
+    },
+    "mean_rate_of_change": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ]
+    },
+    "median_rate_of_change": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ]
+    },
+    "central_rate_of_change": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ]
+    },
+    "mean_price_macd": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ]
+    },
+    "median_price_macd": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ]
+    },
+    "central_price_macd": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ]
+    },
+    "mean_rate_of_change_macd": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ]
+    },
+    "median_rate_of_change_macd": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ]
+    },
+    "central_rate_of_change_macd": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ]
+    },
+    "mean_price_macd_trend": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
+    },
+    "median_price_macd_trend": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
+    },
+    "central_price_macd_trend": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
+    },
+    "mean_rate_of_change_macd_trend": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
+    },
+    "median_rate_of_change_macd_trend": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
+    },
+    "central_rate_of_change_macd_trend": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "MacdLength": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
+    },
+    "fixed_bias": {
         "Bias": [
             1
         ]
     },
-    "Trend": {
-        "LenST": [
-            4,
-            8,
-            16,
-            32,
-            64
-        ],
-        "LenLT": [
-            16,
-            32,
-            64,
-            128,
-            256
-        ]
-    },
-    "Acceleration": {
-        "LenST": [
-            4,
-            8,
-            16,
-            32,
-            64
-        ],
-        "LenLT": [
-            16,
-            32,
-            64,
-            128,
-            256
-        ],
-        "MacdLength": [
-            4,
-            8,
-            16,
-            32,
-            64
-        ]
-    },
-    "AccelerationTrend": {
-        "LenST": [
-            4,
-            16,
-            64
-        ],
-        "LenLT": [
-            16,
-            64,
-            256
-        ],
-        "MacdLength": [
-            4,
-            16,
-            64
-        ],
-        "TrendLenST": [
-            4,
-            16,
-            64
-        ],
-        "TrendLenLT": [
-            16,
-            64,
-            256
-        ]
-    },
-    "MeanReversion": {
+    "mean_price_ratio_normalised": {
         "SignalLength": [
-            2,
-            4,
-            8,
-            16,
-            32
+            1
         ],
         "PLength": [
-            64,
-            128,
-            256,
-            512,
-            1024
+            1
         ]
     },
-    "MeanReversionTrend": {
+    "mean_rate_of_change_normalised": {
         "SignalLength": [
-            1,
-            2,
-            4,
-            8,
-            16,
-            32
+            1
         ],
         "PLength": [
-            64,
-            128,
-            256,
-            512,
-            1024
-        ],
-        "LenST": [
-            4,
-            8,
-            16,
-            32,
-            64
-        ],
-        "LenLT": [
-            16,
-            32,
-            64,
-            128,
-            256
+            1
         ]
     },
-    "ReturnsDistribution": {
+    "mean_price_ratio_normalised_trend": {
+        "SignalLength": [
+            1
+        ],
+        "PLength": [
+            1
+        ],
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ]
+    },
+    "mean_rate_of_change_normalised_trend": {
+        "SignalLength": [
+            1
+        ],
+        "PLength": [
+            1
+        ],
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ]
+    },
+    "skewness": {
         "LenSmooth": [
-            1,
-            2,
-            4,
-            8,
-            16,
-            32,
-            64
+            1
         ],
         "LenSkew": [
-            4,
-            8,
-            16,
-            32,
-            64,
-            128,
-            256,
-            512
+            1
         ]
     },
-    "ReturnsDistributionTrend": {
+    "relative_skewness": {
         "LenSmooth": [
-            1,
-            2,
-            4,
-            8,
-            16,
-            32,
-            64
+            1
         ],
         "LenSkew": [
-            4,
-            8,
-            16,
-            32,
-            64,
-            128,
-            256,
-            512
+            1
+        ]
+    },
+    "skewness_on_kurtosis": {
+        "LenSmooth": [
+            1
+        ],
+        "LenSkew": [
+            1
+        ]
+    },
+    "relative_skewness_on_kurtosis": {
+        "LenSmooth": [
+            1
+        ],
+        "LenSkew": [
+            1
+        ]
+    },
+    "skewness_trend": {
+        "LenSmooth": [
+            1
+        ],
+        "LenSkew": [
+            1
         ],
         "TrendLenST": [
-            4,
-            8,
-            16,
-            32,
-            64
+            1
         ],
         "TrendLenLT": [
-            16,
-            32,
-            64,
-            128,
-            256
+            1
         ]
     },
-    "Volatility": {
-        "LenVol": [
-            4,
-            8,
-            16,
-            32,
-            64
+    "relative_skewness_trend": {
+        "LenSmooth": [
+            1
         ],
-        "LenST": [
-            4,
-            8,
-            16,
-            32,
-            64
-        ],
-        "LenLT": [
-            16,
-            32,
-            64,
-            128,
-            256
-        ]
-    },
-    "VolatilityTrend": {
-        "LenVol": [
-            4,
-            8,
-            16,
-            32,
-            64
-        ],
-        "LenST": [
-            4,
-            8,
-            16,
-            32,
-            64
-        ],
-        "LenLT": [
-            16,
-            32,
-            64,
-            128,
-            256
+        "LenSkew": [
+            1
         ],
         "TrendLenST": [
-            4,
-            8,
-            16,
-            32,
-            64
+            1
         ],
         "TrendLenLT": [
-            16,
-            32,
-            64,
-            128,
-            256
+            1
         ]
     },
-    "Seasonality": {
-        "GroupBy": [],
-        "GroupSelected": [],
-        "LenST": [],
-        "LenLT": []
+    "skewness_on_kurtosis_trend": {
+        "LenSmooth": [
+            1
+        ],
+        "LenSkew": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
     },
-    "SeasonalityTrend": {
-        "GroupBy": [],
-        "GroupSelected": [],
-        "LenST": [],
-        "LenLT": [],
-        "TrendLenST": [],
-        "TrendLenLT": []
+    "relative_skewness_on_kurtosis_trend": {
+        "LenSmooth": [
+            1
+        ],
+        "LenSkew": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
     },
-    "SeasonalBreakout": {
-        "LengthMean": [],
-        "LengthSnapshot": [],
-        "amplitude": []
+    "relative_directional_volatility": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "LenVol": [
+            1
+        ]
     },
-    "SeasonalBreakoutTrend": {
-        "LengthMean": [],
-        "LengthSnapshot": [],
-        "amplitude": [],
-        "LenST": [],
-        "LenLT": []
+    "normalised_directional_volatility": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "LenVol": [
+            1
+        ]
+    },
+    "relative_directional_volatility_trend": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "LenVol": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
+    },
+    "normalised_directional_volatility_trend": {
+        "LenST": [
+            1
+        ],
+        "LenLT": [
+            1
+        ],
+        "LenVol": [
+            1
+        ],
+        "TrendLenST": [
+            1
+        ],
+        "TrendLenLT": [
+            1
+        ]
     }
 }
