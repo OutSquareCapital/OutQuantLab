@@ -1,5 +1,5 @@
 import numpy as np
-import Files
+from Files import ANNUALIZED_PERCENTAGE_FACTOR
 import bottleneck as bn
 from Metrics.Aggregation import rolling_mean, rolling_median
 
@@ -37,7 +37,7 @@ def hv_composite(returns_array: np.ndarray,
 
     if annualization:
 
-        composite_vol_array = composite_vol_array * Files.ANNUALIZED_PERCENTAGE_FACTOR
+        composite_vol_array = composite_vol_array * ANNUALIZED_PERCENTAGE_FACTOR
 
     return rolling_mean(composite_vol_array, length=5)
 

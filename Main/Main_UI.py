@@ -24,7 +24,7 @@ from Files import (
                     FRAME_STYLE,
                     ASSETS_CLASSES_FILE, 
                     METHODS_CLASSES_FILE,
-                    METHODS_CONFIG_FILE,
+                    METHODS_TO_TEST_FILE,
                     PARAM_CONFIG_FILE,
                     ASSETS_TO_TEST_CONFIG_FILE
                     )
@@ -70,7 +70,7 @@ def setup_home_page(
 
     param_widget = ParameterWidget(methods_args, PARAM_CONFIG_FILE)
     asset_widget = AssetSelectionWidget(asset_config, assets_names, ASSETS_TO_TEST_CONFIG_FILE)
-    method_widget = MethodSelectionWidget(methods_names, METHODS_CONFIG_FILE)
+    method_widget = MethodSelectionWidget(methods_names, METHODS_TO_TEST_FILE)
     right_upper_layout.addWidget(param_widget, stretch=2)
     right_upper_layout.addWidget(asset_widget, stretch=1)
     right_upper_layout.addWidget(method_widget, stretch=1)

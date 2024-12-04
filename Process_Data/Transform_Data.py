@@ -6,7 +6,7 @@ from Infrastructure import Fast_Tools as ft
 from typing import List, Tuple
 import Metrics as mt
 from itertools import combinations
-import Files
+from Files import PERCENTAGE_FACTOR
 
 def calculate_volatility_adjusted_returns(
     pct_returns_array: np.ndarray, 
@@ -58,7 +58,7 @@ def equity_curves_calculs(returns_array: np.ndarray) -> np.ndarray:
 
     cumulative_returns[mask] = np.nan
 
-    return cumulative_returns * Files.PERCENTAGE_FACTOR
+    return cumulative_returns * PERCENTAGE_FACTOR
 
 
 def pct_returns_np(prices_array: np.ndarray) -> np.ndarray:

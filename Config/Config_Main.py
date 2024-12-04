@@ -94,11 +94,7 @@ class MethodSelectionWidget(QWidget):
         self.init_ui()
 
     def sync_methods_with_file(self, methods_list: List[str]) -> Dict[str, bool]:
-        """
-        Synchronise le fichier JSON avec la liste des méthodes.
-        - Supprime les éléments obsolètes.
-        - Ajoute les nouvelles méthodes avec une valeur par défaut.
-        """
+
         try:
             # Charger le fichier JSON
             config = load_config_file(self.config_file)

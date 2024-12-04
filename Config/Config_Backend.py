@@ -1,5 +1,5 @@
 import json
-from Files import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_CONFIG_FILE
+from Files import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_TO_TEST_FILE
 from typing import List, Callable, Dict, Any
 import inspect
 import numpy as np
@@ -32,6 +32,7 @@ def get_all_methods_from_module(module_name: str) -> Dict[str, Callable]:
     return {
         name: func for name, func in vars(module).items() if callable(func)
     }
+
 def get_all_methods_with_args_from_module(module_name: str) -> Dict[str, Dict[str, Any]]:
 
     module = importlib.import_module(module_name)
@@ -51,6 +52,7 @@ def get_all_methods_with_args_from_module(module_name: str) -> Dict[str, Dict[st
             }
     
     return methods_with_args
+
 def filter_active_methods(
     current_config: dict, 
     all_methods: Dict[str, Callable]
@@ -63,7 +65,7 @@ def filter_active_methods(
 def dynamic_config(all_methods):
     param_config = load_config_file(PARAM_CONFIG_FILE)
     asset_config = load_config_file(ASSETS_TO_TEST_CONFIG_FILE)
-    methods_config = load_config_file(METHODS_CONFIG_FILE)
+    methods_config = load_config_file(METHODS_TO_TEST_FILE)
     active_methods = filter_active_methods(methods_config, all_methods)
     indicators_and_params = automatic_generation(active_methods, param_config, methods_config)
     return indicators_and_params, asset_config

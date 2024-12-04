@@ -161,7 +161,7 @@ if __name__ == "__main__":
     progress_window, progress_bar = UI_Common.setup_launch_page(None)
 
     QApplication.processEvents()
-    from Files import FILE_PATH_YF, PARAM_CONFIG_FILE, ASSETS_TO_TEST_CONFIG_FILE, METHODS_CONFIG_FILE
+    from Files import FILE_PATH_YF, ASSETS_TO_TEST_CONFIG_FILE
     import os
     progress_bar.setValue(30)
     progress_bar.setValue(40)
