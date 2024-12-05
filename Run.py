@@ -18,7 +18,7 @@ class MainApp(QMainWindow):
         self.showMaximized()
 
     def show_home_page(self):
-        Main.setup_home_page(
+        UI.setup_home_page(
             parent=self,
             run_backtest_callback=self.run_backtest,
             refresh_data_callback=self.refresh_data,
@@ -34,13 +34,13 @@ class MainApp(QMainWindow):
         Get_Data.get_yahoo_finance_data(self.assets_names, FILE_PATH_YF)
 
     def update_progress(self, value, message=None):
-        Main.update_progress_with_events(self.progress_bar, self.log_output, value, message)
+        UI.update_progress_with_events(self.progress_bar, self.log_output, value, message)
 
     def show_backtest_page(self):
-        self.progress_bar, self.log_output = Main.setup_backtest_page(self)
+        self.progress_bar, self.log_output = UI.setup_backtest_page(self)
 
     def show_plot(self, fig):
-        Main.display_plot_dialog(
+        UI.display_plot_dialog(
             parent=self,
             fig=fig,
             window_title="Graph"
@@ -121,7 +121,7 @@ class MainApp(QMainWindow):
             round(Dashboard.calculate_overall_monthly_skew(global_result
                                                            ).item(), 2)
         ]
-        bottom_layout = Main.setup_results_page(
+        bottom_layout = UI.setup_results_page(
                                             parent=self,
                                             plots=plots,
                                             back_to_home_callback=self.show_home_page,
@@ -156,14 +156,11 @@ class MainApp(QMainWindow):
 if __name__ == "__main__":
 
     import sys
-    import UI_Common
     from PySide6.QtWidgets import QApplication
-    import Main
-
+    import UI
     app = QApplication(sys.argv)
-
-    UI_Common.apply_global_styles(app)
-    progress_window, progress_bar = UI_Common.setup_launch_page(None)
+    UI.apply_global_styles(app)
+    progress_window, progress_bar = UI.setup_launch_page(None)
 
     QApplication.processEvents()
 

@@ -25,7 +25,7 @@ from Files import (
                     )
 
 from PySide6.QtCore import Qt, QDate
-from UI_Common import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
+from .Common_UI import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
 from .Config_UI import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget, TreeStructureWidget
 
 def setup_home_page(
