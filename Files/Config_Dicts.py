@@ -26,20 +26,3 @@ portfolio_futures = {
     'Base Metals': ['HG'],
     }
 }
-
-
-paires_futures_etf = [
-("6A", "AD"),
-("6B", "BP"),
-("6C", "CD"),
-("YM", "1YM"),
-("RTY", "TF"),
-("RTY", "SMC"),
-("6E", "URO"),
-("ZS", "S"),
-("ZC", "C"),
-("ZW", "W"),
-("ES", "SP"),
-("ZB", "US"),
-("ZF", "FV"),
-]

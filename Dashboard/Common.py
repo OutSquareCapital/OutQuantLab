@@ -2,7 +2,6 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 import plotly.graph_objects as go
 from Files import FONT_FAMILY, FONT_SIZE, COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK
-import pandas as pd
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
     cmap_name = "custom_colormap"

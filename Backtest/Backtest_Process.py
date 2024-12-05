@@ -23,22 +23,17 @@ def calculate_strategy_returns(
 
     # Parallélisation des calculs sur les paramètres
     for func, array_type, params in indicators_and_params.values():
-        # Récupérer le tableau réel via `array_type`
         data_array = data_arrays[array_type]
 
-        # Paralléliser sur les paramètres de cet indicateur
         results = Parallel(n_jobs=-1, backend='threading')(delayed(process_param)(
             func, data_array, adjusted_returns_array, param) for param in params)
 
-        # Empiler les résultats et les insérer dans l'array final
         results_stacked = np.hstack(results)
         num_cols = results_stacked.shape[1]
         signals_array[:, signal_col_index:signal_col_index + num_cols] = results_stacked
 
-        # Mise à jour de l'index de colonne
         signal_col_index += num_cols
 
-        # Mise à jour de la progression
         progress = 10 + int(total_steps * signal_col_index / total_columns)
         progress_callback(progress, f"Backtesting Strategies: {signal_col_index}/{total_columns}...")
 

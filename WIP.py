@@ -31,6 +31,21 @@ def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> 
 # Concaténation des DataFrames
 #total_df = pd.concat([test_global_returns, equal_weights_global_returns], axis=1).dropna()
 
+paires_futures_etf = [
+("6A", "AD"),
+("6B", "BP"),
+("6C", "CD"),
+("YM", "1YM"),
+("RTY", "TF"),
+("RTY", "SMC"),
+("6E", "URO"),
+("ZS", "S"),
+("ZC", "C"),
+("ZW", "W"),
+("ES", "SP"),
+("ZB", "US"),
+("ZF", "FV"),
+]
 '''
 import pandas as pd
 import numpy as np
