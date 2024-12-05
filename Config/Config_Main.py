@@ -1,8 +1,8 @@
 from UI_Common import create_scroll_area, add_category_widget_shared, create_apply_button, select_all_items, unselect_all_items, create_checkbox_item, create_expandable_section, create_apply_button
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
 from PySide6.QtCore import Qt, Signal
-from typing import Dict, List, Any
-from .Config_Backend import param_range_values, save_config_file, load_config_file
+from typing import Dict, List
+from .Config_Backend import param_range_values, save_config_file
 from PySide6.QtGui import QFont
 
 class AssetSelectionWidget(QWidget):
@@ -85,30 +85,12 @@ class AssetSelectionWidget(QWidget):
 class MethodSelectionWidget(QWidget):
     saved_signal = Signal()
 
-    def __init__(self, methods_list: List[str], config_file: str, parent=None):
+    def __init__(self, methods_list: List[str], methods_to_test,  config_file: str, parent=None):
         super().__init__(parent)
         self.config_file = config_file
-
-        # Charger la configuration actuelle
-        self.current_config = self.sync_methods_with_file(methods_list)
+        self.current_config = {method: methods_to_test.get(method, False) for method in methods_list}
         self.init_ui()
 
-    def sync_methods_with_file(self, methods_list: List[str]) -> Dict[str, bool]:
-
-        try:
-            # Charger le fichier JSON
-            config = load_config_file(self.config_file)
-            if config is None:
-                config = {}
-        except FileNotFoundError:
-            config = {}
-
-        # Synchroniser les méthodes
-        updated_config = {method: config.get(method, False) for method in methods_list}
-
-        # Sauvegarder le fichier mis à jour
-        save_config_file(self.config_file, updated_config, 4)
-        return updated_config
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -183,41 +165,9 @@ class ParameterWidget(QWidget):
     def __init__(self, methods_with_params: Dict[str, Dict[str, list]], config_file: str):
         super().__init__()
         self.config_file = config_file
-
-        # Synchronisation initiale du JSON avec les données
-        self.current_config = self.sync_with_json(methods_with_params)
+        self.current_config =  {method: params.get("args", {}) for method, params in methods_with_params.items()}
         self.param_widgets = {}
         self.init_ui()
-
-    def sync_with_json(self, methods_with_params: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, list]]:
-
-        try:
-            # Charger la configuration existante
-            existing_config = load_config_file(self.config_file) or {}
-        except FileNotFoundError:
-            existing_config = {}
-
-        # Filtrer les méthodes avec leurs arguments, supprimer la clé 'function'
-        filtered_methods_with_params = {
-            method: params.get("args", {}) for method, params in methods_with_params.items()
-        }
-
-        # Mettre à jour la configuration pour correspondre aux méthodes fournies
-        updated_config = {}
-        for method, params in filtered_methods_with_params.items():
-            if method not in existing_config:
-                # Nouvelle méthode
-                updated_config[method] = {param: values if values else [1] for param, values in params.items()}
-            else:
-                # Méthode existante, mise à jour des paramètres
-                updated_config[method] = {
-                    param: existing_config[method].get(param, values if values else [1])
-                    for param, values in params.items()
-                }
-
-        # Sauvegarder la configuration mise à jour
-        save_config_file(self.config_file, updated_config, indent=4)
-        return updated_config
 
     def init_ui(self):
         layout = QVBoxLayout()
@@ -383,24 +333,21 @@ class ParameterWidget(QWidget):
 
 
 class TreeStructureWidget(QWidget):
-    def __init__(self, json_file_path: str, data: List[str], parent=None):
+    def __init__(self, json_file_path: str, data: List[str], classes, parent=None):
         super().__init__(parent)
         self.json_file_path = json_file_path
-        self.data = set(data)  # Convertir data en set pour une recherche rapide
+        self.data = set(data)
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         self.tree.setDragDropMode(QTreeWidget.InternalMove)
         self.tree.setSelectionMode(QTreeWidget.ExtendedSelection)
         self.tree.itemClicked.connect(self.handle_item_click)
-
-        # Charger la structure JSON
-        self.tree_structure = load_config_file(self.json_file_path) or {}
+        self.tree_structure = classes
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
 
-        # Remplir l'arborescence à partir du JSON et de data
         self.populate_tree_from_dict(self.tree_structure)
         layout.addWidget(self.tree)
 

@@ -37,10 +37,13 @@ def setup_home_page(
     parent: QMainWindow, 
     run_backtest_callback,
     refresh_data_callback,
-    asset_config,
+    assets_to_test,
     assets_names,
     methods_names,
-    methods_args
+    methods_args,
+    methods_to_test,
+    assets_classes,
+    methods_classes
     ):
 
     parent.setWindowTitle("OutQuantLab")
@@ -69,14 +72,14 @@ def setup_home_page(
     right_lower_layout = QHBoxLayout(bottom_frame)
 
     param_widget = ParameterWidget(methods_args, PARAM_CONFIG_FILE)
-    asset_widget = AssetSelectionWidget(asset_config, assets_names, ASSETS_TO_TEST_CONFIG_FILE)
-    method_widget = MethodSelectionWidget(methods_names, METHODS_TO_TEST_FILE)
+    asset_widget = AssetSelectionWidget(assets_to_test, assets_names, ASSETS_TO_TEST_CONFIG_FILE)
+    method_widget = MethodSelectionWidget(methods_names, methods_to_test, METHODS_TO_TEST_FILE)
     right_upper_layout.addWidget(param_widget, stretch=2)
     right_upper_layout.addWidget(asset_widget, stretch=1)
     right_upper_layout.addWidget(method_widget, stretch=1)
 
-    asset_tree_widget = TreeStructureWidget(ASSETS_CLASSES_FILE, assets_names)
-    method_tree_widget = TreeStructureWidget(METHODS_CLASSES_FILE, methods_names)
+    asset_tree_widget = TreeStructureWidget(ASSETS_CLASSES_FILE, assets_names, assets_classes)
+    method_tree_widget = TreeStructureWidget(METHODS_CLASSES_FILE, methods_names, methods_classes)
     right_lower_layout.addWidget(asset_tree_widget)
     right_lower_layout.addWidget(method_tree_widget)
 

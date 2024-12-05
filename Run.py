@@ -4,25 +4,32 @@ class MainApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.methods_names=Config.get_all_methods_from_module('Signals')
-        self.assets_names=Get_Data.load_asset_names(FILE_PATH_YF)
-        self.methods_with_args = Config.get_all_methods_with_args_from_module('Signals')
 
     def initialize(self):
+        self.methods_funcs=Config.get_all_methods_from_module('Signals')
+        self.methods_names=list(self.methods_funcs.keys())
+        self.assets_names=Get_Data.load_asset_names(FILE_PATH_YF)
+        self.methods_with_args = Config.get_all_methods_with_args_from_module('Signals')
+        self.assets_to_test = Config.load_config_file(ASSETS_TO_TEST_CONFIG_FILE)
+        self.params_config = Config.load_config_file(PARAM_CONFIG_FILE)
+        self.methods_to_test = Config.load_config_file(METHODS_TO_TEST_FILE)
+        self.assets_classes=Config.load_config_file(ASSETS_CLASSES_FILE)
+        self.methods_classes=Config.load_config_file(METHODS_CLASSES_FILE)
         self.show_home_page()
         self.showMaximized()
-        if not os.path.exists(FILE_PATH_YF):
-            self.refresh_data()
 
     def show_home_page(self):
         Main.setup_home_page(
             parent=self,
             run_backtest_callback=self.run_backtest,
             refresh_data_callback=self.refresh_data,
-            asset_config=Config.load_config_file(ASSETS_TO_TEST_CONFIG_FILE),
+            assets_to_test=self.assets_to_test,
             assets_names=self.assets_names,
-            methods_names=list(self.methods_names.keys()),
-            methods_args=self.methods_with_args)
+            methods_names=self.methods_names,
+            methods_args=self.methods_with_args,
+            methods_to_test=self.methods_to_test,
+            assets_classes=self.assets_classes,
+            methods_classes=self.methods_classes)
 
     def refresh_data(self):
         Get_Data.get_yahoo_finance_data(self.assets_names, FILE_PATH_YF)
@@ -46,7 +53,7 @@ class MainApp(QMainWindow):
 
         data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_names)
 
-        indicators_and_params, assets_to_backtest = Config.dynamic_config(self.methods_names)
+        indicators_and_params = Config.dynamic_config(self.methods_funcs, self.methods_to_test, self.param_config)
 
         self.update_progress(5, "Preparing Data...")
 
@@ -59,7 +66,7 @@ class MainApp(QMainWindow):
         ) = Process_Data.process_data(
             self.assets_names,
             data_prices_df,
-            assets_to_backtest,
+            self.assets_to_test,
         )
 
         self.update_progress(10, "Processing Backtest...")
@@ -75,11 +82,12 @@ class MainApp(QMainWindow):
         )
 
         self.update_progress(80, "Creating Portfolio...")
-        equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df, by_method=True, by_asset=True)
+        equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df,  by_method=True, by_asset=True)
         self.update_progress(90, "Creating Portfolio...")
         equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_method_returns, global_avg=True)
 
         backtest_result = equal_weights_method_returns
+
         global_result = equal_weights_global_returns
 
         self.update_progress(95, "Calculating Metrics...")
@@ -129,12 +137,12 @@ class MainApp(QMainWindow):
                                             )
 
         '''
-        equity_plot = m.generate_plot_widget(Dashboard.plot_equity(global_result), show_legend=False)
-        sharpe_plot = m.generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(global_result, length=1250), show_legend=False)
-        drawdown_plot = m.generate_plot_widget(Dashboard.plot_rolling_drawdown(global_result, length=1250), show_legend=False)
-        vol_plot = m.generate_plot_widget(Dashboard.plot_rolling_volatility(global_result), show_legend=False)
-        distribution_plot = m.generate_plot_widget(Dashboard.plot_returns_distribution_histogram(global_result), show_legend=False)
-        violin_plot = m.generate_plot_widget(Dashboard.plot_returns_distribution_violin(global_result), show_legend=False)
+        equity_plot = Main.generate_plot_widget(Dashboard.plot_equity(global_result), show_legend=False)
+        sharpe_plot = Main.generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(global_result, length=1250), show_legend=False)
+        drawdown_plot = Main.generate_plot_widget(Dashboard.plot_rolling_drawdown(global_result, length=1250), show_legend=False)
+        vol_plot = Main.generate_plot_widget(Dashboard.plot_rolling_volatility(global_result), show_legend=False)
+        distribution_plot = Main.generate_plot_widget(Dashboard.plot_returns_distribution_histogram(global_result), show_legend=False)
+        violin_plot = Main.generate_plot_widget(Dashboard.plot_returns_distribution_violin(global_result), show_legend=False)
         
         bottom_layout.addWidget(equity_plot, 0, 0)
         bottom_layout.addWidget(drawdown_plot, 1, 0)
@@ -152,18 +160,20 @@ if __name__ == "__main__":
 
     import sys
     import UI_Common
-    import Main
     from PySide6.QtWidgets import QApplication
-    import Get_Data
+    import Main
 
     app = QApplication(sys.argv)
+
     UI_Common.apply_global_styles(app)
     progress_window, progress_bar = UI_Common.setup_launch_page(None)
 
     QApplication.processEvents()
-    from Files import FILE_PATH_YF, ASSETS_TO_TEST_CONFIG_FILE
-    import os
+
+    progress_bar.setValue(20)
+    from Files import FILE_PATH_YF, ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_TO_TEST_FILE, ASSETS_CLASSES_FILE, METHODS_CLASSES_FILE
     progress_bar.setValue(30)
+    import Get_Data
     progress_bar.setValue(40)
     import Process_Data
     progress_bar.setValue(50)
