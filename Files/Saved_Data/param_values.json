@@ -33,10 +33,18 @@
     },
     "mean_rate_of_change": {
         "LenST": [
-            1
+            4,
+            6,
+            8,
+            11,
+            16
         ],
         "LenLT": [
-            1
+            16,
+            32,
+            64,
+            128,
+            256
         ]
     },
     "median_rate_of_change": {
@@ -57,13 +65,30 @@
     },
     "mean_price_macd": {
         "LenST": [
-            1
+            4,
+            7,
+            11,
+            19,
+            32
         ],
         "LenLT": [
-            1
+            16,
+            32,
+            64,
+            128,
+            256
         ],
         "MacdLength": [
-            1
+            4,
+            5,
+            7,
+            10,
+            14,
+            19,
+            25,
+            35,
+            47,
+            64
         ]
     },
     "median_price_macd": {
@@ -123,19 +148,39 @@
     },
     "mean_price_macd_trend": {
         "LenST": [
-            1
+            4,
+            6,
+            8,
+            11,
+            16
         ],
         "LenLT": [
-            1
+            16,
+            32,
+            64,
+            128,
+            256
         ],
         "MacdLength": [
-            1
+            4,
+            8,
+            16,
+            32,
+            64
         ],
         "TrendLenST": [
-            1
+            4,
+            8,
+            16,
+            32,
+            64
         ],
         "TrendLenLT": [
-            1
+            16,
+            32,
+            64,
+            128,
+            256
         ]
     },
     "median_price_macd_trend": {
@@ -230,10 +275,17 @@
     },
     "mean_price_ratio_normalised": {
         "SignalLength": [
-            1
+            2,
+            4,
+            8,
+            16,
+            32
         ],
         "PLength": [
-            1
+            128,
+            256,
+            512,
+            1024
         ]
     },
     "mean_rate_of_change_normalised": {
@@ -274,10 +326,23 @@
     },
     "skewness": {
         "LenSmooth": [
-            1
+            1,
+            2,
+            4,
+            8,
+            16,
+            32,
+            64
         ],
         "LenSkew": [
-            1
+            4,
+            8,
+            16,
+            32,
+            64,
+            128,
+            256,
+            512
         ]
     },
     "relative_skewness": {

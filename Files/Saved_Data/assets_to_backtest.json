@@ -1,27 +1,16 @@
 {
    "assets": [
-      "CORN",
-      "DBB",
-      "DIA",
-      "FXA",
-      "FXB",
-      "FXC",
-      "FXE",
-      "GBTC",
-      "GLD",
       "IWM",
-      "QQQ",
-      "SLV",
-      "SOYB",
-      "SPY",
-      "TLT",
-      "UNG",
-      "USO",
-      "VIXY",
-      "WEAT"
+      "SPY"
    ],
-   "ratios": [],
-   "ensembles": [],
+   "ratios": [
+      "IWM",
+      "SPY"
+   ],
+   "ensembles": [
+      "IWM",
+      "SPY"
+   ],
    "canary_assets": [],
    "canary_ratios": [],
    "canary_ensembles": []

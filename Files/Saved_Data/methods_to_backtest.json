@@ -22,7 +22,7 @@
     "mean_rate_of_change_normalised": false,
     "mean_price_ratio_normalised_trend": false,
     "mean_rate_of_change_normalised_trend": false,
-    "skewness": false,
+    "skewness": true,
     "relative_skewness": false,
     "skewness_on_kurtosis": false,
     "relative_skewness_on_kurtosis": false,
