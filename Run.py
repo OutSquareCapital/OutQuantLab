@@ -8,12 +8,13 @@ class MainApp(QMainWindow):
     def initialize(self):
         self.methods_funcs=Config.get_all_methods_from_module('Signals')
         self.methods_names=list(self.methods_funcs.keys())
-        self.methods_to_test = Config.load_config_file(METHODS_TO_TEST_FILE)
-        self.methods_classes=Config.load_config_file(METHODS_CLASSES_FILE)
         self.assets_names=Config.load_asset_names(FILE_PATH_YF)
-        self.assets_to_test = Config.load_config_file(ASSETS_TO_TEST_CONFIG_FILE)
-        self.assets_classes=Config.load_config_file(ASSETS_CLASSES_FILE)
-        self.params_config = Config.load_config_file(PARAM_CONFIG_FILE)
+        self.json_data = Config.load_all_json_files()
+        self.methods_to_test = self.json_data["methods_to_test"]
+        self.methods_classes = self.json_data["methods_classes"]
+        self.assets_to_test = self.json_data["assets_to_test"]
+        self.assets_classes = self.json_data["assets_classes"]
+        self.params_config = self.json_data["params_config"]
         self.show_home_page()
         self.showMaximized()
 
@@ -146,11 +147,7 @@ class MainApp(QMainWindow):
 
     def closeEvent(self, event):
         Config.cleanup_temp_files()
-        Config.save_config_file(ASSETS_TO_TEST_CONFIG_FILE, self.assets_to_test, 3)
-        Config.save_config_file(PARAM_CONFIG_FILE, self.params_config, 3)
-        Config.save_config_file(METHODS_TO_TEST_FILE, self.methods_to_test, 3)
-        Config.save_config_file(ASSETS_CLASSES_FILE, self.assets_classes, 3)
-        Config.save_config_file(METHODS_CLASSES_FILE, self.methods_classes, 3)
+        Config.save_all_json_files(self.json_data, indent=3)
         super().closeEvent(event)
 
 if __name__ == "__main__":
@@ -163,9 +160,8 @@ if __name__ == "__main__":
     progress_window, progress_bar = UI.setup_launch_page(None)
 
     QApplication.processEvents()
-
+    from Files import FILE_PATH_YF
     progress_bar.setValue(20)
-    from Files import FILE_PATH_YF, ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_TO_TEST_FILE, ASSETS_CLASSES_FILE, METHODS_CLASSES_FILE
     progress_bar.setValue(30)
     import Get_Data
     progress_bar.setValue(40)

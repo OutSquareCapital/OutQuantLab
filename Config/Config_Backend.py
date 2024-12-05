@@ -4,20 +4,13 @@ import importlib
 import os
 import tempfile
 import pyarrow.parquet as pq
+from Files import ASSETS_TO_TEST_CONFIG_FILE, PARAM_CONFIG_FILE, METHODS_TO_TEST_FILE, ASSETS_CLASSES_FILE, METHODS_CLASSES_FILE
 
 def load_asset_names(file_path: str) -> List[str]:
     parquet_file = pq.ParquetFile(file_path)
     column_names = parquet_file.schema.names
     return [col for col in column_names if col != "Date"]
 
-
-def load_config_file(file_path:str):
-    with open(file_path, "r") as file:
-        return json.load(file)
-
-def save_config_file(file_path:str, dict_to_save: dict, indent: int):
-    with open(file_path, "w") as file:
-        json.dump(dict_to_save, file, indent=indent)
 
 def get_all_methods_from_module(module_name: str) -> Dict[str, Callable]:
         
@@ -33,7 +26,6 @@ def save_html_temp_file(html_content: str, suffix: str = "outquant.html") -> str
         f.write(html_content)
     return temp_file.name
 
-
 def cleanup_temp_files():
     temp_dir = tempfile.gettempdir()
     for file_name in os.listdir(temp_dir):
@@ -43,39 +35,27 @@ def cleanup_temp_files():
                 os.remove(file_path)
             except Exception as e:
                 print(f"Erreur lors de la suppression du fichier temporaire {file_path} : {e}")
-            
-def sync_methods_with_file(config_file, methods_list: List[str]) -> Dict[str, bool]:
 
-    config = load_config_file(config_file)
+def load_config_file(file_path:str):
+    with open(file_path, "r") as file:
+        return json.load(file)
 
-    # Synchroniser les méthodes
-    updated_config = {method: config.get(method, False) for method in methods_list}
+def save_config_file(file_path:str, dict_to_save: dict, indent: int):
+    with open(file_path, "w") as file:
+        json.dump(dict_to_save, file, indent=indent)
 
-    save_config_file(config_file, updated_config, 4)
-    return updated_config
-
-def sync_with_json(config_file, methods_with_params: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, list]]:
-
-    existing_config = load_config_file(config_file)
-
-    # Filtrer les méthodes avec leurs arguments, supprimer la clé 'function'
-    filtered_methods_with_params = {
-        method: params.get("args", {}) for method, params in methods_with_params.items()
+def load_all_json_files() -> Dict[str, Any]:
+    return {
+        "assets_to_test": load_config_file(ASSETS_TO_TEST_CONFIG_FILE),
+        "params_config": load_config_file(PARAM_CONFIG_FILE),
+        "methods_to_test": load_config_file(METHODS_TO_TEST_FILE),
+        "methods_classes": load_config_file(METHODS_CLASSES_FILE),
+        "assets_classes": load_config_file(ASSETS_CLASSES_FILE),
     }
 
-    # Mettre à jour la configuration pour correspondre aux méthodes fournies
-    updated_config = {}
-    for method, params in filtered_methods_with_params.items():
-        if method not in existing_config:
-            # Nouvelle méthode
-            updated_config[method] = {param: values if values else [1] for param, values in params.items()}
-        else:
-            # Méthode existante, mise à jour des paramètres
-            updated_config[method] = {
-                param: existing_config[method].get(param, values if values else [1])
-                for param, values in params.items()
-            }
-
-    # Sauvegarder la configuration mise à jour
-    save_config_file(config_file, updated_config, indent=4)
-    return updated_config
+def save_all_json_files(data: Dict[str, Any], indent: int = 4):
+    save_config_file(ASSETS_TO_TEST_CONFIG_FILE, data["assets_to_test"], indent)
+    save_config_file(PARAM_CONFIG_FILE, data["params_config"], indent)
+    save_config_file(METHODS_TO_TEST_FILE, data["methods_to_test"], indent)
+    save_config_file(METHODS_CLASSES_FILE, data["methods_classes"], indent)
+    save_config_file(ASSETS_CLASSES_FILE, data["assets_classes"], indent)
