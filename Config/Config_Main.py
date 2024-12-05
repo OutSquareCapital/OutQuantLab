@@ -1,18 +1,17 @@
 from UI_Common import create_scroll_area, add_category_widget_shared, create_apply_button, select_all_items, unselect_all_items, create_checkbox_item, create_expandable_section, create_apply_button
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QGroupBox, QHBoxLayout, QSlider, QComboBox, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QMessageBox, QGroupBox, QHBoxLayout, QSlider, QComboBox, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
 from PySide6.QtCore import Qt, Signal
 from typing import Dict, List
-from .Config_Backend import param_range_values, save_config_file
+from .Config_Backend import param_range_values
 from PySide6.QtGui import QFont
 
 class AssetSelectionWidget(QWidget):
     saved_signal = Signal()
 
-    def __init__(self, current_config: Dict[str, List[str]], items: List[str], config_file: str, parent=None):
+    def __init__(self, current_config: Dict[str, List[str]], items: List[str], parent=None):
         super().__init__(parent)
         self.current_config = current_config
         self.items = items
-        self.config_file = config_file
         self.category_vars = {}
         self.init_ui()
 
@@ -26,7 +25,7 @@ class AssetSelectionWidget(QWidget):
 
         layout.addWidget(scroll_area)
 
-        self.apply_button = create_apply_button(self.save_selection)
+        self.apply_button = create_apply_button(self.apply_changes)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
@@ -53,15 +52,15 @@ class AssetSelectionWidget(QWidget):
             unselect_all_callback=self.unselect_all,
         )
 
-    def save_selection(self):
+    def apply_changes(self):
+        # Met à jour directement le dictionnaire en mémoire
         for category, item_vars in self.category_vars.items():
             self.current_config[category] = [
                 item for item, checkbox in item_vars.items() if checkbox.isChecked()
             ]
 
-        save_config_file(self.config_file, self.current_config, 3)
-        self.apply_button.setEnabled(False)
-        self.saved_signal.emit()
+        self.apply_button.setEnabled(False)  # Désactiver le bouton une fois les changements appliqués
+        self.saved_signal.emit()  # Notifier que les données ont été mises à jour
 
     def select_all(self, category: str):
         select_all_items(category, self.category_vars[category])
@@ -81,36 +80,28 @@ class AssetSelectionWidget(QWidget):
                     break
         self.apply_button.setEnabled(not warnings_active)
 
-
 class MethodSelectionWidget(QWidget):
     saved_signal = Signal()
 
-    def __init__(self, methods_list: List[str], methods_to_test,  config_file: str, parent=None):
+    def __init__(self, methods_list: List[str], methods_to_test: Dict[str, bool], parent=None):
         super().__init__(parent)
-        self.config_file = config_file
         self.current_config = {method: methods_to_test.get(method, False) for method in methods_list}
+        self.methods_to_test = methods_to_test
         self.init_ui()
-
 
     def init_ui(self):
         layout = QVBoxLayout()
 
-        # Zone de défilement pour les cases à cocher
         scroll_area, _, scroll_layout = create_scroll_area()
-
-        # Ajout des cases à cocher
         self.add_methods_section(scroll_layout)
-
         layout.addWidget(scroll_area)
 
-        # Bouton pour sauvegarder
-        self.apply_button = create_apply_button(self.save_selection)
+        self.apply_button = create_apply_button(self.apply_changes)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
 
     def add_methods_section(self, layout: QVBoxLayout):
-        # Création des cases à cocher pour chaque méthode
         for method_name, is_checked in self.current_config.items():
             checkbox = create_checkbox_item(
                 parent=self,
@@ -121,7 +112,6 @@ class MethodSelectionWidget(QWidget):
             )
             layout.addWidget(checkbox)
 
-        # Ajout des boutons "Select All" et "Unselect All"
         select_buttons_layout = QHBoxLayout()
         select_all_button = QPushButton("Select All")
         unselect_all_button = QPushButton("Unselect All")
@@ -137,35 +127,29 @@ class MethodSelectionWidget(QWidget):
         self.current_config[method_name] = is_checked
         self.apply_button.setEnabled(True)
 
-    def select_all_methods(self):
-        # Activer toutes les méthodes
-        for method_name in self.current_config.keys():
-            self.current_config[method_name] = True
-        self.init_ui()  # Met à jour l'affichage des cases à cocher
-        self.apply_button.setEnabled(True)
-
-    def unselect_all_methods(self):
-        # Désactiver toutes les méthodes
-        for method_name in self.current_config.keys():
-            self.current_config[method_name] = False
-        self.init_ui()  # Met à jour l'affichage des cases à cocher
-        self.apply_button.setEnabled(True)
-
-    def save_selection(self):   
-        # Sauvegarde dans le fichier
-        save_config_file(self.config_file, self.current_config, 4)
+    def apply_changes(self):
+        # Met à jour le dictionnaire des méthodes en mémoire
+        self.methods_to_test.update(self.current_config)
         self.apply_button.setEnabled(False)
         self.saved_signal.emit()
 
+    def select_all_methods(self):
+        for method_name in self.current_config.keys():
+            self.current_config[method_name] = True
+        self.apply_changes()
+
+    def unselect_all_methods(self):
+        for method_name in self.current_config.keys():
+            self.current_config[method_name] = False
+        self.apply_changes()
 
 
 class ParameterWidget(QWidget):
     parameters_saved = Signal()
 
-    def __init__(self, methods_with_params: Dict[str, Dict[str, list]], config_file: str):
-        super().__init__()
-        self.config_file = config_file
-        self.current_config =  {method: params.get("args", {}) for method, params in methods_with_params.items()}
+    def __init__(self, params_config: Dict[str, Dict[str, list]], parent=None):
+        super().__init__(parent)
+        self.params_config = params_config
         self.param_widgets = {}
         self.init_ui()
 
@@ -176,14 +160,14 @@ class ParameterWidget(QWidget):
         scroll_area, scroll_widget, scroll_layout = create_scroll_area()
 
         # Ajouter une section pour chaque méthode
-        for method, params in self.current_config.items():
+        for method, params in self.params_config.items():
             self.add_method_widget(method, params, scroll_layout)
 
         scroll_widget.setLayout(scroll_layout)
         layout.addWidget(scroll_area)
 
         # Bouton pour sauvegarder
-        self.apply_button = create_apply_button(self.save_configuration)
+        self.apply_button = create_apply_button(self.apply_changes)
         layout.addWidget(self.apply_button)
 
         self.setLayout(layout)
@@ -318,7 +302,7 @@ class ParameterWidget(QWidget):
             range_info_label.setText(f"Range: {start} - {end}")
             num_values_info_label.setText(f"Num Values: {len(unique_values)}")
             generated_values_label.setText(f"Generated Values: {unique_values}")
-            self.current_config[method][param] = unique_values
+            self.params_config[method][param] = unique_values
             self.apply_button.setEnabled(True)
 
         start_slider.valueChanged.connect(update_values)
@@ -326,47 +310,50 @@ class ParameterWidget(QWidget):
         num_values_slider.valueChanged.connect(update_values)
         mode_combobox.currentTextChanged.connect(update_values)
 
-    def save_configuration(self):
-        save_config_file(self.config_file, self.current_config, 4)
+    def apply_changes(self):
+        # Met à jour les paramètres dans `params_config`
+        for method, params in self.params_config.items():
+            if method not in self.params_config:
+                self.params_config[method] = {}
+            for param, values in params.items():
+                self.params_config[method][param] = values
+
+        # Désactiver le bouton `Apply`
         self.apply_button.setEnabled(False)
         self.parameters_saved.emit()
-
-
 class TreeStructureWidget(QWidget):
-    def __init__(self, json_file_path: str, data: List[str], classes, parent=None):
+    def __init__(self, tree_structure: dict, data: List[str], parent=None):
         super().__init__(parent)
-        self.json_file_path = json_file_path
-        self.data = set(data)
+        self.tree_structure = tree_structure  # Référence directe au dictionnaire en mémoire
+        self.data = set(data)  # Données disponibles
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         self.tree.setDragDropMode(QTreeWidget.InternalMove)
         self.tree.setSelectionMode(QTreeWidget.ExtendedSelection)
         self.tree.itemClicked.connect(self.handle_item_click)
-        self.tree_structure = classes
+
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
-
-        self.populate_tree_from_dict(self.tree_structure)
+        self.populate_tree_from_dict(self.tree_structure)  # Charger la structure existante
         layout.addWidget(self.tree)
 
         buttons_layout = QHBoxLayout()
 
         add_button = QPushButton("Add Category")
         delete_button = QPushButton("Delete Category")
-        save_button = QPushButton("Save")
+        apply_button = QPushButton("Apply Changes")
 
         add_button.clicked.connect(self.add_category)
         delete_button.clicked.connect(self.delete_category)
-        save_button.clicked.connect(self.save_structure)
+        apply_button.clicked.connect(self.apply_changes)
 
         buttons_layout.addWidget(add_button)
         buttons_layout.addWidget(delete_button)
-        buttons_layout.addWidget(save_button)
+        buttons_layout.addWidget(apply_button)
 
         layout.addLayout(buttons_layout)
-
         self.setLayout(layout)
 
     def populate_tree_from_dict(self, data: dict, parent_item=None):
@@ -415,7 +402,8 @@ class TreeStructureWidget(QWidget):
                 return True
         return False
 
-    def save_structure(self):
+    def apply_changes(self):
+        # Fonction récursive pour parcourir l'arbre et reconstruire la structure
         def traverse_tree(item):
             if item.childCount() == 0:  # Éléments finaux
                 return item.text(0)
@@ -423,25 +411,45 @@ class TreeStructureWidget(QWidget):
             result = {}
             for i in range(item.childCount()):
                 child = item.child(i)
-                if child.childCount() == 0:  # Éléments finaux dans une liste
-                    result.setdefault("elements", []).append(child.text(0))
-                else:  # Sous-catégories
+                if child.childCount() > 0:  # Sous-catégorie
                     result[child.text(0)] = traverse_tree(child)
-            return result.get("elements", []) if len(result) == 1 and "elements" in result else result
+                else:  # Éléments finaux
+                    if child.text(0) in self.data:
+                        if isinstance(result, dict):
+                            result = []  # Convertit en liste dès qu'un élément est trouvé
+                        result.append(child.text(0))
+            return result
 
-        result = {}
+        # Réinitialiser la structure
+        self.tree_structure.clear()
+        uncategorized_elements = []
+
         for i in range(self.tree.topLevelItemCount()):
             category_item = self.tree.topLevelItem(i)
-            if category_item.childCount() > 0:
-                result[category_item.text(0)] = traverse_tree(category_item)
-            else:  # Éléments finaux directement au niveau supérieur
-                result.setdefault("Uncategorized", []).append(category_item.text(0))
+            if category_item.childCount() > 0:  # Catégories avec contenu
+                self.tree_structure[category_item.text(0)] = traverse_tree(category_item)
+            else:  # Catégories vides ou éléments non catégorisés
+                if category_item.text(0) in self.data:  # Éléments finaux non catégorisés
+                    uncategorized_elements.append(category_item.text(0))
+                else:  # Nouvelle catégorie vide
+                    self.tree_structure[category_item.text(0)] = []
 
-        save_config_file(self.json_file_path, result, indent=4)
+        # Ajouter les éléments non catégorisés
+        if uncategorized_elements:
+            self.tree_structure["Uncategorized"] = uncategorized_elements
 
     def add_category(self):
         category_name, ok = QInputDialog.getText(self, "New Category", "Category Name:")
         if ok and category_name:
+            # Vérifie si la catégorie existe déjà
+            if category_name in self.tree_structure:
+                QMessageBox.warning(self, "Warning", f"The category '{category_name}' already exists.")
+                return
+
+            # Ajouter la nouvelle catégorie à la structure en mémoire
+            self.tree_structure[category_name] = {}
+
+            # Crée un item correspondant dans le widget
             category_item = QTreeWidgetItem([category_name])
             category_item.setFlags(category_item.flags() | Qt.ItemIsDropEnabled)
             self.tree.addTopLevelItem(category_item)

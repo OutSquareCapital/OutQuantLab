@@ -29,26 +29,6 @@ def get_all_methods_from_module(module_name: str) -> Dict[str, Callable]:
         name: func for name, func in vars(module).items() if callable(func)
     }
 
-def get_all_methods_with_args_from_module(module_name: str) -> Dict[str, Dict[str, Any]]:
-
-    module = importlib.import_module(module_name)
-
-    methods_with_args = {}
-    for name, func in vars(module).items():
-        if callable(func):
-            signature = inspect.signature(func)
-            args = {
-                param_name: param.default if param.default is not inspect.Parameter.empty else None
-                for param_name, param in signature.parameters.items()
-                if param_name not in ['returns_array', 'prices_array']
-            }
-            methods_with_args[name] = {
-                "function": func,
-                "args": args
-            }
-    
-    return methods_with_args
-
 def filter_active_methods(
     current_config: dict, 
     all_methods: Dict[str, Callable]
@@ -62,9 +42,6 @@ def dynamic_config(all_methods, methods_to_test, param_config):
 
     active_methods = filter_active_methods(methods_to_test, all_methods)
     return automatic_generation(active_methods, param_config, methods_to_test)
-
-
-
 
 
 def sync_methods_with_file(config_file, methods_list: List[str]) -> Dict[str, bool]:

@@ -8,13 +8,12 @@ class MainApp(QMainWindow):
     def initialize(self):
         self.methods_funcs=Config.get_all_methods_from_module('Signals')
         self.methods_names=list(self.methods_funcs.keys())
-        self.assets_names=Get_Data.load_asset_names(FILE_PATH_YF)
-        self.methods_with_args = Config.get_all_methods_with_args_from_module('Signals')
-        self.assets_to_test = Config.load_config_file(ASSETS_TO_TEST_CONFIG_FILE)
-        self.params_config = Config.load_config_file(PARAM_CONFIG_FILE)
         self.methods_to_test = Config.load_config_file(METHODS_TO_TEST_FILE)
-        self.assets_classes=Config.load_config_file(ASSETS_CLASSES_FILE)
         self.methods_classes=Config.load_config_file(METHODS_CLASSES_FILE)
+        self.assets_names=Get_Data.load_asset_names(FILE_PATH_YF)
+        self.assets_to_test = Config.load_config_file(ASSETS_TO_TEST_CONFIG_FILE)
+        self.assets_classes=Config.load_config_file(ASSETS_CLASSES_FILE)
+        self.params_config = Config.load_config_file(PARAM_CONFIG_FILE)
         self.show_home_page()
         self.showMaximized()
 
@@ -26,7 +25,7 @@ class MainApp(QMainWindow):
             assets_to_test=self.assets_to_test,
             assets_names=self.assets_names,
             methods_names=self.methods_names,
-            methods_args=self.methods_with_args,
+            methods_params=self.params_config,
             methods_to_test=self.methods_to_test,
             assets_classes=self.assets_classes,
             methods_classes=self.methods_classes)
@@ -52,11 +51,6 @@ class MainApp(QMainWindow):
         self.update_progress(1, "Loading Data...")
 
         data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_names)
-
-        indicators_and_params = Config.dynamic_config(self.methods_funcs, self.methods_to_test, self.param_config)
-
-        self.update_progress(5, "Preparing Data...")
-
         (
             prices_array,
             volatility_adjusted_pct_returns_array,
@@ -68,6 +62,9 @@ class MainApp(QMainWindow):
             data_prices_df,
             self.assets_to_test,
         )
+
+        indicators_and_params = Config.dynamic_config(self.methods_funcs, self.methods_to_test, self.params_config)
+
 
         self.update_progress(10, "Processing Backtest...")
 
@@ -83,33 +80,17 @@ class MainApp(QMainWindow):
 
         self.update_progress(80, "Creating Portfolio...")
         equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df,  by_method=True, by_asset=True)
-        self.update_progress(90, "Creating Portfolio...")
         equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_method_returns, global_avg=True)
 
         backtest_result = equal_weights_method_returns
 
         global_result = equal_weights_global_returns
 
-        self.update_progress(95, "Calculating Metrics...")
-
-        metrics = [
-            round(Dashboard.calculate_overall_returns(global_result).item(
-                                                                        ), 2),
-            round(Dashboard.calculate_overall_sharpe_ratio(global_result
-                                                           ).item(), 2),
-            round(Dashboard.calculate_overall_average_drawdown(global_result, length=1250
-                                                               ).item(), 2),
-            round(Dashboard.calculate_overall_volatility(global_result
-                                                         ).item(), 2),
-            round(Dashboard.calculate_overall_monthly_skew(global_result
-                                                           ).item(), 2)
-        ]
-
         self.update_progress(100, "Plotting Results...")
 
-        self.show_results_page(metrics, backtest_result, global_result)
+        self.show_results_page(backtest_result, global_result)
 
-    def show_results_page(self, metrics, backtest_result, global_result):
+    def show_results_page(self, backtest_result, global_result):
         plots = {
             "Equity": lambda: self.show_plot(Dashboard.plot_equity(backtest_result)),
             "Total Returns %": lambda: self.show_plot(Dashboard.plot_overall_returns(backtest_result)),
@@ -128,7 +109,18 @@ class MainApp(QMainWindow):
             "Correlation Heatmap": lambda: self.show_plot(Dashboard.plot_correlation_heatmap(backtest_result)),
             "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2))
         }
-
+        metrics = [
+            round(Dashboard.calculate_overall_returns(global_result).item(
+                                                                        ), 2),
+            round(Dashboard.calculate_overall_sharpe_ratio(global_result
+                                                           ).item(), 2),
+            round(Dashboard.calculate_overall_average_drawdown(global_result, length=1250
+                                                               ).item(), 2),
+            round(Dashboard.calculate_overall_volatility(global_result
+                                                         ).item(), 2),
+            round(Dashboard.calculate_overall_monthly_skew(global_result
+                                                           ).item(), 2)
+        ]
         bottom_layout = Main.setup_results_page(
                                             parent=self,
                                             plots=plots,
@@ -154,6 +146,11 @@ class MainApp(QMainWindow):
 
     def closeEvent(self, event):
         Main.cleanup_temp_files()
+        Config.save_config_file(ASSETS_TO_TEST_CONFIG_FILE, self.assets_to_test, 3)
+        Config.save_config_file(PARAM_CONFIG_FILE, self.params_config, 3)
+        Config.save_config_file(METHODS_TO_TEST_FILE, self.methods_to_test, 3)
+        Config.save_config_file(ASSETS_CLASSES_FILE, self.assets_classes, 3)
+        Config.save_config_file(METHODS_CLASSES_FILE, self.methods_classes, 3)
         super().closeEvent(event)
 
 if __name__ == "__main__":

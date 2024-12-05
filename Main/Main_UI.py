@@ -21,12 +21,7 @@ from Files import (
                     ADVANCED_BUTTONS_NAMES,
                     BACKTEST_STATS_RESULTS,
                     CLUSTERS_PARAMETERS,
-                    FRAME_STYLE,
-                    ASSETS_CLASSES_FILE, 
-                    METHODS_CLASSES_FILE,
-                    METHODS_TO_TEST_FILE,
-                    PARAM_CONFIG_FILE,
-                    ASSETS_TO_TEST_CONFIG_FILE
+                    FRAME_STYLE
                     )
 
 from PySide6.QtCore import Qt, QDate
@@ -40,7 +35,7 @@ def setup_home_page(
     assets_to_test,
     assets_names,
     methods_names,
-    methods_args,
+    methods_params,
     methods_to_test,
     assets_classes,
     methods_classes
@@ -71,15 +66,15 @@ def setup_home_page(
     right_upper_layout = QHBoxLayout(top_frame)
     right_lower_layout = QHBoxLayout(bottom_frame)
 
-    param_widget = ParameterWidget(methods_args, PARAM_CONFIG_FILE)
-    asset_widget = AssetSelectionWidget(assets_to_test, assets_names, ASSETS_TO_TEST_CONFIG_FILE)
-    method_widget = MethodSelectionWidget(methods_names, methods_to_test, METHODS_TO_TEST_FILE)
+    param_widget = ParameterWidget(methods_params)
+    asset_widget = AssetSelectionWidget(assets_to_test, assets_names)
+    method_widget = MethodSelectionWidget(methods_names, methods_to_test)
     right_upper_layout.addWidget(param_widget, stretch=2)
     right_upper_layout.addWidget(asset_widget, stretch=1)
     right_upper_layout.addWidget(method_widget, stretch=1)
 
-    asset_tree_widget = TreeStructureWidget(ASSETS_CLASSES_FILE, assets_names, assets_classes)
-    method_tree_widget = TreeStructureWidget(METHODS_CLASSES_FILE, methods_names, methods_classes)
+    asset_tree_widget = TreeStructureWidget(assets_classes, assets_names)
+    method_tree_widget = TreeStructureWidget(methods_classes, methods_names)
     right_lower_layout.addWidget(asset_tree_widget)
     right_lower_layout.addWidget(method_tree_widget)
 
