@@ -1,47 +1,47 @@
 {
-    "Equities": {
-        "Large Caps": [
-            "SPY",
-            "DIA",
-            "QQQ"
-        ],
-        "Small Caps": [
-            "IWM"
-        ],
-        "Volatility": [
-            "VIXY"
-        ]
-    },
-    "Bonds": [
-        "TLT"
-    ],
-    "Currencies": {
-        "Precious Metals": [
-            "GLD",
-            "SLV"
-        ],
-        "FX": [
-            "FXA",
-            "FXE",
-            "FXB",
-            "FXC"
-        ],
-        "Crypto": [
-            "GBTC"
-        ]
-    },
-    "Commodities": {
-        "Agricultural": [
-            "CORN",
-            "WEAT",
-            "SOYB"
-        ],
-        "Energy": [
-            "USO",
-            "UNG"
-        ],
-        "Base Metals": [
-            "DBB"
-        ]
-    }
+   "Equities": {
+      "Large Caps": [
+         "SPY",
+         "DIA",
+         "QQQ"
+      ],
+      "Small Caps": [
+         "IWM"
+      ],
+      "Volatility": [
+         "VIXY"
+      ]
+   },
+   "Bonds": [
+      "TLT"
+   ],
+   "Currencies": {
+      "Precious Metals": [
+         "GLD",
+         "SLV"
+      ],
+      "FX": [
+         "FXA",
+         "FXE",
+         "FXB",
+         "FXC"
+      ],
+      "Crypto": [
+         "GBTC"
+      ]
+   },
+   "Commodities": {
+      "Agricultural": [
+         "CORN",
+         "WEAT",
+         "SOYB"
+      ],
+      "Energy": [
+         "USO",
+         "UNG"
+      ],
+      "Base Metals": [
+         "DBB"
+      ]
+   }
 }
