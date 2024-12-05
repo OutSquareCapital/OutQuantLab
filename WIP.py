@@ -46,6 +46,27 @@ paires_futures_etf = [
 ("ZB", "US"),
 ("ZF", "FV"),
 ]
+
+portfolio_futures = {
+    'Equities': {
+        'Large Caps': ['ES', 'YM', 'NQ'],
+        'Small Caps': ['RTY'],
+        'Volatility': ['VX'],
+    },
+    'Bonds': {
+        'US':['ZF'],
+    },
+    'Currencies': {
+        'Precious Metals': ['GC', 'SI'],
+        'FX': ['6A', '6E', '6B', '6C'],
+        'Crypto': ['BTC'],
+    },
+    'Commodities': {
+    'Agricultural': ['ZC', 'ZW', 'ZS'],
+    'Energy': ['CL', 'NG'],
+    'Base Metals': ['HG'],
+    }
+}
 '''
 import pandas as pd
 import numpy as np

@@ -1,16 +1,22 @@
 {
    "Equities": {
-      "Large Caps": [
-         "SPY",
-         "DIA",
-         "QQQ"
-      ],
-      "Small Caps": [
-         "IWM"
-      ],
       "Volatility": [
          "VIXY"
-      ]
+      ],
+      "EX-US": [
+         "EFA",
+         "EEM"
+      ],
+      "US": {
+         "Large Caps": [
+            "SPY",
+            "DIA",
+            "QQQ"
+         ],
+         "Small Caps": [
+            "IWM"
+         ]
+      }
    },
    "Bonds": [
       "TLT"
@@ -24,7 +30,8 @@
          "FXA",
          "FXE",
          "FXB",
-         "FXC"
+         "FXC",
+         "FXY"
       ],
       "Crypto": [
          "GBTC"
