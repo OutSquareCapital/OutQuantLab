@@ -3,8 +3,14 @@ QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBo
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
-from typing import Callable
-from typing import Dict
+from typing import Callable, Dict
+
+def param_range_values(start: int, end: int, num_values: int) -> list:
+    if num_values == 1:
+        return [int((start + end) / 2)]
+    ratio = (end / start) ** (1 / (num_values - 1))
+    return [int(round(start * (ratio ** i))) for i in range(num_values)]
+
 
 def set_frame_design(frame_style):
     frame = QFrame()

@@ -1,1 +1,1 @@
-from Get_Data.Fetch_Data import get_yahoo_finance_data, load_asset_names, load_prices
+from Get_Data.Fetch_Data import get_yahoo_finance_data, load_prices

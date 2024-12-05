@@ -1,9 +1,15 @@
 import json
 from typing import List, Callable, Dict, Any
-import inspect
-import numpy as np
 import importlib
-from .Strategy_Params_Generation import automatic_generation
+import os
+import tempfile
+import pyarrow.parquet as pq
+
+def load_asset_names(file_path: str) -> List[str]:
+    parquet_file = pq.ParquetFile(file_path)
+    column_names = parquet_file.schema.names
+    return [col for col in column_names if col != "Date"]
+
 
 def load_config_file(file_path:str):
     with open(file_path, "r") as file:
@@ -13,14 +19,6 @@ def save_config_file(file_path:str, dict_to_save: dict, indent: int):
     with open(file_path, "w") as file:
         json.dump(dict_to_save, file, indent=indent)
 
-def param_range_values(start: int, end: int, num_values: int, linear: bool = False) -> list:
-    if num_values == 1:
-        return [int((start + end) / 2)]
-    if linear:
-        return list(map(int, np.linspace(start, end, num_values)))
-    ratio = (end / start) ** (1 / (num_values - 1))
-    return [int(round(start * (ratio ** i))) for i in range(num_values)]
-
 def get_all_methods_from_module(module_name: str) -> Dict[str, Callable]:
         
     module = importlib.import_module(module_name)
@@ -29,45 +27,36 @@ def get_all_methods_from_module(module_name: str) -> Dict[str, Callable]:
         name: func for name, func in vars(module).items() if callable(func)
     }
 
-def filter_active_methods(
-    current_config: dict, 
-    all_methods: Dict[str, Callable]
-) -> List[Callable]:
-    return [
-        all_methods[method_name] for method_name, is_checked in current_config.items() 
-        if is_checked and method_name in all_methods
-    ]
-
-def dynamic_config(all_methods, methods_to_test, param_config):
-
-    active_methods = filter_active_methods(methods_to_test, all_methods)
-    return automatic_generation(active_methods, param_config, methods_to_test)
+def save_html_temp_file(html_content: str, suffix: str = "outquant.html") -> str:
+    temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+    with open(temp_file.name, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    return temp_file.name
 
 
+def cleanup_temp_files():
+    temp_dir = tempfile.gettempdir()
+    for file_name in os.listdir(temp_dir):
+        if file_name.endswith("outquant.html"):
+            file_path = os.path.join(temp_dir, file_name)
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"Erreur lors de la suppression du fichier temporaire {file_path} : {e}")
+            
 def sync_methods_with_file(config_file, methods_list: List[str]) -> Dict[str, bool]:
 
-    try:
-        # Charger le fichier JSON
-        config = load_config_file(config_file)
-        if config is None:
-            config = {}
-    except FileNotFoundError:
-        config = {}
+    config = load_config_file(config_file)
 
     # Synchroniser les méthodes
     updated_config = {method: config.get(method, False) for method in methods_list}
 
-    # Sauvegarder le fichier mis à jour
     save_config_file(config_file, updated_config, 4)
     return updated_config
 
 def sync_with_json(config_file, methods_with_params: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, list]]:
 
-    try:
-        # Charger la configuration existante
-        existing_config = load_config_file(config_file) or {}
-    except FileNotFoundError:
-        existing_config = {}
+    existing_config = load_config_file(config_file)
 
     # Filtrer les méthodes avec leurs arguments, supprimer la clé 'function'
     filtered_methods_with_params = {

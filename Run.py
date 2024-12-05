@@ -10,7 +10,7 @@ class MainApp(QMainWindow):
         self.methods_names=list(self.methods_funcs.keys())
         self.methods_to_test = Config.load_config_file(METHODS_TO_TEST_FILE)
         self.methods_classes=Config.load_config_file(METHODS_CLASSES_FILE)
-        self.assets_names=Get_Data.load_asset_names(FILE_PATH_YF)
+        self.assets_names=Config.load_asset_names(FILE_PATH_YF)
         self.assets_to_test = Config.load_config_file(ASSETS_TO_TEST_CONFIG_FILE)
         self.assets_classes=Config.load_config_file(ASSETS_CLASSES_FILE)
         self.params_config = Config.load_config_file(PARAM_CONFIG_FILE)
@@ -145,7 +145,7 @@ class MainApp(QMainWindow):
         '''
 
     def closeEvent(self, event):
-        Main.cleanup_temp_files()
+        Config.cleanup_temp_files()
         Config.save_config_file(ASSETS_TO_TEST_CONFIG_FILE, self.assets_to_test, 3)
         Config.save_config_file(PARAM_CONFIG_FILE, self.params_config, 3)
         Config.save_config_file(METHODS_TO_TEST_FILE, self.methods_to_test, 3)

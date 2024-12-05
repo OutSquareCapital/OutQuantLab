@@ -13,6 +13,15 @@ def filter_valid_pairs(params: Dict[str, List[int]]) -> List[Dict[str, int]]:
 
     return valid_pairs
 
+def filter_active_methods(
+    current_config: dict, 
+    all_methods: Dict[str, Callable]
+) -> List[Callable]:
+    return [
+        all_methods[method_name] for method_name, is_checked in current_config.items() 
+        if is_checked and method_name in all_methods
+    ]
+
 def is_valid_combination(param_dict: Dict[str, int]) -> bool:
     st_param = next((k for k in param_dict if 'ST' in k), None)
     lt_param = next((k for k in param_dict if 'LT' in k), None)
@@ -70,3 +79,8 @@ def automatic_generation(
     }
 
     return generate_all_indicators_params(active_methods, options_by_method)
+
+def dynamic_config(all_methods, methods_to_test, param_config):
+
+    active_methods = filter_active_methods(methods_to_test, all_methods)
+    return automatic_generation(active_methods, param_config, methods_to_test)
