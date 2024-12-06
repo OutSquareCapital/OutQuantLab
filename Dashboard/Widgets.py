@@ -77,7 +77,7 @@ def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str):
         yaxis=dict(showgrid=False, autorange="reversed")
     )
 
-    setup_figure_layout(fig, title)
+    setup_figure_layout(fig, title, hover_data=None)
 
     return fig
 
@@ -154,7 +154,7 @@ def histogram(data: pd.DataFrame, title: str):
     fig.update_layout(
         barmode="overlay"
     )
-    setup_figure_layout(fig, title)
+    setup_figure_layout(fig, title, hover_data='x')
     return fig
 
 def icicle(labels: list, parents: list, title: str):
@@ -165,6 +165,6 @@ def icicle(labels: list, parents: list, title: str):
             tiling=dict(orientation="v"),
         )
     )
-    setup_figure_layout(fig, title)
+    setup_figure_layout(fig, title, hover_data=None)
     
     return fig

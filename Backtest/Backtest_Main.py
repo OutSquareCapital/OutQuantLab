@@ -34,7 +34,7 @@ def process_backtest(prices_array: np.ndarray,
                     dates_index: pd.Index,
                     indicators_and_params: dict,
                     progress_callback: callable
-                    ) -> tuple[pd.DataFrame, pd.DataFrame]:
+                    ) -> pd.DataFrame:
 
     raw_adjusted_returns_array = transform_signals_into_returns(prices_array,
                                                                 log_returns_array,

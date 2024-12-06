@@ -80,6 +80,7 @@ class MainApp(QMainWindow):
         )
 
         self.update_progress(80, "Creating Portfolio...")
+        raw_adjusted_returns_df=raw_adjusted_returns_df.dropna(axis=0)
         equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df,  by_method=True, by_asset=True)
         equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_method_returns, global_avg=True)
 
@@ -129,13 +130,13 @@ class MainApp(QMainWindow):
                                             metrics=metrics
                                             )
 
-        '''
-        equity_plot = Main.generate_plot_widget(Dashboard.plot_equity(global_result), show_legend=False)
-        sharpe_plot = Main.generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(global_result, length=1250), show_legend=False)
-        drawdown_plot = Main.generate_plot_widget(Dashboard.plot_rolling_drawdown(global_result, length=1250), show_legend=False)
-        vol_plot = Main.generate_plot_widget(Dashboard.plot_rolling_volatility(global_result), show_legend=False)
-        distribution_plot = Main.generate_plot_widget(Dashboard.plot_returns_distribution_histogram(global_result), show_legend=False)
-        violin_plot = Main.generate_plot_widget(Dashboard.plot_returns_distribution_violin(global_result), show_legend=False)
+        #'''
+        equity_plot = UI.generate_plot_widget(Dashboard.plot_equity(global_result), show_legend=False)
+        sharpe_plot = UI.generate_plot_widget(Dashboard.plot_rolling_sharpe_ratio(global_result, length=1250), show_legend=False)
+        drawdown_plot = UI.generate_plot_widget(Dashboard.plot_rolling_drawdown(global_result, length=1250), show_legend=False)
+        vol_plot = UI.generate_plot_widget(Dashboard.plot_rolling_volatility(global_result), show_legend=False)
+        distribution_plot = UI.generate_plot_widget(Dashboard.plot_returns_distribution_histogram(global_result), show_legend=False)
+        violin_plot = UI.generate_plot_widget(Dashboard.plot_returns_distribution_violin(global_result), show_legend=False)
         
         bottom_layout.addWidget(equity_plot, 0, 0)
         bottom_layout.addWidget(drawdown_plot, 1, 0)
@@ -143,7 +144,7 @@ class MainApp(QMainWindow):
         bottom_layout.addWidget(vol_plot, 1, 1)
         bottom_layout.addWidget(distribution_plot, 0, 2)
         bottom_layout.addWidget(violin_plot, 1, 2)
-        '''
+        #'''
 
     def closeEvent(self, event):
         Config.cleanup_temp_files()

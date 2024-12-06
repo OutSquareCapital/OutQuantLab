@@ -1,7 +1,7 @@
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 import plotly.graph_objects as go
-from Files import FONT_FAMILY, FONT_SIZE, COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK
+from Files import FONT_FAMILY, FONT_SIZE, FONT_TYPE, COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
     cmap_name = "custom_colormap"
@@ -30,17 +30,21 @@ def get_heatmap_colorscale(n_colors: int = 100) -> list:
     return [[i / (n_colors - 1), mcolors.to_hex(color)] for i, color in enumerate(colors)]
 
 def setup_figure_layout(fig: go.Figure, 
-                        figtitle: str):
+                        figtitle: str,
+                        hover_data='y'):
     fig.update_layout(
         font={
             'family': FONT_FAMILY,
             'color': COLOR_ADJUSTMENT,
-            'size': FONT_SIZE
+            'size': FONT_SIZE,
+            'weight': FONT_TYPE
         },
         title={
             'text': figtitle,
             'font': {'size': FONT_SIZE*1.4, 
-                     'family': FONT_FAMILY}
+                     'family': FONT_FAMILY,
+                     'weight': FONT_TYPE
+                     }
         },
         autosize=True,
         margin=dict(l=30, r=30, t=40, b=30),
@@ -48,20 +52,26 @@ def setup_figure_layout(fig: go.Figure,
         plot_bgcolor=BACKGROUND_APP_DARK,
         legend={
             'title_font': {'size': FONT_SIZE*1.2,
-                           'family': FONT_FAMILY}
+                           'family': FONT_FAMILY,
+                           'weight': FONT_TYPE
+                           }
         }
     )
 
     fig.update_yaxes(
-        automargin=True,
-        gridcolor=COLOR_ADJUSTMENT
+        showgrid=False,
+        automargin=True
     )
 
     fig.update_xaxes(
         showgrid=False,
-        automargin=True,
-        gridcolor=COLOR_ADJUSTMENT
+        automargin=True
     )
+    if hover_data is not None:
+        
+        for trace in fig.data:
+            trace.hovertemplate = f"<span style='color:{COLOR_ADJUSTMENT}'><b>%{{{hover_data}}}</b></span><extra><b>%{{fullData.name}}</b></extra>"
+
 
 def get_marker_config(color: str) -> dict:
     return dict(
