@@ -73,7 +73,7 @@ def calculate_daily_average_returns(returns_df: pd.DataFrame,
         daily_averages = bn.nanmean(returns_df.values, axis=1)
         return pd.DataFrame(daily_averages, 
                             index=returns_df.index, 
-                            columns=['Daily_Average_Returns'], 
+                            columns=['Portfolio'], 
                             dtype=np.float32)
 
     grouping_levels = []
