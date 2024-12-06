@@ -68,7 +68,7 @@ def setup_home_page(
 
     param_widget = ParameterWidget(methods_params)
     asset_widget = AssetSelectionWidget(assets_to_test, assets_names)
-    method_widget = MethodSelectionWidget(methods_names, methods_to_test)
+    method_widget = MethodSelectionWidget(methods_to_test, methods_names)
     right_upper_layout.addWidget(param_widget, stretch=2)
     right_upper_layout.addWidget(asset_widget, stretch=1)
     right_upper_layout.addWidget(method_widget, stretch=1)

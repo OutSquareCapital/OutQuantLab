@@ -82,17 +82,20 @@ class AssetSelectionWidget(QWidget):
 class MethodSelectionWidget(QWidget):
     saved_signal = Signal()
 
-    def __init__(self, methods_list: List[str], methods_to_test: Dict[str, bool], parent=None):
+    def __init__(self, current_config: Dict[str, bool], items: List[str], parent=None):
         super().__init__(parent)
-        self.current_config = {method: methods_to_test.get(method, False) for method in methods_list}
-        self.methods_to_test = methods_to_test
+        self.methods_to_test = current_config
+        self.methods_list = items
+        self.category_vars = {}
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
 
         scroll_area, _, scroll_layout = create_scroll_area()
+
         self.add_methods_section(scroll_layout)
+
         layout.addWidget(scroll_area)
 
         self.apply_button = create_apply_button(self.apply_changes)
@@ -101,7 +104,8 @@ class MethodSelectionWidget(QWidget):
         self.setLayout(layout)
 
     def add_methods_section(self, layout: QVBoxLayout):
-        for method_name, is_checked in self.current_config.items():
+        for method_name in self.methods_list:
+            is_checked = self.methods_to_test.get(method_name, False)
             checkbox = create_checkbox_item(
                 parent=self,
                 category="",
@@ -110,6 +114,7 @@ class MethodSelectionWidget(QWidget):
                 callback=lambda state, name=method_name: self.update_method_state(name, state)
             )
             layout.addWidget(checkbox)
+            self.category_vars[method_name] = checkbox
 
         select_buttons_layout = QHBoxLayout()
         select_all_button = QPushButton("Select All")
@@ -123,25 +128,25 @@ class MethodSelectionWidget(QWidget):
         layout.addLayout(select_buttons_layout)
 
     def update_method_state(self, method_name: str, is_checked: bool):
-        self.current_config[method_name] = is_checked
+        self.methods_to_test[method_name] = is_checked
         self.apply_button.setEnabled(True)
 
     def apply_changes(self):
-        # Met à jour le dictionnaire des méthodes en mémoire
-        self.methods_to_test.update(self.current_config)
+        for method_name, checkbox in self.category_vars.items():
+            self.methods_to_test[method_name] = checkbox.isChecked()
+
         self.apply_button.setEnabled(False)
         self.saved_signal.emit()
-
+        
     def select_all_methods(self):
-        for method_name in self.current_config.keys():
-            self.current_config[method_name] = True
-        self.apply_changes()
+        for checkbox in self.category_vars.values():
+            checkbox.setChecked(True)
+        self.apply_button.setEnabled(True)
 
     def unselect_all_methods(self):
-        for method_name in self.current_config.keys():
-            self.current_config[method_name] = False
-        self.apply_changes()
-
+        for checkbox in self.category_vars.values():
+            checkbox.setChecked(False)
+        self.apply_button.setEnabled(True)
 
 class ParameterWidget(QWidget):
     parameters_saved = Signal()
@@ -210,16 +215,9 @@ class ParameterWidget(QWidget):
         num_values_layout.addWidget(num_values_slider)
         param_layout.addLayout(num_values_layout)
 
-        # Ajouter le mode linéaire ou ratio
-        mode_combobox = self.create_mode_combobox()
-        mode_layout = QHBoxLayout()
-        mode_layout.addWidget(QLabel("Mode:"))
-        mode_layout.addWidget(mode_combobox)
-        param_layout.addLayout(mode_layout)
-
         self.connect_sliders_to_update(
-            method, param, start_slider, end_slider, num_values_slider, mode_combobox,
-            range_info_label, num_values_info_label, scroll_area.widget(), param_box
+            method, param, start_slider, end_slider, num_values_slider,
+            range_info_label, num_values_info_label, scroll_area.widget()
         )
 
         param_box.setLayout(param_layout)
@@ -229,7 +227,6 @@ class ParameterWidget(QWidget):
             "start_slider": start_slider,
             "end_slider": end_slider,
             "num_values_slider": num_values_slider,
-            "mode_combobox": mode_combobox,
             "range_info_label": range_info_label,
             "num_values_info_label": num_values_info_label,
         }
@@ -267,24 +264,18 @@ class ParameterWidget(QWidget):
         num_values_slider.setValue(num_values)
         return num_values_slider
 
-    def create_mode_combobox(self):
-        mode_combobox = QComboBox()
-        mode_combobox.addItems(["Linear", "Ratio"])
-        return mode_combobox
-
     def value_to_index(self, value: int) -> int:
         return int(value).bit_length() - 1
 
     def index_to_value(self, index: int) -> int:
         return 2 ** index
 
-    def connect_sliders_to_update(self, method, param, start_slider, end_slider, num_values_slider, mode_combobox,
-                                  range_info_label, num_values_info_label, generated_values_label, param_box):
+    def connect_sliders_to_update(self, method, param, start_slider, end_slider, num_values_slider,
+                                  range_info_label, num_values_info_label, generated_values_label):
         def update_values():
             start = self.index_to_value(start_slider.value())
             end = self.index_to_value(end_slider.value())
             num_values = num_values_slider.value()
-            mode = mode_combobox.currentText()
 
             if start * 2 > end:
                 if start_slider.hasFocus():
@@ -294,8 +285,7 @@ class ParameterWidget(QWidget):
                     start_slider.setValue(self.value_to_index(end // 2))
                     start = self.index_to_value(start_slider.value())
 
-            linear = (mode == "Linear")
-            generated_values = param_range_values(start, end, num_values, linear=linear)
+            generated_values = param_range_values(start, end, num_values)
 
             unique_values = list(sorted(set(generated_values)))
             range_info_label.setText(f"Range: {start} - {end}")
@@ -307,7 +297,6 @@ class ParameterWidget(QWidget):
         start_slider.valueChanged.connect(update_values)
         end_slider.valueChanged.connect(update_values)
         num_values_slider.valueChanged.connect(update_values)
-        mode_combobox.currentTextChanged.connect(update_values)
 
     def apply_changes(self):
         # Met à jour les paramètres dans `params_config`
@@ -320,6 +309,7 @@ class ParameterWidget(QWidget):
         # Désactiver le bouton `Apply`
         self.apply_button.setEnabled(False)
         self.parameters_saved.emit()
+
 class TreeStructureWidget(QWidget):
     def __init__(self, tree_structure: dict, data: List[str], parent=None):
         super().__init__(parent)
