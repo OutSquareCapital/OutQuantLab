@@ -23,14 +23,8 @@
       "VIXY",
       "WEAT"
    ],
-   "ratios": [
-      "IWM",
-      "SPY"
-   ],
-   "ensembles": [
-      "IWM",
-      "SPY"
-   ],
+   "ratios": [],
+   "ensembles": [],
    "canary_assets": [],
    "canary_ratios": [],
    "canary_ensembles": []

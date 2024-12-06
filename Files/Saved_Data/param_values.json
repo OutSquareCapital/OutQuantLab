@@ -60,9 +60,27 @@
       "LenLT": null
    },
    "mean_price_macd": {
-      "LenST": null,
-      "LenLT": null,
-      "MacdLength": null
+      "LenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "MacdLength": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "median_price_macd": {
       "LenST": null,
@@ -132,7 +150,9 @@
       "TrendLenLT": null
    },
    "fixed_bias": {
-      "Bias": null
+      "Bias": [
+         1
+      ]
    },
    "mean_price_ratio_normalised": {
       "SignalLength": null,

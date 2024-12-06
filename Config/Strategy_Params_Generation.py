@@ -17,6 +17,7 @@ def filter_active_methods(
     current_config: dict, 
     all_methods: Dict[str, Callable]
 ) -> List[Callable]:
+    
     return [
         all_methods[method_name] for method_name, is_checked in current_config.items() 
         if is_checked and method_name in all_methods
