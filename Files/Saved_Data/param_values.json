@@ -57,9 +57,19 @@
    },
    "central_rate_of_change": {
       "LenST": [
-         1
+         4,
+         8,
+         16,
+         32,
+         64
       ],
-      "LenLT": null
+      "LenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "mean_price_macd": {
       "LenST": [
