@@ -1,9 +1,9 @@
 {
-   "CORN": true,
-   "DBB": true,
+   "CORN": false,
+   "DBB": false,
    "DIA": true,
-   "EEM": false,
-   "EFA": false,
+   "EEM": true,
+   "EFA": true,
    "FXA": false,
    "FXB": false,
    "FXC": false,
@@ -12,13 +12,13 @@
    "GBTC": false,
    "GLD": false,
    "IWM": false,
-   "QQQ": false,
+   "QQQ": true,
    "SLV": false,
-   "SOYB": true,
-   "SPY": false,
+   "SOYB": false,
+   "SPY": true,
    "TLT": false,
    "UNG": false,
    "USO": false,
    "VIXY": false,
-   "WEAT": true
+   "WEAT": false
 }

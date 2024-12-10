@@ -183,8 +183,25 @@
       "LenLT": null
    },
    "skewness": {
-      "LenSmooth": null,
-      "LenSkew": null
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ]
    },
    "relative_skewness": {
       "LenSmooth": [
