@@ -1,10 +1,20 @@
 from PySide6.QtWidgets import (
 QVBoxLayout, 
-QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame      
+QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame, QHBoxLayout
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from typing import Callable
+
+def add_select_buttons(layout: QHBoxLayout, select_callback: Callable, unselect_callback: Callable):
+    select_all_button = QPushButton("Select All")
+    select_all_button.clicked.connect(select_callback)
+    layout.addWidget(select_all_button)
+
+    unselect_all_button = QPushButton("Unselect All")
+    unselect_all_button.clicked.connect(unselect_callback)
+    layout.addWidget(unselect_all_button)
+
 
 def param_range_values(start: int, end: int, num_values: int) -> list:
     if num_values == 1:

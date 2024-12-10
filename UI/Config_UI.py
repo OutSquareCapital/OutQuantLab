@@ -1,4 +1,4 @@
-from .Common_UI import param_range_values, create_scroll_area, create_checkbox_item, create_expandable_section
+from .Common_UI import param_range_values, create_scroll_area, create_checkbox_item, create_expandable_section, add_select_buttons
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QMessageBox, QGroupBox, QHBoxLayout, QSlider, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
 from PySide6.QtCore import Qt
 from typing import Dict, List, Any
@@ -27,17 +27,10 @@ class AssetSelectionWidget(QWidget):
             self.checkboxes[asset.name] = checkbox
 
         scroll_area.setWidget(scroll_widget)
+
         layout.addWidget(scroll_area)
-
         buttons_layout = QHBoxLayout()
-
-        select_all_button = QPushButton("Select All")
-        select_all_button.clicked.connect(self.select_all_assets)
-        buttons_layout.addWidget(select_all_button)
-
-        unselect_all_button = QPushButton("Unselect All")
-        unselect_all_button.clicked.connect(self.unselect_all_assets)
-        buttons_layout.addWidget(unselect_all_button)
+        add_select_buttons(buttons_layout, self.select_all_assets, self.unselect_all_assets)
 
         layout.addLayout(buttons_layout)
 
@@ -76,18 +69,10 @@ class IndicatorsConfigWidget(QWidget):
         scroll_widget.setLayout(scroll_layout)
         layout.addWidget(scroll_area)
 
-        # Boutons "Select All" et "Unselect All" pour activer/désactiver tous les indicateurs
         buttons_layout = QHBoxLayout()
-        select_all_button = QPushButton("Select All")
-        select_all_button.clicked.connect(self.select_all_indicators)
-        buttons_layout.addWidget(select_all_button)
-
-        unselect_all_button = QPushButton("Unselect All")
-        unselect_all_button.clicked.connect(self.unselect_all_indicators)
-        buttons_layout.addWidget(unselect_all_button)
-
+        add_select_buttons(buttons_layout, self.select_all_indicators, self.unselect_all_indicators)
         layout.addLayout(buttons_layout)
-
+        
         self.setLayout(layout)
 
     def add_indicator_section(self, indicator_name: str, is_active: bool, params: Dict[str, List[int]], layout: QVBoxLayout):
