@@ -1,7 +1,7 @@
 {
    "CORN": true,
-   "DBB": false,
-   "DIA": false,
+   "DBB": true,
+   "DIA": true,
    "EEM": false,
    "EFA": false,
    "FXA": false,

@@ -187,8 +187,25 @@
       "LenSkew": null
    },
    "relative_skewness": {
-      "LenSmooth": null,
-      "LenSkew": null
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ]
    },
    "skewness_on_kurtosis": {
       "LenSmooth": null,
@@ -232,10 +249,37 @@
       ]
    },
    "relative_skewness_trend": {
-      "LenSmooth": null,
-      "LenSkew": null,
-      "TrendLenST": null,
-      "TrendLenLT": null
+      "LenSmooth": [
+         1,
+         2,
+         6,
+         13,
+         32
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "skewness_on_kurtosis_trend": {
       "LenSmooth": null,
