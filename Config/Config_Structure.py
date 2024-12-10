@@ -17,22 +17,18 @@ class Indicator(BaseEntity):
 
 class BaseCollection(ABC):
 
-    def __init__(self, entities_file: str, clusters_file: str):
+    def __init__(self, entities_file: str, clusters_file: str, primary_keys_file: str):
         self.entities_file = entities_file
         self.clusters_file = clusters_file
+        self.primary_keys_file = primary_keys_file
         self.entities: Dict[str, BaseEntity] = {}
-        self.clusters: Dict[str, Any] = {}
-        self._load()
-
-    def _load(self):
-        entities_to_test = load_config_file(self.entities_file)
         self.clusters = load_config_file(self.clusters_file)
-        self._load_entities(entities_to_test)
+        self._load_entities()
 
     @abstractmethod
-    def _load_entities(self, entities_to_test: Dict[str, bool]):
+    def _load_entities(self):
         pass
-
+    
     def get_all_entities_names(self) -> List[str]:
         return list(self.entities.keys())
 
@@ -67,11 +63,12 @@ class BaseCollection(ABC):
 
 class IndicatorsCollection(BaseCollection):
     def __init__(self):
-        super().__init__(INDICATORS_TO_TEST_FILE, INDICATORS_CLUSTERS_FILE)
+        super().__init__(INDICATORS_TO_TEST_FILE, INDICATORS_CLUSTERS_FILE, INDICATORS_MODULE)
 
-    def _load_entities(self, entities_to_test: Dict[str, bool]):
+    def _load_entities(self):
+        entities_to_test = load_config_file(self.entities_file)
         params_config = load_config_file(INDICATORS_PARAMS_FILE)
-        entities_functions: Dict[str, Callable] = get_all_indicators_from_module(INDICATORS_MODULE)
+        entities_functions: Dict[str, Callable] = get_all_indicators_from_module(self.primary_keys_file)
 
         for name, func in entities_functions.items():
             active = entities_to_test.get(name, False)
@@ -116,10 +113,11 @@ class IndicatorsCollection(BaseCollection):
     
 class AssetsCollection(BaseCollection):
     def __init__(self):
-        super().__init__(ASSETS_TO_TEST_CONFIG_FILE, ASSETS_CLUSTERS_FILE)
+        super().__init__(ASSETS_TO_TEST_CONFIG_FILE, ASSETS_CLUSTERS_FILE, FILE_PATH_YF)
 
-    def _load_entities(self, entities_to_test: Dict[str, bool]):
-        entities_names = load_asset_names(FILE_PATH_YF)
+    def _load_entities(self):
+        entities_to_test = load_config_file(self.entities_file)
+        entities_names = load_asset_names(self.primary_keys_file)
         for name in entities_names:
             is_active = entities_to_test.get(name, False)
             self.entities[name] = BaseEntity(name=name, active=is_active)

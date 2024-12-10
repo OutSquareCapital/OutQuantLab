@@ -1,11 +1,11 @@
 import json
 import pyarrow.parquet as pq
-from typing import Dict, List, Callable, Tuple
+from typing import Dict, List, Callable, Tuple, Any
 import importlib
 from inspect import signature
 from itertools import product
 
-def load_config_file(file_path: str) -> dict:
+def load_config_file(file_path: str) -> Dict[str, Any]:
     with open(file_path, "r") as file:
         return json.load(file)
 
