@@ -18,7 +18,7 @@
    "median_rate_of_change_macd_trend": false,
    "central_rate_of_change_macd_trend": false,
    "fixed_bias": false,
-   "mean_price_ratio_normalised": false,
+   "mean_price_ratio_normalised": true,
    "mean_rate_of_change_normalised": false,
    "mean_price_ratio_normalised_trend": false,
    "mean_rate_of_change_normalised_trend": false,

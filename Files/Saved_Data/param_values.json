@@ -163,8 +163,20 @@
       ]
    },
    "mean_price_ratio_normalised": {
-      "SignalLength": null,
-      "PLength": null
+      "SignalLength": [
+         2,
+         4,
+         8,
+         16,
+         32
+      ],
+      "PLength": [
+         64,
+         128,
+         256,
+         512,
+         1024
+      ]
    },
    "mean_rate_of_change_normalised": {
       "SignalLength": null,
