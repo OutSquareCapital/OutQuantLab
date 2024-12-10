@@ -1,205 +1,129 @@
-from .Common_UI import param_range_values, create_scroll_area, add_category_widget_shared, create_apply_button, select_all_items, unselect_all_items, create_checkbox_item, create_expandable_section, create_apply_button
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QMessageBox, QGroupBox, QHBoxLayout, QSlider, QComboBox, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
-from PySide6.QtCore import Qt, Signal
-from typing import Dict, List
+from .Common_UI import param_range_values, create_scroll_area, create_checkbox_item, create_expandable_section
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QMessageBox, QGroupBox, QHBoxLayout, QSlider, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
+from PySide6.QtCore import Qt
+from typing import Dict, List, Any
 from PySide6.QtGui import QFont
+from Config import AssetsCollection, IndicatorsCollection
 
 class AssetSelectionWidget(QWidget):
-    saved_signal = Signal()
-
-    def __init__(self, current_config: Dict[str, List[str]], items: List[str], parent=None):
+    def __init__(self, assets_collection: AssetsCollection, parent=None):
         super().__init__(parent)
-        self.current_config = current_config
-        self.items = items
-        self.category_vars = {}
+        self.assets_collection = assets_collection
+        self.checkboxes: Dict[str, QCheckBox] = {}
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
 
-        scroll_area, _, scroll_layout = create_scroll_area()
-
-        for category in self.current_config.keys():
-            self.add_category_widget(category, scroll_layout)
-
-        layout.addWidget(scroll_area)
-
-        self.apply_button = create_apply_button(self.apply_changes)
-        layout.addWidget(self.apply_button)
-
-        self.setLayout(layout)
-
-    def add_category_widget(self, category: str, layout: QVBoxLayout):
-        if category not in self.category_vars:
-            self.category_vars[category] = {}
-
-        def create_checkbox(category: str, item: str, is_checked: bool) -> QCheckBox:
-            checkbox = create_checkbox_item(
-                self, category, item, is_checked,
-                lambda _: self.check_item_count()
-            )
-            self.category_vars[category][item] = checkbox
-            return checkbox
-
-        add_category_widget_shared(
-            parent=self,
-            category=category,
-            items={item: item in self.current_config.get(category, []) for item in self.items},
-            layout=layout,
-            create_checkbox=create_checkbox,
-            select_all_callback=self.select_all,
-            unselect_all_callback=self.unselect_all,
-        )
-
-    def apply_changes(self):
-        # Met à jour directement le dictionnaire en mémoire
-        for category, item_vars in self.category_vars.items():
-            self.current_config[category] = [
-                item for item, checkbox in item_vars.items() if checkbox.isChecked()
-            ]
-
-        self.apply_button.setEnabled(False)  # Désactiver le bouton une fois les changements appliqués
-        self.saved_signal.emit()  # Notifier que les données ont été mises à jour
-
-    def select_all(self, category: str):
-        select_all_items(category, self.category_vars[category])
-
-    def unselect_all(self, category: str):
-        unselect_all_items(category, self.category_vars[category])
-
-    def check_item_count(self):
-        warnings_active = False
-        for category in ["ratios", "ensembles"]:
-            if category in self.category_vars:
-                selected_items = sum(
-                    1 for _, checkbox in self.category_vars[category].items() if checkbox.isChecked()
-                )
-                if selected_items == 1:
-                    warnings_active = True
-                    break
-        self.apply_button.setEnabled(not warnings_active)
-
-class MethodSelectionWidget(QWidget):
-    saved_signal = Signal()
-
-    def __init__(self, current_config: Dict[str, bool], items: List[str], parent=None):
-        super().__init__(parent)
-        self.methods_to_test = current_config
-        self.methods_list = items
-        self.category_vars = {}
-        self.init_ui()
-
-    def init_ui(self):
-        layout = QVBoxLayout()
-
-        scroll_area, _, scroll_layout = create_scroll_area()
-
-        self.add_methods_section(scroll_layout)
-
-        layout.addWidget(scroll_area)
-
-        self.apply_button = create_apply_button(self.apply_changes)
-        layout.addWidget(self.apply_button)
-
-        self.setLayout(layout)
-
-    def add_methods_section(self, layout: QVBoxLayout):
-        for method_name in self.methods_list:
-            is_checked = self.methods_to_test.get(method_name, False)
+        scroll_area, scroll_widget, scroll_layout = create_scroll_area()
+        for asset in self.assets_collection.get_all_objects():
             checkbox = create_checkbox_item(
                 parent=self,
-                category="",
-                item=method_name,
-                is_checked=is_checked,
-                callback=lambda state, name=method_name: self.update_method_state(name, state)
+                item=asset.name,
+                is_checked=asset.active,
+                callback=lambda checked, name=asset.name: self.update_asset_state(name, checked)
             )
-            layout.addWidget(checkbox)
-            self.category_vars[method_name] = checkbox
+            scroll_layout.addWidget(checkbox)
+            self.checkboxes[asset.name] = checkbox
 
-        select_buttons_layout = QHBoxLayout()
+        scroll_area.setWidget(scroll_widget)
+        layout.addWidget(scroll_area)
+
+        buttons_layout = QHBoxLayout()
+
         select_all_button = QPushButton("Select All")
+        select_all_button.clicked.connect(self.select_all_assets)
+        buttons_layout.addWidget(select_all_button)
+
         unselect_all_button = QPushButton("Unselect All")
+        unselect_all_button.clicked.connect(self.unselect_all_assets)
+        buttons_layout.addWidget(unselect_all_button)
 
-        select_all_button.clicked.connect(self.select_all_methods)
-        unselect_all_button.clicked.connect(self.unselect_all_methods)
+        layout.addLayout(buttons_layout)
 
-        select_buttons_layout.addWidget(select_all_button)
-        select_buttons_layout.addWidget(unselect_all_button)
-        layout.addLayout(select_buttons_layout)
+        self.setLayout(layout)
 
-    def update_method_state(self, method_name: str, is_checked: bool):
-        self.methods_to_test[method_name] = is_checked
-        self.apply_button.setEnabled(True)
+    def update_asset_state(self, asset_name: str, is_checked: bool):
+        self.assets_collection.set_active(asset_name, is_checked)
 
-    def apply_changes(self):
-        for method_name, checkbox in self.category_vars.items():
-            self.methods_to_test[method_name] = checkbox.isChecked()
-
-        self.apply_button.setEnabled(False)
-        self.saved_signal.emit()
-        
-    def select_all_methods(self):
-        for checkbox in self.category_vars.values():
+    def select_all_assets(self):
+        for checkbox in self.checkboxes.values():
             checkbox.setChecked(True)
-        self.apply_button.setEnabled(True)
 
-    def unselect_all_methods(self):
-        for checkbox in self.category_vars.values():
+    def unselect_all_assets(self):
+        for checkbox in self.checkboxes.values():
             checkbox.setChecked(False)
-        self.apply_button.setEnabled(True)
 
-class ParameterWidget(QWidget):
-    parameters_saved = Signal()
+class IndicatorsConfigWidget(QWidget):
 
-    def __init__(self, params_config: Dict[str, Dict[str, list]], parent=None):
+    def __init__(self, indicators_collection: IndicatorsCollection, parent=None):
         super().__init__(parent)
-        self.params_config = params_config
-        self.param_widgets = {}
+        self.indicators_collection = indicators_collection
+        self.param_widgets: Dict[str, Dict[str, Dict[str, QSlider]]] = {}
+        self.checkboxes: Dict[str, QCheckBox] = {}
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
 
-        # Créer une zone de défilement
+        # Créer une zone de défilement principale
         scroll_area, scroll_widget, scroll_layout = create_scroll_area()
 
-        # Ajouter une section pour chaque méthode
-        for method, params in self.params_config.items():
-            self.add_method_widget(method, params, scroll_layout)
+        # Ajouter une section pour chaque indicateur avec checkbox d'activation + paramètres
+        for indicator in self.indicators_collection.get_all_objects():
+            self.add_indicator_section(indicator.name, indicator.active, indicator.params, scroll_layout)
 
         scroll_widget.setLayout(scroll_layout)
         layout.addWidget(scroll_area)
 
-        # Bouton pour sauvegarder
-        self.apply_button = create_apply_button(self.apply_changes)
-        layout.addWidget(self.apply_button)
+        # Boutons "Select All" et "Unselect All" pour activer/désactiver tous les indicateurs
+        buttons_layout = QHBoxLayout()
+        select_all_button = QPushButton("Select All")
+        select_all_button.clicked.connect(self.select_all_indicators)
+        buttons_layout.addWidget(select_all_button)
+
+        unselect_all_button = QPushButton("Unselect All")
+        unselect_all_button.clicked.connect(self.unselect_all_indicators)
+        buttons_layout.addWidget(unselect_all_button)
+
+        layout.addLayout(buttons_layout)
 
         self.setLayout(layout)
 
-    def add_method_widget(self, method: str, params: Dict[str, list], layout: QVBoxLayout):
-        # Section extensible par méthode
-        method_box, content_widget, content_layout = create_expandable_section(method)
+    def add_indicator_section(self, indicator_name: str, is_active: bool, params: Dict[str, List[int]], layout: QVBoxLayout):
+        # Section extensible par indicateur
+        indicator_box, content_widget, content_layout = create_expandable_section(indicator_name)
 
-        for param, values in params.items():
-            self.add_param_widget(method, param, values, content_layout)
+        # Ajout de la checkbox pour l'activation de l'indicateur
+        checkbox = create_checkbox_item(
+            parent=self,
+            item=indicator_name,
+            is_checked=is_active,
+            callback=lambda checked, name=indicator_name: self.update_indicator_state(name, checked)
+        )
+        content_layout.addWidget(checkbox)
+        self.checkboxes[indicator_name] = checkbox
 
-        layout.addWidget(method_box)
+        # Ajouter les widgets de paramètres si l'indicateur en a
+        if params:
+            for param_name, values in params.items():
+                self.add_param_widget(indicator_name, param_name, values, content_layout)
 
-    def add_param_widget(self, method: str, param: str, values: list, layout: QVBoxLayout):
-        param_box = QGroupBox(param)
+        layout.addWidget(indicator_box)
+
+    def add_param_widget(self, indicator_name: str, param_name: str, values: List[int], layout: QVBoxLayout):
+        param_box = QGroupBox(param_name)
         param_layout = QVBoxLayout()
 
-        # Valeurs par défaut
+        # Si values est vide ou None, on le remplace par [1]
         if not values:
             values = [1]
 
-        # Créer les étiquettes d'informations
         range_info_label, num_values_info_label, scroll_area = self.create_info_labels(values)
         param_layout.addWidget(range_info_label)
         param_layout.addWidget(num_values_info_label)
         param_layout.addWidget(scroll_area)
 
-        # Créer les sliders pour ajuster les paramètres
         start_slider, end_slider = self.create_range_sliders(values)
         num_values_slider = self.create_num_values_slider(len(values))
 
@@ -216,14 +140,14 @@ class ParameterWidget(QWidget):
         param_layout.addLayout(num_values_layout)
 
         self.connect_sliders_to_update(
-            method, param, start_slider, end_slider, num_values_slider,
+            indicator_name, param_name, start_slider, end_slider, num_values_slider,
             range_info_label, num_values_info_label, scroll_area.widget()
         )
 
         param_box.setLayout(param_layout)
         layout.addWidget(param_box)
 
-        self.param_widgets.setdefault(method, {})[param] = {
+        self.param_widgets.setdefault(indicator_name, {})[param_name] = {
             "start_slider": start_slider,
             "end_slider": end_slider,
             "num_values_slider": num_values_slider,
@@ -247,10 +171,13 @@ class ParameterWidget(QWidget):
         start_slider = QSlider(Qt.Horizontal)
         end_slider = QSlider(Qt.Horizontal)
 
-        start_slider.setMinimum(0)  # Index correspondant à 1
-        start_slider.setMaximum(11)  # Index correspondant à 2048
-        end_slider.setMinimum(0)  # Index correspondant à 1
-        end_slider.setMaximum(12)  # Index correspondant à 4096
+        # On travaille sur des puissances de 2, de 1 à 4096 (2^12)
+        # start_slider : 0 à 11  (2^0 =1, 2^11=2048)
+        # end_slider   : 0 à 12  (2^0 =1, 2^12=4096)
+        start_slider.setMinimum(0)
+        start_slider.setMaximum(11)
+        end_slider.setMinimum(0)
+        end_slider.setMaximum(12)
 
         start_slider.setValue(self.value_to_index(min(values)))
         end_slider.setValue(self.value_to_index(max(values)))
@@ -270,13 +197,15 @@ class ParameterWidget(QWidget):
     def index_to_value(self, index: int) -> int:
         return 2 ** index
 
-    def connect_sliders_to_update(self, method, param, start_slider, end_slider, num_values_slider,
-                                  range_info_label, num_values_info_label, generated_values_label):
+    def connect_sliders_to_update(self, indicator_name: str, param_name: str,
+                                  start_slider: QSlider, end_slider: QSlider, num_values_slider: QSlider,
+                                  range_info_label: QLabel, num_values_info_label: QLabel, generated_values_label: QLabel):
         def update_values():
             start = self.index_to_value(start_slider.value())
             end = self.index_to_value(end_slider.value())
             num_values = num_values_slider.value()
 
+            # Validation des valeurs
             if start * 2 > end:
                 if start_slider.hasFocus():
                     end_slider.setValue(self.value_to_index(start * 2))
@@ -286,35 +215,39 @@ class ParameterWidget(QWidget):
                     start = self.index_to_value(start_slider.value())
 
             generated_values = param_range_values(start, end, num_values)
-
             unique_values = list(sorted(set(generated_values)))
             range_info_label.setText(f"Range: {start} - {end}")
             num_values_info_label.setText(f"Num Values: {len(unique_values)}")
             generated_values_label.setText(f"Generated Values: {unique_values}")
-            self.params_config[method][param] = unique_values
-            self.apply_button.setEnabled(True)
+
+            self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
 
         start_slider.valueChanged.connect(update_values)
         end_slider.valueChanged.connect(update_values)
         num_values_slider.valueChanged.connect(update_values)
 
-    def apply_changes(self):
-        # Met à jour les paramètres dans `params_config`
-        for method, params in self.params_config.items():
-            if method not in self.params_config:
-                self.params_config[method] = {}
-            for param, values in params.items():
-                self.params_config[method][param] = values
+    def update_indicator_state(self, indicator_name: str, is_checked: bool):
+        self.indicators_collection.set_active(indicator_name, is_checked)
 
-        # Désactiver le bouton `Apply`
-        self.apply_button.setEnabled(False)
-        self.parameters_saved.emit()
+    def select_all_indicators(self):
+
+        for checkbox in self.checkboxes.values():
+            checkbox.setChecked(True)
+
+    def unselect_all_indicators(self):
+
+        for checkbox in self.checkboxes.values():
+            checkbox.setChecked(False)
 
 class TreeStructureWidget(QWidget):
-    def __init__(self, tree_structure: dict, data: List[str], parent=None):
+    def __init__(self, collection, parent=None):
         super().__init__(parent)
-        self.tree_structure = tree_structure  # Référence directe au dictionnaire en mémoire
-        self.data = set(data)  # Données disponibles
+        self.collection = collection
+
+        # Récupérer la structure de clusters et les noms des objets
+        self.tree_structure = self.collection.clusters
+        self.data = set(self.collection.get_all_objects_names())
+
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
         self.tree.setDragDropMode(QTreeWidget.InternalMove)
@@ -325,7 +258,7 @@ class TreeStructureWidget(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        self.populate_tree_from_dict(self.tree_structure)  # Charger la structure existante
+        self.populate_tree_from_dict(self.tree_structure)
         layout.addWidget(self.tree)
 
         buttons_layout = QHBoxLayout()
@@ -345,7 +278,7 @@ class TreeStructureWidget(QWidget):
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
 
-    def populate_tree_from_dict(self, data: dict, parent_item=None):
+    def populate_tree_from_dict(self, data: Dict[str, Any], parent_item=None):
         if parent_item is None:
             parent_item = self.tree
 
@@ -360,16 +293,16 @@ class TreeStructureWidget(QWidget):
             else:
                 parent_item.addChild(category_item)
 
-            if isinstance(value, dict):  # Sous-catégorie
+            if isinstance(value, dict):
                 self.populate_tree_from_dict(value, category_item)
-            elif isinstance(value, list):  # Éléments finaux
+            elif isinstance(value, list):
                 for element in value:
                     if element in self.data:
                         child_item = QTreeWidgetItem([element])
                         child_item.setFlags(child_item.flags() & ~Qt.ItemIsDropEnabled)
                         category_item.addChild(child_item)
 
-        # Ajouter les éléments de data sans correspondance dans une catégorie spéciale
+        # Ajouter les éléments non catégorisés
         if parent_item is self.tree:
             for element in self.data:
                 if not self.find_element_in_tree(element):
@@ -392,20 +325,19 @@ class TreeStructureWidget(QWidget):
         return False
 
     def apply_changes(self):
-        # Fonction récursive pour parcourir l'arbre et reconstruire la structure
         def traverse_tree(item):
-            if item.childCount() == 0:  # Éléments finaux
+            if item.childCount() == 0:
                 return item.text(0)
 
             result = {}
             for i in range(item.childCount()):
                 child = item.child(i)
-                if child.childCount() > 0:  # Sous-catégorie
+                if child.childCount() > 0:
                     result[child.text(0)] = traverse_tree(child)
-                else:  # Éléments finaux
+                else:
                     if child.text(0) in self.data:
                         if isinstance(result, dict):
-                            result = []  # Convertit en liste dès qu'un élément est trouvé
+                            result = []
                         result.append(child.text(0))
             return result
 
@@ -415,30 +347,31 @@ class TreeStructureWidget(QWidget):
 
         for i in range(self.tree.topLevelItemCount()):
             category_item = self.tree.topLevelItem(i)
-            if category_item.childCount() > 0:  # Catégories avec contenu
+            if category_item.childCount() > 0:
                 self.tree_structure[category_item.text(0)] = traverse_tree(category_item)
-            else:  # Catégories vides ou éléments non catégorisés
-                if category_item.text(0) in self.data:  # Éléments finaux non catégorisés
+            else:
+                if category_item.text(0) in self.data:
                     uncategorized_elements.append(category_item.text(0))
-                else:  # Nouvelle catégorie vide
+                else:
                     self.tree_structure[category_item.text(0)] = []
 
-        # Ajouter les éléments non catégorisés
         if uncategorized_elements:
             self.tree_structure["Uncategorized"] = uncategorized_elements
+
+        # Mettre à jour la structure dans la collection
+        self.collection.update_clusters_structure(self.tree_structure)
 
     def add_category(self):
         category_name, ok = QInputDialog.getText(self, "New Category", "Category Name:")
         if ok and category_name:
-            # Vérifie si la catégorie existe déjà
             if category_name in self.tree_structure:
                 QMessageBox.warning(self, "Warning", f"The category '{category_name}' already exists.")
                 return
 
-            # Ajouter la nouvelle catégorie à la structure en mémoire
+            # Ajouter à la structure en mémoire
             self.tree_structure[category_name] = {}
 
-            # Crée un item correspondant dans le widget
+            # Ajouter dans le widget
             category_item = QTreeWidgetItem([category_name])
             category_item.setFlags(category_item.flags() | Qt.ItemIsDropEnabled)
             self.tree.addTopLevelItem(category_item)
@@ -447,10 +380,10 @@ class TreeStructureWidget(QWidget):
         selected_item = self.tree.currentItem()
         if selected_item:
             parent = selected_item.parent()
-            if parent is None:  # Supprimer une catégorie
+            if parent is None:
                 index = self.tree.indexOfTopLevelItem(selected_item)
                 self.tree.takeTopLevelItem(index)
-            else:  # Supprimer un sous-élément
+            else:
                 parent.removeChild(selected_item)
 
     def handle_item_click(self, item, column):

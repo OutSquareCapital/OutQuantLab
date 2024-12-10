@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import Metrics as mt
 import Process_Data.Transform_Data as TransformData
 
@@ -8,10 +8,8 @@ def generate_data_categories(assets_names: List[str],
                              assets_to_backtest: Dict[str, List[str]]
                              ) -> Dict[str, List[str]]:
     
-    # Initialisation des catégories avec des listes vides
     categories = {key: [] for key in assets_to_backtest.keys()}
     
-    # Parcourir les assets disponibles et les ajouter dans les catégories correspondantes
     for asset in assets_names:
         for category, assets_list in assets_to_backtest.items():
             if asset in assets_list:
@@ -28,13 +26,10 @@ def generate_category_dataframes(data_prices_df: pd.DataFrame,
 
     returns_df = TransformData.adjust_returns_for_inversion(returns_df, ['VIXY'])
     
-    # Boucle unique pour traiter toutes les catégories de manière uniforme
     for category, assets_list in categories.items():
         if assets_list:
-            # Filtrer les colonnes de data_prices_df correspondant aux actifs de la catégorie
             category_returns_dfs[category] = returns_df[assets_list]
         else:
-            # Générer un DataFrame vide si la liste est vide
             category_returns_dfs[category] = pd.DataFrame(dtype=np.float32)
 
     return category_returns_dfs
@@ -154,7 +149,7 @@ def process_category_data(
 
     return extract_category_data(recombined_category_returns_dfs)
 
-def process_data(assets_names: List[str], 
+def process_data_old(assets_names: List[str], 
                 data_prices_df: pd.DataFrame, 
                 assets_to_backtest: Dict[str, List[str]]
                 ):
@@ -170,3 +165,30 @@ def process_data(assets_names: List[str],
     dates_index = data['returnstreams']['dates']
 
     return prices_array, volatility_adjusted_pct_returns_array, log_returns_array, asset_names, dates_index
+
+def process_data(
+    data_prices_df: pd.DataFrame
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, List[str], pd.Index]:
+    
+    returns_df=data_prices_df.pct_change(fill_method=None)
+
+    # Calcul des rendements simples
+    pct_returns_array = returns_df.to_numpy(dtype=np.float32)
+
+    # Calcul des prix à partir des rendements (cumul des rendements)
+    prices_array = TransformData.equity_curves_calculs(pct_returns_array)
+
+    # Calcul des rendements log
+    log_returns_array = TransformData.log_returns_np(prices_array)
+
+    # Calcul de la volatilité ajustée
+    hv_array = mt.hv_composite(pct_returns_array)
+    volatility_adjusted_pct_returns = TransformData.calculate_volatility_adjusted_returns(
+        pct_returns_array, hv_array
+    )
+
+    # Extraction des noms d'actifs et des dates
+    asset_names = list(data_prices_df.columns)
+    dates_index = data_prices_df.index
+
+    return prices_array, volatility_adjusted_pct_returns, log_returns_array, asset_names, dates_index

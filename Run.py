@@ -6,15 +6,8 @@ class MainApp(QMainWindow):
         super().__init__()
 
     def initialize(self):
-        self.methods_funcs=Config.get_all_methods_from_module('Signals')
-        self.methods_names=list(self.methods_funcs.keys())
-        self.assets_names=Config.load_asset_names(FILE_PATH_YF)
-        self.json_data = Config.load_all_json_files()
-        self.methods_to_test = self.json_data["methods_to_test"]
-        self.methods_classes = self.json_data["methods_classes"]
-        self.assets_to_test = self.json_data["assets_to_test"]
-        self.assets_classes = self.json_data["assets_classes"]
-        self.params_config = self.json_data["params_config"]
+        self.assets_collection = Config.AssetsCollection()
+        self.indicators_collection = Config.IndicatorsCollection()
         self.show_home_page()
         self.showMaximized()
 
@@ -23,16 +16,11 @@ class MainApp(QMainWindow):
             parent=self,
             run_backtest_callback=self.run_backtest,
             refresh_data_callback=self.refresh_data,
-            assets_to_test=self.assets_to_test,
-            assets_names=self.assets_names,
-            methods_names=self.methods_names,
-            methods_params=self.params_config,
-            methods_to_test=self.methods_to_test,
-            assets_classes=self.assets_classes,
-            methods_classes=self.methods_classes)
+            assets_collection=self.assets_collection,
+            indicators_collection=self.indicators_collection)
 
     def refresh_data(self):
-        Get_Data.get_yahoo_finance_data(self.assets_names, FILE_PATH_YF)
+        Get_Data.get_yahoo_finance_data(self.assets_collection.get_all_objects_names(), FILE_PATH_YF)
 
     def update_progress(self, value, message=None):
         UI.update_progress_with_events(self.progress_bar, self.log_output, value, message)
@@ -51,20 +39,17 @@ class MainApp(QMainWindow):
         self.show_backtest_page()
         self.update_progress(1, "Loading Data...")
 
-        data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_names)
+        data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_collection.get_active_asset_names())
+
         (
             prices_array,
             volatility_adjusted_pct_returns_array,
             log_returns_array,
-            category_asset_names,
+            asset_names,
             dates_index,
-        ) = Process_Data.process_data(
-            self.assets_names,
-            data_prices_df,
-            self.assets_to_test,
-        )
+        ) = Process_Data.process_data(data_prices_df)
 
-        indicators_and_params = Config.dynamic_config(self.methods_funcs, self.methods_to_test, self.params_config)
+        indicators_and_params = self.indicators_collection.get_indicators_and_parameters_for_backtest()
 
 
         self.update_progress(10, "Processing Backtest...")
@@ -73,20 +58,19 @@ class MainApp(QMainWindow):
             prices_array,
             log_returns_array,
             volatility_adjusted_pct_returns_array,
-            category_asset_names,
+            asset_names,
             dates_index,
             indicators_and_params,
             progress_callback=self.update_progress
         )
 
         self.update_progress(80, "Creating Portfolio...")
-        raw_adjusted_returns_df=raw_adjusted_returns_df.dropna(axis=0)
-        equal_weights_method_returns = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df,  by_method=True, by_asset=True)
-        equal_weights_global_returns = Portfolio.calculate_daily_average_returns(equal_weights_method_returns, global_avg=True)
-
-        backtest_result = equal_weights_method_returns
-
-        global_result = equal_weights_global_returns
+        backtest_result = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df.dropna(axis=0),  
+                                                                                by_method=True, 
+                                                                                by_asset=True)
+                                                                                
+        global_result = Portfolio.calculate_daily_average_returns(backtest_result, 
+                                                                global_avg=True)
 
         self.update_progress(100, "Plotting Results...")
 
@@ -147,8 +131,9 @@ class MainApp(QMainWindow):
         #'''
 
     def closeEvent(self, event):
-        Config.cleanup_temp_files()
-        Config.save_all_json_files(self.json_data, indent=3)
+        self.assets_collection.save()
+        self.indicators_collection.save()
+        UI.cleanup_temp_files()
         super().closeEvent(event)
 
 if __name__ == "__main__":

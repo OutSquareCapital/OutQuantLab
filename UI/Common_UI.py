@@ -1,16 +1,16 @@
 from PySide6.QtWidgets import (
-QVBoxLayout, QHBoxLayout, QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame      
+QVBoxLayout, 
+QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame      
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
-from typing import Callable, Dict
+from typing import Callable
 
 def param_range_values(start: int, end: int, num_values: int) -> list:
     if num_values == 1:
         return [int((start + end) / 2)]
     ratio = (end / start) ** (1 / (num_values - 1))
     return [int(round(start * (ratio ** i))) for i in range(num_values)]
-
 
 def set_frame_design(frame_style):
     frame = QFrame()
@@ -90,53 +90,7 @@ def create_expandable_section(category_name: str) -> tuple[QGroupBox, QPushButto
     setup_expandable_animation(expand_button, content_widget)
     return category_box, content_widget, content_layout
 
-
-def create_apply_button(apply_callback: Callable[[], None]) -> QPushButton:
-
-    apply_button = QPushButton("Apply")
-    apply_button.setEnabled(False)
-    apply_button.clicked.connect(apply_callback)
-    return apply_button
-
-def add_category_widget_shared(
-    parent,
-    category: str,
-    items: Dict[str, bool],
-    layout: QVBoxLayout,
-    create_checkbox: Callable[[str, str, bool], QCheckBox],
-    select_all_callback: Callable[[str], None],
-    unselect_all_callback: Callable[[str], None],
-):
-    category_box, content_widget, content_layout = create_expandable_section(category)
-
-    # Add Select All and Unselect All buttons
-    button_layout = QHBoxLayout()
-    select_all_button = QPushButton("Select All")
-    unselect_all_button = QPushButton("Unselect All")
-
-    select_all_button.clicked.connect(lambda: select_all_callback(category))
-    unselect_all_button.clicked.connect(lambda: unselect_all_callback(category))
-
-    button_layout.addWidget(select_all_button)
-    button_layout.addWidget(unselect_all_button)
-    content_layout.addLayout(button_layout)
-
-    # Create checkboxes for each item
-    for item, is_checked in items.items():
-        item_checkbox = create_checkbox(category, item, is_checked)
-        content_layout.addWidget(item_checkbox)
-
-    layout.addWidget(category_box)
-
-def select_all_items(category: str, items: Dict[str, QCheckBox]):
-    for checkbox in items.values():
-        checkbox.setChecked(True)
-
-def unselect_all_items(category: str, items: Dict[str, QCheckBox]):
-    for checkbox in items.values():
-        checkbox.setChecked(False)
-
-def create_checkbox_item(parent, category: str, item: str, is_checked: bool, callback: Callable[[bool], None]) -> QCheckBox:
+def create_checkbox_item(parent, item: str, is_checked: bool, callback: Callable[[bool], None]) -> QCheckBox:
     checkbox = QCheckBox(item)
     checkbox.setChecked(is_checked)
     checkbox.stateChanged.connect(lambda: callback(checkbox.isChecked()))

@@ -26,19 +26,14 @@ from Files import (
 
 from PySide6.QtCore import Qt, QDate
 from .Common_UI import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
-from .Config_UI import ParameterWidget, AssetSelectionWidget, MethodSelectionWidget, TreeStructureWidget
+from .Config_UI import AssetSelectionWidget, IndicatorsConfigWidget, TreeStructureWidget
 
 def setup_home_page(
     parent: QMainWindow, 
     run_backtest_callback,
     refresh_data_callback,
-    assets_to_test,
-    assets_names,
-    methods_names,
-    methods_params,
-    methods_to_test,
-    assets_classes,
-    methods_classes
+    assets_collection,
+    indicators_collection
     ):
 
     parent.setWindowTitle("OutQuantLab")
@@ -66,15 +61,13 @@ def setup_home_page(
     right_upper_layout = QHBoxLayout(top_frame)
     right_lower_layout = QHBoxLayout(bottom_frame)
 
-    param_widget = ParameterWidget(methods_params)
-    asset_widget = AssetSelectionWidget(assets_to_test, assets_names)
-    method_widget = MethodSelectionWidget(methods_to_test, methods_names)
-    right_upper_layout.addWidget(param_widget, stretch=2)
+    asset_widget = AssetSelectionWidget(assets_collection)
+    indicator_widget = IndicatorsConfigWidget(indicators_collection)
     right_upper_layout.addWidget(asset_widget, stretch=1)
-    right_upper_layout.addWidget(method_widget, stretch=1)
+    right_upper_layout.addWidget(indicator_widget, stretch=2)
 
-    asset_tree_widget = TreeStructureWidget(assets_classes, assets_names)
-    method_tree_widget = TreeStructureWidget(methods_classes, methods_names)
+    asset_tree_widget = TreeStructureWidget(assets_collection)
+    method_tree_widget = TreeStructureWidget(indicators_collection)
     right_lower_layout.addWidget(asset_tree_widget)
     right_lower_layout.addWidget(method_tree_widget)
 
