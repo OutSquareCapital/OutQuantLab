@@ -6,7 +6,8 @@ ASSETS_TO_TEST_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "assets_to_backtest
 INDICATORS_PARAMS_FILE = os.path.join(SAVED_DATA_FOLDER, "param_values.json")
 INDICATORS_TO_TEST_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_to_backtest.json")
 INDICATORS_CLUSTERS_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_classes.json")
-ASSETS_CLASSES_FILE = os.path.join(SAVED_DATA_FOLDER, "assets_classes.json")
+ASSETS_CLUSTERS_FILE = os.path.join(SAVED_DATA_FOLDER, "assets_classes.json")
+INDICATORS_MODULE = 'Signals'
 
 FILE_PATH_YF = os.path.join(SAVED_DATA_FOLDER, "price_data.parquet")
 

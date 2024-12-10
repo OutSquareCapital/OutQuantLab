@@ -16,7 +16,7 @@ class AssetSelectionWidget(QWidget):
         layout = QVBoxLayout()
 
         scroll_area, scroll_widget, scroll_layout = create_scroll_area()
-        for asset in self.assets_collection.get_all_objects():
+        for asset in self.assets_collection.get_all_entities():
             checkbox = create_checkbox_item(
                 parent=self,
                 item=asset.name,
@@ -70,7 +70,7 @@ class IndicatorsConfigWidget(QWidget):
         scroll_area, scroll_widget, scroll_layout = create_scroll_area()
 
         # Ajouter une section pour chaque indicateur avec checkbox d'activation + paramètres
-        for indicator in self.indicators_collection.get_all_objects():
+        for indicator in self.indicators_collection.get_all_entities():
             self.add_indicator_section(indicator.name, indicator.active, indicator.params, scroll_layout)
 
         scroll_widget.setLayout(scroll_layout)
@@ -246,7 +246,7 @@ class TreeStructureWidget(QWidget):
 
         # Récupérer la structure de clusters et les noms des objets
         self.tree_structure = self.collection.clusters
-        self.data = set(self.collection.get_all_objects_names())
+        self.data = set(self.collection.get_all_entities_names())
 
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)

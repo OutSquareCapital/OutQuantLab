@@ -20,7 +20,7 @@ class MainApp(QMainWindow):
             indicators_collection=self.indicators_collection)
 
     def refresh_data(self):
-        Get_Data.get_yahoo_finance_data(self.assets_collection.get_all_objects_names(), FILE_PATH_YF)
+        Get_Data.get_yahoo_finance_data(self.assets_collection.get_all_entities_names(), FILE_PATH_YF)
 
     def update_progress(self, value, message=None):
         UI.update_progress_with_events(self.progress_bar, self.log_output, value, message)
@@ -39,7 +39,7 @@ class MainApp(QMainWindow):
         self.show_backtest_page()
         self.update_progress(1, "Loading Data...")
 
-        data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_collection.get_active_asset_names())
+        data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_collection.get_active_entities_names())
 
         (
             prices_array,
