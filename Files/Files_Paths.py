@@ -3,9 +3,9 @@ import os
 SAVED_DATA_FOLDER = os.path.join(os.path.dirname(__file__), "Saved_Data")
 
 ASSETS_TO_TEST_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "assets_to_backtest.json")
-PARAM_CONFIG_FILE = os.path.join(SAVED_DATA_FOLDER, "param_values.json")
-METHODS_TO_TEST_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_to_backtest.json")
-METHODS_CLASSES_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_classes.json")
+INDICATORS_PARAMS_FILE = os.path.join(SAVED_DATA_FOLDER, "param_values.json")
+INDICATORS_TO_TEST_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_to_backtest.json")
+INDICATORS_CLUSTERS_FILE = os.path.join(SAVED_DATA_FOLDER, "methods_classes.json")
 ASSETS_CLASSES_FILE = os.path.join(SAVED_DATA_FOLDER, "assets_classes.json")
 
 FILE_PATH_YF = os.path.join(SAVED_DATA_FOLDER, "price_data.parquet")

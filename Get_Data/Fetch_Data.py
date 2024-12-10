@@ -21,7 +21,7 @@ def get_yahoo_finance_data(assets: List[str], file_path: str) -> None:
 
     print(f"Yahoo Finance Data Updated")
 
-def load_prices(file_path: str, asset_names) -> pd.DataFrame:
+def load_prices(file_path: str, asset_names: List[str]) -> pd.DataFrame:
     columns_to_load = ["Date"] + [name for name in asset_names]
 
     return pd.read_parquet(
