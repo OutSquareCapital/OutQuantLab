@@ -321,10 +321,37 @@
       ]
    },
    "skewness_on_kurtosis_trend": {
-      "LenSmooth": null,
-      "LenSkew": null,
-      "TrendLenST": null,
-      "TrendLenLT": null
+      "LenSmooth": [
+         32,
+         35,
+         39,
+         43,
+         48,
+         53,
+         58,
+         64
+      ],
+      "LenSkew": [
+         32,
+         38,
+         45,
+         54,
+         64
+      ],
+      "TrendLenST": [
+         64,
+         76,
+         91,
+         108,
+         128
+      ],
+      "TrendLenLT": [
+         32,
+         38,
+         45,
+         54,
+         64
+      ]
    },
    "relative_skewness_on_kurtosis_trend": {
       "LenSmooth": [
@@ -335,32 +362,149 @@
          223,
          512
       ],
-      "LenSkew": null,
-      "TrendLenST": null,
-      "TrendLenLT": null
+      "LenSkew": [
+         16,
+         29,
+         53,
+         95,
+         172,
+         312,
+         565,
+         1024
+      ],
+      "TrendLenST": [
+         32,
+         45,
+         64,
+         91,
+         128
+      ],
+      "TrendLenLT": [
+         32,
+         54,
+         91,
+         152,
+         256
+      ]
    },
    "relative_directional_volatility": {
-      "LenST": null,
-      "LenLT": null,
-      "LenVol": null
+      "LenSmooth": [
+         64,
+         81,
+         102,
+         128
+      ],
+      "LenRelative": [
+         16,
+         27,
+         45,
+         76,
+         128
+      ],
+      "LenVol": [
+         16,
+         27,
+         45,
+         76,
+         128
+      ]
    },
    "normalised_directional_volatility": {
-      "LenST": null,
-      "LenLT": null,
-      "LenVol": null
+      "LenSmooth": [
+         64,
+         76,
+         91,
+         108,
+         128
+      ],
+      "LenNormalization": [
+         32,
+         38,
+         45,
+         54,
+         64
+      ],
+      "LenVol": [
+         64,
+         76,
+         91,
+         108,
+         128
+      ]
    },
    "relative_directional_volatility_trend": {
-      "LenST": null,
-      "LenLT": null,
-      "LenVol": null,
-      "TrendLenST": null,
-      "TrendLenLT": null
+      "LenSmooth": [
+         32,
+         42,
+         56,
+         74,
+         97,
+         128
+      ],
+      "LenRelative": [
+         128,
+         152,
+         181,
+         215,
+         256
+      ],
+      "LenVol": [
+         16,
+         19,
+         23,
+         27,
+         32
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "normalised_directional_volatility_trend": {
-      "LenST": null,
-      "LenLT": null,
-      "LenVol": null,
-      "TrendLenST": null,
-      "TrendLenLT": null
+      "LenSmooth": [
+         8,
+         11,
+         16,
+         23,
+         32
+      ],
+      "LenNormalization": [
+         64,
+         76,
+         91,
+         108,
+         128
+      ],
+      "LenVol": [
+         32,
+         45,
+         64,
+         91,
+         128
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    }
 }
