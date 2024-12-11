@@ -1,10 +1,81 @@
 from PySide6.QtWidgets import (
 QVBoxLayout, 
-QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame, QHBoxLayout, QSlider, QLabel
+QPushButton, QTreeWidget, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame, QHBoxLayout, QSlider, QLabel, QTreeWidgetItem, QMessageBox, QInputDialog
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
-from typing import Callable, Tuple, Dict
+from typing import Callable, Tuple, Dict, Any
+from PySide6.QtGui import QFont
+
+def add_category(tree: QTreeWidget, tree_structure: Dict[str, Any], data: set):
+    category_name, ok = QInputDialog.getText(tree, "New Category", "Category Name:")
+    if ok and category_name:
+        if category_name in tree_structure:
+            QMessageBox.warning(tree, "Warning", f"The category '{category_name}' already exists.")
+            return
+
+        tree_structure[category_name] = {}
+        category_item = QTreeWidgetItem([category_name])
+        category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
+        tree.addTopLevelItem(category_item)
+
+def delete_category(tree: QTreeWidget, tree_structure: Dict[str, Any]):
+    selected_item = tree.currentItem()
+    if selected_item:
+        parent = selected_item.parent()
+        if parent is None:
+            index = tree.indexOfTopLevelItem(selected_item)
+            tree.takeTopLevelItem(index)
+        else:
+            parent.removeChild(selected_item)
+
+
+def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
+    def traverse(item):
+        if item.text(0) == element:
+            return True
+        for i in range(item.childCount()):
+            if traverse(item.child(i)):
+                return True
+        return False
+
+    for i in range(tree.topLevelItemCount()):
+        if traverse(tree.topLevelItem(i)):
+            return True
+    return False
+
+
+def populate_tree_from_dict(tree: QTreeWidget, data: Dict[str, Any], data_set: set, parent_item=None):
+    if parent_item is None:
+        parent_item = tree
+
+    for key, value in data.items():
+        category_item = QTreeWidgetItem([key])
+        category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
+        font = QFont()
+        font.setUnderline(True)
+        category_item.setFont(0, font)
+        if isinstance(parent_item, QTreeWidget):
+            parent_item.addTopLevelItem(category_item)
+        else:
+            parent_item.addChild(category_item)
+
+        if isinstance(value, dict):
+            populate_tree_from_dict(tree, value, data_set, category_item)
+        elif isinstance(value, list):
+            for element in value:
+                if element in data_set:
+                    child_item = QTreeWidgetItem([element])
+                    child_item.setFlags(child_item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
+                    category_item.addChild(child_item)
+
+    if parent_item is tree:
+        for element in data_set:
+            if not find_element_in_tree(tree, element):
+                orphan_item = QTreeWidgetItem([element])
+                orphan_item.setFlags(orphan_item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
+                tree.addTopLevelItem(orphan_item)
+
 
 def create_info_labels(values: list) -> Tuple[QLabel, QLabel, QLabel]:
     range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")

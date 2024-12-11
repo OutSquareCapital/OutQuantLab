@@ -1,8 +1,29 @@
-from .Common_UI import create_scroll_area, create_checkbox_item, create_expandable_section, add_select_buttons, create_range_sliders, create_info_labels, create_num_values_slider, connect_sliders_to_update
-from PySide6.QtWidgets import QAbstractItemView, QWidget, QVBoxLayout, QCheckBox,  QLabel, QMessageBox, QGroupBox, QHBoxLayout, QSlider, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
+from .Common_UI import (create_scroll_area, 
+                        create_checkbox_item, 
+                        create_expandable_section, 
+                        add_select_buttons, 
+                        create_range_sliders, 
+                        create_info_labels, 
+                        create_num_values_slider, 
+                        connect_sliders_to_update, 
+                        populate_tree_from_dict, 
+                        add_category, 
+                        delete_category
+)
+from PySide6.QtWidgets import (QAbstractItemView, 
+                               QWidget, 
+                               QVBoxLayout, 
+                               QCheckBox,  
+                               QLabel, 
+                               QGroupBox, 
+                               QHBoxLayout, 
+                               QSlider, 
+                               QTreeWidget, 
+                               QPushButton, 
+                               QApplication
+)
 from PySide6.QtCore import Qt
-from typing import Dict, List, Any
-from PySide6.QtGui import QFont
+from typing import Dict, List
 from Config import AssetsCollection, IndicatorsCollection, BaseCollection
 
 class AssetSelectionWidget(QWidget):
@@ -152,9 +173,8 @@ class IndicatorsConfigWidget(QWidget):
 
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(False)
-
 class TreeStructureWidget(QWidget):
-    def __init__(self, collection: BaseCollection , parent=None):
+    def __init__(self, collection: BaseCollection, parent=None):
         super().__init__(parent)
         self.collection = collection
         self.tree_structure = self.collection.clusters
@@ -170,133 +190,22 @@ class TreeStructureWidget(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        self.populate_tree_from_dict(self.tree_structure)
+        populate_tree_from_dict(self.tree, self.tree_structure, self.data)
         layout.addWidget(self.tree)
 
         buttons_layout = QHBoxLayout()
 
         add_button = QPushButton("Add Category")
         delete_button = QPushButton("Delete Category")
-        apply_button = QPushButton("Apply Changes")
 
-        add_button.clicked.connect(self.add_category)
-        delete_button.clicked.connect(self.delete_category)
-        apply_button.clicked.connect(self.apply_changes)
+        add_button.clicked.connect(lambda: add_category(self.tree, self.tree_structure, self.data))
+        delete_button.clicked.connect(lambda: delete_category(self.tree, self.tree_structure))
 
         buttons_layout.addWidget(add_button)
         buttons_layout.addWidget(delete_button)
-        buttons_layout.addWidget(apply_button)
 
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
-
-    def populate_tree_from_dict(self, data: Dict[str, Any], parent_item=None):
-        if parent_item is None:
-            parent_item = self.tree
-
-        for key, value in data.items():
-            category_item = QTreeWidgetItem([key])
-            category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
-            font = QFont()
-            font.setUnderline(True)
-            category_item.setFont(0, font)
-            if isinstance(parent_item, QTreeWidget):
-                parent_item.addTopLevelItem(category_item)
-            else:
-                parent_item.addChild(category_item)
-
-            if isinstance(value, dict):
-                self.populate_tree_from_dict(value, category_item)
-            elif isinstance(value, list):
-                for element in value:
-                    if element in self.data:
-                        child_item = QTreeWidgetItem([element])
-                        child_item.setFlags(child_item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
-                        category_item.addChild(child_item)
-
-        # Ajouter les éléments non catégorisés
-        if parent_item is self.tree:
-            for element in self.data:
-                if not self.find_element_in_tree(element):
-                    orphan_item = QTreeWidgetItem([element])
-                    orphan_item.setFlags(orphan_item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
-                    self.tree.addTopLevelItem(orphan_item)
-
-    def find_element_in_tree(self, element: str) -> bool:
-        def traverse(item):
-            if item.text(0) == element:
-                return True
-            for i in range(item.childCount()):
-                if traverse(item.child(i)):
-                    return True
-            return False
-
-        for i in range(self.tree.topLevelItemCount()):
-            if traverse(self.tree.topLevelItem(i)):
-                return True
-        return False
-
-    def apply_changes(self):
-        def traverse_tree(item):
-            if item.childCount() == 0:
-                return item.text(0)
-
-            result = {}
-            for i in range(item.childCount()):
-                child = item.child(i)
-                if child.childCount() > 0:
-                    result[child.text(0)] = traverse_tree(child)
-                else:
-                    if child.text(0) in self.data:
-                        if isinstance(result, dict):
-                            result = []
-                        result.append(child.text(0))
-            return result
-
-        # Réinitialiser la structure
-        self.tree_structure.clear()
-        uncategorized_elements = []
-
-        for i in range(self.tree.topLevelItemCount()):
-            category_item = self.tree.topLevelItem(i)
-            if category_item.childCount() > 0:
-                self.tree_structure[category_item.text(0)] = traverse_tree(category_item)
-            else:
-                if category_item.text(0) in self.data:
-                    uncategorized_elements.append(category_item.text(0))
-                else:
-                    self.tree_structure[category_item.text(0)] = []
-
-        if uncategorized_elements:
-            self.tree_structure["Uncategorized"] = uncategorized_elements
-
-        # Mettre à jour la structure dans la collection
-        self.collection.update_clusters_structure(self.tree_structure)
-
-    def add_category(self):
-        category_name, ok = QInputDialog.getText(self, "New Category", "Category Name:")
-        if ok and category_name:
-            if category_name in self.tree_structure:
-                QMessageBox.warning(self, "Warning", f"The category '{category_name}' already exists.")
-                return
-
-            # Ajouter à la structure en mémoire
-            self.tree_structure[category_name] = {}
-
-            # Ajouter dans le widget
-            category_item = QTreeWidgetItem([category_name])
-            category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
-            self.tree.addTopLevelItem(category_item)
-
-    def delete_category(self):
-        selected_item = self.tree.currentItem()
-        if selected_item:
-            parent = selected_item.parent()
-            if parent is None:
-                index = self.tree.indexOfTopLevelItem(selected_item)
-                self.tree.takeTopLevelItem(index)
-            else:
-                parent.removeChild(selected_item)
 
     def handle_item_click(self, item, column):
         if Qt.KeyboardModifier.ControlModifier & QApplication.keyboardModifiers():
