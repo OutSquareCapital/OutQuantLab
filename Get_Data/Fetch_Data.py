@@ -1,27 +1,30 @@
 import pandas as pd
-from typing import List
 import yfinance as yf
 
-def get_yahoo_finance_data(assets: List[str], file_path: str) -> None:
+def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 
-    data:pd.DataFrame = yf.download(
-                                    assets,
-                                    interval="1d",
-                                    auto_adjust=True,
-                                    progress=False,
-                                )
-
-    adj_close_df = data['Close']
+    data: pd.DataFrame|None = yf.download(
+                            tickers=assets,
+                            interval="1d",
+                            auto_adjust=True,
+                            progress=False,
+                        )
     
-    adj_close_df.to_parquet(
-                            file_path,
-                            index=True,
-                            engine="pyarrow"
-                            )
+    if data is None:
+        print("Yahoo Finance returned no data.")
+        return None
 
-    print(f"Yahoo Finance Data Updated")
+    data['Close'].to_parquet(
+        file_path,
+        index=True,
+        engine="pyarrow"
+    )
 
-def load_prices(file_path: str, asset_names: List[str]) -> pd.DataFrame:
+    print("Yahoo Finance Data Updated")
+    return None
+
+def load_prices(file_path: str, asset_names: list[str]) -> pd.DataFrame:
+    
     columns_to_load = ["Date"] + [name for name in asset_names]
 
     return pd.read_parquet(

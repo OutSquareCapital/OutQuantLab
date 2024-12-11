@@ -3,7 +3,6 @@ from scipy.stats import norm, rankdata
 import pandas as pd
 import numpy as np
 from Infrastructure import Fast_Tools as ft
-from typing import List, Tuple
 import Metrics as mt
 from itertools import combinations
 from Files import PERCENTAGE_FACTOR
@@ -92,10 +91,10 @@ def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
     
     return log_returns_array
 
-def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame) -> Tuple[np.ndarray, 
+def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame) -> tuple[np.ndarray, 
                                                                         np.ndarray, 
                                                                         np.ndarray,
-                                                                        List[str],
+                                                                        list[str],
                                                                         pd.Index]:
 
     # Création de l'array des pct returns

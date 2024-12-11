@@ -1,24 +1,22 @@
-from typing import Tuple
 from Infrastructure import Fast_Tools as ft
 import numpy as np
 
 def initialize_data_array(prices_array: np.ndarray,
-                          log_returns_array: np.ndarray):
+                          log_returns_array: np.ndarray) -> dict[str, np.ndarray]:
 
     shifted_log_returns = ft.shift_array(log_returns_array)
     shifted_prices = ft.shift_array(prices_array)
-    data_arrays = {
+
+    return {
         'returns_array': shifted_log_returns,
         'prices_array': shifted_prices
     }
-
-    return data_arrays
 
 def initialize_signals_array(
                             prices_array: np.ndarray,
                             indicators_and_params: dict,
                             asset_names: list,
-                            ) -> Tuple[np.ndarray, dict]:
+                            ) -> np.ndarray:
     
     total_days = prices_array.shape[0]
 

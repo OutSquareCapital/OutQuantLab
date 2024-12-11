@@ -23,14 +23,14 @@ from PySide6.QtWidgets import (QAbstractItemView,
                                QApplication
 )
 from PySide6.QtCore import Qt
-from typing import Dict, List
+
 from Config import AssetsCollection, IndicatorsCollection, BaseCollection
 
 class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection, parent=None):
         super().__init__(parent)
         self.assets_collection = assets_collection
-        self.checkboxes: Dict[str, QCheckBox] = {}
+        self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
 
     def init_ui(self):
@@ -73,8 +73,8 @@ class IndicatorsConfigWidget(QWidget):
     def __init__(self, indicators_collection: IndicatorsCollection, parent=None):
         super().__init__(parent)
         self.indicators_collection = indicators_collection
-        self.param_widgets: Dict[str, Dict[str, Dict[str, QSlider | QLabel]]] = {}
-        self.checkboxes: Dict[str, QCheckBox] = {}
+        self.param_widgets: dict[str, dict[str, dict[str, QSlider | QLabel]]] = {}
+        self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
 
     def init_ui(self):
@@ -94,7 +94,7 @@ class IndicatorsConfigWidget(QWidget):
         
         self.setLayout(layout)
 
-    def add_indicator_section(self, indicator_name: str, is_active: bool, params: Dict[str, List[int]], layout: QVBoxLayout):
+    def add_indicator_section(self, indicator_name: str, is_active: bool, params: dict[str, list[int]], layout: QVBoxLayout):
 
         indicator_box, content_widget, content_layout = create_expandable_section(indicator_name)
 
@@ -112,7 +112,7 @@ class IndicatorsConfigWidget(QWidget):
 
         layout.addWidget(indicator_box)
 
-    def add_param_widget(self, indicator_name: str, param_name: str, values: List[int], layout: QVBoxLayout):
+    def add_param_widget(self, indicator_name: str, param_name: str, values: list[int], layout: QVBoxLayout):
         param_box = QGroupBox(param_name)
         param_layout = QVBoxLayout()
 

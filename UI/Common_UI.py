@@ -4,10 +4,11 @@ QPushButton, QTreeWidget, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame, QH
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
-from typing import Callable, Tuple, Dict, Any
 from PySide6.QtGui import QFont
+from typing import Any
+from collections.abc import Callable
 
-def add_category(tree: QTreeWidget, tree_structure: Dict[str, Any], data: set):
+def add_category(tree: QTreeWidget, tree_structure: dict[str, Any], data: set):
     category_name, ok = QInputDialog.getText(tree, "New Category", "Category Name:")
     if ok and category_name:
         if category_name in tree_structure:
@@ -19,7 +20,7 @@ def add_category(tree: QTreeWidget, tree_structure: Dict[str, Any], data: set):
         category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
         tree.addTopLevelItem(category_item)
 
-def delete_category(tree: QTreeWidget, tree_structure: Dict[str, Any]):
+def delete_category(tree: QTreeWidget, tree_structure: dict[str, Any]):
     selected_item = tree.currentItem()
     if selected_item:
         parent = selected_item.parent()
@@ -45,7 +46,7 @@ def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
     return False
 
 
-def populate_tree_from_dict(tree: QTreeWidget, data: Dict[str, Any], data_set: set, parent_item=None):
+def populate_tree_from_dict(tree: QTreeWidget, data: dict[str, Any], data_set: set, parent_item=None):
     if parent_item is None:
         parent_item = tree
 
@@ -77,14 +78,14 @@ def populate_tree_from_dict(tree: QTreeWidget, data: Dict[str, Any], data_set: s
                 tree.addTopLevelItem(orphan_item)
 
 
-def create_info_labels(values: list) -> Tuple[QLabel, QLabel, QLabel]:
+def create_info_labels(values: list) -> tuple[QLabel, QLabel, QLabel]:
     range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")
     num_values_info_label = QLabel(f"Num Values: {len(values)}")
     generated_values_label = QLabel(f"Generated Values: {values}")
     generated_values_label.setWordWrap(False)
     return range_info_label, num_values_info_label, generated_values_label
 
-def create_range_sliders(values: list) -> Tuple[QSlider, QSlider]:
+def create_range_sliders(values: list) -> tuple[QSlider, QSlider]:
     start_slider = QSlider(Qt.Orientation.Horizontal)
     end_slider = QSlider(Qt.Orientation.Horizontal)
     start_slider.setMinimum(0)
@@ -196,13 +197,13 @@ def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidg
     toggle_button.toggled.connect(toggle_animation)
     return animation
 
-def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: Dict[str, Callable]):
+def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: dict[str, Callable]):
     for btn_text in buttons_names:
         button = QPushButton(btn_text)
         button.clicked.connect(buttons_actions.get(btn_text, lambda: None))
         layout.addWidget(button)
 
-def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list, buttons_actions: Dict[str, Callable], open_on_launch: bool = False):
+def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list, buttons_actions: dict[str, Callable], open_on_launch: bool = False):
     toggle_button = QPushButton(toggle_button_name)
     outer_layout = QVBoxLayout()
     outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)

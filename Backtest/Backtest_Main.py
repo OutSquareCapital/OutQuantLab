@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from .Backtest_Process import transform_signals_into_returns
+from collections.abc import Callable
 
 def data_arrays_to_dataframe(raw_adjusted_returns_array: np.ndarray, 
                                 dates_index: pd.Index, 
@@ -33,7 +34,7 @@ def process_backtest(prices_array: np.ndarray,
                     asset_names: list,
                     dates_index: pd.Index,
                     indicators_and_params: dict,
-                    progress_callback: callable
+                    progress_callback: Callable
                     ) -> pd.DataFrame:
 
     raw_adjusted_returns_array = transform_signals_into_returns(prices_array,

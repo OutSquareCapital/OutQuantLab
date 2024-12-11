@@ -27,7 +27,6 @@ from Files import (
 from PySide6.QtCore import Qt, QDate
 from .Common_UI import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
 from .Config_UI import AssetSelectionWidget, IndicatorsConfigWidget, TreeStructureWidget
-from typing import List
 
 def setup_home_page(
     parent: QMainWindow, 
@@ -119,7 +118,7 @@ def setup_backtest_page(parent):
     parent.setCentralWidget(loading_widget)
     return progress_bar, log_output
 
-def setup_results_page(parent, plots, back_to_home_callback, metrics: List[float]):
+def setup_results_page(parent, plots, back_to_home_callback, metrics: list[float]):
 
     results_widget = QWidget()
     results_layout = QVBoxLayout(results_widget)
