@@ -1,7 +1,4 @@
 {
-   "RiskPremium": [
-      "fixed_bias"
-   ],
    "Divergent": {
       "Direction": [
          "mean_rate_of_change",
@@ -58,6 +55,8 @@
       "relative_skewness_on_kurtosis",
       "skewness_on_kurtosis_trend",
       "relative_skewness_on_kurtosis_trend",
+      "fixed_bias",
       "skewness_on_kurtosis"
-   ]
+   ],
+   "test": {}
 }

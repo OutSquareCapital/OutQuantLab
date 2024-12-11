@@ -1,7 +1,7 @@
 {
-   "mean_price_ratio": false,
-   "median_price_ratio": false,
-   "central_price_ratio": false,
+   "mean_price_ratio": true,
+   "median_price_ratio": true,
+   "central_price_ratio": true,
    "mean_rate_of_change": false,
    "median_rate_of_change": false,
    "central_rate_of_change": false,
@@ -32,6 +32,6 @@
    "relative_skewness_on_kurtosis_trend": false,
    "relative_directional_volatility": false,
    "normalised_directional_volatility": false,
-   "relative_directional_volatility_trend": true,
-   "normalised_directional_volatility_trend": true
+   "relative_directional_volatility_trend": false,
+   "normalised_directional_volatility_trend": false
 }
