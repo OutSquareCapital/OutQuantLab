@@ -2,6 +2,7 @@ import numpy as np
 from Files import ANNUALIZED_PERCENTAGE_FACTOR
 import bottleneck as bn
 from Metrics.Aggregation import rolling_mean, rolling_median
+from typing import Tuple
 
 def rolling_volatility(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
 
@@ -42,7 +43,7 @@ def hv_composite(returns_array: np.ndarray,
 
     return rolling_mean(composite_vol_array, length=5)
 
-def separate_volatility(array:np.ndarray, LenVol: int) -> np.ndarray:
+def separate_volatility(array:np.ndarray, LenVol: int) -> Tuple[np.ndarray, np.ndarray]:
 
     # Séparation des rendements positifs et négatifs, tout en conservant les NaN
     positive_returns = np.where(np.isnan(array), np.nan, np.where(array > 0, array, 0))

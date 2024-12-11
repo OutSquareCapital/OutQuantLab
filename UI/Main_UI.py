@@ -27,6 +27,7 @@ from Files import (
 from PySide6.QtCore import Qt, QDate
 from .Common_UI import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
 from .Config_UI import AssetSelectionWidget, IndicatorsConfigWidget, TreeStructureWidget
+from typing import List
 
 def setup_home_page(
     parent: QMainWindow, 
@@ -118,7 +119,7 @@ def setup_backtest_page(parent):
     parent.setCentralWidget(loading_widget)
     return progress_bar, log_output
 
-def setup_results_page(parent, plots, back_to_home_callback, metrics):
+def setup_results_page(parent, plots, back_to_home_callback, metrics: List[float]):
 
     results_widget = QWidget()
     results_layout = QVBoxLayout(results_widget)
@@ -135,17 +136,23 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
     # Tableau des résultats avec animation
     stats_button = QPushButton("Portfolio Statistics")
     stats_layout = QVBoxLayout()
-    stats_layout.setAlignment(Qt.AlignTop)
+    stats_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
     stats_widget = QWidget()
     stats_inner_layout = QVBoxLayout(stats_widget)
-    stats_inner_layout.setAlignment(Qt.AlignTop)
+    stats_inner_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     for label, value in zip(BACKTEST_STATS_RESULTS, metrics):
         row_layout = QHBoxLayout()
-        row_layout.addWidget(QLabel(label, alignment=Qt.AlignLeft))
-        row_layout.addWidget(QLabel(f"{value}", alignment=Qt.AlignRight))
+        
+        left_label = QLabel(label)
+        left_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        row_layout.addWidget(left_label)
+        
+        right_label = QLabel(f"{value}")
+        right_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        row_layout.addWidget(right_label)
+        
         stats_inner_layout.addLayout(row_layout)
-
     stats_layout.addWidget(stats_button)
     stats_layout.addWidget(stats_widget)
     setup_expandable_animation(stats_button, stats_widget)
@@ -153,12 +160,12 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
 
     clusters_toggle_button = QPushButton("Clusters Parameters")
     clusters_buttons_layout = QVBoxLayout()
-    clusters_buttons_layout.setAlignment(Qt.AlignTop)
+    clusters_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
     clusters_buttons_widget = QWidget()
     clusters_buttons_inner_layout = QVBoxLayout(clusters_buttons_widget)
 
     for param in CLUSTERS_PARAMETERS:
-        slider = QSlider(Qt.Horizontal)
+        slider = QSlider(Qt.Orientation.Horizontal)
         slider.setRange(0, 10)
         slider.setValue(5)
         label = QLabel(f"{param}: {slider.value()}")
@@ -172,11 +179,11 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
 
     backtest_parameters_button = QPushButton("Backtest Parameters")
     backtest_parameters_layout = QVBoxLayout()
-    backtest_parameters_layout.setAlignment(Qt.AlignTop)  # Alignement en haut
+    backtest_parameters_layout.setAlignment(Qt.AlignmentFlag.AlignTop)  # Alignement en haut
     backtest_parameters_widget = QWidget()
     backtest_parameters_inner_layout = QVBoxLayout(backtest_parameters_widget)
 
-    length_slider = QSlider(Qt.Horizontal)
+    length_slider = QSlider(Qt.Orientation.Horizontal)
     length_slider.setRange(6, 12)  # Log base 2 de 64 à 4096
     length_slider.setValue(10)
     length_label = QLabel(f"Rolling Length: {2 ** length_slider.value()}")
@@ -184,7 +191,7 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
     backtest_parameters_inner_layout.addWidget(length_label)
     backtest_parameters_inner_layout.addWidget(length_slider)
 
-    leverage_slider = QSlider(Qt.Horizontal)
+    leverage_slider = QSlider(Qt.Orientation.Horizontal)
     leverage_slider.setRange(1, 100)  # 0.1 à 10, step 0.1
     leverage_slider.setValue(10)
     leverage_label = QLabel(f"Leverage: {leverage_slider.value() / 10:.1f}")
@@ -192,7 +199,7 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
     backtest_parameters_inner_layout.addWidget(leverage_label)
     backtest_parameters_inner_layout.addWidget(leverage_slider)
 
-    date_slider = QSlider(Qt.Horizontal)
+    date_slider = QSlider(Qt.Orientation.Horizontal)
     date_slider.setRange(0, (2025 - 1950) * 12)  # Range in months from 1950 à 2025
     date_slider.setValue((2025 - 1950) // 2 * 12)  # Par défaut au milieu de la plage
     date_label = QLabel(f"Starting Date: {QDate(1950, 1, 1).addMonths(date_slider.value()).toString('yyyy-MM')}")
@@ -206,7 +213,7 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
     setup_expandable_animation(backtest_parameters_button, backtest_parameters_widget)
 
     home_layout = QVBoxLayout()
-    home_layout.setAlignment(Qt.AlignTop)
+    home_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
     back_to_home_button = QPushButton("Home")
     back_to_home_button.clicked.connect(back_to_home_callback)
@@ -228,7 +235,7 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics):
 
     return bottom_layout
 
-def update_progress_with_events(progress_bar: QProgressBar, log_output: QTextEdit, value: int, message: str = None):
+def update_progress_with_events(progress_bar: QProgressBar, log_output: QTextEdit, value: int, message: str):
     progress_bar.setValue(value)
     if message:
         log_output.clear()

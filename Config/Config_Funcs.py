@@ -1,9 +1,10 @@
 import json
 import pyarrow.parquet as pq
-from typing import Dict, List, Callable, Tuple, Any
+from types import MappingProxyType
+from typing import Dict, List, Callable, Any
 import importlib
-from inspect import signature
 from itertools import product
+from inspect import Parameter
 
 def load_config_file(file_path: str) -> Dict[str, Any]:
     with open(file_path, "r") as file:
@@ -23,14 +24,22 @@ def get_all_indicators_from_module(module_name: str) -> Dict[str, Callable]:
         name: func for name, func in vars(module).items() if callable(func)
     }
 
-def analyze_indicator_function(func: Callable) -> Tuple[str, Dict[str, List[int]]]:
+def determine_array_type(func_params: MappingProxyType[str, Parameter]) -> str:
+    return 'returns_array' if 'returns_array' in func_params else 'prices_array'
 
-    array_type = 'returns_array' if 'returns_array' in func.__code__.co_varnames else 'prices_array'
-    excluded_params = {'returns_array', 'prices_array'}
-    func_signature = signature(func)
-    params = {param_name: [] for param_name in func_signature.parameters.keys() if param_name not in excluded_params}
-
-    return array_type, params
+def determine_indicator_params(
+    func_signature: MappingProxyType[str, Parameter],
+    name: str,
+    params_config: Dict[str, Dict[str, List[int]]],
+    array_type: str
+) -> Dict[str, List[int]]:
+    
+    param_values = params_config.get(name, {})
+    return {
+        param_name: param_values.get(param_name, [])
+        for param_name in func_signature.keys()
+        if param_name != array_type
+    }
 
 def is_valid_combination(parameters_dict: Dict[str, int]) -> bool:
     short_term_param = next((k for k in parameters_dict if 'ST' in k), None)
@@ -53,7 +62,7 @@ def is_valid_combination(parameters_dict: Dict[str, int]) -> bool:
 def filter_valid_pairs(params: Dict[str, List[int]]) -> List[Dict[str, int]]:
     parameter_names = list(params.keys())
     parameter_values_combinations = product(*params.values())
-    valid_pairs = []
+    valid_pairs: List[Dict[str, int]] = []
 
     for combination in parameter_values_combinations:
         combination_dict = dict(zip(parameter_names, combination))

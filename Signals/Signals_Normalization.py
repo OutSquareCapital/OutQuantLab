@@ -30,11 +30,11 @@ def rolling_median_normalisation(signal_array: np.ndarray, window_length: int) -
     limit = 1
 
     # Calcul de la médiane mobile
-    median_array = mt.rolling_median(signal_array, length=window_length, min_length=64)
+    median_array = mt.rolling_median(signal_array, length=window_length, min_length=window_length)
     
     # Calcul de la valeur minimale et maximale dans chaque fenêtre
-    rolling_min = mt.rolling_min(signal_array, length=window_length, min_length=64)
-    rolling_max = mt.rolling_max(signal_array, length=window_length, min_length=64)
+    rolling_min = mt.rolling_min(signal_array, length=window_length, min_length=window_length)
+    rolling_max = mt.rolling_max(signal_array, length=window_length, min_length=window_length)
     
     # Réutilisation du tableau 'signals' pour stocker le résultat
     adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)  # Pré-allocation du tableau

@@ -1,10 +1,72 @@
 from PySide6.QtWidgets import (
 QVBoxLayout, 
-QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame, QHBoxLayout
+QPushButton, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame, QHBoxLayout, QSlider, QLabel
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
-from typing import Callable
+from typing import Callable, Tuple, Dict
+
+def create_info_labels(values: list) -> Tuple[QLabel, QLabel, QLabel]:
+    range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")
+    num_values_info_label = QLabel(f"Num Values: {len(values)}")
+    generated_values_label = QLabel(f"Generated Values: {values}")
+    generated_values_label.setWordWrap(False)
+    return range_info_label, num_values_info_label, generated_values_label
+
+def create_range_sliders(values: list) -> Tuple[QSlider, QSlider]:
+    start_slider = QSlider(Qt.Orientation.Horizontal)
+    end_slider = QSlider(Qt.Orientation.Horizontal)
+    start_slider.setMinimum(0)
+    start_slider.setMaximum(11)
+    end_slider.setMinimum(0)
+    end_slider.setMaximum(12)
+    start_slider.setValue(value_to_index(min(values)))
+    end_slider.setValue(value_to_index(max(values)))
+    return start_slider, end_slider
+
+def create_num_values_slider(num_values: int) -> QSlider:
+    num_values_slider = QSlider(Qt.Orientation.Horizontal)
+    num_values_slider.setMinimum(1)
+    num_values_slider.setMaximum(10)
+    num_values_slider.setValue(num_values)
+    return num_values_slider
+
+def value_to_index(value: int) -> int:
+    return int(value).bit_length() - 1
+
+def index_to_value(index: int) -> int:
+    return 2 ** index
+
+def connect_sliders_to_update(
+    start_slider: QSlider, end_slider: QSlider, num_values_slider: QSlider,
+    range_info_label: QLabel, num_values_info_label: QLabel, generated_values_label: QLabel,
+    update_callback: Callable
+):
+    def update_values():
+        start = index_to_value(start_slider.value())
+        end = index_to_value(end_slider.value())
+        num_values = num_values_slider.value()
+
+        # Validation des sliders
+        if start * 2 > end:
+            if start_slider.hasFocus():
+                end_slider.setValue(value_to_index(start * 2))
+            elif end_slider.hasFocus():
+                start_slider.setValue(value_to_index(end // 2))
+
+        # Génération des valeurs
+        generated_values = param_range_values(start, end, num_values)
+        unique_values = sorted(set(generated_values))
+        range_info_label.setText(f"Range: {start} - {end}")
+        num_values_info_label.setText(f"Num Values: {len(unique_values)}")
+        generated_values_label.setText(f"Generated Values: {unique_values}")
+
+        # Appeler le callback pour sauvegarder les modifications
+        update_callback(unique_values)
+
+    start_slider.valueChanged.connect(update_values)
+    end_slider.valueChanged.connect(update_values)
+    num_values_slider.valueChanged.connect(update_values)
 
 def add_select_buttons(layout: QHBoxLayout, select_callback: Callable, unselect_callback: Callable):
     select_all_button = QPushButton("Select All")
@@ -30,7 +92,7 @@ def set_frame_design(frame_style):
 def set_background_image(widget: QWidget, image_path: str):
     palette = QPalette()
     pixmap = QPixmap(image_path)
-    palette.setBrush(QPalette.Window, QBrush(pixmap))
+    palette.setBrush(QPalette.ColorRole.Window, QBrush(pixmap))
     widget.setPalette(palette)
     widget.setAutoFillBackground(True)
 
@@ -48,7 +110,7 @@ def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidg
     content_widget.setMaximumHeight(0)
     animation = QPropertyAnimation(content_widget, b"maximumHeight")
     animation.setDuration(animation_duration)
-    animation.setEasingCurve(QEasingCurve.InOutCubic)
+    animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
 
     def toggle_animation(checked: bool):
         if checked:
@@ -63,16 +125,16 @@ def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidg
     toggle_button.toggled.connect(toggle_animation)
     return animation
 
-def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: list):
+def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: Dict[str, Callable]):
     for btn_text in buttons_names:
         button = QPushButton(btn_text)
         button.clicked.connect(buttons_actions.get(btn_text, lambda: None))
         layout.addWidget(button)
 
-def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list, buttons_actions: list, open_on_launch: bool = False):
+def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list, buttons_actions: Dict[str, Callable], open_on_launch: bool = False):
     toggle_button = QPushButton(toggle_button_name)
     outer_layout = QVBoxLayout()
-    outer_layout.setAlignment(Qt.AlignTop)
+    outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
     buttons_widget = QWidget()
     inner_layout = QVBoxLayout(buttons_widget)
     create_buttons_from_list(inner_layout, buttons_names, buttons_actions)
@@ -83,7 +145,7 @@ def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list,
         toggle_button.setChecked(True)
     return outer_layout
 
-def create_expandable_section(category_name: str) -> tuple[QGroupBox, QPushButton, QWidget]:
+def create_expandable_section(category_name: str) -> tuple[QGroupBox, QWidget, QVBoxLayout]:
 
     category_box = QGroupBox(category_name)
     category_layout = QVBoxLayout()
@@ -98,6 +160,7 @@ def create_expandable_section(category_name: str) -> tuple[QGroupBox, QPushButto
     category_layout.addWidget(content_widget)
 
     setup_expandable_animation(expand_button, content_widget)
+
     return category_box, content_widget, content_layout
 
 def create_checkbox_item(parent, item: str, is_checked: bool, callback: Callable[[bool], None]) -> QCheckBox:

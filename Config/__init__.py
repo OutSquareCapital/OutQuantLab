@@ -1,1 +1,1 @@
-from .Config_Structure import IndicatorsCollection, AssetsCollection
+from .Config_Structure import IndicatorsCollection, AssetsCollection, BaseCollection

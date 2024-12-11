@@ -6,8 +6,8 @@ class MainApp(QMainWindow):
         super().__init__()
 
     def initialize(self):
-        self.assets_collection = Config.AssetsCollection()
-        self.indicators_collection = Config.IndicatorsCollection()
+        self.assets_collection = AssetsCollection()
+        self.indicators_collection = IndicatorsCollection()
         self.show_home_page()
         self.showMaximized()
 
@@ -22,7 +22,7 @@ class MainApp(QMainWindow):
     def refresh_data(self):
         Get_Data.get_yahoo_finance_data(self.assets_collection.get_all_entities_names(), FILE_PATH_YF)
 
-    def update_progress(self, value, message=None):
+    def update_progress(self, value, message):
         UI.update_progress_with_events(self.progress_bar, self.log_output, value, message)
 
     def show_backtest_page(self):
@@ -50,7 +50,6 @@ class MainApp(QMainWindow):
         ) = Process_Data.process_data(data_prices_df)
 
         indicators_and_params = self.indicators_collection.get_indicators_and_parameters_for_backtest()
-
 
         self.update_progress(10, "Processing Backtest...")
 
@@ -95,7 +94,7 @@ class MainApp(QMainWindow):
             "Correlation Heatmap": lambda: self.show_plot(Dashboard.plot_correlation_heatmap(backtest_result)),
             "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2))
         }
-        metrics = [
+        metrics: List[float] = [
             round(Dashboard.calculate_overall_returns(global_result).item(
                                                                         ), 2),
             round(Dashboard.calculate_overall_sharpe_ratio(global_result
@@ -152,6 +151,7 @@ if __name__ == "__main__":
     import Get_Data
     progress_bar.setValue(40)
     import Process_Data
+    from typing import List
     progress_bar.setValue(50)
     import Backtest
     progress_bar.setValue(60)
@@ -159,7 +159,7 @@ if __name__ == "__main__":
     progress_bar.setValue(70)
     import Dashboard
     progress_bar.setValue(80)
-    import Config
+    from Config import AssetsCollection, IndicatorsCollection
     progress_bar.setValue(90)
     main_window = MainApp()
     progress_bar.setValue(100)

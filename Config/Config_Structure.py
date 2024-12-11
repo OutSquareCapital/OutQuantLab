@@ -1,13 +1,19 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Any, Callable, Tuple
+from typing import Dict, List, Any, Callable, Tuple, TypeVar, Generic
+from types import MappingProxyType
 from Files import INDICATORS_PARAMS_FILE, INDICATORS_TO_TEST_FILE, INDICATORS_CLUSTERS_FILE, INDICATORS_MODULE, ASSETS_TO_TEST_CONFIG_FILE, ASSETS_CLUSTERS_FILE, FILE_PATH_YF
-from .Config_Funcs import load_config_file, save_config_file, load_asset_names, get_all_indicators_from_module, analyze_indicator_function, filter_valid_pairs
+from .Config_Funcs import load_config_file, save_config_file, load_asset_names, get_all_indicators_from_module, determine_indicator_params, filter_valid_pairs, determine_array_type
 from abc import ABC, abstractmethod
+from inspect import signature, Parameter
 
 @dataclass
-class BaseEntity:
+class BaseEntity(ABC):
     name: str
     active: bool
+
+@dataclass
+class Asset(BaseEntity):
+    category: str
 
 @dataclass
 class Indicator(BaseEntity):
@@ -15,13 +21,15 @@ class Indicator(BaseEntity):
     array_type: str
     params: Dict[str, List[int]] = field(default_factory=dict)
 
-class BaseCollection(ABC):
+T = TypeVar("T", bound=BaseEntity)
+
+class BaseCollection(Generic[T]):
 
     def __init__(self, entities_file: str, clusters_file: str, primary_keys_file: str):
-        self.entities_file = entities_file
-        self.clusters_file = clusters_file
-        self.primary_keys_file = primary_keys_file
-        self.entities: Dict[str, BaseEntity] = {}
+        self.entities_file: str = entities_file
+        self.clusters_file: str = clusters_file
+        self.primary_keys_file: str = primary_keys_file
+        self.entities: Dict[str, T] = {}
         self.clusters = load_config_file(self.clusters_file)
         self._load_entities()
 
@@ -32,10 +40,10 @@ class BaseCollection(ABC):
     def get_all_entities_names(self) -> List[str]:
         return list(self.entities.keys())
 
-    def get_all_entities(self) -> List[BaseEntity]:
+    def get_all_entities(self) -> List[T]:
         return list(self.entities.values())
 
-    def get_entity(self, name: str) -> BaseEntity:
+    def get_entity(self, name: str) -> T:
         return self.entities[name]
 
     def is_active(self, name: str) -> bool:
@@ -44,7 +52,7 @@ class BaseCollection(ABC):
     def set_active(self, name: str, active: bool):
         self.entities[name].active = active
 
-    def get_active_entities(self) -> List[BaseEntity]:
+    def get_active_entities(self) -> List[T]:
         return [entity for entity in self.entities.values() if entity.active]
 
     def get_active_entities_names(self) -> List[str]:
@@ -61,20 +69,21 @@ class BaseCollection(ABC):
         save_config_file(self.entities_file, active_entities, indent=3)
         save_config_file(self.clusters_file, self.clusters, indent=3)
 
-class IndicatorsCollection(BaseCollection):
+class IndicatorsCollection(BaseCollection[Indicator]):
     def __init__(self):
         super().__init__(INDICATORS_TO_TEST_FILE, INDICATORS_CLUSTERS_FILE, INDICATORS_MODULE)
 
     def _load_entities(self):
-        entities_to_test = load_config_file(self.entities_file)
-        params_config = load_config_file(INDICATORS_PARAMS_FILE)
+        entities_to_test: Dict[str, bool] = load_config_file(self.entities_file)
         entities_functions: Dict[str, Callable] = get_all_indicators_from_module(self.primary_keys_file)
+        params_config: Dict[str, Dict[str, List[int]]] = load_config_file(INDICATORS_PARAMS_FILE)
 
         for name, func in entities_functions.items():
-            active = entities_to_test.get(name, False)
-            array_type, detected_params = analyze_indicator_function(func)
-            params = params_config.get(name, {})
-            params.update({k: v for k, v in detected_params.items() if k not in params})
+            func_signature: MappingProxyType[str, Parameter] = signature(func).parameters
+            active: bool = entities_to_test.get(name, False)
+            array_type: str = determine_array_type(func_signature)
+            params: Dict[str, List[int]] = determine_indicator_params(func_signature, name, params_config, array_type)
+            
             self.entities[name] = Indicator(
                 name=name,
                 active=active,
@@ -97,21 +106,16 @@ class IndicatorsCollection(BaseCollection):
     def update_param_values(self, name: str, param_key: str, values: List[int]):
         self.entities[name].params[param_key] = values
 
-    def _get_valid_parameter_combinations_for_indicator(self, indicator_name: str) -> List[Dict[str, int]]:
-        indicator = self.get_entity(indicator_name)
-        if indicator.params:
-            return filter_valid_pairs(indicator.params)
-        return []
-
     def get_indicators_and_parameters_for_backtest(self) -> Dict[str, Tuple[Callable, str, List[Dict[str, int]]]]:
+
         result = {}
         for indicator in self.get_active_entities():
             formatted_indicator_name = ''.join([word.title() for word in indicator.name.split('_')])
-            valid_pairs = self._get_valid_parameter_combinations_for_indicator(indicator.name)
+            valid_pairs =  filter_valid_pairs(indicator.params)
             result[formatted_indicator_name] = (indicator.func, indicator.array_type, valid_pairs)
         return result
     
-class AssetsCollection(BaseCollection):
+class AssetsCollection(BaseCollection[Asset]):
     def __init__(self):
         super().__init__(ASSETS_TO_TEST_CONFIG_FILE, ASSETS_CLUSTERS_FILE, FILE_PATH_YF)
 
@@ -120,4 +124,8 @@ class AssetsCollection(BaseCollection):
         entities_names = load_asset_names(self.primary_keys_file)
         for name in entities_names:
             is_active = entities_to_test.get(name, False)
-            self.entities[name] = BaseEntity(name=name, active=is_active)
+            self.entities[name] = Asset(
+                name=name, 
+                active=is_active,
+                category=''
+                )

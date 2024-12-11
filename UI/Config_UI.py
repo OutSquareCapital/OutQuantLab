@@ -1,9 +1,9 @@
-from .Common_UI import param_range_values, create_scroll_area, create_checkbox_item, create_expandable_section, add_select_buttons
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QCheckBox,  QLabel, QMessageBox, QGroupBox, QHBoxLayout, QSlider, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
+from .Common_UI import create_scroll_area, create_checkbox_item, create_expandable_section, add_select_buttons, create_range_sliders, create_info_labels, create_num_values_slider, connect_sliders_to_update
+from PySide6.QtWidgets import QAbstractItemView, QWidget, QVBoxLayout, QCheckBox,  QLabel, QMessageBox, QGroupBox, QHBoxLayout, QSlider, QTreeWidget, QTreeWidgetItem, QPushButton, QInputDialog, QApplication
 from PySide6.QtCore import Qt
 from typing import Dict, List, Any
 from PySide6.QtGui import QFont
-from Config import AssetsCollection, IndicatorsCollection
+from Config import AssetsCollection, IndicatorsCollection, BaseCollection
 
 class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection, parent=None):
@@ -52,17 +52,15 @@ class IndicatorsConfigWidget(QWidget):
     def __init__(self, indicators_collection: IndicatorsCollection, parent=None):
         super().__init__(parent)
         self.indicators_collection = indicators_collection
-        self.param_widgets: Dict[str, Dict[str, Dict[str, QSlider]]] = {}
+        self.param_widgets: Dict[str, Dict[str, Dict[str, QSlider | QLabel]]] = {}
         self.checkboxes: Dict[str, QCheckBox] = {}
         self.init_ui()
 
     def init_ui(self):
         layout = QVBoxLayout()
 
-        # Créer une zone de défilement principale
         scroll_area, scroll_widget, scroll_layout = create_scroll_area()
 
-        # Ajouter une section pour chaque indicateur avec checkbox d'activation + paramètres
         for indicator in self.indicators_collection.get_all_entities():
             self.add_indicator_section(indicator.name, indicator.active, indicator.params, scroll_layout)
 
@@ -76,10 +74,9 @@ class IndicatorsConfigWidget(QWidget):
         self.setLayout(layout)
 
     def add_indicator_section(self, indicator_name: str, is_active: bool, params: Dict[str, List[int]], layout: QVBoxLayout):
-        # Section extensible par indicateur
+
         indicator_box, content_widget, content_layout = create_expandable_section(indicator_name)
 
-        # Ajout de la checkbox pour l'activation de l'indicateur
         checkbox = create_checkbox_item(
             parent=self,
             item=indicator_name,
@@ -89,10 +86,8 @@ class IndicatorsConfigWidget(QWidget):
         content_layout.addWidget(checkbox)
         self.checkboxes[indicator_name] = checkbox
 
-        # Ajouter les widgets de paramètres si l'indicateur en a
-        if params:
-            for param_name, values in params.items():
-                self.add_param_widget(indicator_name, param_name, values, content_layout)
+        for param_name, values in params.items():
+            self.add_param_widget(indicator_name, param_name, values, content_layout)
 
         layout.addWidget(indicator_box)
 
@@ -100,17 +95,20 @@ class IndicatorsConfigWidget(QWidget):
         param_box = QGroupBox(param_name)
         param_layout = QVBoxLayout()
 
-        # Si values est vide ou None, on le remplace par [1]
         if not values:
             values = [1]
 
-        range_info_label, num_values_info_label, scroll_area = self.create_info_labels(values)
+        range_info_label, num_values_info_label, generated_values_label = create_info_labels(values)
         param_layout.addWidget(range_info_label)
         param_layout.addWidget(num_values_info_label)
+
+        scroll_area, _, _ = create_scroll_area()
+        scroll_area.setWidget(generated_values_label)
+        scroll_area.setFixedHeight(50)
         param_layout.addWidget(scroll_area)
 
-        start_slider, end_slider = self.create_range_sliders(values)
-        num_values_slider = self.create_num_values_slider(len(values))
+        start_slider, end_slider = create_range_sliders(values)
+        num_values_slider = create_num_values_slider(len(values))
 
         sliders_layout = QHBoxLayout()
         sliders_layout.addWidget(QLabel("Start:"))
@@ -124,9 +122,11 @@ class IndicatorsConfigWidget(QWidget):
         num_values_layout.addWidget(num_values_slider)
         param_layout.addLayout(num_values_layout)
 
-        self.connect_sliders_to_update(
-            indicator_name, param_name, start_slider, end_slider, num_values_slider,
-            range_info_label, num_values_info_label, scroll_area.widget()
+        # Connecter les sliders à la mise à jour des valeurs
+        connect_sliders_to_update(
+            start_slider, end_slider, num_values_slider,
+            range_info_label, num_values_info_label, generated_values_label,
+            lambda unique_values: self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
         )
 
         param_box.setLayout(param_layout)
@@ -139,77 +139,6 @@ class IndicatorsConfigWidget(QWidget):
             "range_info_label": range_info_label,
             "num_values_info_label": num_values_info_label,
         }
-
-    def create_info_labels(self, values: list):
-        range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")
-        num_values_info_label = QLabel(f"Num Values: {len(values)}")
-
-        generated_values_label = QLabel(f"Generated Values: {values}")
-        generated_values_label.setWordWrap(False)
-        scroll_area, _, _ = create_scroll_area()
-        scroll_area.setWidget(generated_values_label)
-        scroll_area.setFixedHeight(50)
-
-        return range_info_label, num_values_info_label, scroll_area
-
-    def create_range_sliders(self, values: list):
-        start_slider = QSlider(Qt.Horizontal)
-        end_slider = QSlider(Qt.Horizontal)
-
-        # On travaille sur des puissances de 2, de 1 à 4096 (2^12)
-        # start_slider : 0 à 11  (2^0 =1, 2^11=2048)
-        # end_slider   : 0 à 12  (2^0 =1, 2^12=4096)
-        start_slider.setMinimum(0)
-        start_slider.setMaximum(11)
-        end_slider.setMinimum(0)
-        end_slider.setMaximum(12)
-
-        start_slider.setValue(self.value_to_index(min(values)))
-        end_slider.setValue(self.value_to_index(max(values)))
-
-        return start_slider, end_slider
-
-    def create_num_values_slider(self, num_values: int):
-        num_values_slider = QSlider(Qt.Horizontal)
-        num_values_slider.setMinimum(1)
-        num_values_slider.setMaximum(10)
-        num_values_slider.setValue(num_values)
-        return num_values_slider
-
-    def value_to_index(self, value: int) -> int:
-        return int(value).bit_length() - 1
-
-    def index_to_value(self, index: int) -> int:
-        return 2 ** index
-
-    def connect_sliders_to_update(self, indicator_name: str, param_name: str,
-                                  start_slider: QSlider, end_slider: QSlider, num_values_slider: QSlider,
-                                  range_info_label: QLabel, num_values_info_label: QLabel, generated_values_label: QLabel):
-        def update_values():
-            start = self.index_to_value(start_slider.value())
-            end = self.index_to_value(end_slider.value())
-            num_values = num_values_slider.value()
-
-            # Validation des valeurs
-            if start * 2 > end:
-                if start_slider.hasFocus():
-                    end_slider.setValue(self.value_to_index(start * 2))
-                    end = self.index_to_value(end_slider.value())
-                elif end_slider.hasFocus():
-                    start_slider.setValue(self.value_to_index(end // 2))
-                    start = self.index_to_value(start_slider.value())
-
-            generated_values = param_range_values(start, end, num_values)
-            unique_values = list(sorted(set(generated_values)))
-            range_info_label.setText(f"Range: {start} - {end}")
-            num_values_info_label.setText(f"Num Values: {len(unique_values)}")
-            generated_values_label.setText(f"Generated Values: {unique_values}")
-
-            self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
-
-        start_slider.valueChanged.connect(update_values)
-        end_slider.valueChanged.connect(update_values)
-        num_values_slider.valueChanged.connect(update_values)
 
     def update_indicator_state(self, indicator_name: str, is_checked: bool):
         self.indicators_collection.set_active(indicator_name, is_checked)
@@ -225,18 +154,16 @@ class IndicatorsConfigWidget(QWidget):
             checkbox.setChecked(False)
 
 class TreeStructureWidget(QWidget):
-    def __init__(self, collection, parent=None):
+    def __init__(self, collection: BaseCollection , parent=None):
         super().__init__(parent)
         self.collection = collection
-
-        # Récupérer la structure de clusters et les noms des objets
         self.tree_structure = self.collection.clusters
         self.data = set(self.collection.get_all_entities_names())
 
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
-        self.tree.setDragDropMode(QTreeWidget.InternalMove)
-        self.tree.setSelectionMode(QTreeWidget.ExtendedSelection)
+        self.tree.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self.tree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.tree.itemClicked.connect(self.handle_item_click)
 
         self.init_ui()
@@ -269,7 +196,7 @@ class TreeStructureWidget(QWidget):
 
         for key, value in data.items():
             category_item = QTreeWidgetItem([key])
-            category_item.setFlags(category_item.flags() | Qt.ItemIsDropEnabled)
+            category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
             font = QFont()
             font.setUnderline(True)
             category_item.setFont(0, font)
@@ -284,7 +211,7 @@ class TreeStructureWidget(QWidget):
                 for element in value:
                     if element in self.data:
                         child_item = QTreeWidgetItem([element])
-                        child_item.setFlags(child_item.flags() & ~Qt.ItemIsDropEnabled)
+                        child_item.setFlags(child_item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
                         category_item.addChild(child_item)
 
         # Ajouter les éléments non catégorisés
@@ -292,7 +219,7 @@ class TreeStructureWidget(QWidget):
             for element in self.data:
                 if not self.find_element_in_tree(element):
                     orphan_item = QTreeWidgetItem([element])
-                    orphan_item.setFlags(orphan_item.flags() & ~Qt.ItemIsDropEnabled)
+                    orphan_item.setFlags(orphan_item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
                     self.tree.addTopLevelItem(orphan_item)
 
     def find_element_in_tree(self, element: str) -> bool:
@@ -358,7 +285,7 @@ class TreeStructureWidget(QWidget):
 
             # Ajouter dans le widget
             category_item = QTreeWidgetItem([category_name])
-            category_item.setFlags(category_item.flags() | Qt.ItemIsDropEnabled)
+            category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
             self.tree.addTopLevelItem(category_item)
 
     def delete_category(self):
@@ -372,9 +299,9 @@ class TreeStructureWidget(QWidget):
                 parent.removeChild(selected_item)
 
     def handle_item_click(self, item, column):
-        if Qt.ControlModifier & QApplication.keyboardModifiers():
+        if Qt.KeyboardModifier.ControlModifier & QApplication.keyboardModifiers():
             item.setSelected(not item.isSelected())
-        elif Qt.ShiftModifier & QApplication.keyboardModifiers():
+        elif Qt.KeyboardModifier.ShiftModifier & QApplication.keyboardModifiers():
             current_items = self.tree.selectedItems()
             if current_items:
                 start = self.tree.indexOfTopLevelItem(current_items[0])
