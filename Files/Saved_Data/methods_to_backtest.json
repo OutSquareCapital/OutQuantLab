@@ -2,7 +2,7 @@
    "mean_price_ratio": true,
    "median_price_ratio": true,
    "central_price_ratio": true,
-   "mean_rate_of_change": false,
+   "mean_rate_of_change": true,
    "median_rate_of_change": false,
    "central_rate_of_change": false,
    "mean_price_macd": false,
