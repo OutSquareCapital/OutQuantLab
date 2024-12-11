@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 import pandas as pd
 import numpy as np
 from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
-import Dashboard.Transformations as Transformations
+from .Transformations import normalize_data_for_colormap
 from Files import COLOR_ADJUSTMENT
 
 def curves( x_values: pd.Index,
@@ -12,7 +12,7 @@ def curves( x_values: pd.Index,
 
     fig = go.Figure()
 
-    color_map = get_color_map(y_values.columns)
+    color_map = get_color_map(y_values.columns.tolist())
 
     for column in y_values.columns:
         fig.add_trace(go.Scatter(
@@ -59,7 +59,7 @@ def bars(series: pd.Series, title: str):
 
 def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str):
 
-    z_normalized = Transformations.normalize_data_for_colormap(z_values)
+    z_normalized = normalize_data_for_colormap(z_values)
 
     colorscale = get_heatmap_colorscale()
 
@@ -71,13 +71,20 @@ def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str):
         showscale=False,
         zmin=0,
         zmax=1,
-        customdata=z_values
+        customdata=z_values,
+        hovertemplate=(
+        "X: %{x}<br>"
+        "Y: %{y}<br>"
+        "Rank: %{z}<br>"
+        "Correlation: %{customdata}<extra></extra>"
+    )
     ))
+
     fig.update_layout(
         yaxis=dict(showgrid=False, autorange="reversed")
     )
 
-    setup_figure_layout(fig, title, hover_data=None)
+    setup_figure_layout(fig, title, hover_display_custom=False)
 
     return fig
 
@@ -165,6 +172,6 @@ def icicle(labels: list, parents: list, title: str):
             tiling=dict(orientation="v"),
         )
     )
-    setup_figure_layout(fig, title, hover_data=None)
+    setup_figure_layout(fig, title, hover_display_custom=False)
     
     return fig

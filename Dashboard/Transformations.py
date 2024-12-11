@@ -5,12 +5,12 @@ from collections import defaultdict
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import linkage, leaves_list
 
-def convert_series_multiindex_labels(series: pd.Series) -> pd.Series:
+def convert_series_multiindex_labels(series):
     if isinstance(series.index, pd.MultiIndex):
         series.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in series.index]
     return series
 
-def convert_dataframe_multiindex_labels(df: pd.DataFrame) -> pd.DataFrame:
+def convert_dataframe_multiindex_labels(df):
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = ["_".join(map(str, col)) if isinstance(col, tuple) else str(col) for col in df.columns]
     if isinstance(df.index, pd.MultiIndex):
@@ -25,7 +25,7 @@ def compute_linkage_matrix(corr_matrix: pd.DataFrame) -> np.ndarray:
     condensed_distances = squareform(pairwise_distances.values)
     return linkage(condensed_distances, method='average')
 
-def sort_correlation_matrix(corr_matrix: pd.DataFrame) -> pd.DataFrame:
+def sort_correlation_matrix(corr_matrix) -> pd.DataFrame:
 
     linkage_matrix = compute_linkage_matrix(corr_matrix)
     ordered_indices = leaves_list(linkage_matrix)
@@ -35,7 +35,7 @@ def sort_correlation_matrix(corr_matrix: pd.DataFrame) -> pd.DataFrame:
 
     return sorted_corr_matrix
 
-def convert_params_to_3d(sharpe_ratios_df:pd.DataFrame, param1, param2):
+def convert_params_to_3d(sharpe_ratios_df, param1, param2):
 
     sharpe_dict = defaultdict(list)
 
@@ -147,14 +147,14 @@ def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=No
 def sort_series(data: pd.Series, ascending: bool = True) -> pd.Series:
     return data.sort_values(ascending=ascending)
 
-def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool = True) -> list:
+def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool = True) -> pd.DataFrame:
     if use_final:
         return data.sort_values(by=data.index[-1], axis=1, ascending=ascending)
     else:
         sorted_data = data.mean().sort_values(ascending=ascending)
         return data[sorted_data.index]
 
-def normalize_data_for_colormap(data: np.ndarray) -> tuple:
+def normalize_data_for_colormap(data: np.ndarray):
 
     z_min = np.nanmin(data)
     z_max = np.nanmax(data)

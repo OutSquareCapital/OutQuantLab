@@ -150,8 +150,8 @@ def plot_correlation_heatmap(returns_df: pd.DataFrame):
     sorted_correlation_matrix = Transformations.convert_dataframe_multiindex_labels(sorted_correlation_matrix)
     return Widgets.heatmap(
         z_values=sorted_correlation_matrix.values,
-        x_labels=sorted_correlation_matrix.columns,
-        y_labels=sorted_correlation_matrix.columns,
+        x_labels=sorted_correlation_matrix.columns.to_list(),
+        y_labels=sorted_correlation_matrix.columns.to_list(),
         title="Correlation Matrix")
 
 def plot_clusters_icicle(returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters):
@@ -171,7 +171,7 @@ def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str
 
     return Widgets.heatmap(z_values=Z,
                     x_labels=X[0],
-                    y_labels=Y[:, 0],
+                    y_labels=Y[:, 0].tolist(),
                     title=f"Sharpe Ratios for {param1} and {param2}")
 
 def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list):

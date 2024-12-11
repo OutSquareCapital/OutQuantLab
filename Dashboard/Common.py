@@ -31,6 +31,7 @@ def get_heatmap_colorscale(n_colors: int = 100) -> list:
 
 def setup_figure_layout(fig: go.Figure, 
                         figtitle: str,
+                        hover_display_custom: bool=True,
                         hover_data='y'):
     fig.update_layout(
         font={
@@ -67,10 +68,10 @@ def setup_figure_layout(fig: go.Figure,
         showgrid=False,
         automargin=True
     )
-    if hover_data is not None:
+    if hover_display_custom:
         
         for trace in fig.data:
-            trace.hovertemplate = f"<span style='color:{COLOR_ADJUSTMENT}'><b>%{{{hover_data}}}</b></span><extra><b>%{{fullData.name}}</b></extra>"
+            trace.hovertemplate = f"<span style='color:{COLOR_ADJUSTMENT}'><b>%{{{hover_data}}}</b></span><extra><b>%{{fullData.name}}</b></extra>" # type: ignore
 
 
 def get_marker_config(color: str) -> dict:

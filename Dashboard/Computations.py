@@ -33,7 +33,7 @@ def calculate_overall_average_drawdown(returns_df: pd.DataFrame, length: int) ->
     return calculate_rolling_drawdown(returns_df, length).mean().round(2)
 
 
-def calculate_overall_monthly_skew(returns_df: pd.DataFrame) -> pd.Series:
+def calculate_overall_monthly_skew(returns_df) -> pd.Series:
 
     monthly_returns_df = returns_df.resample('ME').mean()
     
@@ -54,7 +54,7 @@ def calculate_equity_curves_df(returns_df: pd.DataFrame):
                                               dtype=np.float32
                                               ).round(2)
 
-def format_returns(returns_df: pd.DataFrame, limit: int) -> pd.DataFrame:
+def format_returns(returns_df: pd.DataFrame, limit: float) -> pd.DataFrame:
     lower_threshold = returns_df.quantile(limit, axis=0)
     upper_threshold = returns_df.quantile(1-limit, axis=0)
     
