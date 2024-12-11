@@ -434,26 +434,28 @@
    },
    "relative_directional_volatility_trend": {
       "LenSmooth": [
-         32,
-         42,
-         56,
-         74,
-         97,
-         128
+         1,
+         2,
+         4,
+         8,
+         16
       ],
       "LenRelative": [
+         16,
+         32,
+         64,
          128,
-         152,
-         181,
-         215,
-         256
+         256,
+         512,
+         1024
       ],
       "LenVol": [
+         4,
+         8,
          16,
-         19,
-         23,
-         27,
-         32
+         32,
+         64,
+         128
       ],
       "TrendLenST": [
          4,
@@ -472,25 +474,25 @@
    },
    "normalised_directional_volatility_trend": {
       "LenSmooth": [
+         1,
+         2,
+         4,
          8,
-         11,
-         16,
-         23,
-         32
+         16
       ],
       "LenNormalization": [
          64,
-         76,
-         91,
-         108,
-         128
+         128,
+         256,
+         512,
+         1024
       ],
       "LenVol": [
+         4,
+         8,
+         16,
          32,
-         45,
-         64,
-         91,
-         128
+         64
       ],
       "TrendLenST": [
          4,
