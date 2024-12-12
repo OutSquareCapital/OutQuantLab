@@ -167,9 +167,9 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics: list[float
         slider = QSlider(Qt.Orientation.Horizontal)
         slider.setRange(0, 10)
         slider.setValue(5)
-        label = QLabel(f"{param}: {slider.value()}")
-        slider.valueChanged.connect(lambda value, lbl=label, txt=param: lbl.setText(f"{txt}: {value}"))
-        clusters_buttons_inner_layout.addWidget(label)
+        slider_label = QLabel(f"{param}: {slider.value()}")
+        slider.valueChanged.connect(lambda value, lbl=slider_label, txt=param: lbl.setText(f"{txt}: {value}"))
+        clusters_buttons_inner_layout.addWidget(slider_label)
         clusters_buttons_inner_layout.addWidget(slider)
 
     clusters_buttons_layout.addWidget(clusters_toggle_button)
