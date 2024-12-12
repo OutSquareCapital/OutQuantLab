@@ -13,11 +13,12 @@ class MainApp(QMainWindow):
 
     def show_home_page(self):
         UI.setup_home_page(
-            parent=self,
-            run_backtest_callback=self.run_backtest,
-            refresh_data_callback=self.refresh_data,
-            assets_collection=self.assets_collection,
-            indicators_collection=self.indicators_collection)
+        parent=self,
+        run_backtest_callback=self.run_backtest,
+        refresh_data_callback=self.refresh_data,
+        assets_collection=self.assets_collection,
+        indicators_collection=self.indicators_collection
+        )
 
     def refresh_data(self):
         Get_Data.get_yahoo_finance_data(self.assets_collection.get_all_entities_names(), FILE_PATH_YF)
@@ -30,9 +31,9 @@ class MainApp(QMainWindow):
 
     def show_plot(self, fig):
         UI.display_plot_dialog(
-            parent=self,
-            fig=fig,
-            window_title="Graph"
+        parent=self,
+        fig=fig,
+        window_title="Graph"
         )
 
     def run_backtest(self):
@@ -42,11 +43,11 @@ class MainApp(QMainWindow):
         data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_collection.get_active_entities_names())
 
         (
-            prices_array,
-            volatility_adjusted_pct_returns_array,
-            log_returns_array,
-            asset_names,
-            dates_index,
+        prices_array,
+        volatility_adjusted_pct_returns_array,
+        log_returns_array,
+        asset_names,
+        dates_index,
         ) = Process_Data.process_data(data_prices_df)
 
         indicators_and_params = self.indicators_collection.get_indicators_and_parameters_for_backtest()
@@ -54,25 +55,26 @@ class MainApp(QMainWindow):
         self.update_progress(10, "Processing Backtest...")
 
         raw_adjusted_returns_df = Backtest.process_backtest(
-            prices_array,
-            log_returns_array,
-            volatility_adjusted_pct_returns_array,
-            asset_names,
-            dates_index,
-            indicators_and_params,
-            progress_callback=self.update_progress
+        prices_array,
+        log_returns_array,
+        volatility_adjusted_pct_returns_array,
+        asset_names,
+        dates_index,
+        indicators_and_params,
+        progress_callback=self.update_progress
         )
 
         self.update_progress(80, "Creating Portfolio...")
         
-        backtest_result = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df.dropna(axis=0),  
-                                                                    by_method=True, 
-                                                                    by_asset=True)
-                                                                                
+        backtest_result = Portfolio.calculate_daily_average_returns(
+        raw_adjusted_returns_df.dropna(axis=0),  
+        by_method=True, 
+        by_asset=True)
+
         global_result = Portfolio.calculate_daily_average_returns(
-                                                                backtest_result, 
-                                                                global_avg=True
-                                                                )
+        backtest_result, 
+        global_avg=True
+        )
 
         self.update_progress(100, "Plotting Results...")
 
@@ -80,41 +82,36 @@ class MainApp(QMainWindow):
 
     def show_results_page(self, backtest_result, global_result):
         plots = {
-            "Equity": lambda: self.show_plot(Dashboard.plot_equity(backtest_result)),
-            "Total Returns %": lambda: self.show_plot(Dashboard.plot_overall_returns(backtest_result)),
-            "Volatility": lambda: self.show_plot(Dashboard.plot_rolling_volatility(backtest_result)),
-            "Drawdown": lambda: self.show_plot(Dashboard.plot_rolling_drawdown(backtest_result, length=1250)),
-            "Sharpe Ratio": lambda: self.show_plot(Dashboard.plot_rolling_sharpe_ratio(backtest_result, length=1250)),
-            "Smoothed Skewness": lambda: self.show_plot(Dashboard.plot_rolling_smoothed_skewness(backtest_result, length=1250)),
-            "Average Inverted Correlation": lambda: self.show_plot(Dashboard.plot_rolling_average_inverted_correlation(backtest_result, length=1250)),
-            "Overall Sharpe Ratio": lambda: self.show_plot(Dashboard.plot_overall_sharpe_ratio(backtest_result)),
-            "Overall Volatility": lambda: self.show_plot(Dashboard.plot_overall_volatility(backtest_result)),
-            "Average Drawdown": lambda: self.show_plot(Dashboard.plot_overall_average_drawdown(backtest_result, length=1250)),
-            "Overall Average Inverted Correlation": lambda: self.show_plot(Dashboard.plot_overall_average_inverted_correlation(backtest_result)),
-            "Monthly Skew": lambda: self.show_plot(Dashboard.plot_overall_monthly_skew(backtest_result)),
-            "Distribution Violin": lambda: self.show_plot(Dashboard.plot_returns_distribution_violin(backtest_result)),
-            "Distribution Histogram": lambda: self.show_plot(Dashboard.plot_returns_distribution_histogram(backtest_result)),
-            "Correlation Heatmap": lambda: self.show_plot(Dashboard.plot_correlation_heatmap(backtest_result)),
-            "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2))
+        "Equity": lambda: self.show_plot(Dashboard.plot_equity(backtest_result)),
+        "Total Returns %": lambda: self.show_plot(Dashboard.plot_overall_returns(backtest_result)),
+        "Volatility": lambda: self.show_plot(Dashboard.plot_rolling_volatility(backtest_result)),
+        "Drawdown": lambda: self.show_plot(Dashboard.plot_rolling_drawdown(backtest_result, length=1250)),
+        "Sharpe Ratio": lambda: self.show_plot(Dashboard.plot_rolling_sharpe_ratio(backtest_result, length=1250)),
+        "Smoothed Skewness": lambda: self.show_plot(Dashboard.plot_rolling_smoothed_skewness(backtest_result, length=1250)),
+        "Average Inverted Correlation": lambda: self.show_plot(Dashboard.plot_rolling_average_inverted_correlation(backtest_result, length=1250)),
+        "Overall Sharpe Ratio": lambda: self.show_plot(Dashboard.plot_overall_sharpe_ratio(backtest_result)),
+        "Overall Volatility": lambda: self.show_plot(Dashboard.plot_overall_volatility(backtest_result)),
+        "Average Drawdown": lambda: self.show_plot(Dashboard.plot_overall_average_drawdown(backtest_result, length=1250)),
+        "Overall Average Inverted Correlation": lambda: self.show_plot(Dashboard.plot_overall_average_inverted_correlation(backtest_result)),
+        "Monthly Skew": lambda: self.show_plot(Dashboard.plot_overall_monthly_skew(backtest_result)),
+        "Distribution Violin": lambda: self.show_plot(Dashboard.plot_returns_distribution_violin(backtest_result)),
+        "Distribution Histogram": lambda: self.show_plot(Dashboard.plot_returns_distribution_histogram(backtest_result)),
+        "Correlation Heatmap": lambda: self.show_plot(Dashboard.plot_correlation_heatmap(backtest_result)),
+        "Clusters Icicle": lambda: self.show_plot(Dashboard.plot_clusters_icicle(backtest_result, max_clusters=5, max_sub_clusters=3, max_sub_sub_clusters=2))
         }
         metrics: list[float] = [
-            round(Dashboard.calculate_overall_returns(global_result).item(
-                                                                        ), 2),
-            round(Dashboard.calculate_overall_sharpe_ratio(global_result
-                                                           ).item(), 2),
-            round(Dashboard.calculate_overall_average_drawdown(global_result, length=1250
-                                                               ).item(), 2),
-            round(Dashboard.calculate_overall_volatility(global_result
-                                                         ).item(), 2),
-            round(Dashboard.calculate_overall_monthly_skew(global_result
-                                                           ).item(), 2)
+        round(Dashboard.calculate_overall_returns(global_result).item(), 2),
+        round(Dashboard.calculate_overall_sharpe_ratio(global_result).item(), 2),
+        round(Dashboard.calculate_overall_average_drawdown(global_result, length=1250).item(), 2),
+        round(Dashboard.calculate_overall_volatility(global_result).item(), 2),
+        round(Dashboard.calculate_overall_monthly_skew(global_result).item(), 2)
         ]
         bottom_layout = UI.setup_results_page(
-                                            parent=self,
-                                            plots=plots,
-                                            back_to_home_callback=self.show_home_page,
-                                            metrics=metrics
-                                            )
+        parent=self,
+        plots=plots,
+        back_to_home_callback=self.show_home_page,
+        metrics=metrics
+        )
 
         #'''
         equity_plot = UI.generate_plot_widget(Dashboard.plot_equity(global_result), show_legend=False)

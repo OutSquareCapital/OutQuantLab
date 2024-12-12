@@ -11,16 +11,83 @@ QHBoxLayout,
 QSlider, 
 QLabel, 
 QTreeWidgetItem,
-QMessageBox, 
+QMessageBox,
 QInputDialog
 )
+
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from PySide6.QtGui import QFont
 from typing import Any
 from collections.abc import Callable
 
-def add_category(tree: QTreeWidget, tree_structure: dict[str, Any], data: set):
+def create_range_sliders(values: list) -> tuple[QSlider, QSlider]:
+    start_slider = QSlider(Qt.Orientation.Horizontal)
+    end_slider = QSlider(Qt.Orientation.Horizontal)
+    start_slider.setMinimum(0)
+    start_slider.setMaximum(11)
+    end_slider.setMinimum(0)
+    end_slider.setMaximum(12)
+    start_slider.setValue(value_to_index(min(values)))
+    end_slider.setValue(value_to_index(max(values)))
+    return start_slider, end_slider
+
+def create_num_values_slider(num_values: int) -> QSlider:
+    num_values_slider = QSlider(Qt.Orientation.Horizontal)
+    num_values_slider.setMinimum(1)
+    num_values_slider.setMaximum(10)
+    num_values_slider.setValue(num_values)
+    return num_values_slider
+
+def param_range_values(start: int, end: int, num_values: int) -> list:
+    if num_values == 1:
+        return [int((start + end) / 2)]
+    ratio = (end / start) ** (1 / (num_values - 1))
+    return [int(round(start * (ratio ** i))) for i in range(num_values)]
+
+def value_to_index(value: int) -> int:
+    return int(value).bit_length() - 1
+
+def index_to_value(index: int) -> int:
+    return 2 ** index
+
+def create_info_labels(values: list) -> tuple[QLabel, QLabel, QLabel]:
+    range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")
+    num_values_info_label = QLabel(f"Num Values: {len(values)}")
+    generated_values_label = QLabel(f"Generated Values: {values}")
+    generated_values_label.setWordWrap(False)
+    return range_info_label, num_values_info_label, generated_values_label
+
+def create_param_labels(values: list[int]) -> tuple[QVBoxLayout, QLabel, QLabel, QLabel]:
+    range_info_label, num_values_info_label, generated_values_label = create_info_labels(values)
+    param_layout = QVBoxLayout()
+    param_layout.addWidget(range_info_label)
+    param_layout.addWidget(num_values_info_label)
+
+    scroll_area, _, _ = create_scroll_area()
+    scroll_area.setWidget(generated_values_label)
+    scroll_area.setFixedHeight(50)
+    param_layout.addWidget(scroll_area)
+
+    return param_layout, range_info_label, num_values_info_label, generated_values_label
+
+def create_param_sliders(values: list[int]) -> tuple[QHBoxLayout, QHBoxLayout, QSlider, QSlider, QSlider]:
+    start_slider, end_slider = create_range_sliders(values)
+    num_values_slider = create_num_values_slider(len(values))
+
+    sliders_layout = QHBoxLayout()
+    sliders_layout.addWidget(QLabel("Start:"))
+    sliders_layout.addWidget(start_slider)
+    sliders_layout.addWidget(QLabel("End:"))
+    sliders_layout.addWidget(end_slider)
+
+    num_values_layout = QHBoxLayout()
+    num_values_layout.addWidget(QLabel("Num Values:"))
+    num_values_layout.addWidget(num_values_slider)
+
+    return sliders_layout, num_values_layout, start_slider, end_slider, num_values_slider
+
+def add_category(tree: QTreeWidget, tree_structure: dict[str, Any]):
     category_name, ok = QInputDialog.getText(tree, "New Category", "Category Name:")
     if ok and category_name:
         if category_name in tree_structure:
@@ -32,7 +99,7 @@ def add_category(tree: QTreeWidget, tree_structure: dict[str, Any], data: set):
         category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
         tree.addTopLevelItem(category_item)
 
-def delete_category(tree: QTreeWidget, tree_structure: dict[str, Any]):
+def delete_category(tree: QTreeWidget):
     selected_item = tree.currentItem()
     if selected_item:
         parent = selected_item.parent()
@@ -41,7 +108,6 @@ def delete_category(tree: QTreeWidget, tree_structure: dict[str, Any]):
             tree.takeTopLevelItem(index)
         else:
             parent.removeChild(selected_item)
-
 
 def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
     def traverse(item):
@@ -56,7 +122,6 @@ def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
         if traverse(tree.topLevelItem(i)):
             return True
     return False
-
 
 def populate_tree_from_dict(tree: QTreeWidget, data: dict[str, Any], data_set: set, parent_item=None):
     if parent_item is None:
@@ -89,38 +154,6 @@ def populate_tree_from_dict(tree: QTreeWidget, data: dict[str, Any], data_set: s
                 orphan_item.setFlags(orphan_item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
                 tree.addTopLevelItem(orphan_item)
 
-
-def create_info_labels(values: list) -> tuple[QLabel, QLabel, QLabel]:
-    range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")
-    num_values_info_label = QLabel(f"Num Values: {len(values)}")
-    generated_values_label = QLabel(f"Generated Values: {values}")
-    generated_values_label.setWordWrap(False)
-    return range_info_label, num_values_info_label, generated_values_label
-
-def create_range_sliders(values: list) -> tuple[QSlider, QSlider]:
-    start_slider = QSlider(Qt.Orientation.Horizontal)
-    end_slider = QSlider(Qt.Orientation.Horizontal)
-    start_slider.setMinimum(0)
-    start_slider.setMaximum(11)
-    end_slider.setMinimum(0)
-    end_slider.setMaximum(12)
-    start_slider.setValue(value_to_index(min(values)))
-    end_slider.setValue(value_to_index(max(values)))
-    return start_slider, end_slider
-
-def create_num_values_slider(num_values: int) -> QSlider:
-    num_values_slider = QSlider(Qt.Orientation.Horizontal)
-    num_values_slider.setMinimum(1)
-    num_values_slider.setMaximum(10)
-    num_values_slider.setValue(num_values)
-    return num_values_slider
-
-def value_to_index(value: int) -> int:
-    return int(value).bit_length() - 1
-
-def index_to_value(index: int) -> int:
-    return 2 ** index
-
 def connect_sliders_to_update(
     start_slider: QSlider, end_slider: QSlider, num_values_slider: QSlider,
     range_info_label: QLabel, num_values_info_label: QLabel, generated_values_label: QLabel,
@@ -151,7 +184,7 @@ def connect_sliders_to_update(
     start_slider.valueChanged.connect(update_values)
     end_slider.valueChanged.connect(update_values)
     num_values_slider.valueChanged.connect(update_values)
-
+    
 def add_select_buttons(layout: QHBoxLayout, select_callback: Callable, unselect_callback: Callable):
     select_all_button = QPushButton("Select All")
     select_all_button.clicked.connect(select_callback)
@@ -160,13 +193,6 @@ def add_select_buttons(layout: QHBoxLayout, select_callback: Callable, unselect_
     unselect_all_button = QPushButton("Unselect All")
     unselect_all_button.clicked.connect(unselect_callback)
     layout.addWidget(unselect_all_button)
-
-
-def param_range_values(start: int, end: int, num_values: int) -> list:
-    if num_values == 1:
-        return [int((start + end) / 2)]
-    ratio = (end / start) ** (1 / (num_values - 1))
-    return [int(round(start * (ratio ** i))) for i in range(num_values)]
 
 def set_frame_design(frame_style):
     frame = QFrame()
@@ -247,7 +273,7 @@ def create_expandable_section(category_name: str) -> tuple[QGroupBox, QWidget, Q
 
     return category_box, content_widget, content_layout
 
-def create_checkbox_item(parent, item: str, is_checked: bool, callback: Callable[[bool], None]) -> QCheckBox:
+def create_checkbox_item(item: str, is_checked: bool, callback: Callable[[bool], None]) -> QCheckBox:
     checkbox = QCheckBox(item)
     checkbox.setChecked(is_checked)
     checkbox.stateChanged.connect(lambda: callback(checkbox.isChecked()))
