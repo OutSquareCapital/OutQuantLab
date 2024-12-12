@@ -2,32 +2,31 @@ import bottleneck as bn
 import numpy as np
 import pandas as pd
 
-def generate_recursive_means(returns_df, asset_tree):
+def generate_recursive_means(returns_df: pd.DataFrame, asset_tree):
     
-    group_means = []  # Liste pour stocker les moyennes calculées à chaque niveau
-
-    # Parcours récursif de l'arbre des actifs
+    group_means = [] 
     for key, value in asset_tree.items():
         if isinstance(value, dict):
-            # Si c'est un sous-groupe, on applique la récursion pour obtenir les moyennes des sous-groupes
             sub_group_mean = generate_recursive_means(returns_df, value)
             group_means.append(sub_group_mean)
         
         elif isinstance(value, list):
-            # Si c'est une liste d'actifs, on calcule la moyenne des rendements pour ces actifs
-            sub_group_mean = pd.Series(bn.nanmean(returns_df[value], axis=1), index=returns_df.index)
+            sub_group_mean = pd.Series(bn.nanmean(returns_df[value], axis=1), 
+                                       index=returns_df.index)
             group_means.append(sub_group_mean)
 
-    # Si on a des moyennes pour ce groupe, on calcule la moyenne finale à ce niveau
-    if group_means:
-        # Concaténer les sous-groupes ou actifs pour calculer la moyenne au niveau supérieur
+    if group_means: 
         final_mean = pd.concat(group_means, axis=1).mean(axis=1)
-        return pd.DataFrame(final_mean, columns=['PortfolioReturns'], dtype=np.float32)
+        return pd.DataFrame(final_mean, 
+                            columns=['PortfolioReturns'], 
+                            dtype=np.float32)
     else:
-        # Si aucune donnée n'est disponible, retourner un DataFrame vide avec des NaN
-        return pd.DataFrame(np.nan, index=returns_df.index, columns=['PortfolioReturns'], dtype=np.float32)
+        return pd.DataFrame(np.nan, 
+                            index=returns_df.index, 
+                            columns=['PortfolioReturns'], 
+                            dtype=np.float32)
 
-def generate_recursive_strategy_means(returns_df, strategy_tree):
+def generate_recursive_strategy_means(returns_df: pd.DataFrame, strategy_tree):
     strategy_means = {}
 
     for key, value in strategy_tree.items():
@@ -91,44 +90,50 @@ def calculate_daily_average_returns(returns_df: pd.DataFrame,
 
     return returns_df
 
-def generate_recursive_cluster_means(returns_df, cluster_tree, by_cluster=False):
+def generate_recursive_cluster_means(returns_df: pd.DataFrame, 
+                                     cluster_tree, 
+                                     by_cluster=False
+                                     ) -> pd.DataFrame:
 
-    group_means = {}  # Dictionnaire pour stocker les moyennes calculées à chaque niveau
+    group_means = {}
 
-    # Parcours récursif de l'arbre des clusters
     for cluster_key, cluster_value in cluster_tree.items():
         if isinstance(cluster_value, dict):
-            # Si c'est un sous-cluster, appliquer la récursion pour obtenir les moyennes des sous-groupes
+
             if not by_cluster:
                 sub_group_mean = generate_recursive_cluster_means(returns_df, cluster_value, by_cluster)
                 group_means[cluster_key] = sub_group_mean
             else:
-                # Si by_cluster est True, on ne descend pas plus bas, et on passe directement à ce niveau
                 matching_columns = []
                 for sub_key, sub_items in cluster_value.items():
-                    # Filtrer les colonnes qui correspondent aux items du sous-cluster
                     matching_columns += [col for col in returns_df.columns if any(str(item) in col for item in sub_items)]
                 
                 if matching_columns:
-                    # Calculer la moyenne des colonnes correspondantes pour ce cluster spécifique
-                    cluster_mean = pd.Series(bn.nanmean(returns_df[matching_columns], axis=1), index=returns_df.index, name=f'Cluster_{cluster_key}')
+                    cluster_mean = pd.Series(bn.nanmean(returns_df[matching_columns], axis=1), 
+                                             index=returns_df.index, 
+                                             name=f'Cluster_{cluster_key}')
                     group_means[cluster_key] = cluster_mean
         
         elif isinstance(cluster_value, list):
-            # Si c'est une liste d'actifs (ou de stratégies), calculer la moyenne des rendements pour ces actifs
             matching_columns = [col for col in returns_df.columns if any(item in col for item in cluster_value)]
             if matching_columns:
-                sub_group_mean = pd.Series(bn.nanmean(returns_df[matching_columns], axis=1), index=returns_df.index, name=f'Cluster_{cluster_key}')
+                sub_group_mean = pd.Series(bn.nanmean(returns_df[matching_columns], 
+                                                      axis=1), 
+                                                      index=returns_df.index, 
+                                                      name=f'Cluster_{cluster_key}')
                 group_means[cluster_key] = sub_group_mean
 
-    # Si by_cluster est True, on retourne directement les moyennes des plus hauts clusters
     if by_cluster and group_means:
-        return pd.DataFrame(group_means, dtype=np.float32)
+        return pd.DataFrame(group_means, 
+                            dtype=np.float32)
     
-    # Si on n'a pas encore remonté, on calcule la moyenne finale en remontant à tous les niveaux
     if group_means:
         final_mean = pd.concat(group_means.values(), axis=1).mean(axis=1)
-        return pd.DataFrame(final_mean, columns=['Cluster_Mean'], dtype=np.float32)
+        return pd.DataFrame(final_mean, 
+                            columns=['Cluster_Mean'], 
+                            dtype=np.float32)
     
-    # Si aucune donnée n'est disponible, retourner un DataFrame vide avec des NaN
-    return pd.DataFrame(np.nan, index=returns_df.index, columns=['Cluster_Mean'], dtype=np.float32)
+    return pd.DataFrame(np.nan, 
+                        index=returns_df.index, 
+                        columns=['Cluster_Mean'], 
+                        dtype=np.float32)

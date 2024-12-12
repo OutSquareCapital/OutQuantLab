@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import Portfolio.Common as Common
 
-def classify_assets(asset_list, portfolio):
+def classify_assets(asset_list: list[str], portfolio):
     portfolios = {
         'Assets': {},
         'Ratios': {},
@@ -87,24 +87,19 @@ def generate_static_weights(portfolio, parent_weight=1.0):
     
     return weighted_portfolio
 
-def generate_dynamic_weights(returns_df, base_weights):
+def generate_dynamic_weights(returns_df: pd.DataFrame, base_weights):
 
-    # Convertir le dictionnaire des poids de base en DataFrame aligné sur returns_df
     base_weights_df = pd.Series(base_weights).reindex(returns_df.columns)
 
-    # Créer une matrice indiquant la disponibilité des actifs pour chaque date (NaN si indisponible)
     available_mask = returns_df.notna().astype(float)
 
-    # Étendre les poids de base pour toutes les dates (en alignant avec l'index du DataFrame des rendements)
     base_weights_matrix = pd.DataFrame(np.tile(base_weights_df.values, (returns_df.shape[0], 1)),
-                                    index=returns_df.index, columns=returns_df.columns, dtype=np.float32)
+                                                index=returns_df.index, 
+                                                columns=returns_df.columns, 
+                                                dtype=np.float32)
 
-    # Appliquer le masque de disponibilité : les poids resteront NaN si les données de rendements sont NaN
     dynamic_weights = base_weights_matrix.where(available_mask == 1, np.nan)
 
-    # Appliquer la renormalisation des poids
-    adjusted_dynamic_weights = pd.DataFrame(Common.renormalize_weights(dynamic_weights, returns_df),
-                                            index=dynamic_weights.index,
-                                            columns=dynamic_weights.columns)
-
-    return adjusted_dynamic_weights
+    return pd.DataFrame(Common.renormalize_weights(dynamic_weights, returns_df),
+                        index=dynamic_weights.index,
+                        columns=dynamic_weights.columns)
