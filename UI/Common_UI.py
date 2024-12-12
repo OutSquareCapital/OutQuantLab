@@ -1,6 +1,18 @@
 from PySide6.QtWidgets import (
 QVBoxLayout, 
-QPushButton, QTreeWidget, QScrollArea, QWidget, QCheckBox, QGroupBox, QFrame, QHBoxLayout, QSlider, QLabel, QTreeWidgetItem, QMessageBox, QInputDialog
+QPushButton, 
+QTreeWidget, 
+QScrollArea, 
+QWidget, 
+QCheckBox, 
+QGroupBox, 
+QFrame, 
+QHBoxLayout, 
+QSlider, 
+QLabel, 
+QTreeWidgetItem,
+QMessageBox, 
+QInputDialog
 )
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap

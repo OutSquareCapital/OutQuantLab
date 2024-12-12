@@ -64,12 +64,15 @@ class MainApp(QMainWindow):
         )
 
         self.update_progress(80, "Creating Portfolio...")
+        
         backtest_result = Portfolio.calculate_daily_average_returns(raw_adjusted_returns_df.dropna(axis=0),  
-                                                                                by_method=True, 
-                                                                                by_asset=True)
+                                                                    by_method=True, 
+                                                                    by_asset=True)
                                                                                 
-        global_result = Portfolio.calculate_daily_average_returns(backtest_result, 
-                                                                global_avg=True)
+        global_result = Portfolio.calculate_daily_average_returns(
+                                                                backtest_result, 
+                                                                global_avg=True
+                                                                )
 
         self.update_progress(100, "Plotting Results...")
 

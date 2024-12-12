@@ -33,7 +33,7 @@ def generate_plot_widget(fig, show_legend:bool=True):
     temp_file_path = save_html_temp_file(html_content)
     plot_widget = QWebEngineView()
     page = plot_widget.page()
-    page.settings().setAttribute(QWebEngineSettings.ShowScrollBars, False)
+    page.settings().setAttribute(QWebEngineSettings.WebAttribute.ShowScrollBars, False)
     page.setBackgroundColor(BACKGROUND_APP_DARK)
     plot_widget.load(QUrl.fromLocalFile(temp_file_path))
 

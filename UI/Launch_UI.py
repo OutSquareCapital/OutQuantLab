@@ -46,7 +46,7 @@ def setup_launch_page(parent):
     grid_layout.setContentsMargins(0, 0, 0, 0)  # Supprime les marges inutiles
     for row in range(3):
         for col in range(3):
-            grid_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Expanding), row, col)
+            grid_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding), row, col)
 
     # Ajouter le logo au centre (grille 3x3)
     logo_label = QLabel()

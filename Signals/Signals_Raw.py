@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import Metrics as mt
 from .Signals_Normalization import ratio_normalization
 
