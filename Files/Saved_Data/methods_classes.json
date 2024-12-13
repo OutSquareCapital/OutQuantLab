@@ -57,6 +57,5 @@
       "relative_skewness_on_kurtosis_trend",
       "fixed_bias",
       "skewness_on_kurtosis"
-   ],
-   "test": {}
+   ]
 }
