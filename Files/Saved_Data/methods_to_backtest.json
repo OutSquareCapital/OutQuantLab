@@ -17,7 +17,7 @@
    "mean_rate_of_change_macd_trend": false,
    "median_rate_of_change_macd_trend": false,
    "central_rate_of_change_macd_trend": false,
-   "fixed_bias": false,
+   "fixed_bias": true,
    "mean_price_ratio_normalised": false,
    "mean_rate_of_change_normalised": false,
    "mean_price_ratio_normalised_trend": false,
@@ -31,7 +31,7 @@
    "skewness_on_kurtosis_trend": false,
    "relative_skewness_on_kurtosis_trend": false,
    "relative_directional_volatility": false,
-   "normalised_directional_volatility": true,
+   "normalised_directional_volatility": false,
    "relative_directional_volatility_trend": false,
    "normalised_directional_volatility_trend": false
 }
