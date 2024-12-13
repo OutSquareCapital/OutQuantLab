@@ -51,6 +51,15 @@ def value_to_index(value: int) -> int:
 def index_to_value(index: int) -> int:
     return 2 ** index
 
+def create_scroll_area() ->tuple[QScrollArea, QWidget, QVBoxLayout]:
+    scroll_area = QScrollArea()
+    scroll_widget = QWidget()
+    scroll_layout = QVBoxLayout()
+    scroll_widget.setLayout(scroll_layout)
+    scroll_area.setWidget(scroll_widget)
+    scroll_area.setWidgetResizable(True)
+    return scroll_area, scroll_widget, scroll_layout
+
 def create_info_labels(values: list) -> tuple[QLabel, QLabel, QLabel]:
     range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")
     num_values_info_label = QLabel(f"Num Values: {len(values)}")
@@ -98,6 +107,25 @@ def add_category(tree: QTreeWidget, tree_structure: dict[str, Any]):
         category_item = QTreeWidgetItem([category_name])
         category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
         tree.addTopLevelItem(category_item)
+
+
+def create_expandable_section(category_name: str) -> tuple[QGroupBox, QWidget, QVBoxLayout]:
+
+    category_box = QGroupBox(category_name)
+    category_layout = QVBoxLayout()
+    category_box.setLayout(category_layout)
+
+    content_widget = QWidget()
+    content_layout = QVBoxLayout()
+    content_widget.setLayout(content_layout)
+
+    expand_button = QPushButton("Expand/Collapse")
+    category_layout.addWidget(expand_button)
+    category_layout.addWidget(content_widget)
+
+    setup_expandable_animation(expand_button, content_widget)
+
+    return category_box, content_widget, content_layout
 
 def delete_category(tree: QTreeWidget):
     selected_item = tree.currentItem()
@@ -206,15 +234,6 @@ def set_background_image(widget: QWidget, image_path: str):
     widget.setPalette(palette)
     widget.setAutoFillBackground(True)
 
-def create_scroll_area() ->tuple[QScrollArea, QWidget, QVBoxLayout]:
-    scroll_area = QScrollArea()
-    scroll_widget = QWidget()
-    scroll_layout = QVBoxLayout()
-    scroll_widget.setLayout(scroll_layout)
-    scroll_area.setWidget(scroll_widget)
-    scroll_area.setWidgetResizable(True)
-    return scroll_area, scroll_widget, scroll_layout
-
 def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidget, animation_duration: int = 500) -> QPropertyAnimation:
 
     content_widget.setMaximumHeight(0)
@@ -254,24 +273,6 @@ def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list,
     if open_on_launch:
         toggle_button.setChecked(True)
     return outer_layout
-
-def create_expandable_section(category_name: str) -> tuple[QGroupBox, QWidget, QVBoxLayout]:
-
-    category_box = QGroupBox(category_name)
-    category_layout = QVBoxLayout()
-    category_box.setLayout(category_layout)
-
-    content_widget = QWidget()
-    content_layout = QVBoxLayout()
-    content_widget.setLayout(content_layout)
-
-    expand_button = QPushButton("Expand/Collapse")
-    category_layout.addWidget(expand_button)
-    category_layout.addWidget(content_widget)
-
-    setup_expandable_animation(expand_button, content_widget)
-
-    return category_box, content_widget, content_layout
 
 def create_checkbox_item(item: str, is_checked: bool, callback: Callable[[bool], None]) -> QCheckBox:
     checkbox = QCheckBox(item)

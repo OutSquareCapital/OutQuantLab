@@ -1,30 +1,29 @@
 from PySide6.QtWidgets import (
-                            QWidget,
-                            QHBoxLayout,
-                            QVBoxLayout,
-                            QProgressBar, 
-                            QTextEdit,
-                            QPushButton,
-                            QMainWindow,
-                            QApplication,
-                            QGridLayout,
-                            QLabel,
-                            QSlider
-                            )
+QWidget,
+QHBoxLayout,
+QVBoxLayout,
+QProgressBar, 
+QTextEdit,
+QPushButton,
+QMainWindow,
+QApplication,
+QGridLayout,
+QLabel,
+QSlider
+)
+from PySide6.QtCore import Qt, QDate
 
 from Files import (
-                    BACKTEST_PAGE_PHOTO,
-                    HOME_PAGE_PHOTO,
-                    DASHBOARD_PAGE_PHOTO,
-                    OVERALL_BUTTONS_NAMES,
-                    ROLLING_BUTTONS_NAMES,
-                    ADVANCED_BUTTONS_NAMES,
-                    BACKTEST_STATS_RESULTS,
-                    CLUSTERS_PARAMETERS,
-                    FRAME_STYLE
-                    )
-
-from PySide6.QtCore import Qt, QDate
+BACKTEST_PAGE_PHOTO,
+HOME_PAGE_PHOTO,
+DASHBOARD_PAGE_PHOTO,
+OVERALL_BUTTONS_NAMES,
+ROLLING_BUTTONS_NAMES,
+ADVANCED_BUTTONS_NAMES,
+BACKTEST_STATS_RESULTS,
+CLUSTERS_PARAMETERS,
+FRAME_STYLE
+)
 from .Common_UI import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
 from .Config_UI import AssetSelectionWidget, IndicatorsConfigWidget, TreeStructureWidget
 

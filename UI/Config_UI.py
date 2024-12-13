@@ -180,7 +180,6 @@ class TreeStructureWidget(QWidget):
         layout.addWidget(self.tree)
 
         buttons_layout = QHBoxLayout()
-
         add_button = QPushButton("Add Category")
         delete_button = QPushButton("Delete Category")
 
