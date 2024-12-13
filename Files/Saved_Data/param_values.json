@@ -170,12 +170,41 @@
    },
    "central_rate_of_change_macd_trend": {
       "LenST": [
-         1
+         4,
+         8,
+         16,
+         32,
+         64
       ],
-      "LenLT": null,
-      "MacdLength": null,
-      "TrendLenST": null,
-      "TrendLenLT": null
+      "LenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "MacdLength": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         28,
+         49,
+         84,
+         147,
+         256
+      ]
    },
    "fixed_bias": {
       "Bias": [
