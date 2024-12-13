@@ -1,13 +1,12 @@
 from .Common_UI import (
 create_checkbox_item, 
-create_expandable_section, 
-create_param_labels, 
-create_param_sliders, 
+create_expandable_section,
 connect_sliders_to_update, 
 populate_tree_from_dict, 
 add_category, 
 delete_category,
-create_scroll_with_buttons
+create_scroll_with_buttons,
+create_param_widget
 )
 from PySide6.QtWidgets import (
 QAbstractItemView, 
@@ -36,7 +35,7 @@ class AssetSelectionWidget(QWidget):
     def init_ui(self):
         layout = QVBoxLayout()
     
-        scroll_area, scroll_layout, buttons_layout = create_scroll_with_buttons(
+        scroll_layout = create_scroll_with_buttons(
         layout, 
         self.select_all_assets, 
         self.unselect_all_assets
@@ -76,7 +75,7 @@ class IndicatorsConfigWidget(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        scroll_area, scroll_layout, buttons_layout = create_scroll_with_buttons(
+        scroll_layout = create_scroll_with_buttons(
         layout, 
         self.select_all_indicators, 
         self.unselect_all_indicators
@@ -94,7 +93,7 @@ class IndicatorsConfigWidget(QWidget):
         params: dict[str, list[int]], 
         layout: QVBoxLayout):
 
-        indicator_box, content_widget, content_layout = create_expandable_section(indicator_name)
+        indicator_box, content_layout = create_expandable_section(indicator_name)
 
         checkbox = create_checkbox_item(
         item=indicator_name,
@@ -115,23 +114,27 @@ class IndicatorsConfigWidget(QWidget):
         param_name: str, 
         values: list[int], 
         layout: QVBoxLayout):
+        
         if not values:
             values = [1]
 
         param_box = QGroupBox(param_name)
         param_layout = QVBoxLayout()
-        param_labels_layout, range_info_label, num_values_info_label, generated_values_label = create_param_labels(values)
-        sliders_layout, num_values_layout, start_slider, end_slider, num_values_slider = create_param_sliders(values)
-        param_layout.addLayout(param_labels_layout)
-        param_layout.addLayout(sliders_layout)
-        param_layout.addLayout(num_values_layout)
-        param_box.setLayout(param_layout)
         layout.addWidget(param_box)
+        
+        (
+        range_info_label, 
+        num_values_info_label, 
+        generated_values_label, 
+        start_slider, 
+        end_slider, 
+        num_values_slider
+        ) = create_param_widget(param_box, param_layout, values)
 
         connect_sliders_to_update(
-            start_slider, end_slider, num_values_slider,
-            range_info_label, num_values_info_label, generated_values_label,
-            lambda unique_values: self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
+        start_slider, end_slider, num_values_slider,
+        range_info_label, num_values_info_label, generated_values_label,
+        lambda unique_values: self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
         )
 
         self.param_widgets.setdefault(indicator_name, {})[param_name] = {

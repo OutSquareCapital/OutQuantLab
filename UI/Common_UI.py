@@ -22,17 +22,33 @@ from PySide6.QtGui import QFont
 from typing import Any
 from collections.abc import Callable
 
+def create_param_widget(
+    param_box: QGroupBox, 
+    param_layout: QVBoxLayout, 
+    values: list[int]
+    ) -> tuple[QLabel, QLabel, QLabel, QSlider, QSlider, QSlider]:
+    
+        param_labels_layout, range_info_label, num_values_info_label, generated_values_label = create_param_labels(values)
+        sliders_layout, num_values_layout, start_slider, end_slider, num_values_slider = create_param_sliders(values)
+        
+        param_layout.addLayout(param_labels_layout)
+        param_layout.addLayout(sliders_layout)
+        param_layout.addLayout(num_values_layout)
+        param_box.setLayout(param_layout)
+        
+        return range_info_label, num_values_info_label, generated_values_label, start_slider, end_slider, num_values_slider
+        
 def create_scroll_with_buttons(
     parent_layout: QVBoxLayout,
     select_callback: Callable,
     unselect_callback: Callable
-) -> tuple[QScrollArea, QVBoxLayout, QHBoxLayout]:
+) -> QVBoxLayout:
     scroll_area, scroll_widget, scroll_layout = create_scroll_area()
     buttons_layout = QHBoxLayout()
     add_select_buttons(buttons_layout, select_callback, unselect_callback)
     parent_layout.addWidget(scroll_area)
     parent_layout.addLayout(buttons_layout)
-    return scroll_area, scroll_layout, buttons_layout
+    return scroll_layout
 
 def create_range_sliders(values: list) -> tuple[QSlider, QSlider]:
     start_slider = QSlider(Qt.Orientation.Horizontal)
@@ -134,7 +150,7 @@ def delete_category(tree: QTreeWidget, tree_structure: dict[str, Any]) -> None:
         else:
             parent.removeChild(selected_item)
 
-def create_expandable_section(category_name: str) -> tuple[QGroupBox, QWidget, QVBoxLayout]:
+def create_expandable_section(category_name: str) -> tuple[QGroupBox, QVBoxLayout]:
 
     category_box = QGroupBox(category_name)
     category_layout = QVBoxLayout()
@@ -150,7 +166,7 @@ def create_expandable_section(category_name: str) -> tuple[QGroupBox, QWidget, Q
 
     setup_expandable_animation(expand_button, content_widget)
 
-    return category_box, content_widget, content_layout
+    return category_box, content_layout
 
 def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
     def traverse(item):
