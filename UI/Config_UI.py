@@ -1,14 +1,13 @@
 from .Common_UI import (
-create_scroll_area, 
 create_checkbox_item, 
 create_expandable_section, 
-add_select_buttons, 
 create_param_labels, 
 create_param_sliders, 
 connect_sliders_to_update, 
 populate_tree_from_dict, 
 add_category, 
-delete_category
+delete_category,
+create_scroll_with_buttons
 )
 from PySide6.QtWidgets import (
 QAbstractItemView, 
@@ -36,9 +35,13 @@ class AssetSelectionWidget(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        buttons_layout = QHBoxLayout()
+    
+        scroll_area, scroll_layout, buttons_layout = create_scroll_with_buttons(
+        layout, 
+        self.select_all_assets, 
+        self.unselect_all_assets
+        )
         
-        scroll_area, scroll_widget, scroll_layout = create_scroll_area()
         for asset in self.entities:
             checkbox = create_checkbox_item(
             item=asset.name,
@@ -48,14 +51,8 @@ class AssetSelectionWidget(QWidget):
             scroll_layout.addWidget(checkbox)
             self.checkboxes[asset.name] = checkbox
 
-        scroll_area.setWidget(scroll_widget)
-
-        add_select_buttons(buttons_layout, self.select_all_assets, self.unselect_all_assets)
-        
-        layout.addWidget(scroll_area)
-        layout.addLayout(buttons_layout)
         self.setLayout(layout)
-
+        
     def update_asset_state(self, asset_name: str, is_checked: bool):
         self.assets_collection.set_active(asset_name, is_checked)
 
@@ -79,18 +76,15 @@ class IndicatorsConfigWidget(QWidget):
 
     def init_ui(self):
         layout = QVBoxLayout()
-        buttons_layout = QHBoxLayout()
-        
-        scroll_area, scroll_widget, scroll_layout = create_scroll_area()
+        scroll_area, scroll_layout, buttons_layout = create_scroll_with_buttons(
+        layout, 
+        self.select_all_indicators, 
+        self.unselect_all_indicators
+        )
 
         for indicator in self.entities:
             self.add_indicator_section(indicator.name, indicator.active, indicator.params, scroll_layout)
             
-        add_select_buttons(buttons_layout, self.select_all_indicators, self.unselect_all_indicators)
-        
-        scroll_widget.setLayout(scroll_layout)
-        layout.addWidget(scroll_area)
-        layout.addLayout(buttons_layout)
         self.setLayout(layout)
 
     def add_indicator_section(
@@ -184,7 +178,8 @@ class TreeStructureWidget(QWidget):
         delete_button = QPushButton("Delete Category")
 
         add_button.clicked.connect(lambda: add_category(self.tree, self.tree_structure))
-        delete_button.clicked.connect(lambda: delete_category(self.tree))
+        delete_button.clicked.connect(lambda: delete_category(self.tree, self.tree_structure))
+
 
         buttons_layout.addWidget(add_button)
         buttons_layout.addWidget(delete_button)

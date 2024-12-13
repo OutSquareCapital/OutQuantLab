@@ -24,55 +24,57 @@ BACKTEST_STATS_RESULTS,
 CLUSTERS_PARAMETERS,
 FRAME_STYLE
 )
-from .Common_UI import setup_expandable_animation, set_background_image, set_frame_design, create_expandable_buttons_list
-from .Config_UI import AssetSelectionWidget, IndicatorsConfigWidget, TreeStructureWidget
+from .Common_UI import (
+setup_expandable_animation, 
+set_background_image, 
+set_frame_design, 
+create_expandable_buttons_list, 
+create_button
+)
+from .Config_UI import (
+AssetSelectionWidget, 
+IndicatorsConfigWidget, 
+TreeStructureWidget, 
+AssetsCollection, 
+IndicatorsCollection
+)
+from collections.abc import Callable
 
 def setup_home_page(
     parent: QMainWindow, 
-    run_backtest_callback,
-    refresh_data_callback,
-    assets_collection,
-    indicators_collection
+    run_backtest_callback: Callable,
+    refresh_data_callback: Callable,
+    assets_collection: AssetsCollection,
+    indicators_collection: IndicatorsCollection
     ):
 
     parent.setWindowTitle("OutQuantLab")
     main_widget = QWidget()
     main_layout = QHBoxLayout(main_widget)
-    set_background_image(main_widget, HOME_PAGE_PHOTO)
-
+    right_layout = QVBoxLayout()
     left_layout = QVBoxLayout()
     buttons_layout = QVBoxLayout()
-
-    backtest_button = QPushButton("Run Backtest")
-    backtest_button.clicked.connect(run_backtest_callback)
-    buttons_layout.addWidget(backtest_button)
-
-    refresh_button = QPushButton("Refresh Data")
-    refresh_button.clicked.connect(refresh_data_callback)
-    buttons_layout.addWidget(refresh_button)
-
-    left_layout.addLayout(buttons_layout)
-
-    right_layout = QVBoxLayout()
-
     top_frame = set_frame_design(FRAME_STYLE)
     bottom_frame = set_frame_design(FRAME_STYLE)
     right_upper_layout = QHBoxLayout(top_frame)
     right_lower_layout = QHBoxLayout(bottom_frame)
-
+    set_background_image(main_widget, HOME_PAGE_PHOTO)
+    
     asset_widget = AssetSelectionWidget(assets_collection)
     indicator_widget = IndicatorsConfigWidget(indicators_collection)
-    right_upper_layout.addWidget(asset_widget, stretch=1)
-    right_upper_layout.addWidget(indicator_widget, stretch=2)
-
     asset_tree_widget = TreeStructureWidget(assets_collection)
     method_tree_widget = TreeStructureWidget(indicators_collection)
+    
+    create_button("Run Backtest", run_backtest_callback, buttons_layout)
+    create_button("Refresh Data", refresh_data_callback, buttons_layout)
+    
+    left_layout.addLayout(buttons_layout)
+    right_upper_layout.addWidget(asset_widget, stretch=1)
+    right_upper_layout.addWidget(indicator_widget, stretch=2)
     right_lower_layout.addWidget(asset_tree_widget)
     right_lower_layout.addWidget(method_tree_widget)
-
     right_layout.addWidget(top_frame, stretch=1)
     right_layout.addWidget(bottom_frame, stretch=1)
-
     main_layout.addLayout(left_layout, stretch=1)
     main_layout.addLayout(right_layout, stretch=19)
 
@@ -86,7 +88,6 @@ def setup_backtest_page(parent):
     main_layout.addLayout(top_layout, stretch=9)
 
     bottom_layout = QHBoxLayout()
-
     left_layout =   QVBoxLayout()
     center_layout = QVBoxLayout()
     right_layout =  QVBoxLayout()
@@ -117,7 +118,11 @@ def setup_backtest_page(parent):
     parent.setCentralWidget(loading_widget)
     return progress_bar, log_output
 
-def setup_results_page(parent, plots, back_to_home_callback, metrics: list[float]):
+def setup_results_page(
+    parent, 
+    plots, 
+    back_to_home_callback:Callable, 
+    metrics: list[float]):
 
     results_widget = QWidget()
     results_layout = QVBoxLayout(results_widget)
@@ -224,8 +229,6 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics: list[float
     top_layout.addLayout(backtest_parameters_layout, stretch=2)
     top_layout.addLayout(clusters_buttons_layout, stretch=2)
     top_layout.addLayout(home_layout, stretch=1)
-
-    # Ajouter les layouts au layout principal
     results_layout.addWidget(top_frame, stretch=1)
     results_layout.addWidget(bottom_frame, stretch=29)
 
@@ -233,7 +236,12 @@ def setup_results_page(parent, plots, back_to_home_callback, metrics: list[float
 
     return bottom_layout
 
-def update_progress_with_events(progress_bar: QProgressBar, log_output: QTextEdit, value: int, message: str):
+def update_progress_with_events(
+    progress_bar: QProgressBar, 
+    log_output: QTextEdit, 
+    value: int, 
+    message: str):
+    
     progress_bar.setValue(value)
     if message:
         log_output.clear()

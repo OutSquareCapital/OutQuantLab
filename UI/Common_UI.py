@@ -12,7 +12,8 @@ QSlider,
 QLabel, 
 QTreeWidgetItem,
 QMessageBox,
-QInputDialog
+QInputDialog,
+QLayout
 )
 
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
@@ -20,6 +21,18 @@ from PySide6.QtGui import QPalette, QBrush, QPixmap
 from PySide6.QtGui import QFont
 from typing import Any
 from collections.abc import Callable
+
+def create_scroll_with_buttons(
+    parent_layout: QVBoxLayout,
+    select_callback: Callable,
+    unselect_callback: Callable
+) -> tuple[QScrollArea, QVBoxLayout, QHBoxLayout]:
+    scroll_area, scroll_widget, scroll_layout = create_scroll_area()
+    buttons_layout = QHBoxLayout()
+    add_select_buttons(buttons_layout, select_callback, unselect_callback)
+    parent_layout.addWidget(scroll_area)
+    parent_layout.addLayout(buttons_layout)
+    return scroll_area, scroll_layout, buttons_layout
 
 def create_range_sliders(values: list) -> tuple[QSlider, QSlider]:
     start_slider = QSlider(Qt.Orientation.Horizontal)
@@ -108,6 +121,18 @@ def add_category(tree: QTreeWidget, tree_structure: dict[str, Any]):
         category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
         tree.addTopLevelItem(category_item)
 
+def delete_category(tree: QTreeWidget, tree_structure: dict[str, Any]) -> None:
+    selected_item = tree.currentItem()
+    if selected_item:
+        category_name = selected_item.text(0)
+        parent = selected_item.parent()
+        if parent is None:
+            index = tree.indexOfTopLevelItem(selected_item)
+            tree.takeTopLevelItem(index)
+            if category_name in tree_structure:
+                del tree_structure[category_name]
+        else:
+            parent.removeChild(selected_item)
 
 def create_expandable_section(category_name: str) -> tuple[QGroupBox, QWidget, QVBoxLayout]:
 
@@ -126,16 +151,6 @@ def create_expandable_section(category_name: str) -> tuple[QGroupBox, QWidget, Q
     setup_expandable_animation(expand_button, content_widget)
 
     return category_box, content_widget, content_layout
-
-def delete_category(tree: QTreeWidget):
-    selected_item = tree.currentItem()
-    if selected_item:
-        parent = selected_item.parent()
-        if parent is None:
-            index = tree.indexOfTopLevelItem(selected_item)
-            tree.takeTopLevelItem(index)
-        else:
-            parent.removeChild(selected_item)
 
 def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
     def traverse(item):
@@ -234,7 +249,11 @@ def set_background_image(widget: QWidget, image_path: str):
     widget.setPalette(palette)
     widget.setAutoFillBackground(True)
 
-def setup_expandable_animation(toggle_button: QPushButton, content_widget: QWidget, animation_duration: int = 500) -> QPropertyAnimation:
+def setup_expandable_animation(
+    toggle_button: QPushButton, 
+    content_widget: QWidget, 
+    animation_duration: int = 500
+    ) -> QPropertyAnimation:
 
     content_widget.setMaximumHeight(0)
     animation = QPropertyAnimation(content_widget, b"maximumHeight")
@@ -259,6 +278,16 @@ def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_a
         button = QPushButton(btn_text)
         button.clicked.connect(buttons_actions.get(btn_text, lambda: None))
         layout.addWidget(button)
+
+def create_button(
+    text: str, 
+    callback: Callable, 
+    parent_layout: QLayout
+) -> QPushButton:
+    button: QPushButton = QPushButton(text)
+    button.clicked.connect(callback)
+    parent_layout.addWidget(button)
+    return button
 
 def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list, buttons_actions: dict[str, Callable], open_on_launch: bool = False):
     toggle_button = QPushButton(toggle_button_name)
