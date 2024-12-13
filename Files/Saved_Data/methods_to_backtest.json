@@ -1,5 +1,5 @@
 {
-   "mean_price_ratio": false,
+   "mean_price_ratio": true,
    "median_price_ratio": false,
    "central_price_ratio": false,
    "mean_rate_of_change": false,
