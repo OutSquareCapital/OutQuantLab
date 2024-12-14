@@ -25,19 +25,22 @@ def data_arrays_to_dataframe(
         multiindex.levels[2]]
     )
 
-    return pd.DataFrame(raw_adjusted_returns_array, 
-                        index=dates_index, 
-                        columns=multiindex, 
-                        dtype=np.float32)
+    return pd.DataFrame(
+    raw_adjusted_returns_array, 
+    index=dates_index, 
+    columns=multiindex, 
+    dtype=np.float32
+    )
 
-def process_backtest(prices_array: np.ndarray, 
-                    log_returns_array: np.ndarray,
-                    volatility_adjusted_pct_returns_array: np.ndarray,
-                    asset_names: list,
-                    dates_index: pd.Index,
-                    indicators_and_params: dict,
-                    progress_callback: Callable
-                    ) -> pd.DataFrame:
+def process_backtest(
+    prices_array: np.ndarray, 
+    log_returns_array: np.ndarray,
+    volatility_adjusted_pct_returns_array: np.ndarray,
+    asset_names: list,
+    dates_index: pd.Index,
+    indicators_and_params: dict,
+    progress_callback: Callable
+    ) -> pd.DataFrame:
 
     raw_adjusted_returns_array = transform_signals_into_returns(prices_array,
                                                                 log_returns_array,

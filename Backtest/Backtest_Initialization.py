@@ -1,8 +1,10 @@
 from Infrastructure import Fast_Tools as ft
 import numpy as np
 
-def initialize_data_array(prices_array: np.ndarray,
-                          log_returns_array: np.ndarray) -> dict[str, np.ndarray]:
+def initialize_data_array(
+    prices_array: np.ndarray,
+    log_returns_array: np.ndarray
+    ) -> dict[str, np.ndarray]:
 
     shifted_log_returns = ft.shift_array(log_returns_array)
     shifted_prices = ft.shift_array(prices_array)
@@ -13,10 +15,10 @@ def initialize_data_array(prices_array: np.ndarray,
     }
 
 def initialize_signals_array(
-                            prices_array: np.ndarray,
-                            indicators_and_params: dict,
-                            asset_names: list,
-                            ) -> np.ndarray:
+    prices_array: np.ndarray,
+    indicators_and_params: dict,
+    asset_names: list,
+    ) -> np.ndarray:
     
     total_days = prices_array.shape[0]
 

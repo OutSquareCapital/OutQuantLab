@@ -3,19 +3,21 @@ import numpy as np
 from .Backtest_Initialization import initialize_data_array, initialize_signals_array
 from collections.abc import Callable
 
-def process_param(func: Callable, 
-                  data_array: np.ndarray, 
-                  volatility_adjusted_pct_returns_array: np.ndarray, 
-                  param: dict[str, int]
-                  ) -> np.ndarray:
+def process_param(
+    func: Callable, 
+    data_array: np.ndarray, 
+    volatility_adjusted_pct_returns_array: np.ndarray, 
+    param: dict[str, int]
+    ) -> np.ndarray:
     
     return func(data_array, **param) * volatility_adjusted_pct_returns_array
 
-def process_indicator_parallel(func:Callable, 
-                               data_array:np.ndarray, 
-                               adjusted_returns_array:np.ndarray, 
-                               params:list[dict[str, int]]
-                               ):
+def process_indicator_parallel(
+    func:Callable, 
+    data_array:np.ndarray, 
+    adjusted_returns_array:np.ndarray, 
+    params:list[dict[str, int]]
+    ):
     
     return Parallel(n_jobs=-1, 
                     backend='threading'
