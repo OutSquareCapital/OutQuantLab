@@ -21,9 +21,15 @@ def load_asset_names(file_path: str) -> list[str]:
 
 def get_all_indicators_from_module(module_name: str) -> dict[str, Callable]:
     module = importlib.import_module(module_name)
-    return {
-        name: func for name, func in vars(module).items() if callable(func)
-    }
+    indicators = vars(module).items()
+
+    formatted_indicators: dict[str, Callable] = {}
+    for name, func in indicators:
+        if callable(func):
+            formatted_name:str = ''.join(word.title() for word in name.split('_'))
+            formatted_indicators[formatted_name] = func
+
+    return formatted_indicators
 
 def determine_array_type(func_params: MappingProxyType[str, Parameter]) -> str:
     return 'returns_array' if 'returns_array' in func_params else 'prices_array'

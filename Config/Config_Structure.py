@@ -84,7 +84,7 @@ class IndicatorsCollection(BaseCollection[Indicator]):
             active: bool = entities_to_test.get(name, False)
             array_type: str = determine_array_type(func_signature)
             params: dict[str, list[int]] = determine_indicator_params(func_signature, name, params_config, array_type)
-            
+
             self.entities[name] = Indicator(
                 name=name,
                 active=active,
@@ -111,9 +111,8 @@ class IndicatorsCollection(BaseCollection[Indicator]):
 
         result = {}
         for indicator in self.get_active_entities():
-            formatted_indicator_name = ''.join([word.title() for word in indicator.name.split('_')])
             valid_pairs =  filter_valid_pairs(indicator.params)
-            result[formatted_indicator_name] = (indicator.func, indicator.array_type, valid_pairs)
+            result[indicator.name] = (indicator.func, indicator.array_type, valid_pairs)
         return result
     
 class AssetsCollection(BaseCollection[Asset]):

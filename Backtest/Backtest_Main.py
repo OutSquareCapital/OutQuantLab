@@ -3,11 +3,12 @@ import numpy as np
 from .Backtest_Process import transform_signals_into_returns
 from collections.abc import Callable
 
-def data_arrays_to_dataframe(raw_adjusted_returns_array: np.ndarray, 
-                                dates_index: pd.Index, 
-                                indicators_and_params: dict, 
-                                asset_names: list
-                                ) -> pd.DataFrame:
+def data_arrays_to_dataframe(
+    raw_adjusted_returns_array: np.ndarray, 
+    dates_index: pd.Index, 
+    indicators_and_params: dict, 
+    asset_names: list
+    ) -> pd.DataFrame:
 
     multiindex_tuples = []
     for indicator_name, (_, _, params) in indicators_and_params.items():
@@ -18,9 +19,10 @@ def data_arrays_to_dataframe(raw_adjusted_returns_array: np.ndarray,
 
     multiindex = pd.MultiIndex.from_tuples(multiindex_tuples, names=["Asset", "Indicator", "Param"])
     multiindex = multiindex.set_levels(
-        [pd.CategoricalIndex(multiindex.levels[0]),
-         pd.CategoricalIndex(multiindex.levels[1]),
-         multiindex.levels[2]]
+        [
+        pd.CategoricalIndex(multiindex.levels[0]),
+        pd.CategoricalIndex(multiindex.levels[1]),
+        multiindex.levels[2]]
     )
 
     return pd.DataFrame(raw_adjusted_returns_array, 
