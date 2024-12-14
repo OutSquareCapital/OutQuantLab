@@ -5,7 +5,7 @@
    "MeanRateOfChange": false,
    "MedianRateOfChange": false,
    "CentralRateOfChange": false,
-   "MeanPriceMacd": false,
+   "MeanPriceMacd": true,
    "MedianPriceMacd": false,
    "CentralPriceMacd": false,
    "MeanRateOfChangeMacd": false,
