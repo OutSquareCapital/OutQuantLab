@@ -149,19 +149,6 @@ def process_data(
 
     return prices_array, log_returns_array, volatility_adjusted_pct_returns
 
-def initialize_data_array(
-    prices_array: np.ndarray,
-    log_returns_array: np.ndarray
-    ) -> dict[str, np.ndarray]:
-
-    shifted_log_returns = ft.shift_array(log_returns_array)
-    shifted_prices = ft.shift_array(prices_array)
-
-    return {
-        'returns_array': shifted_log_returns,
-        'prices_array': shifted_prices
-    }
-
 def initialize_signals_array(
     prices_array: np.ndarray,
     total_returns_streams: int

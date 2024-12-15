@@ -33,7 +33,7 @@ def process_indicator_parallel(
 
 def calculate_strategy_returns(
     signals_array: np.ndarray,
-    data_arrays: dict[str, np.ndarray],
+    data_arrays: tuple[np.ndarray, np.ndarray],
     indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]],
     adjusted_returns_array: np.ndarray,
     progress_callback: Callable
@@ -45,7 +45,7 @@ def calculate_strategy_returns(
 
     for func, array_type, params in indicators_and_params.values():
 
-        data_array = data_arrays[array_type]
+        data_array = data_arrays[0] if array_type == 'prices_array' else data_arrays[1]
 
         results = process_indicator_parallel(func, data_array, adjusted_returns_array, params)
         
@@ -62,7 +62,7 @@ def calculate_strategy_returns(
 
 def process_backtest(
     signals_array: np.ndarray,
-    data_arrays: dict[str, np.ndarray],
+    data_arrays: tuple[np.ndarray, np.ndarray],
     volatility_adjusted_pct_returns_array: np.ndarray,
     dates_index: pd.Index,
     indicators_and_params: dict,
