@@ -4,9 +4,19 @@ import pandas as pd
 import numpy as np
 from Infrastructure import Fast_Tools as ft
 import Metrics as mt
-from itertools import combinations
 from Files import PERCENTAGE_FACTOR
+from collections.abc import Callable
 
+def load_prices(asset_names: list[str], file_path: str) -> pd.DataFrame:
+    
+    columns_to_load = ["Date"] + [name for name in asset_names]
+
+    return pd.read_parquet(
+        file_path,
+        engine="pyarrow",
+        columns=columns_to_load
+    )
+    
 def calculate_volatility_adjusted_returns(
     pct_returns_array: np.ndarray, 
     hv_array: np.ndarray, 
@@ -59,109 +69,103 @@ def equity_curves_calculs(returns_array: np.ndarray) -> np.ndarray:
 
     return cumulative_returns * PERCENTAGE_FACTOR
 
-
-def pct_returns_np(prices_array: np.ndarray) -> np.ndarray:
-
-    if prices_array.ndim == 1:
-        # Si c'est 1D, initialisation d'un array pour les rendements
-        pct_returns_array = np.empty(prices_array.shape, dtype=np.float32)
-        pct_returns_array[0] = np.nan  # Première ligne doit être NaN
-        pct_returns_array[1:] = np.diff(prices_array) / prices_array[:-1]  # Calcul des rendements simples
-    else:
-        # Si c'est 2D, garde le comportement d'origine
-        pct_returns_array = np.empty_like(prices_array, dtype=np.float32)
-        pct_returns_array[0, :] = np.nan  # Première ligne doit être NaN
-        pct_returns_array[1:, :] = np.diff(prices_array, axis=0) / prices_array[:-1, :]  # Calcul des rendements simples
-    
-    return pct_returns_array
-
 def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
 
-    # Vérifie si l'array est 1D ou 2D
     if prices_array.ndim == 1:
-        # Si c'est 1D, initialisation d'un array pour les rendements
         log_returns_array = np.empty(prices_array.shape, dtype=np.float32)
-        log_returns_array[0] = np.nan  # La première valeur doit être NaN
-        log_returns_array[1:] = np.log(prices_array[1:] / prices_array[:-1])  # Calcul des rendements log
+        log_returns_array[0] = np.nan
+        log_returns_array[1:] = np.log(prices_array[1:] / prices_array[:-1])
     else:
-        # Si c'est 2D, garde le comportement d'origine
         log_returns_array = np.empty(prices_array.shape, dtype=np.float32)
-        log_returns_array[0, :] = np.nan  # Première ligne doit être NaN
-        log_returns_array[1:, :] = np.log(prices_array[1:] / prices_array[:-1])  # Calcul des rendements log
+        log_returns_array[0, :] = np.nan
+        log_returns_array[1:, :] = np.log(prices_array[1:] / prices_array[:-1])
     
     return log_returns_array
 
-def extract_data_from_pct_returns(pct_returns_df: pd.DataFrame) -> tuple[np.ndarray, 
-                                                                        np.ndarray, 
-                                                                        np.ndarray,
-                                                                        list[str],
-                                                                        pd.Index]:
-
-    # Création de l'array des pct returns
-    pct_returns_array = pct_returns_df.to_numpy(dtype=np.float32)
-
-    # Création du DataFrame des prix avec des NaN
-    prices_df = pd.DataFrame(equity_curves_calculs(pct_returns_df.values),
-                             index=pct_returns_df.index,
-                             columns=pct_returns_df.columns,
-                             dtype=np.float32)
-
-    prices_array = prices_df.to_numpy(dtype=np.float32)
+def generate_multi_index_tuple(
+    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]], 
+    asset_names: list[str]
+    ) -> list[tuple[str, str, str]]:
     
+    multi_index_tuples: list[tuple[str, str, str]] = []
+    
+    for indicator_name, (_, _, params) in indicators_and_params.items():
+        for param in params:
+            param_str = ''.join([f"{k}{v}" for k, v in param.items()])
+            for asset in asset_names:
+                multi_index_tuples.append((asset, indicator_name, param_str))
+    return multi_index_tuples
+
+def generate_multi_index_pandas(multi_index_tuples: list[tuple[str, str, str]]) -> pd.MultiIndex:
+    
+    multi_index_pandas = pd.MultiIndex.from_tuples(multi_index_tuples, names=["Asset", "Indicator", "Param"])
+    multi_index_pandas = multi_index_pandas.set_levels(
+        [
+        pd.CategoricalIndex(multi_index_pandas.levels[0]),
+        pd.CategoricalIndex(multi_index_pandas.levels[1]),
+        multi_index_pandas.levels[2]
+        ]
+    )
+
+    return multi_index_pandas
+
+def generate_multi_index_process(
+    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]], 
+    asset_names: list[str]
+    ) -> pd.MultiIndex:
+    
+    index_tuples = generate_multi_index_tuple(indicators_and_params, asset_names)
+
+    return generate_multi_index_pandas(index_tuples)
+
+def get_total_return_streams_nb(
+    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]], 
+    asset_names: list[str]
+    ) -> int:
+    
+    num_assets: int = len(asset_names)
+    num_params: int = sum(len(params) for _, (_, _, params) in indicators_and_params.items())
+    
+    return num_assets * num_params
+
+
+def process_data(
+    data_prices_df: pd.DataFrame
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    
+    returns_df=data_prices_df.pct_change(fill_method=None)
+    pct_returns_array = returns_df.to_numpy(dtype=np.float32)
+    prices_array = equity_curves_calculs(pct_returns_array)
     log_returns_array = log_returns_np(prices_array)
     hv_array = mt.hv_composite(pct_returns_array)
-
-    asset_names = list(pct_returns_df.columns)
-    dates = pct_returns_df.index
-
-    volatility_adjusted_pct_returns = calculate_volatility_adjusted_returns(pct_returns_array, hv_array)
     
-    return prices_array, volatility_adjusted_pct_returns, log_returns_array, asset_names, dates
+    volatility_adjusted_pct_returns = calculate_volatility_adjusted_returns(
+        pct_returns_array, 
+        hv_array
+    )
 
-def calculate_ratios_returns(returns_df: pd.DataFrame, asset_names: list) -> pd.DataFrame:
+    return prices_array, volatility_adjusted_pct_returns, log_returns_array
 
-    pair_returns_list = []
+def initialize_data_array(
+    prices_array: np.ndarray,
+    log_returns_array: np.ndarray
+    ) -> dict[str, np.ndarray]:
+
+    shifted_log_returns = ft.shift_array(log_returns_array)
+    shifted_prices = ft.shift_array(prices_array)
+
+    return {
+        'returns_array': shifted_log_returns,
+        'prices_array': shifted_prices
+    }
+
+def initialize_signals_array(
+    prices_array: np.ndarray,
+    total_returns_streams: int
+    ) -> np.ndarray:
     
-    for asset1, asset2 in combinations(asset_names, 2):
-        if asset1 in returns_df.columns and asset2 in returns_df.columns:
-            pair_returns = returns_df[asset1] - returns_df[asset2]
-            pair_returns_list.append(pair_returns.rename(f"{asset1}-{asset2}"))
-    
-    ratios_returns_df = pd.concat(pair_returns_list, axis=1)
-    
-    return ratios_returns_df
+    total_days = prices_array.shape[0]
 
-def calculate_ensembles_returns(returns_df: pd.DataFrame, asset_names: list, combination_size: int = 2) -> pd.DataFrame:
+    return np.full((total_days, total_returns_streams), np.nan, dtype=np.float32)
 
-    # Création d'une liste pour stocker les rendements combinés
-    ensembles_returns_list = []
-    comb_names = []
 
-    # Calcul des rendements combinés pour toutes les combinaisons d'actifs de la taille spécifiée
-    for assets_comb in combinations(asset_names, combination_size):
-        comb_name = '+'.join(assets_comb)
-
-        if all(asset in returns_df.columns for asset in assets_comb):
-            # Moyenne des rendements ajustés pour les actifs de la combinaison
-            comb_returns = returns_df[list(assets_comb)].mean(axis=1, skipna=False)
-            ensembles_returns_list.append(comb_returns.rename(comb_name))
-            comb_names.append(comb_name)
-
-    # Concaténation des résultats dans un seul DataFrame
-    ensembles_returns_df = pd.concat(ensembles_returns_list, axis=1)
-
-    return ensembles_returns_df
-
-def adjust_returns_for_inversion(returns_df: pd.DataFrame, columns_list: list) -> pd.DataFrame:
-
-    for column in columns_list:
-
-        returns = returns_df[column]
-
-        inverted_returns = returns * -1
-        
-        inverted_returns_df = inverted_returns.to_frame(name=column)
-
-        returns_df[column] = inverted_returns_df
-    
-    return returns_df

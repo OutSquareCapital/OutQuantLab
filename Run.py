@@ -40,28 +40,22 @@ class MainApp(QMainWindow):
         self.show_backtest_page()
         self.update_progress(1, "Loading Data...")
 
-        data_prices_df = Get_Data.load_prices(FILE_PATH_YF, self.assets_collection.get_active_entities_names())
-
-        (
-        prices_array,
-        volatility_adjusted_pct_returns_array,
-        log_returns_array,
-        asset_names,
-        dates_index,
-        ) = Process_Data.process_data(data_prices_df)
-
-        indicators_and_params = self.indicators_collection.get_indicators_and_parameters_for_backtest()
+        config = BacktestConfig(
+        FILE_PATH_YF,
+        self.assets_collection.get_active_entities_names(),
+        self.indicators_collection.get_indicators_and_parameters_for_backtest()
+        )
 
         self.update_progress(10, "Processing Backtest...")
 
         raw_adjusted_returns_df = Backtest.process_backtest(
-        prices_array,
-        log_returns_array,
-        volatility_adjusted_pct_returns_array,
-        asset_names,
-        dates_index,
-        indicators_and_params,
-        progress_callback=self.update_progress
+        config.signals_array,
+        config.data_array,
+        config.volatility_adjusted_pct_returns,
+        config.dates_index,
+        config.indicators_and_params,
+        config.multi_index,
+        self.update_progress
         )
 
         self.update_progress(80, "Creating Portfolio...")
@@ -150,7 +144,7 @@ if __name__ == "__main__":
     progress_bar.setValue(30)
     import Get_Data
     progress_bar.setValue(40)
-    import Process_Data
+    from Process_Data import BacktestConfig
     progress_bar.setValue(50)
     import Backtest
     progress_bar.setValue(60)
