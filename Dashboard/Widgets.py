@@ -32,7 +32,6 @@ def curves( x_values: pd.Index,
     return fig
 
 def bars(series: pd.Series, title: str):
-    # Gestion des couleurs avec votre méthode
     color_map = get_color_map(series.index.tolist())
 
     fig = go.Figure()
@@ -46,7 +45,6 @@ def bars(series: pd.Series, title: str):
             showlegend=True
         ))
 
-    # Configuration générale du graphique
     fig.update_layout(
         xaxis=dict(showticklabels=False)
     )

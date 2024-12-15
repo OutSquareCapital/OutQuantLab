@@ -127,20 +127,17 @@ def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=No
     for key, value in cluster_dict.items():
         current_label = parent_label + str(key) if parent_label else str(key)
         if isinstance(value, dict):
-            # Si c'est un sous-cluster, on continue la récursion
             prepare_sunburst_data(value, current_label, labels, parents)
         else:
-            # Si on arrive à une liste d'actifs, on les ajoute comme feuilles
             for asset in value:
                 labels.append(asset)
                 parents.append(current_label)
-        # Ajouter le cluster actuel comme nœud s'il a des enfants
         if parent_label:
             labels.append(current_label)
             parents.append(parent_label)
         else:
             labels.append(current_label)
-            parents.append("")  # Root node has no parent
+            parents.append("")
             
     return labels, parents
 

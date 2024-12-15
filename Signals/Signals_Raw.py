@@ -15,17 +15,13 @@ def generate_seasonal_array(returns_df) -> np.ndarray:
         else:
             return 4
 
-    # Initialisation du tableau saisonnier avec un nombre de colonnes égal aux 3 critères saisonniers
     seasonal_array = np.empty((returns_df.shape[0], 3), dtype=np.int32)
     
-    # QuarterOfYear
     seasonal_array[:, 2] = returns_df.index.quarter
 
-    # WeekOfMonth
     day_of_month = returns_df.groupby([returns_df.index.year, returns_df.index.month], observed=False).cumcount() + 1
     seasonal_array[:, 1] = day_of_month.apply(assign_week_of_month).values
 
-    # DayOfWeek
     seasonal_array[:, 0] = returns_df.index.dayofweek + 1
 
     return seasonal_array

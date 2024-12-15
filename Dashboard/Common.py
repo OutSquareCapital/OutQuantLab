@@ -52,10 +52,11 @@ def setup_figure_layout(fig: go.Figure,
         paper_bgcolor=BACKGROUND_APP_DARK,
         plot_bgcolor=BACKGROUND_APP_DARK,
         legend={
-            'title_font': {'size': FONT_SIZE*1.2,
-                           'family': FONT_FAMILY,
-                           'weight': FONT_TYPE
-                           }
+            'title_font': {
+                'size': FONT_SIZE*1.2,
+                'family': FONT_FAMILY,
+                'weight': FONT_TYPE
+                }
         }
     )
 

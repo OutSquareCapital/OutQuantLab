@@ -79,9 +79,9 @@ def remove_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensa
 def rolling_skewness(array, length, min_length):
     N, M = array.shape
     output = np.empty((N, M), dtype=np.float64)
-    output[:] = np.nan  # Initialize with NaN
+    output[:] = np.nan
 
-    for col in prange(M):  # Parallel loop over columns
+    for col in prange(M):
         nobs, x, xx, xxx = 0, 0.0, 0.0, 0.0
         compensation_x, compensation_xx, compensation_xxx = 0.0, 0.0, 0.0
         prev_value = array[0, col]
@@ -205,9 +205,9 @@ def remove_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, co
 def rolling_kurtosis(array, length, min_length):
     N, M = array.shape
     output = np.empty((N, M), dtype=np.float64)
-    output[:] = np.nan  # Initialize with NaN
+    output[:] = np.nan
 
-    for col in prange(M):  # Parallel loop over columns
+    for col in prange(M):
         nobs, x, xx, xxx, xxxx = 0, 0.0, 0.0, 0.0, 0.0
         compensation_x, compensation_xx, compensation_xxx, compensation_xxxx = 0.0, 0.0, 0.0, 0.0
         prev_value = array[0, col]

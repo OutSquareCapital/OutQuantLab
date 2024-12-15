@@ -59,11 +59,9 @@ def performance_compare(func1: Callable, func2: Callable, num_iterations=1000, *
     stats1 = get_timing_stats(execution_times_df1)
     stats2 = get_timing_stats(execution_times_df2)
 
-    # Noms des fonctions
     func1_name = func1.__name__
     func2_name = func2.__name__
     
-    # Comparer les statistiques et afficher les résultats
     print("Comparison Report")
     print("=================")
     
@@ -88,19 +86,16 @@ def performance_compare(func1: Callable, func2: Callable, num_iterations=1000, *
         print(f"  Ratio: {ratio:.2f}x faster")
         print("")
     
-    # Comparer et afficher les résultats pour chaque statistique
     compare_and_print('median_time', 'Median execution time')
     compare_and_print('percentile_0_1', '0.1st percentile')
     compare_and_print('percentile_1', '1st percentile')
     compare_and_print('percentile_99', '99th percentile')
     compare_and_print('percentile_99.9', '99.9th percentile')
 
-    # Tracer les distributions des temps d'exécution
 
     execution_times_df1['execution_time'], unit1 = determine_time_unit(execution_times_df1['execution_time'])
     execution_times_df2['execution_time'], unit2 = determine_time_unit(execution_times_df2['execution_time'])
 
-    # Superposer les histogrammes
     plt.figure(figsize=(16, 8))
     plt.hist(execution_times_df1['execution_time'], bins=50, alpha=0.75, label=f'{func1_name} ({unit1})')
     plt.hist(execution_times_df2['execution_time'], bins=50, alpha=0.75, label=f'{func2_name} ({unit2})')

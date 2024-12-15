@@ -29,15 +29,12 @@ def rolling_median_normalisation(signal_array: np.ndarray, window_length: int) -
 
     limit = 1
 
-    # Calcul de la médiane mobile
     median_array = mt.rolling_median(signal_array, length=window_length, min_length=window_length)
     
-    # Calcul de la valeur minimale et maximale dans chaque fenêtre
     rolling_min = mt.rolling_min(signal_array, length=window_length, min_length=window_length)
     rolling_max = mt.rolling_max(signal_array, length=window_length, min_length=window_length)
     
-    # Réutilisation du tableau 'signals' pour stocker le résultat
-    adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)  # Pré-allocation du tableau
+    adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)
     ne.evaluate("((signal_array - median_array) / (rolling_max - rolling_min)) * 2", out=adjusted_signal_array)
 
     return np.clip(adjusted_signal_array, -limit, limit)
@@ -46,16 +43,12 @@ def rolling_std_normalisation(signal_array: np.ndarray, window_length: int) -> n
 
     limit = 1
 
-    # Calcul de la moyenne mobile
     median_array = mt.rolling_median(signal_array, length=window_length, min_length=window_length)
     
-    # Calcul de l'écart-type mobile
     rolling_std = mt.rolling_volatility(signal_array, length=window_length, min_length=window_length)
     
-    # Pré-allocation du tableau pour le résultat
     adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)
     
-    # Calcul de la normalisation et scalabilité entre -1 et 1
     ne.evaluate("((signal_array - median_array) / rolling_std) * 0.5", out=adjusted_signal_array)
 
     return np.clip(adjusted_signal_array, -limit, limit)
@@ -65,20 +58,14 @@ def rolling_scalar_normalisation(signal_array: np.ndarray, window_length: int) -
     scalar = 1
     limit = 2
 
-    # Calcul de la moyenne ligne par ligne sur toutes les colonnes
     row_mean_array = np.nanmean(np.abs(signal_array), axis=1)
 
-    # Calcul de la médiane roulante sur la colonne résultante
     rolling_median = mt.rolling_median(row_mean_array, length=window_length, min_length=1)
 
-    # Backfill pour remplacer les NaN par la dernière valeur non-NaN disponible
-    #rolling_median = pd.Series(rolling_median, dtype=np.float32).bfill().values
     rolling_median = ft.bfill(rolling_median)
 
-    # Pré-allocation du tableau pour le résultat
     adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)
 
-    # Calcul du facteur de normalisation
     normalization_factor = scalar / rolling_median[:, None]
 
     return np.clip(signal_array * normalization_factor, -limit, limit)

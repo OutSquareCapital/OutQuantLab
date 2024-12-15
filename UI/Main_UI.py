@@ -136,7 +136,6 @@ def setup_results_page(
     rolling_metrics_layout = create_expandable_buttons_list("Rolling Metrics", ROLLING_BUTTONS_NAMES, plots)
     advanced_metrics_layout = create_expandable_buttons_list("Advanced Metrics", ADVANCED_BUTTONS_NAMES, plots)
 
-    # Tableau des résultats avec animation
     stats_button = QPushButton("Portfolio Statistics")
     stats_layout = QVBoxLayout()
     stats_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -182,12 +181,12 @@ def setup_results_page(
 
     backtest_parameters_button = QPushButton("Backtest Parameters")
     backtest_parameters_layout = QVBoxLayout()
-    backtest_parameters_layout.setAlignment(Qt.AlignmentFlag.AlignTop)  # Alignement en haut
+    backtest_parameters_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
     backtest_parameters_widget = QWidget()
     backtest_parameters_inner_layout = QVBoxLayout(backtest_parameters_widget)
 
     length_slider = QSlider(Qt.Orientation.Horizontal)
-    length_slider.setRange(6, 12)  # Log base 2 de 64 à 4096
+    length_slider.setRange(6, 12)
     length_slider.setValue(10)
     length_label = QLabel(f"Rolling Length: {2 ** length_slider.value()}")
     length_slider.valueChanged.connect(lambda value: length_label.setText(f"Rolling Length: {2 ** value}"))
@@ -195,7 +194,7 @@ def setup_results_page(
     backtest_parameters_inner_layout.addWidget(length_slider)
 
     leverage_slider = QSlider(Qt.Orientation.Horizontal)
-    leverage_slider.setRange(1, 100)  # 0.1 à 10, step 0.1
+    leverage_slider.setRange(1, 100)
     leverage_slider.setValue(10)
     leverage_label = QLabel(f"Leverage: {leverage_slider.value() / 10:.1f}")
     leverage_slider.valueChanged.connect(lambda value: leverage_label.setText(f"Leverage: {value / 10:.1f}"))
@@ -203,8 +202,8 @@ def setup_results_page(
     backtest_parameters_inner_layout.addWidget(leverage_slider)
 
     date_slider = QSlider(Qt.Orientation.Horizontal)
-    date_slider.setRange(0, (2025 - 1950) * 12)  # Range in months from 1950 à 2025
-    date_slider.setValue((2025 - 1950) // 2 * 12)  # Par défaut au milieu de la plage
+    date_slider.setRange(0, (2025 - 1950) * 12)
+    date_slider.setValue((2025 - 1950) // 2 * 12)
     date_label = QLabel(f"Starting Date: {QDate(1950, 1, 1).addMonths(date_slider.value()).toString('yyyy-MM')}")
     date_slider.valueChanged.connect(lambda value: date_label.setText(f"Starting Date: {QDate(1950, 1, 1).addMonths(value).toString('yyyy-MM')}"))
     backtest_parameters_inner_layout.addWidget(date_label)

@@ -223,21 +223,18 @@ def connect_sliders_to_update(
         end = index_to_value(end_slider.value())
         num_values = num_values_slider.value()
 
-        # Validation des sliders
         if start * 2 > end:
             if start_slider.hasFocus():
                 end_slider.setValue(value_to_index(start * 2))
             elif end_slider.hasFocus():
                 start_slider.setValue(value_to_index(end // 2))
 
-        # Génération des valeurs
         generated_values = param_range_values(start, end, num_values)
         unique_values = sorted(set(generated_values))
         range_info_label.setText(f"Range: {start} - {end}")
         num_values_info_label.setText(f"Num Values: {len(unique_values)}")
         generated_values_label.setText(f"Generated Values: {unique_values}")
 
-        # Appeler le callback pour sauvegarder les modifications
         update_callback(unique_values)
 
     start_slider.valueChanged.connect(update_values)

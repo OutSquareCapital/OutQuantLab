@@ -38,15 +38,13 @@ class MainApp(QMainWindow):
 
     def run_backtest(self):
         self.show_backtest_page()
-        self.update_progress(1, "Loading Data...")
+        self.update_progress(1, "Processing Backtest...")
 
         config = BacktestConfig(
         FILE_PATH_YF,
         self.assets_collection.get_active_entities_names(),
         self.indicators_collection.get_indicators_and_parameters_for_backtest()
         )
-
-        self.update_progress(10, "Processing Backtest...")
 
         raw_adjusted_returns_df = Backtest.process_backtest(
         config.signals_array,
@@ -57,8 +55,6 @@ class MainApp(QMainWindow):
         config.multi_index,
         self.update_progress
         )
-
-        self.update_progress(80, "Creating Portfolio...")
         
         backtest_result = Portfolio.calculate_daily_average_returns(
         raw_adjusted_returns_df.dropna(axis=0),  
