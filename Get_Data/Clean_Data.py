@@ -40,6 +40,16 @@ def adjust_prices_for_negativity(prices_df: pd.DataFrame) -> pd.DataFrame:
 
     return prices_df
 
+def adjust_returns_for_inversion(returns_df: pd.DataFrame, columns_list: list) -> pd.DataFrame:
+
+    for column in columns_list:
+        returns = returns_df[column]
+        inverted_returns = returns * -1
+        inverted_returns_df = inverted_returns.to_frame(name=column)
+        returns_df[column] = inverted_returns_df
+    
+    return returns_df
+
 def adjust_returns_for_nans(returns_df: pd.DataFrame) -> pd.DataFrame:
 
     for col in returns_df.columns:
