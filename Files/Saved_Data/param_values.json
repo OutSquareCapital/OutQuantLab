@@ -32,16 +32,52 @@
       ]
    },
    "CentralPriceRatio": {
-      "LenST": [],
-      "LenLT": []
+      "LenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "MeanRateOfChange": {
-      "LenST": [],
-      "LenLT": []
+      "LenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "MedianRateOfChange": {
-      "LenST": [],
-      "LenLT": []
+      "LenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "CentralRateOfChange": {
       "LenST": [],
@@ -161,8 +197,19 @@
       ]
    },
    "MeanPriceRatioNormalised": {
-      "SignalLength": [],
-      "PLength": []
+      "SignalLength": [
+         2,
+         4,
+         8,
+         16
+      ],
+      "PLength": [
+         64,
+         128,
+         256,
+         512,
+         1024
+      ]
    },
    "MeanRateOfChangeNormalised": {
       "SignalLength": [],

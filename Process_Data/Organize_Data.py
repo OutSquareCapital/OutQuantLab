@@ -31,7 +31,7 @@ class BacktestConfig:
         
         prices_df = load_prices(self.asset_names, self.file_path)
         self.dates_index = prices_df.index
-        prices_array, self.volatility_adjusted_pct_returns, log_returns_array = process_data(prices_df)
+        prices_array, log_returns_array, self.volatility_adjusted_pct_returns = process_data(prices_df)
         self.data_array = initialize_data_array(prices_array, log_returns_array)
         total_return_streams: int = get_total_return_streams_nb(self.indicators_and_params, self.asset_names)
         self.signals_array = initialize_signals_array(prices_array, total_return_streams)

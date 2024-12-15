@@ -29,13 +29,16 @@ def calculate_volatility_adjusted_returns(
 
     return ne.evaluate('pct_returns_array * vol_adj_position_size_shifted')
 
-def normalize_returns_distribution_rolling(pct_returns_df: pd.DataFrame, 
-                                            window_size: int) -> pd.DataFrame:
+def normalize_returns_distribution_rolling(
+    pct_returns_df: pd.DataFrame, 
+    window_size: int
+    ) -> pd.DataFrame:
     
-    normalized_returns = pd.DataFrame(index=pct_returns_df.index, 
-                                        columns=pct_returns_df.columns, 
-                                        dtype=np.float32)
-    
+    normalized_returns = pd.DataFrame(
+        index=pct_returns_df.index, 
+        columns=pct_returns_df.columns, 
+        dtype=np.float32)
+
     for end in range(window_size - 1, len(pct_returns_df)):
         window_df = pct_returns_df.iloc[end - window_size + 1 : end + 1]
         
@@ -144,7 +147,7 @@ def process_data(
         hv_array
     )
 
-    return prices_array, volatility_adjusted_pct_returns, log_returns_array
+    return prices_array, log_returns_array, volatility_adjusted_pct_returns
 
 def initialize_data_array(
     prices_array: np.ndarray,
