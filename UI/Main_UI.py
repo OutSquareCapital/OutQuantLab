@@ -8,7 +8,6 @@ QMainWindow,
 QApplication,
 QGridLayout
 )
-from PySide6.QtCore import Qt
 from collections.abc import Callable
 from Files import (
 BACKTEST_PAGE_PHOTO,
@@ -25,7 +24,8 @@ set_frame_design,
 generate_graphs_buttons,
 create_button,
 generate_stats_display,
-generate_home_button
+generate_home_button,
+generate_plot_widget
 )
 from .Config_UI import (
 AssetSelectionWidget, 
@@ -133,6 +133,20 @@ def setup_results_page(
     backtest_parameters_layout, clusters_buttons_layout = generate_backtest_params_sliders(CLUSTERS_PARAMETERS)
     home_layout = generate_home_button(back_to_home_callback)
 
+    equity_plot = generate_plot_widget((dashboards.plot("Equity", global_plot=True)), show_legend=False)
+    sharpe_plot = generate_plot_widget(dashboards.plot("Rolling Sharpe Ratio", global_plot=True), show_legend=False)
+    drawdown_plot = generate_plot_widget(dashboards.plot("Rolling Drawdown", global_plot=True), show_legend=False)
+    vol_plot = generate_plot_widget(dashboards.plot("Rolling Volatility", global_plot=True), show_legend=False)
+    distribution_plot = generate_plot_widget(dashboards.plot("Returns Distribution Histogram", global_plot=True), show_legend=False)
+    violin_plot = generate_plot_widget(dashboards.plot("Returns Distribution Violin", global_plot=True), show_legend=False)
+    
+    bottom_layout.addWidget(equity_plot, 0, 0)
+    bottom_layout.addWidget(drawdown_plot, 1, 0)
+    bottom_layout.addWidget(sharpe_plot, 0, 1)
+    bottom_layout.addWidget(vol_plot, 1, 1)
+    bottom_layout.addWidget(distribution_plot, 0, 2)
+    bottom_layout.addWidget(violin_plot, 1, 2)
+    
     top_layout.addLayout(stats_layout, stretch=2)
     top_layout.addLayout(overall_metrics_layout, stretch=2)
     top_layout.addLayout(rolling_metrics_layout, stretch=2)
@@ -144,8 +158,6 @@ def setup_results_page(
     results_layout.addWidget(bottom_frame, stretch=29)
 
     parent.setCentralWidget(results_widget)
-
-    return bottom_layout
 
 def update_progress_with_events(
     progress_bar: QProgressBar, 

@@ -22,7 +22,7 @@ class MainApp(QMainWindow):
         )
 
     def refresh_data(self):
-        Get_Data.get_yahoo_finance_data(self.assets_collection.get_all_entities_names(), FILE_PATH_YF)
+        get_yahoo_finance_data(self.assets_collection.get_all_entities_names(), FILE_PATH_YF)
 
     def update_progress(self, value, message):
         UI.update_progress_with_events(self.progress_bar, self.log_output, value, message)
@@ -38,7 +38,7 @@ class MainApp(QMainWindow):
         self.indicators_collection.get_indicators_and_parameters_for_backtest()
         )
 
-        raw_adjusted_returns_df = Backtest.process_backtest(
+        raw_adjusted_returns_df = process_backtest(
         config.signals_array,
         config.data_array,
         config.volatility_adjusted_pct_returns,
@@ -49,7 +49,7 @@ class MainApp(QMainWindow):
         )
         
         self.dashboards.sub_portfolios = Portfolio.calculate_daily_average_returns(
-        raw_adjusted_returns_df.dropna(axis=0),  
+        raw_adjusted_returns_df.dropna(axis=0),
         by_method=True, 
         by_asset=True)
 
@@ -67,26 +67,12 @@ class MainApp(QMainWindow):
         
         self.dashboards.metrics = self.dashboards.calculate_metrics()
         
-        bottom_layout = UI.setup_results_page(
+        UI.setup_results_page(
         parent=self,
         dashboards=self.dashboards,
         back_to_home_callback=self.show_home_page,
         metrics=self.dashboards.metrics
         )
-
-        equity_plot = UI.generate_plot_widget((self.dashboards.plot("Equity", global_plot=True)), show_legend=False)
-        sharpe_plot = UI.generate_plot_widget(self.dashboards.plot("Rolling Sharpe Ratio", global_plot=True), show_legend=False)
-        drawdown_plot = UI.generate_plot_widget(self.dashboards.plot("Rolling Drawdown", global_plot=True), show_legend=False)
-        vol_plot = UI.generate_plot_widget(self.dashboards.plot("Rolling Volatility", global_plot=True), show_legend=False)
-        distribution_plot = UI.generate_plot_widget(self.dashboards.plot("Returns Distribution Histogram", global_plot=True), show_legend=False)
-        violin_plot = UI.generate_plot_widget(self.dashboards.plot("Returns Distribution Violin", global_plot=True), show_legend=False)
-        
-        bottom_layout.addWidget(equity_plot, 0, 0)
-        bottom_layout.addWidget(drawdown_plot, 1, 0)
-        bottom_layout.addWidget(sharpe_plot, 0, 1)
-        bottom_layout.addWidget(vol_plot, 1, 1)
-        bottom_layout.addWidget(distribution_plot, 0, 2)
-        bottom_layout.addWidget(violin_plot, 1, 2)
 
     def closeEvent(self, event):
         self.assets_collection.save()
@@ -106,11 +92,11 @@ if __name__ == "__main__":
     QApplication.processEvents()
     from Files import FILE_PATH_YF
     progress_bar.setValue(30)
-    import Get_Data
+    from Get_Data import get_yahoo_finance_data
     progress_bar.setValue(40)
     from Process_Data import BacktestConfig
     progress_bar.setValue(50)
-    import Backtest
+    from Backtest import process_backtest
     progress_bar.setValue(60)
     import Portfolio
     progress_bar.setValue(70)

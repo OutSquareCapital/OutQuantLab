@@ -56,7 +56,8 @@ def calculate_strategy_returns(
         signal_col_index += num_cols
 
         progress = 1 + int(total_steps * signal_col_index / total_columns)
-        progress_callback(progress, f"Backtesting Strategies: {signal_col_index}/{total_columns}...")
+        message = f"Backtesting Strategies: {signal_col_index}/{total_columns}..."
+        progress_callback(progress, message)
 
     return signals_array
 
