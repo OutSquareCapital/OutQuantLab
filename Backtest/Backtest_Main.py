@@ -41,7 +41,7 @@ def calculate_strategy_returns(
 
     signal_col_index = 0
     total_columns = signals_array.shape[1]
-    total_steps = 70 - 10
+    total_steps = 100 - 1
 
     for func, array_type, params in indicators_and_params.values():
 
@@ -55,7 +55,7 @@ def calculate_strategy_returns(
 
         signal_col_index += num_cols
 
-        progress = 10 + int(total_steps * signal_col_index / total_columns)
+        progress = 1 + int(total_steps * signal_col_index / total_columns)
         progress_callback(progress, f"Backtesting Strategies: {signal_col_index}/{total_columns}...")
 
     return signals_array

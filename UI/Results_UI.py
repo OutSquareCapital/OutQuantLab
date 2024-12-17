@@ -1,7 +1,3 @@
-from PySide6.QtWidgets import (
-                               QVBoxLayout, 
-                               QDialog
-                               )
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtCore import QUrl
@@ -38,15 +34,3 @@ def generate_plot_widget(fig, show_legend:bool=True):
     plot_widget.load(QUrl.fromLocalFile(temp_file_path))
 
     return plot_widget
-
-def display_plot_dialog(parent, fig, window_title: str):
-    plot_widget = generate_plot_widget(fig)
-    plot_widget.showMaximized
-    dialog = QDialog(parent)
-    dialog.setWindowTitle(window_title)
-    layout = QVBoxLayout(dialog)
-    layout.addWidget(plot_widget)
-    dialog.setLayout(layout)
-    dialog.resize(1200, 800)
-
-    dialog.exec()

@@ -13,14 +13,16 @@ QLabel,
 QTreeWidgetItem,
 QMessageBox,
 QInputDialog,
-QLayout
+QLayout,
+QDialog
 )
-
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
+from functools import partial
+from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt, QDate
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from PySide6.QtGui import QFont
 from typing import Any
 from collections.abc import Callable
+from .Results_UI import generate_plot_widget
 
 def create_param_widget(
     param_box: QGroupBox, 
@@ -286,23 +288,42 @@ def setup_expandable_animation(
     toggle_button.toggled.connect(toggle_animation)
     return animation
 
-def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: dict[str, Callable]):
-    for btn_text in buttons_names:
-        button = QPushButton(btn_text)
-        button.clicked.connect(buttons_actions.get(btn_text, lambda: None))
-        layout.addWidget(button)
-
 def create_button(
     text: str, 
     callback: Callable, 
     parent_layout: QLayout
-) -> QPushButton:
+    ) -> QPushButton:
+    
     button: QPushButton = QPushButton(text)
     button.clicked.connect(callback)
     parent_layout.addWidget(button)
     return button
 
-def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list, buttons_actions: dict[str, Callable], open_on_launch: bool = False):
+def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: dict[str, Callable]):
+
+    for btn_text in buttons_names:
+        button = QPushButton(btn_text)
+        action = buttons_actions.get(btn_text, lambda: None)
+        button.clicked.connect(action)
+        layout.addWidget(button)
+
+
+def create_checkbox_item(
+    item: str, 
+    is_checked: bool, 
+    callback: Callable[[bool], None]) -> QCheckBox:
+    checkbox = QCheckBox(item)
+    checkbox.setChecked(is_checked)
+    checkbox.stateChanged.connect(lambda: callback(checkbox.isChecked()))
+    return checkbox
+
+def create_expandable_buttons_list(
+    toggle_button_name: str, 
+    buttons_names: list[str], 
+    buttons_actions: dict[str, Callable], 
+    open_on_launch: bool = False
+    ) -> QVBoxLayout:
+    
     toggle_button = QPushButton(toggle_button_name)
     outer_layout = QVBoxLayout()
     outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -316,8 +337,148 @@ def create_expandable_buttons_list(toggle_button_name: str, buttons_names: list,
         toggle_button.setChecked(True)
     return outer_layout
 
-def create_checkbox_item(item: str, is_checked: bool, callback: Callable[[bool], None]) -> QCheckBox:
-    checkbox = QCheckBox(item)
-    checkbox.setChecked(is_checked)
-    checkbox.stateChanged.connect(lambda: callback(checkbox.isChecked()))
-    return checkbox
+def organize_buttons_by_category(dashboards):
+
+    categorized_buttons = {"overall": [], "rolling": [], "other": []}
+    actions = {"overall": {}, "rolling": {}, "other": {}}
+
+    for name, dashboard in dashboards.all_dashboards.items():
+        category = dashboard["category"]
+        formatted_name = name
+        categorized_buttons[category].append(formatted_name)
+
+    return categorized_buttons, actions
+    
+def generate_graphs_buttons(dashboards, parent_window):
+    categorized_buttons, actions = organize_buttons_by_category(dashboards)
+
+    for category, buttons in categorized_buttons.items():
+        for button_name in buttons:
+            actions[category][button_name] = partial(
+                display_dashboard_plot, parent_window, dashboards, button_name
+            )
+
+    overall_metrics_layout = create_expandable_buttons_list(
+        "Overall Metrics", categorized_buttons["overall"], actions["overall"], open_on_launch=True
+    )
+    rolling_metrics_layout = create_expandable_buttons_list(
+        "Rolling Metrics", categorized_buttons["rolling"], actions["rolling"]
+    )
+    advanced_metrics_layout = create_expandable_buttons_list(
+        "Advanced Metrics", categorized_buttons["other"], actions["other"]
+    )
+
+    return overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout
+
+def display_dashboard_plot(parent, dashboards, dashboard_name: str, global_plot: bool = False):
+    dashboard_config = dashboards.all_dashboards.get(dashboard_name)
+    if not dashboard_config or not callable(dashboard_config["callable"]):
+        raise ValueError(f"No callable function for dashboard '{dashboard_name}'")
+
+    fig = dashboards.plot(dashboard_name, global_plot=global_plot)
+    
+    dialog = QDialog(parent)
+    dialog.setWindowTitle(f"{dashboard_name} Plot")
+    dialog.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint)
+    
+    plot_widget = generate_plot_widget(fig)
+    layout = QVBoxLayout(dialog)
+    layout.addWidget(plot_widget)
+    dialog.setLayout(layout)
+    dialog.resize(1200, 800)
+    
+    dialog.exec()
+
+
+def generate_stats_display(stats_results, metrics):
+    stats_button = QPushButton("Portfolio Statistics")
+    stats_layout = QVBoxLayout()
+    stats_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+    stats_widget = QWidget()
+    stats_inner_layout = QVBoxLayout(stats_widget)
+    stats_inner_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+    for label, value in zip(stats_results, metrics):
+        row_layout = QHBoxLayout()
+        
+        left_label = QLabel(label)
+        left_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        row_layout.addWidget(left_label)
+        
+        right_label = QLabel(f"{value}")
+        right_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        row_layout.addWidget(right_label)
+        
+        stats_inner_layout.addLayout(row_layout)
+    stats_layout.addWidget(stats_button)
+    stats_layout.addWidget(stats_widget)
+    setup_expandable_animation(stats_button, stats_widget)
+    stats_button.setChecked(True)
+    
+    return stats_layout
+
+def generate_home_button(back_to_home_callback):
+    home_layout = QVBoxLayout()
+    home_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+    back_to_home_button = QPushButton("Home")
+    back_to_home_button.clicked.connect(back_to_home_callback)
+    home_layout.addWidget(back_to_home_button)
+    
+    return home_layout
+
+def generate_backtest_params_sliders(clusters_params):
+    clusters_toggle_button = QPushButton("Clusters Parameters")
+    clusters_buttons_layout = QVBoxLayout()
+    clusters_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+    clusters_buttons_widget = QWidget()
+    clusters_buttons_inner_layout = QVBoxLayout(clusters_buttons_widget)
+
+    for param in clusters_params:
+        slider = QSlider(Qt.Orientation.Horizontal)
+        slider.setRange(0, 10)
+        slider.setValue(5)
+        slider_label = QLabel(f"{param}: {slider.value()}")
+        slider.valueChanged.connect(lambda value, lbl=slider_label, txt=param: lbl.setText(f"{txt}: {value}"))
+        clusters_buttons_inner_layout.addWidget(slider_label)
+        clusters_buttons_inner_layout.addWidget(slider)
+
+    clusters_buttons_layout.addWidget(clusters_toggle_button)
+    clusters_buttons_layout.addWidget(clusters_buttons_widget)
+    setup_expandable_animation(clusters_toggle_button, clusters_buttons_widget)
+
+    backtest_parameters_button = QPushButton("Backtest Parameters")
+    backtest_parameters_layout = QVBoxLayout()
+    backtest_parameters_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+    backtest_parameters_widget = QWidget()
+    backtest_parameters_inner_layout = QVBoxLayout(backtest_parameters_widget)
+
+    length_slider = QSlider(Qt.Orientation.Horizontal)
+    length_slider.setRange(6, 12)
+    length_slider.setValue(10)
+    length_label = QLabel(f"Rolling Length: {2 ** length_slider.value()}")
+    length_slider.valueChanged.connect(lambda value: length_label.setText(f"Rolling Length: {2 ** value}"))
+    backtest_parameters_inner_layout.addWidget(length_label)
+    backtest_parameters_inner_layout.addWidget(length_slider)
+
+    leverage_slider = QSlider(Qt.Orientation.Horizontal)
+    leverage_slider.setRange(1, 100)
+    leverage_slider.setValue(10)
+    leverage_label = QLabel(f"Leverage: {leverage_slider.value() / 10:.1f}")
+    leverage_slider.valueChanged.connect(lambda value: leverage_label.setText(f"Leverage: {value / 10:.1f}"))
+    backtest_parameters_inner_layout.addWidget(leverage_label)
+    backtest_parameters_inner_layout.addWidget(leverage_slider)
+
+    date_slider = QSlider(Qt.Orientation.Horizontal)
+    date_slider.setRange(0, (2025 - 1950) * 12)
+    date_slider.setValue((2025 - 1950) // 2 * 12)
+    date_label = QLabel(f"Starting Date: {QDate(1950, 1, 1).addMonths(date_slider.value()).toString('yyyy-MM')}")
+    date_slider.valueChanged.connect(lambda value: date_label.setText(f"Starting Date: {QDate(1950, 1, 1).addMonths(value).toString('yyyy-MM')}"))
+    backtest_parameters_inner_layout.addWidget(date_label)
+    backtest_parameters_inner_layout.addWidget(date_slider)
+
+    backtest_parameters_layout.addWidget(backtest_parameters_button)
+    backtest_parameters_layout.addWidget(backtest_parameters_widget)
+    setup_expandable_animation(backtest_parameters_button, backtest_parameters_widget)
+    
+    return backtest_parameters_layout, clusters_buttons_layout

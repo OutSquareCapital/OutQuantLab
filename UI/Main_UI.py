@@ -4,32 +4,28 @@ QHBoxLayout,
 QVBoxLayout,
 QProgressBar, 
 QTextEdit,
-QPushButton,
 QMainWindow,
 QApplication,
-QGridLayout,
-QLabel,
-QSlider
+QGridLayout
 )
-from PySide6.QtCore import Qt, QDate
-
+from PySide6.QtCore import Qt
+from collections.abc import Callable
 from Files import (
 BACKTEST_PAGE_PHOTO,
 HOME_PAGE_PHOTO,
 DASHBOARD_PAGE_PHOTO,
-OVERALL_BUTTONS_NAMES,
-ROLLING_BUTTONS_NAMES,
-ADVANCED_BUTTONS_NAMES,
 BACKTEST_STATS_RESULTS,
 CLUSTERS_PARAMETERS,
 FRAME_STYLE
 )
 from .Common_UI import (
-setup_expandable_animation, 
+generate_backtest_params_sliders, 
 set_background_image, 
 set_frame_design, 
-create_expandable_buttons_list, 
-create_button
+generate_graphs_buttons,
+create_button,
+generate_stats_display,
+generate_home_button
 )
 from .Config_UI import (
 AssetSelectionWidget, 
@@ -38,7 +34,6 @@ TreeStructureWidget,
 AssetsCollection, 
 IndicatorsCollection
 )
-from collections.abc import Callable
 
 def setup_home_page(
     parent: QMainWindow, 
@@ -97,11 +92,11 @@ def setup_backtest_page(parent):
 
     progress_bar_layout = QVBoxLayout()
     progress_bar = QProgressBar()
-    progress_bar.setRange(0, 100)
-    progress_bar_layout.addWidget(progress_bar)
-
     log_output_layout = QVBoxLayout()
     log_output = QTextEdit()
+    
+    progress_bar.setRange(0, 100)
+    progress_bar_layout.addWidget(progress_bar)
     log_output.setReadOnly(True)
     log_output_layout.addWidget(log_output)
 
@@ -119,8 +114,8 @@ def setup_backtest_page(parent):
     return progress_bar, log_output
 
 def setup_results_page(
-    parent, 
-    plots, 
+    parent,
+    dashboards,
     back_to_home_callback:Callable, 
     metrics: list[float]):
 
@@ -132,94 +127,11 @@ def setup_results_page(
     top_layout = QHBoxLayout(top_frame)
     bottom_layout = QGridLayout(bottom_frame)
 
-    overall_metrics_layout = create_expandable_buttons_list("Overall Metrics", OVERALL_BUTTONS_NAMES, plots, True)
-    rolling_metrics_layout = create_expandable_buttons_list("Rolling Metrics", ROLLING_BUTTONS_NAMES, plots)
-    advanced_metrics_layout = create_expandable_buttons_list("Advanced Metrics", ADVANCED_BUTTONS_NAMES, plots)
+    overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout = generate_graphs_buttons(dashboards, parent)
 
-    stats_button = QPushButton("Portfolio Statistics")
-    stats_layout = QVBoxLayout()
-    stats_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-    stats_widget = QWidget()
-    stats_inner_layout = QVBoxLayout(stats_widget)
-    stats_inner_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-    for label, value in zip(BACKTEST_STATS_RESULTS, metrics):
-        row_layout = QHBoxLayout()
-        
-        left_label = QLabel(label)
-        left_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        row_layout.addWidget(left_label)
-        
-        right_label = QLabel(f"{value}")
-        right_label.setAlignment(Qt.AlignmentFlag.AlignRight)
-        row_layout.addWidget(right_label)
-        
-        stats_inner_layout.addLayout(row_layout)
-    stats_layout.addWidget(stats_button)
-    stats_layout.addWidget(stats_widget)
-    setup_expandable_animation(stats_button, stats_widget)
-    stats_button.setChecked(True)
-
-    clusters_toggle_button = QPushButton("Clusters Parameters")
-    clusters_buttons_layout = QVBoxLayout()
-    clusters_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-    clusters_buttons_widget = QWidget()
-    clusters_buttons_inner_layout = QVBoxLayout(clusters_buttons_widget)
-
-    for param in CLUSTERS_PARAMETERS:
-        slider = QSlider(Qt.Orientation.Horizontal)
-        slider.setRange(0, 10)
-        slider.setValue(5)
-        slider_label = QLabel(f"{param}: {slider.value()}")
-        slider.valueChanged.connect(lambda value, lbl=slider_label, txt=param: lbl.setText(f"{txt}: {value}"))
-        clusters_buttons_inner_layout.addWidget(slider_label)
-        clusters_buttons_inner_layout.addWidget(slider)
-
-    clusters_buttons_layout.addWidget(clusters_toggle_button)
-    clusters_buttons_layout.addWidget(clusters_buttons_widget)
-    setup_expandable_animation(clusters_toggle_button, clusters_buttons_widget)
-
-    backtest_parameters_button = QPushButton("Backtest Parameters")
-    backtest_parameters_layout = QVBoxLayout()
-    backtest_parameters_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-    backtest_parameters_widget = QWidget()
-    backtest_parameters_inner_layout = QVBoxLayout(backtest_parameters_widget)
-
-    length_slider = QSlider(Qt.Orientation.Horizontal)
-    length_slider.setRange(6, 12)
-    length_slider.setValue(10)
-    length_label = QLabel(f"Rolling Length: {2 ** length_slider.value()}")
-    length_slider.valueChanged.connect(lambda value: length_label.setText(f"Rolling Length: {2 ** value}"))
-    backtest_parameters_inner_layout.addWidget(length_label)
-    backtest_parameters_inner_layout.addWidget(length_slider)
-
-    leverage_slider = QSlider(Qt.Orientation.Horizontal)
-    leverage_slider.setRange(1, 100)
-    leverage_slider.setValue(10)
-    leverage_label = QLabel(f"Leverage: {leverage_slider.value() / 10:.1f}")
-    leverage_slider.valueChanged.connect(lambda value: leverage_label.setText(f"Leverage: {value / 10:.1f}"))
-    backtest_parameters_inner_layout.addWidget(leverage_label)
-    backtest_parameters_inner_layout.addWidget(leverage_slider)
-
-    date_slider = QSlider(Qt.Orientation.Horizontal)
-    date_slider.setRange(0, (2025 - 1950) * 12)
-    date_slider.setValue((2025 - 1950) // 2 * 12)
-    date_label = QLabel(f"Starting Date: {QDate(1950, 1, 1).addMonths(date_slider.value()).toString('yyyy-MM')}")
-    date_slider.valueChanged.connect(lambda value: date_label.setText(f"Starting Date: {QDate(1950, 1, 1).addMonths(value).toString('yyyy-MM')}"))
-    backtest_parameters_inner_layout.addWidget(date_label)
-    backtest_parameters_inner_layout.addWidget(date_slider)
-
-    backtest_parameters_layout.addWidget(backtest_parameters_button)
-    backtest_parameters_layout.addWidget(backtest_parameters_widget)
-
-    setup_expandable_animation(backtest_parameters_button, backtest_parameters_widget)
-
-    home_layout = QVBoxLayout()
-    home_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-    back_to_home_button = QPushButton("Home")
-    back_to_home_button.clicked.connect(back_to_home_callback)
-    home_layout.addWidget(back_to_home_button)
+    stats_layout = generate_stats_display(BACKTEST_STATS_RESULTS, metrics)
+    backtest_parameters_layout, clusters_buttons_layout = generate_backtest_params_sliders(CLUSTERS_PARAMETERS)
+    home_layout = generate_home_button(back_to_home_callback)
 
     top_layout.addLayout(stats_layout, stretch=2)
     top_layout.addLayout(overall_metrics_layout, stretch=2)
