@@ -3,19 +3,19 @@ from Files import ANNUALIZATION_FACTOR
 from .Aggregation import rolling_mean
 from .Volatility import rolling_volatility
 
-def expanding_sharpe_ratios(daily_returns: np.ndarray) -> np.ndarray:
+def expanding_sharpe_ratios(returns_array: np.ndarray) -> np.ndarray:
 
-    length = daily_returns.shape[0]
+    length = returns_array.shape[0]
 
-    expanding_mean = rolling_mean(daily_returns, length=length, min_length=125)
-    expanding_std = rolling_volatility(daily_returns, length=length, min_length=125) 
+    expanding_mean = rolling_mean(returns_array, length=length, min_length=125)
+    expanding_std = rolling_volatility(returns_array, length=length, min_length=125) 
     
     return expanding_mean/expanding_std * ANNUALIZATION_FACTOR
 
 
-def rolling_sharpe_ratios(daily_returns: np.ndarray, length:int, min_length:int) -> np.ndarray:
+def rolling_sharpe_ratios(returns_array: np.ndarray, length:int, min_length:int) -> np.ndarray:
 
-    mean = rolling_mean(daily_returns, length=length, min_length=min_length)
+    mean = rolling_mean(returns_array, length=length, min_length=min_length)
 
-    volatility = rolling_volatility(daily_returns, length=length, min_length=min_length)
+    volatility = rolling_volatility(returns_array, length=length, min_length=min_length)
     return  mean / volatility * ANNUALIZATION_FACTOR

@@ -29,8 +29,6 @@ class MainApp(QMainWindow):
 
     def run_backtest(self):
         self.progress_bar, self.log_output = UI.setup_backtest_page(self)
-        
-        self.update_progress(1, "Processing Backtest...")
 
         config = BacktestConfig(
         FILE_PATH_YF,
@@ -57,9 +55,6 @@ class MainApp(QMainWindow):
         self.dashboards.sub_portfolios, 
         global_avg=True
         )
-
-        
-        self.update_progress(100, "Plotting Results...")
 
         self.show_results_page()
 

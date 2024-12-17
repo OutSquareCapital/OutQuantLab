@@ -472,94 +472,90 @@ shares_to_trade = calculate_shares_to_trade_from_adjusted_return(portfolio_size,
 print(f"Position optimale : {shares_to_trade:.2f}")
 '''
 
-'''class SeasonalBreakout:
+'''
+def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int)-> np.ndarray:
+    
+    # Capture les snapshots à des intervalles réguliers
+    repeated_snapshots_array = ft.snapshot_at_intervals(prices_array, LengthSnapshot)
 
-    @staticmethod
-    def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int)-> np.ndarray:
-        
-        # Capture les snapshots à des intervalles réguliers
-        repeated_snapshots_array = ft.snapshot_at_intervals(prices_array, LengthSnapshot)
+    # Calcul des rendements par rapport aux snapshots
+    returns = (prices_array / repeated_snapshots_array) - 1
 
-        # Calcul des rendements par rapport aux snapshots
-        returns = (prices_array / repeated_snapshots_array) - 1
+    abs_returns_array = abs(returns)
 
-        abs_returns_array = abs(returns)
+    avg_move = SeasonalBreakout.calculate_avg_move_nan(abs_returns_array, LengthSnapshot, LengthMean)
 
-        avg_move = SeasonalBreakout.calculate_avg_move_nan(abs_returns_array, LengthSnapshot, LengthMean)
+    amplitude_float = np.float32(amplitude)
+    amplitude_adjustement = np.float32(10)
 
-        amplitude_float = np.float32(amplitude)
-        amplitude_adjustement = np.float32(10)
+    adjusted_amplitude = amplitude_float / amplitude_adjustement
 
-        adjusted_amplitude = amplitude_float / amplitude_adjustement
+    # Définition des bornes basées sur la moyenne glissante
+    upper_bound = avg_move * adjusted_amplitude
+    lower_bound = -avg_move * adjusted_amplitude
 
-        # Définition des bornes basées sur la moyenne glissante
-        upper_bound = avg_move * adjusted_amplitude
-        lower_bound = -avg_move * adjusted_amplitude
+    signals = np.where(np.isnan(returns) | np.isnan(upper_bound) | np.isnan(lower_bound), np.nan,  # Si l'un des trois est NaN, signal est NaN
+                    np.where(returns > upper_bound, 1,  # Si returns > upper_bound, signal est 1 (achat)
+                                np.where(returns < lower_bound, -1, 0)))  # Si returns < lower_bound, signal est -1 (vente), sinon 0
+    
+    # Forcer le tableau signals en float32
+    signals = signals.astype(np.float32)
 
-        signals = np.where(np.isnan(returns) | np.isnan(upper_bound) | np.isnan(lower_bound), np.nan,  # Si l'un des trois est NaN, signal est NaN
-                        np.where(returns > upper_bound, 1,  # Si returns > upper_bound, signal est 1 (achat)
-                                    np.where(returns < lower_bound, -1, 0)))  # Si returns < lower_bound, signal est -1 (vente), sinon 0
-        
-        # Forcer le tableau signals en float32
-        signals = signals.astype(np.float32)
+    return signals*-1
 
-        return signals*-1
+@njit
+def calculate_avg_move_nan(abs_returns_np: np.ndarray, LengthSnapshot:int, LengthMean:int):
+    """
+    Calculer la moyenne des mouvements absolus des rendements en excluant les NaN
+    sur une fenêtre de temps basée sur LengthPeriod et LengthMean.
 
-    @njit
-    def calculate_avg_move_nan(abs_returns_np: np.ndarray, LengthSnapshot:int, LengthMean:int):
-        """
-        Calculer la moyenne des mouvements absolus des rendements en excluant les NaN
-        sur une fenêtre de temps basée sur LengthPeriod et LengthMean.
+    Args:
+        abs_returns_np (np.ndarray): Un tableau 2D de rendements absolus (chaque colonne représente un actif).
+        LengthPeriod (int): La période entre chaque snapshot (prise de vue) dans l'historique.
+        LengthMean (int): Le nombre de snapshots à inclure dans le calcul de la moyenne.
 
-        Args:
-            abs_returns_np (np.ndarray): Un tableau 2D de rendements absolus (chaque colonne représente un actif).
-            LengthPeriod (int): La période entre chaque snapshot (prise de vue) dans l'historique.
-            LengthMean (int): Le nombre de snapshots à inclure dans le calcul de la moyenne.
+    Returns:
+        np.ndarray: Un tableau 2D où chaque cellule contient la moyenne des rendements sur la fenêtre, ou NaN si aucune donnée n'est disponible.
+    """
+    
+    # Obtenir les dimensions du tableau de rendements : num_days est le nombre de lignes (jours), num_assets le nombre d'actifs (colonnes)
+    num_days, num_assets = abs_returns_np.shape
 
-        Returns:
-            np.ndarray: Un tableau 2D où chaque cellule contient la moyenne des rendements sur la fenêtre, ou NaN si aucune donnée n'est disponible.
-        """
-        
-        # Obtenir les dimensions du tableau de rendements : num_days est le nombre de lignes (jours), num_assets le nombre d'actifs (colonnes)
-        num_days, num_assets = abs_returns_np.shape
+    # Créer un tableau vide pour stocker les moyennes calculées pour chaque jour et chaque actif
+    avg_move = np.empty((num_days, num_assets), dtype=np.float32)
 
-        # Créer un tableau vide pour stocker les moyennes calculées pour chaque jour et chaque actif
-        avg_move = np.empty((num_days, num_assets), dtype=np.float32)
+    # Boucle sur chaque jour i (chaque ligne)
+    for i in range(num_days):
+        # Générer les indices des snapshots à utiliser pour le calcul de la moyenne
+        # Commence à i, puis recule de LengthPeriod à chaque étape, et ne conserve que les LengthMean premiers indices
+        snapshot_indices = np.arange(i, -1, -LengthSnapshot)[:LengthMean]
 
-        # Boucle sur chaque jour i (chaque ligne)
-        for i in range(num_days):
-            # Générer les indices des snapshots à utiliser pour le calcul de la moyenne
-            # Commence à i, puis recule de LengthPeriod à chaque étape, et ne conserve que les LengthMean premiers indices
-            snapshot_indices = np.arange(i, -1, -LengthSnapshot)[:LengthMean]
+        # Initialiser les variables pour stocker la somme des rendements et le nombre de valeurs valides (non-NaN) pour chaque actif
+        total_sum = np.zeros(num_assets, dtype=np.float32)  # Tableau pour accumuler les sommes de rendements par actif
+        valid_count = np.zeros(num_assets, dtype=np.float32)  # Compteur du nombre de valeurs valides (non-NaN) par actif
 
-            # Initialiser les variables pour stocker la somme des rendements et le nombre de valeurs valides (non-NaN) pour chaque actif
-            total_sum = np.zeros(num_assets, dtype=np.float32)  # Tableau pour accumuler les sommes de rendements par actif
-            valid_count = np.zeros(num_assets, dtype=np.float32)  # Compteur du nombre de valeurs valides (non-NaN) par actif
+        # Boucle sur les indices des snapshots sélectionnés
+        for idx in snapshot_indices:
+            # Extraire les rendements pour chaque actif à l'index donné (snapshot)
+            values = abs_returns_np[idx]
 
-            # Boucle sur les indices des snapshots sélectionnés
-            for idx in snapshot_indices:
-                # Extraire les rendements pour chaque actif à l'index donné (snapshot)
-                values = abs_returns_np[idx]
-
-                # Pour chaque actif, vérifier s'il s'agit d'une valeur valide (non-NaN)
-                for asset_idx in range(num_assets):
-                    if not np.isnan(values[asset_idx]):  # Si la valeur n'est pas NaN, l'inclure dans le calcul
-                        total_sum[asset_idx] += values[asset_idx]  # Ajouter la valeur à la somme courante pour cet actif
-                        valid_count[asset_idx] += 1  # Incrémenter le compteur de valeurs valides pour cet actif
-
-            # Calculer la moyenne des rendements pour chaque actif, seulement si des valeurs valides ont été trouvées
+            # Pour chaque actif, vérifier s'il s'agit d'une valeur valide (non-NaN)
             for asset_idx in range(num_assets):
-                if valid_count[asset_idx] > 0:
-                    # Diviser la somme totale par le nombre de valeurs valides pour obtenir la moyenne
-                    avg_move[i, asset_idx] = total_sum[asset_idx] / valid_count[asset_idx]
-                else:
-                    # Si aucune valeur valide n'a été trouvée, renvoyer NaN pour cet actif
-                    avg_move[i, asset_idx] = np.nan
+                if not np.isnan(values[asset_idx]):  # Si la valeur n'est pas NaN, l'inclure dans le calcul
+                    total_sum[asset_idx] += values[asset_idx]  # Ajouter la valeur à la somme courante pour cet actif
+                    valid_count[asset_idx] += 1  # Incrémenter le compteur de valeurs valides pour cet actif
 
-        # Retourner le tableau des moyennes calculées (ou NaN si aucune donnée valide)
-        return avg_move
+        # Calculer la moyenne des rendements pour chaque actif, seulement si des valeurs valides ont été trouvées
+        for asset_idx in range(num_assets):
+            if valid_count[asset_idx] > 0:
+                # Diviser la somme totale par le nombre de valeurs valides pour obtenir la moyenne
+                avg_move[i, asset_idx] = total_sum[asset_idx] / valid_count[asset_idx]
+            else:
+                # Si aucune valeur valide n'a été trouvée, renvoyer NaN pour cet actif
+                avg_move[i, asset_idx] = np.nan
 
-class SeasonalBreakoutTrend:
+    # Retourner le tableau des moyennes calculées (ou NaN si aucune donnée valide)
+    return avg_move
 
     @staticmethod
     def seasonal_breakout_returns_trend(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int, LenST: int, LenLT: int) -> np.ndarray:
@@ -572,106 +568,103 @@ class SeasonalBreakoutTrend:
 '''
 
 '''
+def generate_group_mask(seasonal_array: np.ndarray, GroupBy: int, GroupSelected: int):
+    # Utiliser les positions des colonnes saisonnières directement
+    # Position 0 : 'DayOfWeek', Position 1 : 'WeekOfMonth', Position 2 : 'QuarterOfYear'
+    return seasonal_array[:, GroupBy - 1] == GroupSelected
 
-class Seasonality:
+@staticmethod
+def generate_seasonal_trend_signal(
+    returns_array: np.ndarray,
+    group_mask_array: np.ndarray, 
+    LenST: int, 
+    LenLT: int
+) -> np.ndarray:
+
+    # Extraction des retours sélectionnés en fonction du masque de groupe
+    selected_returns_array = returns_array[group_mask_array]
     
-    def generate_group_mask(seasonal_array: np.ndarray, GroupBy: int, GroupSelected: int):
-        # Utiliser les positions des colonnes saisonnières directement
-        # Position 0 : 'DayOfWeek', Position 1 : 'WeekOfMonth', Position 2 : 'QuarterOfYear'
-        return seasonal_array[:, GroupBy - 1] == GroupSelected
+    mean_returns = mt.rolling_mean(selected_returns_array, length=LenST, min_length=1)
+    mean_roc_raw = mt.rolling_sum(mean_returns, length=LenLT, min_length=4)
+    seasonal_trend_signal = sn.sign_normalization(mean_roc_raw)
 
-    @staticmethod
-    def generate_seasonal_trend_signal(
-        returns_array: np.ndarray,
-        group_mask_array: np.ndarray, 
-        LenST: int, 
-        LenLT: int
-    ) -> np.ndarray:
-
-        # Extraction des retours sélectionnés en fonction du masque de groupe
-        selected_returns_array = returns_array[group_mask_array]
-        
-        mean_returns = mt.rolling_mean(selected_returns_array, length=LenST, min_length=1)
-        mean_roc_raw = mt.rolling_sum(mean_returns, length=LenLT, min_length=4)
-        seasonal_trend_signal = sn.sign_normalization(mean_roc_raw)
-
-        return ft.shift_array(seasonal_trend_signal)
+    return ft.shift_array(seasonal_trend_signal)
 
 
-    @staticmethod
-    def process_trend_signal(
-        seasonal_trend_signal: np.ndarray, 
-        group_mask_array: np.ndarray,
-        shape: tuple
-    ) -> np.ndarray:
-        
-        processed_seasonal_trend_signal = np.zeros(shape, dtype=np.float32)
-        processed_seasonal_trend_signal[group_mask_array] = seasonal_trend_signal
-
-        return processed_seasonal_trend_signal
+@staticmethod
+def process_trend_signal(
+    seasonal_trend_signal: np.ndarray, 
+    group_mask_array: np.ndarray,
+    shape: tuple
+) -> np.ndarray:
     
-    @staticmethod
-    def generate_conditioned_seasonal_trend_signal(
-        returns_array: np.ndarray,
-        group_mask_array: np.ndarray,
-        LenST: int, 
-        LenLT: int,
-        TrendLenST: int, 
-        TrendLenLT: int
-    ) -> np.ndarray:
+    processed_seasonal_trend_signal = np.zeros(shape, dtype=np.float32)
+    processed_seasonal_trend_signal[group_mask_array] = seasonal_trend_signal
 
-        seasonal_trend_signal = Seasonality.generate_seasonal_trend_signal(returns_array, group_mask_array, LenST, LenLT)
+    return processed_seasonal_trend_signal
 
-        # Calcul de la tendance générale sur l'ensemble des données
-        general_trend_signal = Trend.mean_rate_of_change(returns_array, TrendLenST, TrendLenLT)
+@staticmethod
+def generate_conditioned_seasonal_trend_signal(
+    returns_array: np.ndarray,
+    group_mask_array: np.ndarray,
+    LenST: int, 
+    LenLT: int,
+    TrendLenST: int, 
+    TrendLenLT: int
+) -> np.ndarray:
 
-        # Décalage en arrière de la tendance générale pour éviter le lookahead journalier
-        general_trend_signal = ft.shift_array(general_trend_signal)
+    seasonal_trend_signal = Seasonality.generate_seasonal_trend_signal(returns_array, group_mask_array, LenST, LenLT)
 
-        return sn.calculate_indicator_on_trend_signal(general_trend_signal[group_mask_array], seasonal_trend_signal)
+    # Calcul de la tendance générale sur l'ensemble des données
+    general_trend_signal = Trend.mean_rate_of_change(returns_array, TrendLenST, TrendLenLT)
+
+    # Décalage en arrière de la tendance générale pour éviter le lookahead journalier
+    general_trend_signal = ft.shift_array(general_trend_signal)
+
+    return sn.calculate_indicator_on_trend_signal(general_trend_signal[group_mask_array], seasonal_trend_signal)
+
+@staticmethod
+def seasonal_trend( returns_array: np.ndarray,
+                    seasonal_array: np.ndarray,
+                    GroupBy: int, 
+                    GroupSelected: int, 
+                    LenST: int, 
+                    LenLT: int) -> np.ndarray:
+
+    group_mask_array = Seasonality.generate_group_mask(seasonal_array, GroupBy, GroupSelected)
+
+    seasonal_trend_signal = Seasonality.generate_seasonal_trend_signal(returns_array, group_mask_array, LenST, LenLT)
+
+    processed_seasonal_trend_signal = Seasonality.process_trend_signal(seasonal_trend_signal, 
+                                                                        group_mask_array, 
+                                                                        returns_array.shape)
+
+    return np.roll(processed_seasonal_trend_signal, -1, axis=0)
+
+
+@staticmethod
+def overall_seasonal_trend(returns_array: np.ndarray,
+                            seasonal_array: np.ndarray,
+                            GroupBy: int, 
+                            GroupSelected: int, 
+                            LenST: int, 
+                            LenLT: int,
+                            TrendLenST: int, 
+                            TrendLenLT: int        
+                        ) -> np.ndarray:
+
+    group_mask_array = Seasonality.generate_group_mask(seasonal_array, GroupBy, GroupSelected)
     
-    @staticmethod
-    def seasonal_trend( returns_array: np.ndarray,
-                        seasonal_array: np.ndarray,
-                        GroupBy: int, 
-                        GroupSelected: int, 
-                        LenST: int, 
-                        LenLT: int) -> np.ndarray:
+    seasonal_trend_conditioned_signal = Seasonality.generate_conditioned_seasonal_trend_signal(returns_array, 
+                                                                                                group_mask_array, 
+                                                                                                LenST, 
+                                                                                                LenLT, 
+                                                                                                TrendLenST, 
+                                                                                                TrendLenLT)
 
-        group_mask_array = Seasonality.generate_group_mask(seasonal_array, GroupBy, GroupSelected)
+    processed_seasonal_trend_conditioned_signal = Seasonality.process_trend_signal(seasonal_trend_conditioned_signal, 
+                                                                                    group_mask_array, 
+                                                                                    returns_array.shape)
 
-        seasonal_trend_signal = Seasonality.generate_seasonal_trend_signal(returns_array, group_mask_array, LenST, LenLT)
-
-        processed_seasonal_trend_signal = Seasonality.process_trend_signal(seasonal_trend_signal, 
-                                                                           group_mask_array, 
-                                                                           returns_array.shape)
-
-        return np.roll(processed_seasonal_trend_signal, -1, axis=0)
-
-class SeasonalityTrend:
-
-    @staticmethod
-    def overall_seasonal_trend(returns_array: np.ndarray,
-                                seasonal_array: np.ndarray,
-                                GroupBy: int, 
-                                GroupSelected: int, 
-                                LenST: int, 
-                                LenLT: int,
-                                TrendLenST: int, 
-                                TrendLenLT: int        
-                            ) -> np.ndarray:
-
-        group_mask_array = Seasonality.generate_group_mask(seasonal_array, GroupBy, GroupSelected)
-        
-        seasonal_trend_conditioned_signal = Seasonality.generate_conditioned_seasonal_trend_signal(returns_array, 
-                                                                                                   group_mask_array, 
-                                                                                                   LenST, 
-                                                                                                   LenLT, 
-                                                                                                   TrendLenST, 
-                                                                                                   TrendLenLT)
-
-        processed_seasonal_trend_conditioned_signal = Seasonality.process_trend_signal(seasonal_trend_conditioned_signal, 
-                                                                                       group_mask_array, 
-                                                                                       returns_array.shape)
-
-        return np.roll(processed_seasonal_trend_conditioned_signal, -1, axis=0)'''
+    return np.roll(processed_seasonal_trend_conditioned_signal, -1, axis=0)
+'''

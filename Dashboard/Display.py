@@ -53,7 +53,7 @@ class Dashboards:
         if dashboard["length_required"]:
             return func(portfolio, length=self.length)
         return func(portfolio)
-    
+
 def plot_equity(returns_df: pd.DataFrame):
 
     equity_curves = Computations.calculate_equity_curves_df(returns_df)
@@ -149,18 +149,18 @@ def plot_overall_returns(returns_df: pd.DataFrame):
         series=sorted_total_returns,
         title="Total Returns")
 
-def plot_overall_sharpe_ratio(daily_returns: pd.DataFrame):
+def plot_overall_sharpe_ratio(returns_df: pd.DataFrame):
 
-    sharpe_ratios = Computations.calculate_overall_sharpe_ratio(daily_returns)
+    sharpe_ratios = Computations.calculate_overall_sharpe_ratio(returns_df)
     sorted_sharpe_ratios = Transformations.sort_series(sharpe_ratios, ascending=True)
     sorted_sharpe_ratios=Transformations.convert_series_multiindex_labels(sorted_sharpe_ratios)
     return Widgets.bars(
         series=sorted_sharpe_ratios, 
         title="Sharpe Ratio")
 
-def plot_overall_volatility(daily_returns: pd.DataFrame):
+def plot_overall_volatility(returns_df: pd.DataFrame):
 
-    volatility = Computations.calculate_overall_volatility(daily_returns)
+    volatility = Computations.calculate_overall_volatility(returns_df)
     sorted_volatility = Transformations.sort_series(volatility, ascending=True)
     sorted_volatility=Transformations.convert_series_multiindex_labels(sorted_volatility)
     return Widgets.bars(
