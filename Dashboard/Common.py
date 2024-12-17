@@ -29,10 +29,12 @@ def get_heatmap_colorscale(n_colors: int = 100) -> list:
     colors = [colormap(i / (n_colors - 1)) for i in range(n_colors)]
     return [[i / (n_colors - 1), mcolors.to_hex(color)] for i, color in enumerate(colors)]
 
-def setup_figure_layout(fig: go.Figure, 
-                        figtitle: str,
-                        hover_display_custom: bool=True,
-                        hover_data='y'):
+def setup_figure_layout(
+    fig: go.Figure, 
+    figtitle: str,
+    hover_display_custom: bool=True,
+    hover_data='y'):
+    
     fig.update_layout(
         font={
             'family': FONT_FAMILY,
@@ -42,10 +44,11 @@ def setup_figure_layout(fig: go.Figure,
         },
         title={
             'text': figtitle,
-            'font': {'size': FONT_SIZE*1.4, 
-                     'family': FONT_FAMILY,
-                     'weight': FONT_TYPE
-                     }
+            'font': {
+                'size': FONT_SIZE*1.4, 
+                'family': FONT_FAMILY,
+                'weight': FONT_TYPE
+                }
         },
         autosize=True,
         margin=dict(l=30, r=30, t=40, b=30),

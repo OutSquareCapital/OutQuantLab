@@ -36,6 +36,10 @@ def calculate_overall_average_drawdown(returns_df: pd.DataFrame, length: int) ->
 
     return calculate_rolling_drawdown(returns_df, length).mean().round(2)
 
+def calculate_overall_max_drawdown(returns_df: pd.DataFrame) -> pd.Series:
+
+    return calculate_ath_drawdown(returns_df).mean().round(2)
+
 
 def calculate_overall_monthly_skew(returns_df) -> pd.Series:
 
@@ -98,6 +102,21 @@ def calculate_rolling_drawdown(returns_df: pd.DataFrame, length: int) -> pd.Data
     
     rolling_max = equity_curves.rolling(window=length, min_periods=1).max()
     drawdowns = (equity_curves - rolling_max) / rolling_max * PERCENTAGE_FACTOR
+
+    return drawdowns.round(2)
+
+
+def calculate_ath_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
+    
+    equity_curves = pd.DataFrame(
+        equity_curves_calculs(returns_df.values),
+        index=returns_df.index,
+        columns=returns_df.columns,
+        dtype=np.float32
+        ).round(2)
+    
+    equity_max = equity_curves.max(axis=0)
+    drawdowns = (equity_curves - equity_max) / equity_max * PERCENTAGE_FACTOR
 
     return drawdowns.round(2)
 

@@ -48,18 +48,21 @@ def rolling_quantile_ratio(returns_array: np.ndarray, window: int, quantile_spre
     quantile_low = 0.5 - quantile_spread
     quantile_high = 0.5 + quantile_spread
 
-    df = pl.DataFrame(returns_array).with_columns([pl
-                                                    .all()
-                                                    .fill_nan(None)])
+    df = pl.DataFrame(returns_array).with_columns([
+        pl
+        .all()
+        .fill_nan(None)])
 
-    quantile_low_values = df.select(pl
-                                    .all()
-                                    .rolling_quantile(quantile=quantile_low, window_size=window, min_periods=window))
-    
-    quantile_high_values = df.select(pl
-                                        .all()
-                                        .rolling_quantile(quantile=quantile_high, window_size=window, min_periods=window))
-                        
+    quantile_low_values = df.select(
+        pl
+        .all()
+        .rolling_quantile(quantile=quantile_low, window_size=window, min_periods=window))
+
+    quantile_high_values = df.select(
+        pl
+        .all()
+        .rolling_quantile(quantile=quantile_high, window_size=window, min_periods=window))
+
     quantile_low_values_array = quantile_low_values.to_numpy()
     quantile_high_values_array = quantile_high_values.to_numpy()
 

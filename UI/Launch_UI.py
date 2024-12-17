@@ -9,9 +9,7 @@ from PySide6.QtWidgets import (
     QSizePolicy, 
     QSpacerItem,
     QLabel)
-
 from PySide6.QtGui import QPixmap, QIcon
-
 from Files import (
     APP_ICON_PHOTO,
     FONT_FAMILY, 
