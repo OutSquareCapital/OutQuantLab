@@ -221,7 +221,7 @@ def plot_correlation_heatmap(returns_df: pd.DataFrame):
         y_labels=sorted_correlation_matrix.columns.to_list(),
         title="Correlation Matrix")
 
-def plot_clusters_icicle(returns_df, max_clusters=4, max_sub_clusters=2, max_sub_sub_clusters=1):
+def plot_clusters_icicle(returns_df: pd.DataFrame, max_clusters=4, max_sub_clusters=2, max_sub_sub_clusters=1):
     renamed_returns_df=Transformations.convert_dataframe_multiindex_labels(returns_df)
     clusters_dict = generate_static_clusters(renamed_returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)
     labels, parents = Transformations.prepare_sunburst_data(clusters_dict)

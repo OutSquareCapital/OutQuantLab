@@ -32,7 +32,7 @@ def recursive_subdivision(
     max_subsubclusters: int
 ) -> dict:
     for main_cluster, assets in cluster_dict.items():
-        if isinstance(assets, list) and len(assets) > 1:  # Subcluster level
+        if isinstance(assets, list) and len(assets) > 1:
             subcluster_dict = cluster_subdivision(returns_df, assets, max_subclusters)
             if max_subsubclusters:
                 for sub_cluster, sub_assets in subcluster_dict.items():
@@ -64,18 +64,13 @@ def flatten_singleton_clusters(cluster_dict):
     
     for key, value in cluster_dict.items():
         if isinstance(value, dict):
-            # Aplatir la structure récursivement
             flattened_value = flatten_singleton_clusters(value)
             
-            # Si le cluster contient uniquement un autre niveau ou que tout peut être regroupé
             if len(flattened_value) == 1 and all(isinstance(sub_value, list) for sub_value in flattened_value.values()):
-                # Fusionner les sous-clusters au niveau actuel
                 new_cluster_dict[key] = [item for sublist in flattened_value.values() for item in sublist]
             elif all(isinstance(sub_value, list) and len(sub_value) == 1 for sub_value in flattened_value.values()):
-                # Si tous les sous-clusters contiennent un seul actif, on les remonte au niveau du dessus
                 new_cluster_dict[key] = [item for sublist in flattened_value.values() for item in sublist]
             else:
-                # Si certains sous-clusters peuvent être fusionnés, on le fait, sinon on les garde
                 new_cluster_dict[key] = flattened_value
         else:
             new_cluster_dict[key] = value

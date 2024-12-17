@@ -49,18 +49,13 @@ def combine_csv_files(output_folder, file_names, output_file) -> None:
     for file_name in file_names:
         file_path = os.path.join(output_folder, f"{file_name}.csv")
         
-        # Charger le fichier CSV
         df = pd.read_csv(file_path, parse_dates=['time'], index_col='time')
         df.index.rename('date', inplace=True)
         
-        # Renommer la colonne 'close' avec le nom de l'actif
         df = df[['close']].rename(columns={'close': file_name})
         
-        # Ajouter le DataFrame à la liste
         dfs.append(df)
 
-    # Concaténer tous les DataFrames le long de l'axe des colonnes avec alignement sur l'index
     combined_df = pd.concat(dfs, axis=1, join='outer')
 
-    # Sauvegarder le DataFrame combiné dans un fichier CSV
     combined_df.to_csv(os.path.join(output_folder, output_file))

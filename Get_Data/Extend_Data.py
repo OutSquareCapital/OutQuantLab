@@ -48,7 +48,7 @@ def reconstruct_bond_price_with_yield(yield_10y_df, maturity_years=10, face_valu
 
     return face_value / (1 + yield_10y_df.iloc[:, 0] / 100) ** maturity_years
 
-def adjust_prices_with_risk_free_rate(returns_df, risk_free_rate_df):
+def adjust_prices_with_risk_free_rate(returns_df: pd.DataFrame, risk_free_rate_df):
 
     first_price_date = returns_df.index.min()
     print(f"First date in prices_df: {first_price_date}")
