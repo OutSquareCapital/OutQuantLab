@@ -6,7 +6,6 @@ from Portfolio import generate_static_clusters
 from collections.abc import Callable
 import plotly.graph_objects as go
 from dataclasses import dataclass
-from enum import Enum
 
 @dataclass()
 class DashboardPlot:
@@ -54,11 +53,9 @@ class DashboardsCollection:
 
         return [round(func(self.global_portfolio).item(), 2) for func in metric_functions]
 
-    def plot(self, dashboard_name: str, global_plot:bool = False):
-        dashboard = self.all_dashboards.get(dashboard_name)
-        if not dashboard:
-            raise ValueError(f"Dashboard '{dashboard_name}' not found.")
-
+    def plot(self, dashboard_name: str, global_plot:bool = False) -> go.Figure:
+        
+        dashboard = self.all_dashboards[dashboard_name]
         portfolio = self.global_portfolio if global_plot else self.sub_portfolios
 
         if dashboard.length_required:
