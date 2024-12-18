@@ -34,6 +34,7 @@ TreeStructureWidget,
 AssetsCollection, 
 IndicatorsCollection
 )
+from Dashboard import DashboardsCollection
 
 def setup_home_page(
     parent: QMainWindow, 
@@ -75,7 +76,7 @@ def setup_home_page(
 
     parent.setCentralWidget(main_widget)
 
-def setup_backtest_page(parent):
+def setup_backtest_page(parent: QMainWindow):
     loading_widget = QWidget()
     main_layout = QVBoxLayout(loading_widget)
     set_background_image(loading_widget, BACKTEST_PAGE_PHOTO)
@@ -114,8 +115,8 @@ def setup_backtest_page(parent):
     return progress_bar, log_output
 
 def setup_results_page(
-    parent,
-    dashboards,
+    parent: QMainWindow,
+    dashboards: DashboardsCollection,
     back_to_home_callback:Callable, 
     metrics: list[float]):
 

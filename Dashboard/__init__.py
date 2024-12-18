@@ -1,1 +1,1 @@
-from .Display import Dashboards
+from .Display import DashboardsCollection

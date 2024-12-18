@@ -8,7 +8,7 @@ class MainApp(QMainWindow):
     def initialize(self):
         self.assets_collection = AssetsCollection()
         self.indicators_collection = IndicatorsCollection()
-        self.dashboards = Dashboards(length=1250)
+        self.dashboards = DashboardsCollection(length=1250)
         self.show_home_page()
         self.showMaximized()
 
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     progress_bar.setValue(60)
     import Portfolio
     progress_bar.setValue(70)
-    from Dashboard import Dashboards
+    from Dashboard import DashboardsCollection
     progress_bar.setValue(80)
     from Config import AssetsCollection, IndicatorsCollection
     progress_bar.setValue(90)

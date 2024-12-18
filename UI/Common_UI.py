@@ -23,6 +23,7 @@ from PySide6.QtGui import QFont
 from typing import Any
 from collections.abc import Callable
 from .Results_UI import generate_plot_widget
+from Dashboard import DashboardsCollection
 
 def create_param_widget(
     param_box: QGroupBox, 
@@ -127,30 +128,30 @@ def create_param_sliders(values: list[int]) -> tuple[QHBoxLayout, QHBoxLayout, Q
 
     return sliders_layout, num_values_layout, start_slider, end_slider, num_values_slider
 
-def add_category(tree: QTreeWidget, tree_structure: dict[str, Any]):
-    category_name, ok = QInputDialog.getText(tree, "New Category", "Category Name:")
-    if ok and category_name:
-        if category_name in tree_structure:
-            QMessageBox.warning(tree, "Warning", f"The category '{category_name}' already exists.")
+def add_cluster(tree: QTreeWidget, tree_structure: dict[str, Any]):
+    cluster_name, ok = QInputDialog.getText(tree, "New Cluster", "Cluster Name:")
+    if ok and cluster_name:
+        if cluster_name in tree_structure:
+            QMessageBox.warning(tree, "Warning", f"The cluster '{cluster_name}' already exists.")
             return
 
-        tree_structure[category_name] = {}
-        category_item = QTreeWidgetItem([category_name])
+        tree_structure[cluster_name] = {}
+        category_item = QTreeWidgetItem([cluster_name])
         category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
         tree.addTopLevelItem(category_item)
 
-def delete_category(tree: QTreeWidget, tree_structure: dict[str, Any]) -> None:
-    selected_item = tree.currentItem()
-    if selected_item:
-        category_name = selected_item.text(0)
-        parent = selected_item.parent()
+def delete_cluster(tree: QTreeWidget, tree_structure: dict[str, Any]) -> None:
+    selected_cluster = tree.currentItem()
+    if selected_cluster:
+        cluster_name = selected_cluster.text(0)
+        parent = selected_cluster.parent()
         if parent is None:
-            index = tree.indexOfTopLevelItem(selected_item)
+            index = tree.indexOfTopLevelItem(selected_cluster)
             tree.takeTopLevelItem(index)
-            if category_name in tree_structure:
-                del tree_structure[category_name]
+            if cluster_name in tree_structure:
+                del tree_structure[cluster_name]
         else:
-            parent.removeChild(selected_item)
+            parent.removeChild(selected_cluster)
 
 def create_expandable_section(category_name: str) -> tuple[QGroupBox, QVBoxLayout]:
 
@@ -337,19 +338,17 @@ def create_expandable_buttons_list(
         toggle_button.setChecked(True)
     return outer_layout
 
-def organize_buttons_by_category(dashboards):
+def organize_buttons_by_category(dashboards:DashboardsCollection):
 
     categorized_buttons = {"overall": [], "rolling": [], "other": []}
     actions = {"overall": {}, "rolling": {}, "other": {}}
 
     for name, dashboard in dashboards.all_dashboards.items():
-        category = dashboard["category"]
-        formatted_name = name
-        categorized_buttons[category].append(formatted_name)
+        categorized_buttons[dashboard.category].append(dashboard.name)
 
     return categorized_buttons, actions
     
-def generate_graphs_buttons(dashboards, parent_window):
+def generate_graphs_buttons(dashboards:DashboardsCollection, parent_window):
     categorized_buttons, actions = organize_buttons_by_category(dashboards)
 
     for category, buttons in categorized_buttons.items():
@@ -370,10 +369,7 @@ def generate_graphs_buttons(dashboards, parent_window):
 
     return overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout
 
-def display_dashboard_plot(parent, dashboards, dashboard_name: str, global_plot: bool = False):
-    dashboard_config = dashboards.all_dashboards.get(dashboard_name)
-    if not dashboard_config or not callable(dashboard_config["callable"]):
-        raise ValueError(f"No callable function for dashboard '{dashboard_name}'")
+def display_dashboard_plot(parent, dashboards:DashboardsCollection, dashboard_name: str, global_plot: bool = False):
 
     fig = dashboards.plot(dashboard_name, global_plot=global_plot)
     

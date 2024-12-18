@@ -18,7 +18,7 @@ def map_colors_to_columns(n_colors: int) -> list:
     cmap = generate_colormap(n_colors)
     return [mcolors.to_hex(cmap(i / (n_colors - 1))) for i in range(n_colors)]
 
-def get_color_map(assets: list) -> dict:
+def get_color_map(assets: list[str]) -> dict:
 
     n_colors = len(assets)
     colors = map_colors_to_columns(n_colors)
@@ -33,7 +33,7 @@ def setup_figure_layout(
     fig: go.Figure, 
     figtitle: str,
     hover_display_custom: bool=True,
-    hover_data='y'):
+    hover_data='y') -> None:
     
     fig.update_layout(
         font={

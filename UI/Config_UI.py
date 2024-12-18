@@ -3,8 +3,8 @@ create_checkbox_item,
 create_expandable_section,
 connect_sliders_to_update, 
 populate_tree_from_dict, 
-add_category, 
-delete_category,
+add_cluster, 
+delete_cluster,
 create_scroll_with_buttons,
 create_param_widget
 )
@@ -177,11 +177,11 @@ class TreeStructureWidget(QWidget):
         layout.addWidget(self.tree)
 
         buttons_layout = QHBoxLayout()
-        add_button = QPushButton("Add Category")
-        delete_button = QPushButton("Delete Category")
+        add_button = QPushButton("Add Cluster")
+        delete_button = QPushButton("Delete Cluster")
 
-        add_button.clicked.connect(lambda: add_category(self.tree, self.tree_structure))
-        delete_button.clicked.connect(lambda: delete_category(self.tree, self.tree_structure))
+        add_button.clicked.connect(lambda: add_cluster(self.tree, self.tree_structure))
+        delete_button.clicked.connect(lambda: delete_cluster(self.tree, self.tree_structure))
 
 
         buttons_layout.addWidget(add_button)

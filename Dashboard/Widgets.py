@@ -8,7 +8,8 @@ from Files import COLOR_ADJUSTMENT
 def curves( x_values: pd.Index,
             y_values: pd.DataFrame,  
             title: str,
-            log_scale: bool = False):
+            log_scale: bool = False
+            ) -> go.Figure:
 
     fig = go.Figure()
 
@@ -31,7 +32,11 @@ def curves( x_values: pd.Index,
 
     return fig
 
-def bars(series: pd.Series, title: str):
+def bars(
+    series: pd.Series, 
+    title: str
+    ) -> go.Figure:
+    
     color_map = get_color_map(series.index.tolist())
 
     fig = go.Figure()
@@ -55,7 +60,12 @@ def bars(series: pd.Series, title: str):
 
 
 
-def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str):
+def heatmap(
+    z_values: np.ndarray, 
+    x_labels: list, 
+    y_labels: list, 
+    title: str
+    ) -> go.Figure:
 
     z_normalized = normalize_data_for_colormap(z_values)
 
@@ -86,7 +96,15 @@ def heatmap(z_values: np.ndarray, x_labels: list, y_labels: list, title: str):
 
     return fig
 
-def scatter_3d(x_vals, y_vals, z_vals, values, params, title: str):
+def scatter_3d(
+    x_vals, 
+    y_vals, 
+    z_vals, 
+    values, 
+    params, 
+    title: str
+    ) -> go.Figure:
+    
     fig = go.Figure(data=[go.Scatter3d(
         x=x_vals,
         y=y_vals,
@@ -113,7 +131,11 @@ def scatter_3d(x_vals, y_vals, z_vals, values, params, title: str):
     setup_figure_layout(fig, title)
     return fig
 
-def violin(data: pd.DataFrame, title: str):
+def violin(
+    data: pd.DataFrame, 
+    title: str
+    ) -> go.Figure:
+    
     fig = go.Figure()
 
     color_map = get_color_map(data.columns.tolist())
@@ -143,7 +165,10 @@ def violin(data: pd.DataFrame, title: str):
 
     return fig
 
-def histogram(data: pd.DataFrame, title: str):
+def histogram(
+    data: pd.DataFrame, 
+    title: str
+    ) -> go.Figure:
 
     fig = go.Figure()
 
@@ -162,7 +187,12 @@ def histogram(data: pd.DataFrame, title: str):
     setup_figure_layout(fig, title, hover_data='x')
     return fig
 
-def icicle(labels: list, parents: list, title: str):
+def icicle(
+    labels: list, 
+    parents: list, 
+    title: str
+    ) -> go.Figure:
+    
     fig = go.Figure(
         go.Icicle(
             labels=labels,            
