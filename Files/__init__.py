@@ -1,3 +1,3 @@
-from .Files_Paths import *
-from .Constants import *
+from .System_Constants import *
+from .Maths_Constants import *
 from .UI import *

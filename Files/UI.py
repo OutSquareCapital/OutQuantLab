@@ -1,25 +1,29 @@
-COLOR_ADJUSTMENT = 'white'
-COLOR_PLOT_UNIQUE = '#ff6600'
-BACKGROUND_APP_DARK = '#2A2A2A'
+from typing import Final
 
-FONT_FAMILY = 'Arial'
-FONT_SIZE = 12
-FONT_TYPE = 'bold'
-BASE_COLORS = ["black", "brown", "red","orange", "yellow", "green", "lime", "blue", "cyan", "white"]
+COLOR_ADJUSTMENT: Final = 'white'
+COLOR_PLOT_UNIQUE: Final = '#ff6600'
+BACKGROUND_APP_DARK: Final = '#2A2A2A'
 
-FRAME_STYLE = f"""
+FONT_FAMILY: Final = 'Arial'
+FONT_SIZE: Final = 12
+FONT_TYPE: Final = 'bold'
+BASE_COLORS: Final = ["black", "brown", "red","orange", "yellow", "green", "lime", "blue", "cyan", "white"]
+
+FRAME_STYLE: Final = f"""
         QFrame {{
             border-radius: 15px;
             background-color: {BACKGROUND_APP_DARK};
         }}
     """
-CLUSTERS_PARAMETERS = [
+CLUSTERS_PARAMETERS: Final = [
     "Max Clusters", 
     "Max Sub Clusters", 
-    "Max Sub-Sub Clusters"]
-BACKTEST_STATS_RESULTS = [
+    "Max Sub-Sub Clusters"
+    ]
+BACKTEST_STATS_RESULTS: Final = [
     "Total Return %",
     "Sharpe Ratio",
     "Maximum Drawdown %",
     "Volatility %",
-    "Monthly Skewness"]
+    "Monthly Skewness"
+    ]

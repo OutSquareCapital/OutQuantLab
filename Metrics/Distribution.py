@@ -75,7 +75,8 @@ def remove_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensa
 
     return nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx
 
-@njit(parallel=True)
+
+@njit
 def rolling_skewness(array, length, min_length):
     N, M = array.shape
     output = np.empty((N, M), dtype=np.float64)
@@ -201,7 +202,7 @@ def remove_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, co
 
     return nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx
 
-@njit(parallel=True)
+@njit
 def rolling_kurtosis(array, length, min_length):
     N, M = array.shape
     output = np.empty((N, M), dtype=np.float64)

@@ -1,4 +1,3 @@
-import numexpr as ne
 from scipy.stats import norm, rankdata
 import pandas as pd
 import numpy as np
@@ -23,11 +22,9 @@ def calculate_volatility_adjusted_returns(
     target_volatility: int = 15
     ) -> np.ndarray:
 
-    vol_adj_position_size_array = ne.evaluate('target_volatility / hv_array')
+    vol_adj_position_size_shifted = ft.shift_array(target_volatility / hv_array)
 
-    vol_adj_position_size_shifted = ft.shift_array(vol_adj_position_size_array)
-
-    return ne.evaluate('pct_returns_array * vol_adj_position_size_shifted')
+    return pct_returns_array * vol_adj_position_size_shifted
 
 def normalize_returns_distribution_rolling(
     pct_returns_df: pd.DataFrame, 
