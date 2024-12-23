@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 from Infrastructure import Fast_Tools as ft
-import Metrics as mt
 from Files import PERCENTAGE_FACTOR
 from collections.abc import Callable
+import Metrics as mt
 
 def load_prices(asset_names: list[str], file_path: str) -> pd.DataFrame:
     
@@ -51,20 +51,6 @@ def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
     
     return log_returns_array
 
-def generate_multi_index_tuple(
-    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]], 
-    asset_names: list[str]
-    ) -> list[tuple[str, str, str]]:
-    
-    multi_index_tuples: list[tuple[str, str, str]] = []
-    
-    for indicator_name, (_, _, params) in indicators_and_params.items():
-        for param in params:
-            param_str = ''.join([f"{k}{v}" for k, v in param.items()])
-            for asset in asset_names:
-                multi_index_tuples.append((asset, indicator_name, param_str))
-    return multi_index_tuples
-
 def generate_multi_index_pandas(multi_index_tuples: list[tuple[str, str, str]]) -> pd.MultiIndex:
     
     multi_index_pandas = pd.MultiIndex.from_tuples(multi_index_tuples, names=["Asset", "Indicator", "Param"])
@@ -83,9 +69,15 @@ def generate_multi_index_process(
     asset_names: list[str]
     ) -> pd.MultiIndex:
     
-    index_tuples = generate_multi_index_tuple(indicators_and_params, asset_names)
+    multi_index_tuples: list[tuple[str, str, str]] = []
+    
+    for indicator_name, (_, _, params) in indicators_and_params.items():
+        for param in params:
+            param_str = ''.join([f"{k}{v}" for k, v in param.items()])
+            for asset in asset_names:
+                multi_index_tuples.append((asset, indicator_name, param_str))
 
-    return generate_multi_index_pandas(index_tuples)
+    return generate_multi_index_pandas(multi_index_tuples)
 
 def process_data(
     data_prices_df: pd.DataFrame
@@ -103,15 +95,3 @@ def process_data(
     )
 
     return prices_array, log_returns_array, volatility_adjusted_pct_returns
-
-def initialize_signals_array(
-    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]],
-    prices_array: np.ndarray,
-    ) -> np.ndarray:
-    
-    num_params = sum(len(params) for _, (_, _, params) in indicators_and_params.items())
-    num_assets = prices_array.shape[1]
-    total_days = prices_array.shape[0]
-    total_returns_streams = num_assets * num_params
-    
-    return np.full((total_days, total_returns_streams), np.nan, dtype=np.float32)

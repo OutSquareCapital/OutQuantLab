@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import skew
 from Files import PERCENTAGE_FACTOR, ANNUALIZATION_FACTOR, ANNUALIZED_PERCENTAGE_FACTOR
-from Process_Data import calculate_equity_curves
+from Backtest import calculate_equity_curves
 import Metrics as mt
 
 def calculate_overall_returns(returns_df: pd.DataFrame) -> pd.Series:

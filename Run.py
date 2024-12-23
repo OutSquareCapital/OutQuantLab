@@ -30,21 +30,13 @@ class MainApp(QMainWindow):
     def run_backtest(self):
         self.progress_bar, self.log_output = UI.setup_backtest_page(self)
 
-        config = BacktestConfig(
+        config = BacktestProcess(
         FILE_PATH_YF,
         self.assets_collection.get_active_entities_names(),
         self.indicators_collection.get_indicators_and_parameters_for_backtest()
         )
 
-        raw_adjusted_returns_df = process_backtest(
-        config.signals_array,
-        config.data_array,
-        config.volatility_adjusted_pct_returns,
-        config.dates_index,
-        config.indicators_and_params,
-        config.multi_index,
-        self.update_progress
-        )
+        raw_adjusted_returns_df = config.calculate_strategy_returns()
         
         self.dashboards.sub_portfolios = Portfolio.calculate_daily_average_returns(
         raw_adjusted_returns_df.dropna(axis=0),
@@ -89,9 +81,8 @@ if __name__ == "__main__":
     progress_bar.setValue(30)
     from Get_Data import get_yahoo_finance_data
     progress_bar.setValue(40)
-    from Process_Data import BacktestConfig
+    from Backtest import BacktestProcess
     progress_bar.setValue(50)
-    from Backtest import process_backtest
     progress_bar.setValue(60)
     import Portfolio
     progress_bar.setValue(70)
