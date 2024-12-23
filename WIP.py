@@ -306,7 +306,38 @@ roll_dates_df = identify_roll_dates(adjusted_front_df, unadjusted_front_df)
 # Ajustement des prix
 Final_adjusted_prices_df = apply_adjustment(roll_dates_df, use_price_diff=False)
 '''
+'''
+from scipy.stats import norm, rankdata
+def normalize_returns_distribution_rolling(
+    pct_returns_df: pd.DataFrame, 
+    window_size: int
+    ) -> pd.DataFrame:
+    
+    normalized_returns = pd.DataFrame(
+        index=pct_returns_df.index, 
+        columns=pct_returns_df.columns, 
+        dtype=np.float32)
 
+    for end in range(window_size - 1, len(pct_returns_df)):
+        window_df = pct_returns_df.iloc[end - window_size + 1 : end + 1]
+        
+        window_df_shifted = window_df.shift(1)
+        window_df_shifted.fillna(0, inplace=True)
+        returns = window_df_shifted.values
+        
+        mean_returns = np.mean(returns, axis=0)
+        std_returns = np.std(returns, axis=0)
+        
+        ranks = np.apply_along_axis(lambda x: rankdata(x) / (len(x) + 1), axis=0, arr=returns)
+        
+        normalized_returns_window = norm.ppf(ranks)
+        
+        normalized_returns_window = normalized_returns_window * std_returns + mean_returns
+        
+        normalized_returns.iloc[end] = normalized_returns_window[-1]
+
+    return normalized_returns
+'''
 '''
 from joblib import Parallel, delayed
 import pandas as pd

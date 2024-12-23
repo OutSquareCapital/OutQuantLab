@@ -1,2 +1,2 @@
-from .Transform_Data import equity_curves_calculs
+from .Transform_Data import calculate_equity_curves
 from .Organize_Data import BacktestConfig

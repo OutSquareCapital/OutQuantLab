@@ -1,4 +1,3 @@
-from scipy.stats import norm, rankdata
 import pandas as pd
 import numpy as np
 from Infrastructure import Fast_Tools as ft
@@ -26,37 +25,7 @@ def calculate_volatility_adjusted_returns(
 
     return pct_returns_array * vol_adj_position_size_shifted
 
-def normalize_returns_distribution_rolling(
-    pct_returns_df: pd.DataFrame, 
-    window_size: int
-    ) -> pd.DataFrame:
-    
-    normalized_returns = pd.DataFrame(
-        index=pct_returns_df.index, 
-        columns=pct_returns_df.columns, 
-        dtype=np.float32)
-
-    for end in range(window_size - 1, len(pct_returns_df)):
-        window_df = pct_returns_df.iloc[end - window_size + 1 : end + 1]
-        
-        window_df_shifted = window_df.shift(1)
-        window_df_shifted.fillna(0, inplace=True)
-        returns = window_df_shifted.values
-        
-        mean_returns = np.mean(returns, axis=0)
-        std_returns = np.std(returns, axis=0)
-        
-        ranks = np.apply_along_axis(lambda x: rankdata(x) / (len(x) + 1), axis=0, arr=returns)
-        
-        normalized_returns_window = norm.ppf(ranks)
-        
-        normalized_returns_window = normalized_returns_window * std_returns + mean_returns
-        
-        normalized_returns.iloc[end] = normalized_returns_window[-1]
-
-    return normalized_returns
-
-def equity_curves_calculs(returns_array: np.ndarray) -> np.ndarray:
+def calculate_equity_curves(returns_array: np.ndarray) -> np.ndarray:
 
     temp_array = returns_array.copy()
 
@@ -118,25 +87,14 @@ def generate_multi_index_process(
 
     return generate_multi_index_pandas(index_tuples)
 
-def get_total_return_streams_nb(
-    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]], 
-    asset_names: list[str]
-    ) -> int:
-    
-    num_assets: int = len(asset_names)
-    num_params: int = sum(len(params) for _, (_, _, params) in indicators_and_params.items())
-    
-    return num_assets * num_params
-
-
 def process_data(
     data_prices_df: pd.DataFrame
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     
     returns_df=data_prices_df.pct_change(fill_method=None)
     pct_returns_array = returns_df.to_numpy(dtype=np.float32)
-    prices_array = equity_curves_calculs(pct_returns_array)
-    log_returns_array = log_returns_np(prices_array)
+    prices_array = ft.shift_array(calculate_equity_curves(pct_returns_array))
+    log_returns_array = ft.shift_array(log_returns_np(prices_array))
     hv_array = mt.hv_composite(pct_returns_array)
     
     volatility_adjusted_pct_returns = calculate_volatility_adjusted_returns(
@@ -147,12 +105,13 @@ def process_data(
     return prices_array, log_returns_array, volatility_adjusted_pct_returns
 
 def initialize_signals_array(
+    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]],
     prices_array: np.ndarray,
-    total_returns_streams: int
     ) -> np.ndarray:
     
+    num_params = sum(len(params) for _, (_, _, params) in indicators_and_params.items())
+    num_assets = prices_array.shape[1]
     total_days = prices_array.shape[0]
-
+    total_returns_streams = num_assets * num_params
+    
     return np.full((total_days, total_returns_streams), np.nan, dtype=np.float32)
-
-

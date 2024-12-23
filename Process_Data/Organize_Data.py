@@ -1,13 +1,11 @@
 import numpy as np
 import pandas as pd
 from collections.abc import Callable
-from Infrastructure import Fast_Tools as ft
 from .Transform_Data import (
 load_prices, 
 generate_multi_index_process,
 initialize_signals_array, 
-process_data, 
-get_total_return_streams_nb
+process_data
 )
 
 class BacktestConfig:
@@ -15,7 +13,8 @@ class BacktestConfig:
         self,
         file_path: str,
         asset_names: list[str], 
-        indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]]):
+        indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]]
+        ):
         
         self.file_path = file_path
         self.asset_names = asset_names
@@ -29,9 +28,8 @@ class BacktestConfig:
         
     def initialize_backtest_data(self):
         
-        prices_df = load_prices(self.asset_names, self.file_path)
+        prices_df:pd.DataFrame = load_prices(self.asset_names, self.file_path)
         self.dates_index = prices_df.index
         prices_array, log_returns_array, self.volatility_adjusted_pct_returns = process_data(prices_df)
-        self.data_array = ft.shift_array(prices_array), ft.shift_array(log_returns_array)
-        total_return_streams: int = get_total_return_streams_nb(self.indicators_and_params, self.asset_names)
-        self.signals_array = initialize_signals_array(prices_array, total_return_streams)
+        self.data_array = prices_array, log_returns_array
+        self.signals_array = initialize_signals_array(self.indicators_and_params, prices_array)

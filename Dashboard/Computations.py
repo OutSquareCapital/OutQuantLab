@@ -2,13 +2,13 @@ import pandas as pd
 import numpy as np
 from scipy.stats import skew
 from Files import PERCENTAGE_FACTOR, ANNUALIZATION_FACTOR, ANNUALIZED_PERCENTAGE_FACTOR
-from Process_Data import equity_curves_calculs
+from Process_Data import calculate_equity_curves
 import Metrics as mt
 
 def calculate_overall_returns(returns_df: pd.DataFrame) -> pd.Series:
 
     equity_curves = pd.DataFrame(
-        equity_curves_calculs(returns_df.values),
+        calculate_equity_curves(returns_df.values),
         index=returns_df.index,
         columns=returns_df.columns,
         dtype=np.float32
@@ -58,7 +58,7 @@ def calculate_overall_average_correlation(returns_df: pd.DataFrame) -> pd.Series
 def calculate_equity_curves_df(returns_df: pd.DataFrame):
 
     return pd.DataFrame(
-        equity_curves_calculs(returns_df.values),
+        calculate_equity_curves(returns_df.values),
         index=returns_df.index,
         columns=returns_df.columns,
         dtype=np.float32
@@ -94,7 +94,7 @@ def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
 def calculate_rolling_drawdown(returns_df: pd.DataFrame, length: int) -> pd.DataFrame:
     
     equity_curves = pd.DataFrame(
-        equity_curves_calculs(returns_df.values),
+        calculate_equity_curves(returns_df.values),
         index=returns_df.index,
         columns=returns_df.columns,
         dtype=np.float32
@@ -109,7 +109,7 @@ def calculate_rolling_drawdown(returns_df: pd.DataFrame, length: int) -> pd.Data
 def calculate_ath_drawdown(returns_df: pd.DataFrame) -> pd.DataFrame:
     
     equity_curves = pd.DataFrame(
-        equity_curves_calculs(returns_df.values),
+        calculate_equity_curves(returns_df.values),
         index=returns_df.index,
         columns=returns_df.columns,
         dtype=np.float32
