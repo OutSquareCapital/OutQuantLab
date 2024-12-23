@@ -491,79 +491,405 @@
       ]
    },
    "MeanPriceRatioNormalisedTrend": {
-      "SignalLength": [],
-      "PLength": [],
-      "LenST": [],
-      "LenLT": []
+      "SignalLength": [
+         2,
+         4,
+         8,
+         16
+      ],
+      "PLength": [
+         64,
+         128,
+         256,
+         512,
+         1024
+      ],
+      "LenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "MeanRateOfChangeNormalisedTrend": {
-      "SignalLength": [],
-      "PLength": [],
-      "LenST": [],
-      "LenLT": []
+      "SignalLength": [
+         2,
+         4,
+         8,
+         16
+      ],
+      "PLength": [
+         64,
+         128,
+         256,
+         512,
+         1024
+      ],
+      "LenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "Skewness": {
-      "LenSmooth": [],
-      "LenSkew": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ]
    },
    "RelativeSkewness": {
-      "LenSmooth": [],
-      "LenSkew": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ]
    },
    "SkewnessOnKurtosis": {
-      "LenSmooth": [],
-      "LenSkew": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ]
    },
    "RelativeSkewnessOnKurtosis": {
-      "LenSmooth": [],
-      "LenSkew": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ]
    },
    "SkewnessTrend": {
-      "LenSmooth": [],
-      "LenSkew": [],
-      "TrendLenST": [],
-      "TrendLenLT": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "RelativeSkewnessTrend": {
-      "LenSmooth": [],
-      "LenSkew": [],
-      "TrendLenST": [],
-      "TrendLenLT": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "SkewnessOnKurtosisTrend": {
-      "LenSmooth": [],
-      "LenSkew": [],
-      "TrendLenST": [],
-      "TrendLenLT": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "RelativeSkewnessOnKurtosisTrend": {
-      "LenSmooth": [],
-      "LenSkew": [],
-      "TrendLenST": [],
-      "TrendLenLT": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "LenSkew": [
+         4,
+         8,
+         16,
+         32,
+         64,
+         128,
+         256,
+         512
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "RelativeDirectionalVolatility": {
-      "LenSmooth": [],
-      "LenRelative": [],
-      "LenVol": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16
+      ],
+      "LenRelative": [
+         64,
+         128,
+         256,
+         512,
+         1024
+      ],
+      "LenVol": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "NormalisedDirectionalVolatility": {
-      "LenSmooth": [],
-      "LenNormalization": [],
-      "LenVol": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16
+      ],
+      "LenNormalization": [
+         64,
+         128,
+         256,
+         512,
+         1024
+      ],
+      "LenVol": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "RelativeDirectionalVolatilityTrend": {
-      "LenSmooth": [],
-      "LenRelative": [],
-      "LenVol": [],
-      "TrendLenST": [],
-      "TrendLenLT": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16
+      ],
+      "LenRelative": [
+         64,
+         128,
+         256,
+         512,
+         1024
+      ],
+      "LenVol": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    },
    "NormalisedDirectionalVolatilityTrend": {
-      "LenSmooth": [],
-      "LenNormalization": [],
-      "LenVol": [],
-      "TrendLenST": [],
-      "TrendLenLT": []
+      "LenSmooth": [
+         1,
+         2,
+         4,
+         8,
+         16
+      ],
+      "LenNormalization": [
+         64,
+         128,
+         256,
+         512,
+         1024
+      ],
+      "LenVol": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenST": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "TrendLenLT": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ]
    }
 }
