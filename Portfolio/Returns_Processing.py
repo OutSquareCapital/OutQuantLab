@@ -18,14 +18,17 @@ def generate_recursive_means(returns_df: pd.DataFrame, asset_tree):
 
     if group_means: 
         final_mean = pd.concat(group_means, axis=1).mean(axis=1)
-        return pd.DataFrame(final_mean, 
-                            columns=['PortfolioReturns'], 
-                            dtype=np.float32)
+        return pd.DataFrame(
+            final_mean, 
+            columns=['PortfolioReturns'], 
+            dtype=np.float32)
     else:
-        return pd.DataFrame(np.nan, 
-                            index=returns_df.index, 
-                            columns=['PortfolioReturns'], 
-                            dtype=np.float32)
+        return pd.DataFrame(
+            np.nan, 
+            index=returns_df.index, 
+            columns=['PortfolioReturns'], 
+            dtype=np.float32
+            )
 
 def generate_recursive_strategy_means(returns_df: pd.DataFrame, strategy_tree):
     strategy_means = {}
@@ -40,8 +43,11 @@ def generate_recursive_strategy_means(returns_df: pd.DataFrame, strategy_tree):
                     strategy_means[asset] = [sub_mean]
         elif isinstance(value, list):
             for asset in returns_df.columns.str.split('_').str[0].unique():
-                matching_columns = [col for col in returns_df.columns 
-                                    if col.startswith(asset) and any(strategy in col for strategy in value)]
+                matching_columns = [
+                    col for col in returns_df.columns 
+                    if col.startswith(asset) and any(
+                        strategy in col for strategy in value)
+                    ]
                 sub_strategy_mean = pd.Series(
                     bn.nanmean(returns_df[matching_columns], axis=1), 
                     index=returns_df.index, 
@@ -95,27 +101,31 @@ def generate_recursive_cluster_means(
                 group_means[cluster_key] = sub_group_mean
 
     if by_cluster and group_means:
-        return pd.DataFrame(group_means, 
-                            dtype=np.float32)
-    
+        return pd.DataFrame(
+                group_means, 
+                dtype=np.float32)
+
     if group_means:
         final_mean = pd.concat(group_means.values(), axis=1).mean(axis=1)
-        return pd.DataFrame(final_mean, 
-                            columns=['Cluster_Mean'], 
-                            dtype=np.float32)
-    
-    return pd.DataFrame(np.nan, 
-                        index=returns_df.index, 
-                        columns=['Cluster_Mean'], 
-                        dtype=np.float32)
+        return pd.DataFrame(
+            final_mean, 
+            columns=['Cluster_Mean'], 
+            dtype=np.float32)
 
-def calculate_daily_average_returns(returns_df: pd.DataFrame, 
-                                    global_avg=False, 
-                                    by_asset=False,
-                                    by_method=False, 
-                                    by_param=False,
-                                    common_start_date=False
-                                    ) -> pd.DataFrame:
+    return pd.DataFrame(
+        np.nan, 
+        index=returns_df.index, 
+        columns=['Cluster_Mean'], 
+        dtype=np.float32)
+
+def calculate_daily_average_returns(
+    returns_df: pd.DataFrame, 
+    global_avg=False, 
+    by_asset=False,
+    by_method=False, 
+    by_param=False,
+    common_start_date=False
+    ) -> pd.DataFrame:
 
     if common_start_date:
         returns_df = returns_df.dropna(how='any')

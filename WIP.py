@@ -21,16 +21,6 @@ def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> 
 #test = CleanData.adjust_prices_with_risk_free_rate(etf_data, bill_data)
 
 
-#portfolio_base_structure = Portfolio.classify_assets(category_asset_names, Config.portfolio_etf)
-#relativized_sharpes_df = Portfolio.relative_sharpe_on_confidence_period(raw_adjusted_returns_df, sharpe_lookback = 5000, confidence_lookback=2500)
-#optimized_returns_rltv = raw_adjusted_returns_df * relativized_sharpes_df.shift(1)
-#test_strategy_returns = Portfolio.calculate_daily_average_returns(optimized_returns_rltv, by_method=True, by_class=True, by_asset=True)
-#test_asset_returns = Portfolio.generate_recursive_strategy_means(test_strategy_returns, Config.portfolio_strategies)
-#test_global_returns = Portfolio.generate_recursive_means(test_asset_returns, portfolio_base_structure)
-#test_global_returns = test_global_returns.rename(columns={test_global_returns.columns[0]: 'cluster_optimized'})
-# Concaténation des DataFrames
-#total_df = pd.concat([test_global_returns, equal_weights_global_returns], axis=1).dropna()
-
 paires_futures_etf = [
 ("6A", "AD"),
 ("6B", "BP"),
@@ -343,15 +333,7 @@ from joblib import Parallel, delayed
 import pandas as pd
 import numpy as np
 def extract_asset_groups(portfolio_dict):
-    """
-    Fonction récursive pour extraire toutes les listes d'actifs d'un dictionnaire imbriqué.
-    
-    Parameters:
-    - portfolio_dict: Dictionnaire définissant les groupes et sous-groupes d'actifs.
-    
-    Returns:
-    - asset_groups: Liste de toutes les listes d'actifs trouvées dans le dictionnaire.
-    """
+
     asset_groups = []
     
     def recursive_extract(d):
@@ -367,56 +349,30 @@ def extract_asset_groups(portfolio_dict):
     
     return asset_groups
 
-
 def compute_group_diversification_multiplier(group_returns, weights, window):
-    """
-    Calcule le multiplicateur de diversification pour un groupe d'actifs sur une base roulante.
 
-    Parameters:
-    - group_returns: DataFrame des rendements du groupe d'actifs.
-    - weights: Array de poids pour les actifs du groupe.
-    - window: taille de la fenêtre pour la corrélation roulante.
-
-    Returns:
-    - diversification_multiplier_series: Série des multiplicateurs de diversification pour chaque date.
-    """
-    # Calcul de la matrice de corrélation roulante
     rolling_corr = group_returns.rolling(window=window).corr(pairwise=True)
 
-    # Calcul du multiplicateur de diversification
     num_assets = len(weights)
     diversification_multipliers = []
 
     for i in range(window - 1, len(group_returns)):
-        # Extraire la sous-matrice de corrélation pour chaque fenêtre
         corr_matrix = rolling_corr.iloc[i * num_assets: (i + 1) * num_assets].values.reshape(num_assets, num_assets)
         
-        # Calcul de la variance pondérée et du multiplicateur pour cette fenêtre
         weighted_variance = weights @ corr_matrix @ weights
         diversification_multiplier = 1.0 / np.sqrt(weighted_variance) if weighted_variance > 0 else 1.0
         diversification_multipliers.append(diversification_multiplier)
 
-    # Convertir en série en alignant les index avec les dates de rolling_corr
-    diversification_multiplier_series = pd.Series([np.nan] * (window - 1) + diversification_multipliers, 
-                                                  index=group_returns.index, dtype=np.float32)
+    diversification_multiplier_series = pd.Series(
+        [np.nan] * (window - 1) + diversification_multipliers, 
+        index=group_returns.index, 
+        dtype=np.float32
+        )
 
     return diversification_multiplier_series
 
-
-
 def compute_diversification_for_group(group_assets, returns_df, window):
-    """
-    Calcule la série de multiplicateurs de diversification pour un groupe spécifique d'actifs.
-    
-    Parameters:
-    - group_assets: Liste des actifs dans le groupe.
-    - returns_df: DataFrame des rendements pour tous les actifs.
-    - window: Taille de la fenêtre pour la corrélation roulante.
-    
-    Returns:
-    - Series des multiplicateurs de diversification avec index aligné sur returns_df.
-    - Liste d'actifs du groupe pour assignation directe.
-    """
+
     group_returns = returns_df[group_assets]
     weights = np.full(len(group_assets), 1.0 / len(group_assets), dtype=np.float32)
 
@@ -427,40 +383,22 @@ def compute_diversification_for_group(group_assets, returns_df, window):
     return diversification_multiplier_series, group_assets
 
 def diversification_multiplier_by_group(returns_df, portfolio_dict, window):
-    """
-    Calcule le multiplicateur de diversification pour chaque actif dans un DataFrame de rendements,
-    en utilisant les listes d'actifs définies dans le dictionnaire, sur une base roulante, avec parallélisation.
-    
-    Parameters:
-    - returns_df: DataFrame de rendements, chaque colonne correspondant à un actif.
-    - portfolio_dict: Dictionnaire définissant les groupes et sous-groupes d'actifs.
-    - window: Taille de la fenêtre pour la corrélation roulante.
-    
-    Returns:
-    - diversification_multiplier_df: DataFrame des multiplicateurs de diversification.
-    """
-    # Extraire toutes les listes d'actifs depuis le dictionnaire
+
     asset_groups = extract_asset_groups(portfolio_dict)
-    
-    # Filtrer les groupes pour ne garder que ceux avec plus d'un actif dans returns_df
     valid_groups = [group for group in asset_groups if len([asset for asset in group if asset in returns_df.columns]) > 1]
 
-    # Initialiser le DataFrame pour les multiplicateurs de diversification
     diversification_multiplier_df = pd.DataFrame(1.0, index=returns_df.index, columns=returns_df.columns, dtype=np.float32)
 
-    # Calcul parallèle pour chaque groupe valide
     results = Parallel(n_jobs=-1)(delayed(compute_diversification_for_group)(
         [asset for asset in group if asset in returns_df.columns], 
         returns_df, 
         window
     ) for group in valid_groups)
 
-    # Combiner les résultats dans le DataFrame final
     for diversification_multiplier_series, group_assets in results:
         for asset in group_assets:
             diversification_multiplier_df.loc[diversification_multiplier_series.index, asset] = diversification_multiplier_series
 
-    # Remplacer tous les NaN restants par 1.0
     diversification_multiplier_df.fillna(1.0, inplace=True)
 
     diversification_multiplier_df = diversification_multiplier_df.rolling(window=250, min_periods=1).mean()

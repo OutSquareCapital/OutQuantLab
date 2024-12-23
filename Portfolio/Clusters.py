@@ -10,7 +10,7 @@ def perform_clustering(distance_matrix: pd.DataFrame, num_clusters: int, method:
     linkage_matrix = linkage(squareform(distance_matrix), method=method)
     return fcluster(linkage_matrix, num_clusters, criterion='maxclust')
 
-def create_cluster_dict(assets: pd.Index, clusters: np.ndarray) -> dict:
+def create_cluster_dict(assets: list, clusters: np.ndarray) -> dict:
     cluster_dict = {}
     for asset, cluster in zip(assets, clusters):
         if cluster not in cluster_dict:
@@ -18,7 +18,7 @@ def create_cluster_dict(assets: pd.Index, clusters: np.ndarray) -> dict:
         cluster_dict[cluster].append(asset)
     return {k: cluster_dict[k] for k in sorted(cluster_dict)}
 
-def cluster_subdivision(returns_df: pd.DataFrame, assets: list, max_subclusters: int, method: str = 'ward') -> dict:
+def cluster_subdivision(returns_df: pd.DataFrame, assets: list, max_subclusters: int, method: str = 'ward'):
     if len(assets) <= 1:
         return assets
     sub_distance_matrix = calculate_distance_matrix(returns_df[assets])
@@ -35,7 +35,7 @@ def recursive_subdivision(
         if isinstance(assets, list) and len(assets) > 1:
             subcluster_dict = cluster_subdivision(returns_df, assets, max_subclusters)
             if max_subsubclusters:
-                for sub_cluster, sub_assets in subcluster_dict.items():
+                for sub_cluster, sub_assets in subcluster_dict.items(): # type: ignore
                     if len(sub_assets) > 1:
                         sub_subcluster_dict = cluster_subdivision(returns_df, sub_assets, max_subsubclusters, method='average')
                         subcluster_dict[sub_cluster] = sub_subcluster_dict
@@ -45,12 +45,12 @@ def recursive_subdivision(
 def generate_static_clusters(
     returns_df: pd.DataFrame, 
     max_clusters: int = 3, 
-    max_subclusters: int = None, 
-    max_subsubclusters: int = None
+    max_subclusters: int = 1, 
+    max_subsubclusters: int = 1
 ) -> dict:
     distance_matrix = calculate_distance_matrix(returns_df)
     main_clusters = perform_clustering(distance_matrix, max_clusters)
-    cluster_dict = create_cluster_dict(returns_df.columns, main_clusters)
+    cluster_dict = create_cluster_dict(list(returns_df.columns), main_clusters)
 
     if max_subclusters:
         cluster_dict = recursive_subdivision(returns_df, cluster_dict, max_subclusters, max_subsubclusters)

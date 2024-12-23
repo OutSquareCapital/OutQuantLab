@@ -17,8 +17,6 @@ def convert_dataframe_multiindex_labels(df):
         df.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in df.index]
     return df
 
-
-
 def compute_linkage_matrix(corr_matrix: pd.DataFrame) -> np.ndarray:
 
     pairwise_distances = 1 - corr_matrix.abs()

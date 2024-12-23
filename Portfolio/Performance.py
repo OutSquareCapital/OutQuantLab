@@ -3,7 +3,7 @@ import numpy as np
 import Metrics as mt
 from Infrastructure import Fast_Tools as ft
 import numexpr as ne
-import Portfolio.Common as Common
+from .Common import renormalize_weights
 
 def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookback:int, confidence_lookback = 2500):
 
@@ -60,7 +60,7 @@ def apply_returns_threshold(returns_array: np.ndarray, rolling_periods: list) ->
 
     average_weights = calculate_weights(returns_array, rolling_periods)
 
-    normalized_average_weights = Common.renormalize_weights(average_weights, returns_array)
+    normalized_average_weights = renormalize_weights(average_weights, returns_array)
 
     normalized_shifted_weights = ft.shift_array(normalized_average_weights)
 

@@ -17,22 +17,25 @@ indicators_collection = IndicatorsCollection()
 dashboards = DashboardsCollection(length=1250)
 
 backtest = BacktestProcess(
-file_path=FILE_PATH_YF,
-asset_names=assets_collection.get_active_entities_names(),
-indicators_and_params=indicators_collection.get_indicators_and_parameters_for_backtest()
-)
+    file_path=FILE_PATH_YF,
+    asset_names=assets_collection.get_active_entities_names(),
+    indicators_and_params=indicators_collection.get_indicators_and_parameters_for_backtest()
+    )
+
 
 raw_adjusted_returns_df = backtest.calculate_strategy_returns()
 
 dashboards.sub_portfolios = calculate_daily_average_returns(
-raw_adjusted_returns_df.dropna(axis=0),
-by_method=True, 
-by_asset=True)
+    raw_adjusted_returns_df.dropna(axis=0),
+    by_method=True, 
+    by_asset=True
+    )
 
 dashboards.global_portfolio = calculate_daily_average_returns(
-dashboards.sub_portfolios, 
-global_avg=True
-)
+    dashboards.sub_portfolios, 
+    global_avg=True
+    )
+
 print(f"backtest process: {time.perf_counter() - backtest_process_time:.2f}s")
 
 print(dashboards.calculate_metrics())
