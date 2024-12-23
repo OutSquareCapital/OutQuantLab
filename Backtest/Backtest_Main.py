@@ -3,8 +3,8 @@ import pandas as pd
 from collections.abc import Callable
 from Files import N_THREADS
 from concurrent.futures import ThreadPoolExecutor
-from .Process_Backtest import process_indicator_parallel, handle_progress
-from .Transform_Data import (
+from .Process_Indicators import process_indicator_parallel, handle_progress
+from .Process_Data import (
 load_prices, 
 generate_multi_index_process,
 process_data
