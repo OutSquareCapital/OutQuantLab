@@ -1,0 +1,61 @@
+{
+"Divergent": {
+   "Direction": [
+         "MeanRateOfChange",
+         "CentralRateOfChange",
+         "MedianRateOfChange",
+         "MedianPriceRatio",
+         "CentralPriceRatio",
+         "MeanPriceRatio"
+      ],
+      "Speed": {
+         "Acceleration": [
+         "MeanPriceMacd",
+         "MedianRateOfChangeMacd",
+         "CentralPriceMacd",
+         "CentralRateOfChangeMacd",
+         "MedianPriceMacd",
+         "MeanRateOfChangeMacd"
+         ],
+         "AccelerationTrend": [
+         "MeanPriceMacdTrend",
+         "MedianRateOfChangeMacdTrend",
+         "CentralRateOfChangeMacdTrend",
+         "MeanRateOfChangeMacdTrend",
+         "CentralPriceMacdTrend",
+         "MedianPriceMacdTrend"
+         ]
+      },
+      "Distribution": [
+         "RelativeSkewness",
+         "RelativeSkewnessTrend"
+      ],
+      "Volatility": [
+         "RelativeDirectionalVolatility",
+         "RelativeDirectionalVolatilityTrend"
+      ]
+   },
+   "Convergent": {
+      "MeanReversion": [
+         "MeanPriceRatioNormalised",
+         "MeanPriceRatioNormalisedTrend",
+         "MeanRateOfChangeNormalised",
+         "MeanRateOfChangeNormalisedTrend"
+      ],
+      "Distribution": [
+         "SkewnessTrend",
+         "Skewness"
+      ],
+      "Volatility": [
+         "NormalisedDirectionalVolatility",
+         "NormalisedDirectionalVolatilityTrend"
+      ]
+   },
+   "Dynamic": [
+      "RelativeSkewnessOnKurtosis",
+      "SkewnessOnKurtosisTrend",
+      "RelativeSkewnessOnKurtosisTrend",
+      "FixedBias",
+      "SkewnessOnKurtosis"
+]
+}
