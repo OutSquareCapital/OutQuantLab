@@ -7,20 +7,20 @@
          "EFA",
          "EEM"
       ],
-      "US": {
-         "Large Caps": [
-            "SPY",
-            "DIA",
-            "QQQ"
-         ],
-         "Small Caps": [
-            "IWM"
-         ]
-      }
+      "Large Caps": [
+         "SPY",
+         "DIA",
+         "QQQ"
+      ],
+      "Small Caps": [
+         "IWM"
+      ]
    },
-   "Bonds": [
-      "TLT"
-   ],
+   "Bonds": {
+      "US": [
+         "TLT"
+      ]
+   },
    "Currencies": {
       "Precious Metals": [
          "GLD",

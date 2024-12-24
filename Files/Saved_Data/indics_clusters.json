@@ -1,6 +1,6 @@
 {
-"Divergent": {
-   "Direction": [
+   "Divergent": {
+      "Direction": [
          "MeanRateOfChange",
          "CentralRateOfChange",
          "MedianRateOfChange",
@@ -8,24 +8,20 @@
          "CentralPriceRatio",
          "MeanPriceRatio"
       ],
-      "Speed": {
-         "Acceleration": [
+      "Acceleration": [
          "MeanPriceMacd",
          "MedianRateOfChangeMacd",
          "CentralPriceMacd",
          "CentralRateOfChangeMacd",
          "MedianPriceMacd",
-         "MeanRateOfChangeMacd"
-         ],
-         "AccelerationTrend": [
+         "MeanRateOfChangeMacd",
          "MeanPriceMacdTrend",
          "MedianRateOfChangeMacdTrend",
          "CentralRateOfChangeMacdTrend",
          "MeanRateOfChangeMacdTrend",
          "CentralPriceMacdTrend",
          "MedianPriceMacdTrend"
-         ]
-      },
+      ],
       "Distribution": [
          "RelativeSkewness",
          "RelativeSkewnessTrend"
@@ -51,11 +47,15 @@
          "NormalisedDirectionalVolatilityTrend"
       ]
    },
-   "Dynamic": [
-      "RelativeSkewnessOnKurtosis",
-      "SkewnessOnKurtosisTrend",
-      "RelativeSkewnessOnKurtosisTrend",
-      "FixedBias",
-      "SkewnessOnKurtosis"
-]
+   "Dynamic": {
+      "SkewnessKurtosis": [
+         "RelativeSkewnessOnKurtosis",
+         "SkewnessOnKurtosis",
+         "RelativeSkewnessOnKurtosisTrend",
+         "SkewnessOnKurtosisTrend"
+      ],
+      "RiskPremium": [
+         "FixedBias"
+      ]
+   }
 }
