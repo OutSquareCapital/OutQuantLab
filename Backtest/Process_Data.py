@@ -51,33 +51,47 @@ def log_returns_np(prices_array: np.ndarray) -> np.ndarray:
     
     return log_returns_array
 
-def generate_multi_index_pandas(multi_index_tuples: list[tuple[str, str, str]]) -> pd.MultiIndex:
-    
-    multi_index_pandas = pd.MultiIndex.from_tuples(multi_index_tuples, names=["Asset", "Indicator", "Param"])
-    multi_index_pandas = multi_index_pandas.set_levels(
-        [
-        pd.CategoricalIndex(multi_index_pandas.levels[0]),
-        pd.CategoricalIndex(multi_index_pandas.levels[1]),
-        multi_index_pandas.levels[2]
-        ]
-    )
-
-    return multi_index_pandas
-
 def generate_multi_index_process(
     indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]], 
-    asset_names: list[str]
-    ) -> pd.MultiIndex:
-    
-    multi_index_tuples: list[tuple[str, str, str]] = []
+    asset_names: list[str], 
+    assets_clusters: dict[str, dict[str, list[str]]], 
+    indics_clusters: dict[str, dict[str, list[str]]]
+) -> pd.MultiIndex:
+    import pandas as pd
+
+    asset_to_clusters = {
+        asset: (cluster_level1, cluster_level2)
+        for cluster_level1, subclusters in assets_clusters.items()
+        for cluster_level2, assets in subclusters.items()
+        for asset in assets
+    }
+
+    indic_to_clusters = {
+        indic: (cluster_level1, cluster_level2)
+        for cluster_level1, subclusters in indics_clusters.items()
+        for cluster_level2, indics in subclusters.items()
+        for indic in indics
+    }
+
+    multi_index_tuples = []
     
     for indicator_name, (_, _, params) in indicators_and_params.items():
         for param in params:
             param_str = ''.join([f"{k}{v}" for k, v in param.items()])
             for asset in asset_names:
-                multi_index_tuples.append((asset, indicator_name, param_str))
+                asset_cluster1, asset_cluster2 = asset_to_clusters[asset]
+                indic_cluster1, indic_cluster2 = indic_to_clusters[indicator_name]
+                multi_index_tuples.append((
+                    asset_cluster1, asset_cluster2, asset, 
+                    indic_cluster1, indic_cluster2, 
+                    indicator_name, param_str
+                ))
 
-    return generate_multi_index_pandas(multi_index_tuples)
+    return pd.MultiIndex.from_tuples(
+        multi_index_tuples,
+        names=["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
+    )
+
 
 def process_data(
     data_prices_df: pd.DataFrame

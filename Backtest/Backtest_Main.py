@@ -14,7 +14,9 @@ class BacktestProcess:
     def __init__(
         self,
         file_path: str,
-        asset_names: list[str], 
+        asset_names: list[str],
+        asset_clusters: dict[str, dict[str, list[str]]],
+        indics_clusters: dict[str, dict[str, list[str]]],
         indicators_and_params
         ):
         
@@ -27,11 +29,17 @@ class BacktestProcess:
         self.total_assets_count: int
         self.total_returns_streams: int
         self.multi_index: pd.MultiIndex
-        self.initialize_backtest_data(file_path, asset_names, indicators_and_params)
+        self.initialize_backtest_data(file_path, asset_names, indicators_and_params, asset_clusters, indics_clusters)
         
-    def initialize_backtest_data(self, file_path: str, asset_names: list[str], indicators_and_params):
+    def initialize_backtest_data(
+        self, file_path: str, 
+        asset_names: list[str], 
+        indicators_and_params, 
+        asset_clusters: dict[str, dict[str, list[str]]], 
+        indics_clusters: dict[str, dict[str, list[str]]]):
+        
         self.indicators_and_params = indicators_and_params
-        self.multi_index = generate_multi_index_process(indicators_and_params, asset_names)
+        self.multi_index = generate_multi_index_process(indicators_and_params, asset_names, asset_clusters, indics_clusters)
         prices_df = load_prices(asset_names, file_path)
         self.dates_index = prices_df.index
         self.prices_array, self.log_returns_array, self.adjusted_returns_array = process_data(prices_df)

@@ -33,20 +33,13 @@ class MainApp(QMainWindow):
         config = BacktestProcess(
         FILE_PATH_YF,
         self.assets_collection.get_active_entities_names(),
-        self.indicators_collection.get_indicators_and_parameters_for_backtest()
+        self.indicators_collection.get_indicators_and_parameters_for_backtest(), #type: ignore
+        self.assets_collection.clusters,
+        self.indicators_collection.clusters
         )
 
         raw_adjusted_returns_df = config.calculate_strategy_returns()
-        
-        self.dashboards.sub_portfolios = calculate_portfolio_returns(
-        raw_adjusted_returns_df.dropna(axis=0),
-        by_indic=True, 
-        by_asset=True)
-
-        self.dashboards.global_portfolio = calculate_portfolio_returns(
-        self.dashboards.sub_portfolios
-        )
-
+        self.dashboards.global_portfolio, self.dashboards.sub_portfolios = aggregate_raw_returns(raw_adjusted_returns_df)
         self.show_results_page()
 
     def show_results_page(self):
@@ -83,7 +76,7 @@ if __name__ == "__main__":
     from Backtest import BacktestProcess
     progress_bar.setValue(50)
     progress_bar.setValue(60)
-    from Portfolio import calculate_portfolio_returns
+    from Portfolio import aggregate_raw_returns
     progress_bar.setValue(70)
     from Dashboard import DashboardsCollection
     progress_bar.setValue(80)
