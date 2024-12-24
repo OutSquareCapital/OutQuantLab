@@ -442,6 +442,19 @@ print(f"Position optimale : {shares_to_trade:.2f}")
 '''
 
 '''
+
+def snapshot_at_intervals(prices_array: np.ndarray, snapshot_interval: int) -> np.ndarray:
+
+    snapshot_indices = np.arange(0, prices_array.shape[0], snapshot_interval)
+
+    snapshots = prices_array[snapshot_indices]
+
+    repeated_snapshots = np.repeat(snapshots, snapshot_interval, axis=0)
+
+    repeated_snapshots = repeated_snapshots[:prices_array.shape[0]]
+
+    return repeated_snapshots
+
 def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int)-> np.ndarray:
     
     # Capture les snapshots à des intervalles réguliers

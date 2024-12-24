@@ -37,14 +37,17 @@ def hv_long_term(
 
 def hv_composite(
     returns_array: np.ndarray, 
-    lengths=[8, 16, 32, 64], 
-    long_term_lengths=[200, 400, 800, 1600, 3200], 
+    short_term_lengths=[8, 16, 32, 64], 
+    long_term_lengths=[256, 512, 1024, 2048, 4096], 
     st_weight=0.6
     ) -> np.ndarray:
 
-    short_term_vol_array = hv_short_term(returns_array, lengths_list=lengths)
+    max_length = returns_array.shape[0]
+    adjusted_lengths = [length for length in long_term_lengths if length < max_length]
+    
+    short_term_vol_array = hv_short_term(returns_array, lengths_list=short_term_lengths)
 
-    long_term_vol_array = hv_long_term(short_term_vol_array, long_term_lengths=long_term_lengths)
+    long_term_vol_array = hv_long_term(short_term_vol_array, long_term_lengths=adjusted_lengths)
 
     lt_weight = 1 - st_weight
     

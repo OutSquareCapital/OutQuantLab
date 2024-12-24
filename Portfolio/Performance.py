@@ -1,13 +1,25 @@
 import pandas as pd
 import numpy as np
 import Metrics as mt
-from Infrastructure import Fast_Tools as ft
 import numexpr as ne
 from .Common import renormalize_weights
+from joblib import Parallel, delayed
+from Infrastructure import shift_array
 
+def process_in_blocks_parallel(array, block_size, func, *args, **kwargs):
+
+    num_cols = array.shape[1]
+
+    results = Parallel(n_jobs=-1, backend='threading')(
+        delayed(func)(array[:, start_col:min(start_col + block_size, num_cols)], *args, **kwargs)
+        for start_col in range(0, num_cols, block_size)
+    )
+    if results is list:
+        return np.hstack(results)
+    
 def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookback:int, confidence_lookback = 2500):
 
-    sharpe_array = ft.process_in_blocks_parallel(
+    sharpe_array = process_in_blocks_parallel(
         returns_df.values, 
         block_size=10,
         func=mt.rolling_sharpe_ratios,
@@ -15,14 +27,14 @@ def relative_sharpe_on_confidence_period(returns_df:pd.DataFrame, sharpe_lookbac
         min_length = 125
     )
 
-    mean_sharpe_array = ft.process_in_blocks_parallel(
+    mean_sharpe_array = process_in_blocks_parallel(
         sharpe_array, 
         block_size=10,
         func=mt.rolling_mean,
         length=20, min_length=1
     )
 
-    non_nan_counts = ft.process_in_blocks_parallel(
+    non_nan_counts = process_in_blocks_parallel(
         mean_sharpe_array, 
         block_size=10,
         func=lambda x: np.cumsum(~np.isnan(x), axis=0, dtype=np.float32)
@@ -62,7 +74,7 @@ def apply_returns_threshold(returns_array: np.ndarray, rolling_periods: list) ->
 
     normalized_average_weights = renormalize_weights(average_weights, returns_array)
 
-    normalized_shifted_weights = ft.shift_array(normalized_average_weights)
+    normalized_shifted_weights = shift_array(normalized_average_weights)
 
     normalized_shifted_weights[0, :] = 0
 
