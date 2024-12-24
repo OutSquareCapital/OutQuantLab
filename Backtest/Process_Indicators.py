@@ -2,9 +2,6 @@ import numpy as np
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 
-def handle_progress(progress: int, message: str):
-    print(f"[{progress}%] {message}")
-
 def process_param(
     func: Callable, 
     data_array: np.ndarray, 

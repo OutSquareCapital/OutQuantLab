@@ -3,7 +3,7 @@ import pandas as pd
 from collections.abc import Callable
 from Files import N_THREADS
 from concurrent.futures import ThreadPoolExecutor
-from .Process_Indicators import process_indicator_parallel, handle_progress
+from .Process_Indicators import process_indicator_parallel
 from .Process_Data import (
 load_prices, 
 generate_multi_index_process,
@@ -17,7 +17,8 @@ class BacktestProcess:
         asset_names: list[str],
         asset_clusters: dict[str, dict[str, list[str]]],
         indics_clusters: dict[str, dict[str, list[str]]],
-        indicators_and_params
+        indicators_and_params,
+        progress_callback: Callable
         ):
         
         self.indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]]
@@ -29,6 +30,7 @@ class BacktestProcess:
         self.total_assets_count: int
         self.total_returns_streams: int
         self.multi_index: pd.MultiIndex
+        self.progress_callback = progress_callback
         self.initialize_backtest_data(file_path, asset_names, indicators_and_params, asset_clusters, indics_clusters)
         
     def initialize_backtest_data(
@@ -48,8 +50,7 @@ class BacktestProcess:
         self.signals_array = np.empty((self.prices_array.shape[0], self.total_returns_streams), dtype=np.float32)
 
     def calculate_strategy_returns(
-        self,
-        progress_callback: Callable = handle_progress
+        self
         ) -> pd.DataFrame:
 
         signal_col_index = int(0)
@@ -66,7 +67,7 @@ class BacktestProcess:
 
             progress = int(100 * signal_col_index / self.total_returns_streams)
             message = f"Backtesting Strategies: {signal_col_index}/{self.total_returns_streams}..."
-            progress_callback(progress, message)
+            self.progress_callback(progress, message)
 
         return pd.DataFrame(
         self.signals_array, 
