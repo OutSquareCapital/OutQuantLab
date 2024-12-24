@@ -13,7 +13,6 @@ backtest_process_time = time.perf_counter()
 assets_collection = AssetsCollection()
 indicators_collection = IndicatorsCollection()
 dashboards = DashboardsCollection(length=1250)
-
 backtest_process = BacktestProcess(
     file_path=FILE_PATH_YF,
     asset_names=assets_collection.get_active_entities_names(),
@@ -34,8 +33,8 @@ dashboards.sub_portfolios = calculate_portfolio_returns(
     )
 
 dashboards.global_portfolio = calculate_portfolio_returns(dashboards.sub_portfolios)
-print(f"backtest process: {time.perf_counter() - backtest_process_time:.2f}s")
 
+print(f"backtest process: {time.perf_counter() - backtest_process_time:.2f}s")
 print(dashboards.calculate_metrics())
 #assets_collection.save()
 #indicators_collection.save()

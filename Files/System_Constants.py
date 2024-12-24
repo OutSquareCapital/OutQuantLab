@@ -7,8 +7,8 @@ SAVED_DATA_FOLDER: Final = os.path.join(os.path.dirname(__file__), "Saved_Data")
 
 ASSETS_TO_TEST_CONFIG_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "assets_to_backtest.json")
 INDICATORS_PARAMS_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "param_values.json")
-INDICATORS_TO_TEST_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "methods_to_backtest.json")
-INDICATORS_CLUSTERS_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "methods_clusters.json")
+INDICATORS_TO_TEST_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "indics_to_backtest.json")
+INDICATORS_CLUSTERS_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "indics_clusters.json")
 ASSETS_CLUSTERS_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "assets_clusters.json")
 INDICATORS_MODULE: Final = 'Signals'
 

@@ -12,12 +12,11 @@ def hv_short_term(
     lengths_list: list[int]
     ) -> np.ndarray:
 
-    min_length = min(lengths_list)
-    
-    hv_arrays = np.array([rolling_volatility(
+    hv_arrays = np.array([
+        rolling_volatility(
         returns_array, 
         length=length, 
-        min_length=min_length)
+        min_length=4)
         for length in lengths_list])
 
     return np.mean(hv_arrays, axis=0)
@@ -51,7 +50,7 @@ def hv_composite(
     
     composite_vol_array = ((st_weight * short_term_vol_array) + (lt_weight * long_term_vol_array)) * ANNUALIZED_PERCENTAGE_FACTOR
 
-    return rolling_mean(composite_vol_array, length=5, min_length=1)
+    return rolling_mean(composite_vol_array, length=4, min_length=1)
 
 def separate_volatility(array:np.ndarray, LenVol: int) -> tuple[np.ndarray, np.ndarray]:
 

@@ -38,14 +38,13 @@ class MainApp(QMainWindow):
 
         raw_adjusted_returns_df = config.calculate_strategy_returns()
         
-        self.dashboards.sub_portfolios = Portfolio.calculate_daily_average_returns(
+        self.dashboards.sub_portfolios = calculate_portfolio_returns(
         raw_adjusted_returns_df.dropna(axis=0),
-        by_method=True, 
+        by_indic=True, 
         by_asset=True)
 
-        self.dashboards.global_portfolio = Portfolio.calculate_daily_average_returns(
-        self.dashboards.sub_portfolios, 
-        global_avg=True
+        self.dashboards.global_portfolio = calculate_portfolio_returns(
+        self.dashboards.sub_portfolios
         )
 
         self.show_results_page()
@@ -84,7 +83,7 @@ if __name__ == "__main__":
     from Backtest import BacktestProcess
     progress_bar.setValue(50)
     progress_bar.setValue(60)
-    import Portfolio
+    from Portfolio import calculate_portfolio_returns
     progress_bar.setValue(70)
     from Dashboard import DashboardsCollection
     progress_bar.setValue(80)
