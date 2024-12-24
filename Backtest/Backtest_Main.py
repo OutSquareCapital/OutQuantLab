@@ -15,10 +15,10 @@ class BacktestProcess:
         self,
         file_path: str,
         asset_names: list[str], 
-        indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]]
+        indicators_and_params
         ):
         
-        self.indicators_and_params = indicators_and_params
+        self.indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]]
         self.dates_index: pd.Index
         self.adjusted_returns_array: np.ndarray
         self.prices_array: np.ndarray
@@ -26,11 +26,12 @@ class BacktestProcess:
         self.signals_array: np.ndarray
         self.total_assets_count: int
         self.total_returns_streams: int
-        self.multi_index: pd.MultiIndex = generate_multi_index_process(indicators_and_params, asset_names)
-        self.initialize_backtest_data(file_path, asset_names)
+        self.multi_index: pd.MultiIndex
+        self.initialize_backtest_data(file_path, asset_names, indicators_and_params)
         
-    def initialize_backtest_data(self, file_path: str, asset_names: list[str]):
-        
+    def initialize_backtest_data(self, file_path: str, asset_names: list[str], indicators_and_params):
+        self.indicators_and_params = indicators_and_params
+        self.multi_index = generate_multi_index_process(indicators_and_params, asset_names)
         prices_df = load_prices(asset_names, file_path)
         self.dates_index = prices_df.index
         self.prices_array, self.log_returns_array, self.adjusted_returns_array = process_data(prices_df)

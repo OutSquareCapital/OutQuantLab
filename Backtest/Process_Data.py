@@ -83,12 +83,11 @@ def process_data(
     data_prices_df: pd.DataFrame
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     
-    returns_df=data_prices_df.pct_change(fill_method=None)
+    returns_df = data_prices_df.pct_change(fill_method=None)
     pct_returns_array = returns_df.to_numpy(dtype=np.float32)
     prices_array = ft.shift_array(calculate_equity_curves(pct_returns_array))
     log_returns_array = ft.shift_array(log_returns_np(prices_array))
     hv_array = mt.hv_composite(pct_returns_array)
-    
     volatility_adjusted_pct_returns = calculate_volatility_adjusted_returns(
         pct_returns_array, 
         hv_array

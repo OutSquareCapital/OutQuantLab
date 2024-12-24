@@ -1,12 +1,10 @@
 import time
-imports = time.perf_counter()
 from Files import FILE_PATH_YF
 from Get_Data import get_yahoo_finance_data
 from Backtest import BacktestProcess
-from Portfolio import calculate_daily_average_returns
+from Portfolio import calculate_portfolio_returns
 from Config import AssetsCollection, IndicatorsCollection
 from Dashboard import DashboardsCollection
-print(f"Imports: {time.perf_counter() - imports:.2f}s")
 
 #get_yahoo_finance_data(assets_collection.get_all_entities_names(), FILE_PATH_YF)
 
@@ -16,26 +14,26 @@ assets_collection = AssetsCollection()
 indicators_collection = IndicatorsCollection()
 dashboards = DashboardsCollection(length=1250)
 
-backtest = BacktestProcess(
+backtest_process = BacktestProcess(
     file_path=FILE_PATH_YF,
     asset_names=assets_collection.get_active_entities_names(),
     indicators_and_params=indicators_collection.get_indicators_and_parameters_for_backtest()
     )
 
+raw_adjusted_returns_df = backtest_process.calculate_strategy_returns()
 
-raw_adjusted_returns_df = backtest.calculate_strategy_returns()
-
-dashboards.sub_portfolios = calculate_daily_average_returns(
+indics_assets_portfolio = calculate_portfolio_returns(
     raw_adjusted_returns_df.dropna(axis=0),
-    by_method=True, 
+    by_asset=True,
+    by_indic=True
+    )
+
+dashboards.sub_portfolios = calculate_portfolio_returns(
+    indics_assets_portfolio,
     by_asset=True
     )
 
-dashboards.global_portfolio = calculate_daily_average_returns(
-    dashboards.sub_portfolios, 
-    global_avg=True
-    )
-
+dashboards.global_portfolio = calculate_portfolio_returns(dashboards.sub_portfolios)
 print(f"backtest process: {time.perf_counter() - backtest_process_time:.2f}s")
 
 print(dashboards.calculate_metrics())

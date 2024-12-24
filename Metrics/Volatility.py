@@ -7,46 +7,51 @@ def rolling_volatility(array: np.ndarray, length: int, min_length: int = 1) -> n
 
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1)
 
-def hv_short_term(returns_array: np.ndarray, lengths_list=[8, 16, 32, 64]) -> np.ndarray:
+def hv_short_term(
+    returns_array: np.ndarray, 
+    lengths_list: list[int]
+    ) -> np.ndarray:
 
+    min_length = min(lengths_list)
+    
     hv_arrays = np.array([rolling_volatility(
         returns_array, 
         length=length, 
-        min_length=length)
+        min_length=min_length)
         for length in lengths_list])
 
-    return np.nanmean(hv_arrays, axis=0)
+    return np.mean(hv_arrays, axis=0)
 
-def hv_long_term(short_term_vol_array: np.ndarray, long_term_lengths=[200, 400, 800, 1600, 3200]) -> np.ndarray:
-    max_length = short_term_vol_array.shape[0]
-    adjusted_lengths = [min(length, max_length) for length in long_term_lengths]
-    long_term_vol_arrays = np.array([rolling_median(
+def hv_long_term(
+    short_term_vol_array: np.ndarray, 
+    long_term_lengths: list[int]
+    ) -> np.ndarray:
+    
+    long_term_vol_arrays = np.array([
+        rolling_median(
         short_term_vol_array, 
         length=length, 
         min_length=1)
-        for length in adjusted_lengths])
+        for length in long_term_lengths])
 
-    return np.nanmean(long_term_vol_arrays, axis=0)
+    return np.mean(long_term_vol_arrays, axis=0)
 
 def hv_composite(
     returns_array: np.ndarray, 
     lengths=[8, 16, 32, 64], 
     long_term_lengths=[200, 400, 800, 1600, 3200], 
-    st_weight=0.6, 
-    annualization=True) -> np.ndarray:
+    st_weight=0.6
+    ) -> np.ndarray:
 
     short_term_vol_array = hv_short_term(returns_array, lengths_list=lengths)
 
     long_term_vol_array = hv_long_term(short_term_vol_array, long_term_lengths=long_term_lengths)
 
     lt_weight = 1 - st_weight
-    composite_vol_array = (st_weight * short_term_vol_array) + (lt_weight * long_term_vol_array)
+    
+    composite_vol_array = ((st_weight * short_term_vol_array) + (lt_weight * long_term_vol_array)) * ANNUALIZED_PERCENTAGE_FACTOR
 
-    if annualization:
-
-        composite_vol_array = composite_vol_array * ANNUALIZED_PERCENTAGE_FACTOR
-
-    return rolling_mean(composite_vol_array, length=5)
+    return rolling_mean(composite_vol_array, length=5, min_length=1)
 
 def separate_volatility(array:np.ndarray, LenVol: int) -> tuple[np.ndarray, np.ndarray]:
 
