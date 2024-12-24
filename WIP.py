@@ -438,7 +438,6 @@ adjusted_return = -0.000928 # Rendement ajusté en %
 
 # Calcul du nombre d'actions à acheter ou vendre
 shares_to_trade = calculate_shares_to_trade_from_adjusted_return(portfolio_size, asset_price, adjusted_return)
-print(f"Position optimale : {shares_to_trade:.2f}")
 '''
 
 '''

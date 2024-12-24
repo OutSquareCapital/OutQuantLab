@@ -11,14 +11,10 @@ def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
                         )
     
     if data is None:
-        print("Yahoo Finance returned no data.")
-        return None
+        raise ValueError("Yahoo Finance Data Not Available")
 
     data['Close'].to_parquet(
         file_path,
         index=True,
         engine="pyarrow"
     )
-
-    print("Yahoo Finance Data Updated")
-    return None

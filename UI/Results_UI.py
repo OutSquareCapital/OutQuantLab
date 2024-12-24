@@ -19,7 +19,7 @@ def cleanup_temp_files():
             try:
                 os.remove(file_path)
             except Exception as e:
-                print(f"Erreur lors de la suppression du fichier temporaire {file_path} : {e}")
+                raise Exception(f"Erreur lors de la suppression du fichier temporaire {file_path} : {e}")
 
 def generate_plot_widget(fig, show_legend:bool=True):
     if not show_legend:
