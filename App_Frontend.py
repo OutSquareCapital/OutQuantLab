@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QProgressBar, QTextEdit
+from PySide6.QtWidgets import QMainWindow
 
 class MainApp(QMainWindow):
     def __init__(self):
@@ -47,7 +47,7 @@ class MainApp(QMainWindow):
 if __name__ == "__main__":
 
     import sys
-    from PySide6.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication, QProgressBar, QTextEdit
     import UI
     app = QApplication(sys.argv)
     UI.apply_global_styles(app)
