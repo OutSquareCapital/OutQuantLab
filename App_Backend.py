@@ -36,6 +36,5 @@ class OutQuantLab:
         
 if __name__ == "__main__":
     outquantlab = OutQuantLab(handle_progress)
-    outquantlab.refresh_data()
     outquantlab.run_backtest()
-    print(outquantlab.dashboards.metrics)
+    print(outquantlab.dashboards.calculate_metrics())
