@@ -25,6 +25,12 @@ filter_valid_pairs,
 determine_array_type
 )
 
+@dataclass(slots=True)
+class IndicatorParams:
+    name: str
+    func: Callable
+    array_type: str
+    param_combos: list[dict[str, int]]
 
 @dataclass
 class BaseEntity(ABC):
@@ -117,12 +123,16 @@ class IndicatorsCollection(BaseCollection[Indicator]):
             )
 
     @property
-    def indicators_params_dict(self) -> dict[str, tuple[Callable, str, list[dict[str, int]]]]:
-
-        result = {}
+    def indicators_params_dict(self) -> list[IndicatorParams]:
+        result: list[IndicatorParams] = []
         for indicator in self.all_active_entities:
-            valid_pairs =  filter_valid_pairs(indicator.params)
-            result[indicator.name] = (indicator.func, indicator.array_type, valid_pairs)
+            valid_pairs = filter_valid_pairs(indicator.params)
+            result.append(IndicatorParams(
+                name=indicator.name,
+                func=indicator.func,
+                array_type=indicator.array_type,
+                param_combos=valid_pairs
+            ))
         return result
 
     def save(self):

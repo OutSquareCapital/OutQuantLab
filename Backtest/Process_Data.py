@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 from numpy.typing import NDArray
 from Files import PERCENTAGE_FACTOR
-from collections.abc import Callable
 from Infrastructure import shift_array
 from Metrics import hv_composite
 import yfinance as yf
+from Config import IndicatorParams
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 
@@ -72,7 +72,7 @@ def log_returns_np(prices_array: NDArray[np.float32]) -> NDArray[np.float32]:
     return log_returns_array
 
 def generate_multi_index_process(
-    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]], 
+    indicators_and_params: list[IndicatorParams], 
     asset_names: list[str], 
     assets_clusters: dict[str, dict[str, list[str]]], 
     indics_clusters: dict[str, dict[str, list[str]]]
@@ -94,16 +94,16 @@ def generate_multi_index_process(
 
     multi_index_tuples = []
 
-    for indicator_name, (_, _, params) in indicators_and_params.items():
-        for param in params:
+    for indic in indicators_and_params:
+        for param in indic.param_combos:
             param_str = ''.join([f"{k}{v}" for k, v in param.items()])
             for asset in asset_names:
                 asset_cluster1, asset_cluster2 = asset_to_clusters[asset]
-                indic_cluster1, indic_cluster2 = indic_to_clusters[indicator_name]
+                indic_cluster1, indic_cluster2 = indic_to_clusters[indic.name]
                 multi_index_tuples.append((
                     asset_cluster1, asset_cluster2, asset, 
                     indic_cluster1, indic_cluster2, 
-                    indicator_name, param_str
+                    indic.name, param_str
                 ))
 
     return pd.MultiIndex.from_tuples(

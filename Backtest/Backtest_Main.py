@@ -11,6 +11,7 @@ generate_multi_index_process,
 process_data
 )
 from dataclasses import dataclass
+from Config import IndicatorParams
 
 @dataclass(slots=True)
 class BacktestData:
@@ -18,7 +19,7 @@ class BacktestData:
     log_returns_array: NDArray[np.float32]
     adjusted_returns_array: NDArray[np.float32]
     signals_array: NDArray[np.float32]
-    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]]
+    indicators_and_params: list[IndicatorParams]
 
 @dataclass(slots=True)
 class BacktestStructure:
@@ -35,9 +36,10 @@ def calculate_strategy_returns(
     signal_col_index = 0
     global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
 
-    for func, array_type, params in backtest_data.indicators_and_params.values():
-        data_array = backtest_data.prices_array if array_type == 'prices_array' else backtest_data.log_returns_array
-        results = process_indicator_parallel(func, data_array, backtest_data.adjusted_returns_array, params, global_executor)
+    for indic in backtest_data.indicators_and_params:
+
+        data_array = backtest_data.prices_array if indic.array_type == 'prices_array' else backtest_data.log_returns_array
+        results = process_indicator_parallel(indic.func, data_array, backtest_data.adjusted_returns_array, indic.param_combos, global_executor)
 
         for result in results:
             backtest_data.signals_array[:, signal_col_index:signal_col_index + backtest_structure.total_assets_count] = result
@@ -58,7 +60,7 @@ def calculate_strategy_returns(
 def initialize_backtest_config(
     file_path: str,
     asset_names: list[str],
-    indicators_and_params: dict[str, tuple[Callable, str, list[dict[str, int]]]],
+    indicators_and_params: list[IndicatorParams],
     asset_clusters: dict[str, dict[str, list[str]]],
     indics_clusters: dict[str, dict[str, list[str]]]
     ) -> tuple[BacktestData, BacktestStructure]:
