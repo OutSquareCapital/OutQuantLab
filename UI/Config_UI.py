@@ -28,7 +28,7 @@ class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection, parent=None):
         super().__init__(parent)
         self.assets_collection = assets_collection
-        self.entities: list[Asset] = self.assets_collection.get_all_entities()
+        self.entities: list[Asset] = self.assets_collection.all_entities
         self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
 
@@ -68,7 +68,7 @@ class IndicatorsConfigWidget(QWidget):
     def __init__(self, indicators_collection: IndicatorsCollection, parent=None):
         super().__init__(parent)
         self.indicators_collection = indicators_collection
-        self.entities:list[Indicator] = self.indicators_collection.get_all_entities()
+        self.entities:list[Indicator] = self.indicators_collection.all_entities
         self.param_widgets: dict[str, dict[str, dict[str, QSlider | QLabel]]] = {}
         self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
@@ -161,7 +161,7 @@ class TreeStructureWidget(QWidget):
         super().__init__(parent)
         self.collection = collection
         self.tree_structure = self.collection.clusters
-        self.data = set(self.collection.get_all_entities_names())
+        self.data = set(self.collection.all_entities_names)
 
         self.tree = QTreeWidget()
         self.tree.setHeaderHidden(True)
