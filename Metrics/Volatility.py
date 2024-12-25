@@ -1,16 +1,17 @@
 import numpy as np
+from numpy.typing import NDArray
 from Files import ANNUALIZED_PERCENTAGE_FACTOR
 import bottleneck as bn
 from Metrics.Aggregation import rolling_mean, rolling_median
 
-def rolling_volatility(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+def rolling_volatility(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
 
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1)
 
 def hv_short_term(
-    returns_array: np.ndarray, 
+    returns_array: NDArray[np.float32], 
     lengths_list: list[int]
-    ) -> np.ndarray:
+    ) -> NDArray[np.float32]:
 
     hv_arrays = np.array([
         rolling_volatility(
@@ -22,9 +23,9 @@ def hv_short_term(
     return np.mean(hv_arrays, axis=0)
 
 def hv_long_term(
-    short_term_vol_array: np.ndarray, 
+    short_term_vol_array: NDArray[np.float32], 
     long_term_lengths: list[int]
-    ) -> np.ndarray:
+    ) -> NDArray[np.float32]:
     
     long_term_vol_arrays = np.array([
         rolling_median(
@@ -36,11 +37,11 @@ def hv_long_term(
     return np.mean(long_term_vol_arrays, axis=0)
 
 def hv_composite(
-    returns_array: np.ndarray, 
+    returns_array: NDArray[np.float32], 
     short_term_lengths=[8, 16, 32, 64], 
     long_term_lengths=[256, 512, 1024, 2048, 4096], 
     st_weight=0.6
-    ) -> np.ndarray:
+    ) -> NDArray[np.float32]:
 
     max_length = returns_array.shape[0]
     adjusted_lengths = [length for length in long_term_lengths if length < max_length]

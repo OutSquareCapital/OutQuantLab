@@ -1,9 +1,10 @@
 import numpy as np
+from numpy.typing import NDArray
 from Files import ANNUALIZATION_FACTOR
 from .Aggregation import rolling_mean
 from .Volatility import rolling_volatility
 
-def expanding_sharpe_ratios(returns_array: np.ndarray) -> np.ndarray:
+def expanding_sharpe_ratios(returns_array: NDArray[np.float32]) -> NDArray[np.float32]:
 
     length = returns_array.shape[0]
 
@@ -13,7 +14,7 @@ def expanding_sharpe_ratios(returns_array: np.ndarray) -> np.ndarray:
     return expanding_mean/expanding_std * ANNUALIZATION_FACTOR
 
 
-def rolling_sharpe_ratios(returns_array: np.ndarray, length:int, min_length:int) -> np.ndarray:
+def rolling_sharpe_ratios(returns_array: NDArray[np.float32], length:int, min_length:int) -> NDArray[np.float32]:
 
     mean = rolling_mean(returns_array, length=length, min_length=min_length)
 

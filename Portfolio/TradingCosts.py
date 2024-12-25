@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-import Metrics as mt
+from Metrics import rolling_sharpe_ratios, rolling_mean
+from numpy.typing import NDArray
 
 def calculate_cost_limit(
     raw_rolling_sharpe_df: pd.DataFrame, 
@@ -11,7 +12,7 @@ def calculate_cost_limit(
     day_treshold = 60) -> pd.DataFrame:
 
     cost_validation_df = pd.DataFrame(
-        0, 
+        0.0, 
         index=raw_rolling_sharpe_df.index, 
         columns=raw_rolling_sharpe_df.columns, 
         dtype=np.float32
@@ -21,12 +22,12 @@ def calculate_cost_limit(
         raw_sharpe_columns = [col for col in raw_rolling_sharpe_df.columns if asset in col]
         net_sharpe_columns = [col for col in net_rolling_sharpe_df.columns if asset in col]
         
-        raw_sharpe = raw_rolling_sharpe_df[raw_sharpe_columns].values
-        net_sharpe = net_rolling_sharpe_df[net_sharpe_columns].values
+        raw_sharpe: NDArray[np.float32] = raw_rolling_sharpe_df[raw_sharpe_columns].values
+        net_sharpe: NDArray[np.float32]  = net_rolling_sharpe_df[net_sharpe_columns].values
         
         sharpe_diff = (raw_sharpe + 100) - (net_sharpe + 100)
         
-        ma_sharpe_diff = mt.rolling_mean(sharpe_diff, length=ma_window, min_length=1)
+        ma_sharpe_diff = rolling_mean(sharpe_diff, length=ma_window, min_length=1)
         
         positive_invalid_costs = (raw_sharpe > 0) & (ma_sharpe_diff > (raw_sharpe * limit_treshold))
         negative_invalid_costs = (raw_sharpe < 0) & (ma_sharpe_diff > ((raw_sharpe * limit_treshold)*-1))
@@ -55,12 +56,18 @@ def calculate_cost_adjusted_returns(
     window_size: int = 250) -> pd.DataFrame:
 
     raw_rolling_sharpe_df = pd.DataFrame(
-        mt.rolling_sharpe_ratios(raw_adjusted_returns_df, window_size, window_size),
+        rolling_sharpe_ratios(
+            raw_adjusted_returns_df.values, 
+            window_size, 
+            window_size),
         index=raw_adjusted_returns_df.index,
         columns=raw_adjusted_returns_df.columns)
 
     net_rolling_sharpe_df = pd.DataFrame(
-        mt.rolling_sharpe_ratios(net_adjusted_returns_df, window_size, window_size),
+        rolling_sharpe_ratios(
+            net_adjusted_returns_df.values, 
+            window_size, 
+            window_size),
         index=net_adjusted_returns_df.index,
         columns=net_adjusted_returns_df.columns)
 

@@ -1,7 +1,11 @@
 import os
 from typing import Final
 
-N_THREADS: Final = os.cpu_count()
+cpu_count = os.cpu_count() 
+if cpu_count is not None:
+    N_THREADS: Final = cpu_count
+else:
+    Exception("Could not determine the number of threads available on the system")
 
 SAVED_DATA_FOLDER: Final = os.path.join(os.path.dirname(__file__), "Saved_Data")
 

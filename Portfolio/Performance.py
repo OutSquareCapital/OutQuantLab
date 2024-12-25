@@ -34,7 +34,6 @@ def relative_sharpe_on_confidence_period(
 
     rolling_median_sharpe = np.nanmedian(mean_sharpe_array, axis=1)[:, np.newaxis]
 
-
     normalized_sharpes = ne.evaluate(
         "(mean_sharpe_array - rolling_median_sharpe) * ((non_nan_counts / confidence_lookback)**0.5) + 1",
         local_dict={

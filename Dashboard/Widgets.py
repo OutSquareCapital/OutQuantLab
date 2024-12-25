@@ -1,4 +1,5 @@
 import plotly.graph_objects as go
+from numpy.typing import NDArray
 import pandas as pd
 import numpy as np
 from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
@@ -61,7 +62,7 @@ def bars(
 
 
 def heatmap(
-    z_values: np.ndarray, 
+    z_values: NDArray[np.float32], 
     x_labels: list, 
     y_labels: list, 
     title: str

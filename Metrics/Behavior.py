@@ -1,8 +1,9 @@
 import numpy as np
 from Infrastructure import Fast_Tools as ft
 from Metrics.Aggregation import rolling_mean
+from numpy.typing import NDArray
 
-def rolling_autocorrelation(returns_array: np.ndarray, length: int) -> np.ndarray:
+def rolling_autocorrelation(returns_array: NDArray[np.float32], length: int) -> NDArray[np.float32]:
 
     mean = rolling_mean(returns_array, length=length, min_length=20)
 

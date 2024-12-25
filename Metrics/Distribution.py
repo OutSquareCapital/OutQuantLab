@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.typing import NDArray
 from numba import prange
 from numba import njit
 
@@ -77,9 +78,9 @@ def remove_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensa
 
 
 @njit
-def rolling_skewness(array, length, min_length):
+def rolling_skewness(array, length, min_length) -> NDArray[np.float32]:
     N, M = array.shape
-    output = np.empty((N, M), dtype=np.float64)
+    output = np.empty((N, M), dtype=np.float32)
     output[:] = np.nan
 
     for col in prange(M):
@@ -203,9 +204,9 @@ def remove_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, co
     return nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx
 
 @njit
-def rolling_kurtosis(array, length, min_length):
+def rolling_kurtosis(array, length, min_length) -> NDArray[np.float32]:
     N, M = array.shape
-    output = np.empty((N, M), dtype=np.float64)
+    output = np.empty((N, M), dtype=np.float32)
     output[:] = np.nan
 
     for col in prange(M):
