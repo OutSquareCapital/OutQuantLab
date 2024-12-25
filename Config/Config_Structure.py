@@ -56,12 +56,22 @@ class BaseCollection(Generic[T]):
     @abstractmethod
     def _load_entities(self):
         pass
-    
-    def get_all_entities_names(self) -> list[str]:
+
+    @property
+    def all_entities_names(self) -> list[str]:
         return list(self.entities.keys())
 
-    def get_all_entities(self) -> list[T]:
+    @property
+    def all_entities(self) -> list[T]:
         return list(self.entities.values())
+
+    @property
+    def all_active_entities_names(self) -> list[str]:
+        return [entity.name for entity in self.entities.values() if entity.active]
+
+    @property
+    def all_active_entities(self) -> list[T]:
+        return [entity for entity in self.entities.values() if entity.active]
 
     def get_entity(self, name: str) -> T:
         return self.entities[name]
@@ -71,12 +81,6 @@ class BaseCollection(Generic[T]):
 
     def set_active(self, name: str, active: bool):
         self.entities[name].active = active
-
-    def get_active_entities(self) -> list[T]:
-        return [entity for entity in self.entities.values() if entity.active]
-
-    def get_active_entities_names(self) -> list[str]:
-        return [entity.name for entity in self.entities.values() if entity.active]
 
     def update_clusters_structure(self, new_structure: dict[str, Any]):
         self.clusters = new_structure
@@ -112,6 +116,15 @@ class IndicatorsCollection(BaseCollection[Indicator]):
                 params=params
             )
 
+    @property
+    def indicators_params_dict(self) -> dict[str, tuple[Callable, str, list[dict[str, int]]]]:
+
+        result = {}
+        for indicator in self.all_active_entities:
+            valid_pairs =  filter_valid_pairs(indicator.params)
+            result[indicator.name] = (indicator.func, indicator.array_type, valid_pairs)
+        return result
+
     def save(self):
         super().save()
         parameters_to_save = self.get_attribute_dict("params")
@@ -125,14 +138,6 @@ class IndicatorsCollection(BaseCollection[Indicator]):
 
     def update_param_values(self, name: str, param_key: str, values: list[int]):
         self.entities[name].params[param_key] = values
-
-    def get_indicators_and_parameters_for_backtest(self) -> dict[str, tuple[Callable, str, list[dict[str, int]]]]:
-
-        result = {}
-        for indicator in self.get_active_entities():
-            valid_pairs =  filter_valid_pairs(indicator.params)
-            result[indicator.name] = (indicator.func, indicator.array_type, valid_pairs)
-        return result
     
 class AssetsCollection(BaseCollection[Asset]):
     def __init__(self):

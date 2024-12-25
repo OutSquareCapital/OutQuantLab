@@ -22,10 +22,10 @@ class OutQuantLab:
     def run_backtest(self):
         self.backtest_data, self.backtest_config = initialize_backtest_config(
             file_path=FILE_PATH_YF,
-            asset_names=self.assets_collection.get_active_entities_names(),
+            asset_names=self.assets_collection.all_active_entities_names,
+            indicators_and_params=self.indicators_collection.indicators_params_dict,
             asset_clusters=self.assets_collection.clusters,
-            indics_clusters=self.indicators_collection.clusters,
-            indicators_and_params=self.indicators_collection.get_indicators_and_parameters_for_backtest()
+            indics_clusters=self.indicators_collection.clusters
         )
         
         self.backtest_process = BacktestProcess(
@@ -38,7 +38,7 @@ class OutQuantLab:
         self.dashboards.global_portfolio, self.dashboards.sub_portfolios = aggregate_raw_returns(raw_adjusted_returns_df)
 
     def refresh_data(self):
-        get_yahoo_finance_data(self.assets_collection.get_all_entities_names(), FILE_PATH_YF)
+        get_yahoo_finance_data(self.assets_collection.all_entities_names, FILE_PATH_YF)
 
     def close(self):
         self.assets_collection.save()
