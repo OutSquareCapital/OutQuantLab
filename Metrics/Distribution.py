@@ -1,245 +1,449 @@
 import numpy as np
 from numpy.typing import NDArray
-from numba import prange
-from numba import njit
+from numba import prange  # type: ignore
+from numba import njit  # type: ignore
 
 @njit
-def calc_skew(min_periods, nobs, x, xx, xxx, num_consecutive_same_value):
-    if nobs >= min_periods:
-        dnobs = float(nobs)
-        a = x / dnobs
-        b = xx / dnobs - a * a
-        c = xxx / dnobs - a * a * a - 3 * a * b
+def calculate_skewness(
+    min_length: int,
+    observation_count: float,
+    sum_values: float,
+    sum_values_squared: float,
+    sum_values_cubed: float,
+    consecutive_equal_count: int
+) -> float:
+    if observation_count >= min_length:
+        total_observations = float(observation_count)
+        mean = sum_values / total_observations
+        variance = sum_values_squared / total_observations - mean * mean
+        skewness_numerator = (
+            sum_values_cubed / total_observations
+            - mean * mean * mean
+            - 3 * mean * variance
+        )
 
-        if nobs < 3:
+        if observation_count < 3:
             return np.nan
-        elif num_consecutive_same_value >= nobs:
+        elif consecutive_equal_count >= observation_count:
             return 0.0
-        elif b <= 1e-14:
+        elif variance <= 1e-14:
             return np.nan
         else:
-            r = np.sqrt(b)
-            return (np.sqrt(dnobs * (dnobs - 1.)) * c) / ((dnobs - 2) * r * r * r)
+            std_dev = np.sqrt(variance)
+            return (
+                np.sqrt(total_observations * (total_observations - 1))
+                * skewness_numerator
+                / ((total_observations - 2) * std_dev * std_dev * std_dev)
+            )
     else:
         return np.nan
 
 
 @njit
-def add_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx,
-            num_consecutive_same_value, prev_value):
-    if val == val:
-        nobs += 1
+def add_skewness_contribution(
+    value: float,
+    observation_count: int,
+    sum_values: float,
+    sum_values_squared: float,
+    sum_values_cubed: float,
+    compensation_values: float,
+    compensation_squared: float,
+    compensation_cubed: float,
+    consecutive_equal_count: int,
+    previous_value: float
+    ) -> tuple[int, float, float, float, float, float, float, int, float]:
 
-        y = val - compensation_x
-        t = x + y
-        compensation_x = t - x - y
-        x = t
+    if value == value:  # Vérification NaN
+        observation_count += 1
 
-        y = val * val - compensation_xx
-        t = xx + y
-        compensation_xx = t - xx - y
-        xx = t
+        # Mise à jour pour la somme des valeurs
+        temp = value - compensation_values
+        total = sum_values + temp
+        compensation_values = total - sum_values - temp
+        sum_values = total
 
-        y = val * val * val - compensation_xxx
-        t = xxx + y
-        compensation_xxx = t - xxx - y
-        xxx = t
+        # Mise à jour pour la somme des carrés des valeurs
+        temp = value * value - compensation_squared
+        total = sum_values_squared + temp
+        compensation_squared = total - sum_values_squared - temp
+        sum_values_squared = total
 
-        if val == prev_value:
-            num_consecutive_same_value += 1
+        # Mise à jour pour la somme des cubes des valeurs
+        temp = value * value * value - compensation_cubed
+        total = sum_values_cubed + temp
+        compensation_cubed = total - sum_values_cubed - temp
+        sum_values_cubed = total
+
+        # Gestion des valeurs consécutives identiques
+        if value == previous_value:
+            consecutive_equal_count += 1
         else:
-            num_consecutive_same_value = 1
-        prev_value = val
+            consecutive_equal_count = 1
+        previous_value = value
 
-    return nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx, num_consecutive_same_value, prev_value
-
-
-@njit
-def remove_skew(val, nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx):
-    if val == val:
-        nobs -= 1
-
-        y = -val - compensation_x
-        t = x + y
-        compensation_x = t - x - y
-        x = t
-
-        y = -val * val - compensation_xx
-        t = xx + y
-        compensation_xx = t - xx - y
-        xx = t
-
-        y = -val * val * val - compensation_xxx
-        t = xxx + y
-        compensation_xxx = t - xxx - y
-        xxx = t
-
-    return nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx
+    return (
+        observation_count,
+        sum_values,
+        sum_values_squared,
+        sum_values_cubed,
+        compensation_values,
+        compensation_squared,
+        compensation_cubed,
+        consecutive_equal_count,
+        previous_value,
+    )
 
 
 @njit
-def rolling_skewness(array, length, min_length) -> NDArray[np.float32]:
-    N, M = array.shape
-    output = np.empty((N, M), dtype=np.float32)
-    output[:] = np.nan
+def remove_skewness_contribution(
+    value: float,
+    observation_count: int,
+    sum_values: float,
+    sum_values_squared: float,
+    sum_values_cubed: float,
+    compensation_values: float,
+    compensation_squared: float,
+    compensation_cubed: float
+    ) -> tuple[int, float, float, float, float, float, float]:
+    if value == value:
+        observation_count -= 1
 
-    for col in prange(M):
-        nobs, x, xx, xxx = 0, 0.0, 0.0, 0.0
-        compensation_x, compensation_xx, compensation_xxx = 0.0, 0.0, 0.0
-        prev_value = array[0, col]
-        num_consecutive_same_value = 0
+        temp = -value - compensation_values
+        total = sum_values + temp
+        compensation_values = total - sum_values - temp
+        sum_values = total
 
-        for i in range(N):
-            start = max(0, i - length + 1)
-            end = i + 1
+        temp = -value * value - compensation_squared
+        total = sum_values_squared + temp
+        compensation_squared = total - sum_values_squared - temp
+        sum_values_squared = total
 
-            if i == 0 or start >= i - 1:
-                nobs, x, xx, xxx = 0, 0.0, 0.0, 0.0
-                compensation_x, compensation_xx, compensation_xxx = 0.0, 0.0, 0.0
-                prev_value = array[start, col]
-                num_consecutive_same_value = 0
-                for j in range(start, end):
-                    nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx, num_consecutive_same_value, prev_value = \
-                        add_skew(array[j, col], nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx, num_consecutive_same_value, prev_value)
+        temp = -value * value * value - compensation_cubed
+        total = sum_values_cubed + temp
+        compensation_cubed = total - sum_values_cubed - temp
+        sum_values_cubed = total
+
+    return (
+        observation_count,
+        sum_values,
+        sum_values_squared,
+        sum_values_cubed,
+        compensation_values,
+        compensation_squared,
+        compensation_cubed,
+    )
+
+@njit
+def rolling_skewness(
+    array: NDArray[np.float32],
+    length: int,
+    min_length: int
+) -> NDArray[np.float32]:
+    num_rows, num_cols = array.shape
+    output: NDArray[np.float32] = np.empty((num_rows, num_cols), dtype=np.float32)
+    output.fill(np.nan)
+
+    for col in prange(num_cols):
+        observation_count, sum_values, sum_values_squared, sum_values_cubed = 0, 0.0, 0.0, 0.0
+        compensation_values, compensation_squared, compensation_cubed = 0.0, 0.0, 0.0
+        previous_value = array[0, col]
+        consecutive_equal_count = 0
+
+        for row in range(num_rows):
+            start_idx = max(0, row - length + 1)
+            end_idx = row + 1
+
+            if row == 0 or start_idx >= row - 1:
+                observation_count, sum_values, sum_values_squared, sum_values_cubed = 0, 0.0, 0.0, 0.0
+                compensation_values, compensation_squared, compensation_cubed = 0.0, 0.0, 0.0
+                previous_value = array[start_idx, col]
+                consecutive_equal_count = 0
+                for idx in range(start_idx, end_idx):
+                    observation_count, sum_values, sum_values_squared, sum_values_cubed, compensation_values, compensation_squared, compensation_cubed, consecutive_equal_count, previous_value = \
+                        add_skewness_contribution(
+                            array[idx, col],
+                            observation_count,
+                            sum_values,
+                            sum_values_squared,
+                            sum_values_cubed,
+                            compensation_values,
+                            compensation_squared,
+                            compensation_cubed,
+                            consecutive_equal_count,
+                            previous_value
+                        )
             else:
-                for j in range(max(0, i - length), start):
-                    nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx = \
-                        remove_skew(array[j, col], nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx)
+                for idx in range(max(0, row - length), start_idx):
+                    observation_count, sum_values, sum_values_squared, sum_values_cubed, compensation_values, compensation_squared, compensation_cubed = \
+                        remove_skewness_contribution(
+                            array[idx, col],
+                            observation_count,
+                            sum_values,
+                            sum_values_squared,
+                            sum_values_cubed,
+                            compensation_values,
+                            compensation_squared,
+                            compensation_cubed
+                        )
 
-                nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx, num_consecutive_same_value, prev_value = \
-                    add_skew(array[i, col], nobs, x, xx, xxx, compensation_x, compensation_xx, compensation_xxx, num_consecutive_same_value, prev_value)
+                observation_count, sum_values, sum_values_squared, sum_values_cubed, compensation_values, compensation_squared, compensation_cubed, consecutive_equal_count, previous_value = \
+                    add_skewness_contribution(
+                        array[row, col],
+                        observation_count,
+                        sum_values,
+                        sum_values_squared,
+                        sum_values_cubed,
+                        compensation_values,
+                        compensation_squared,
+                        compensation_cubed,
+                        consecutive_equal_count,
+                        previous_value
+                    )
 
-            output[i, col] = calc_skew(min_length, nobs, x, xx, xxx, num_consecutive_same_value)
+            output[row, col] = calculate_skewness(
+                min_length,
+                observation_count,
+                sum_values,
+                sum_values_squared,
+                sum_values_cubed,
+                consecutive_equal_count
+            )
 
     return output
-    
-
 
 @njit
-def calc_kurt(min_periods, nobs, x, xx, xxx, xxxx, num_consecutive_same_value):
-    if nobs >= min_periods:
-        if nobs < 4:
+def calculate_kurtosis(
+    min_length: int,
+    observation_count: int,
+    sum_values: float,
+    sum_values_squared: float,
+    sum_values_cubed: float,
+    sum_values_fourth: float,
+    consecutive_equal_count: int
+) -> float|np.float32:
+    if observation_count >= min_length:
+        if observation_count < 4:
             return np.nan
-        elif num_consecutive_same_value >= nobs:
+        elif consecutive_equal_count >= observation_count:
             return -3.0
         else:
-            dnobs = float(nobs)
-            A = x / dnobs
-            R = A * A
-            B = xx / dnobs - R
-            R = R * A
-            C = xxx / dnobs - R - 3 * A * B
-            R = R * A
-            D = xxxx / dnobs - R - 6 * B * A * A - 4 * C * A
+            total_observations = float(observation_count)
+            mean = sum_values / total_observations
+            variance = sum_values_squared / total_observations - mean * mean
+            skewness_term = (
+                sum_values_cubed / total_observations
+                - mean * mean * mean
+                - 3 * mean * variance
+            )
+            kurtosis_term = (
+                sum_values_fourth / total_observations
+                - mean * mean * mean * mean
+                - 6 * variance * mean * mean
+                - 4 * skewness_term * mean
+            )
 
-            if B <= 1e-14:
+            if variance <= 1e-14:
                 return np.nan
             else:
-                K = (dnobs * dnobs - 1.) * D / (B * B) - 3 * ((dnobs - 1.) ** 2)
-                return K / ((dnobs - 2.) * (dnobs - 3.))
+                kurtosis = (
+                    (total_observations * total_observations - 1.0) * kurtosis_term
+                    / (variance * variance)
+                    - 3.0 * ((total_observations - 1.0) ** 2)
+                )
+                return kurtosis / ((total_observations - 2.0) * (total_observations - 3.0))
     else:
         return np.nan
 
-
 @njit
-def add_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx,
-            num_consecutive_same_value, prev_value):
-    if val == val:
-        nobs += 1
+def add_kurtosis_contribution(
+    value: float,
+    observation_count: int,
+    sum_values: float,
+    sum_values_squared: float,
+    sum_values_cubed: float,
+    sum_values_fourth: float,
+    compensation_values: float,
+    compensation_squared: float,
+    compensation_cubed: float,
+    compensation_fourth: float,
+    consecutive_equal_count: int,
+    previous_value: float
+) -> tuple[int, float, float, float, float, float, float, float, float, int, float]:
 
-        y = val - compensation_x
-        t = x + y
-        compensation_x = t - x - y
-        x = t
+    if value == value:
+        observation_count += 1
 
-        y = val * val - compensation_xx
-        t = xx + y
-        compensation_xx = t - xx - y
-        xx = t
+        temp = value - compensation_values
+        total = sum_values + temp
+        compensation_values = total - sum_values - temp
+        sum_values = total
 
-        y = val * val * val - compensation_xxx
-        t = xxx + y
-        compensation_xxx = t - xxx - y
-        xxx = t
+        temp = value * value - compensation_squared
+        total = sum_values_squared + temp
+        compensation_squared = total - sum_values_squared - temp
+        sum_values_squared = total
 
-        y = val * val * val * val - compensation_xxxx
-        t = xxxx + y
-        compensation_xxxx = t - xxxx - y
-        xxxx = t
+        temp = value * value * value - compensation_cubed
+        total = sum_values_cubed + temp
+        compensation_cubed = total - sum_values_cubed - temp
+        sum_values_cubed = total
 
-        if val == prev_value:
-            num_consecutive_same_value += 1
+        temp = value * value * value * value - compensation_fourth
+        total = sum_values_fourth + temp
+        compensation_fourth = total - sum_values_fourth - temp
+        sum_values_fourth = total
+
+        if value == previous_value:
+            consecutive_equal_count += 1
         else:
-            num_consecutive_same_value = 1
-        prev_value = val
+            consecutive_equal_count = 1
+        previous_value = value
 
-    return nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx, num_consecutive_same_value, prev_value
-
-
-@njit
-def remove_kurt(val, nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx):
-    if val == val:
-        nobs -= 1
-
-        y = -val - compensation_x
-        t = x + y
-        compensation_x = t - x - y
-        x = t
-
-        y = -val * val - compensation_xx
-        t = xx + y
-        compensation_xx = t - xx - y
-        xx = t
-
-        y = -val * val * val - compensation_xxx
-        t = xxx + y
-        compensation_xxx = t - xxx - y
-        xxx = t
-
-        y = -val * val * val * val - compensation_xxxx
-        t = xxxx + y
-        compensation_xxxx = t - xxxx - y
-        xxxx = t
-
-    return nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx
+    return (
+        observation_count,
+        sum_values,
+        sum_values_squared,
+        sum_values_cubed,
+        sum_values_fourth,
+        compensation_values,
+        compensation_squared,
+        compensation_cubed,
+        compensation_fourth,
+        consecutive_equal_count,
+        previous_value,
+    )
 
 @njit
-def rolling_kurtosis(array, length, min_length) -> NDArray[np.float32]:
-    N, M = array.shape
-    output = np.empty((N, M), dtype=np.float32)
-    output[:] = np.nan
+def remove_kurtosis_contribution(
+    value: float,
+    observation_count: int,
+    sum_values: float,
+    sum_values_squared: float,
+    sum_values_cubed: float,
+    sum_values_fourth: float,
+    compensation_values: float,
+    compensation_squared: float,
+    compensation_cubed: float,
+    compensation_fourth: float
+) -> tuple[
+    int, float, float, float, float, float, float, float, float
+]:
+    if value == value:
+        observation_count -= 1
 
-    for col in prange(M):
-        nobs, x, xx, xxx, xxxx = 0, 0.0, 0.0, 0.0, 0.0
-        compensation_x, compensation_xx, compensation_xxx, compensation_xxxx = 0.0, 0.0, 0.0, 0.0
-        prev_value = array[0, col]
-        num_consecutive_same_value = 0
+        temp = -value - compensation_values
+        total = sum_values + temp
+        compensation_values = total - sum_values - temp
+        sum_values = total
 
-        for i in range(N):
-            start = max(0, i - length + 1)
-            end = i + 1
+        temp = -value * value - compensation_squared
+        total = sum_values_squared + temp
+        compensation_squared = total - sum_values_squared - temp
+        sum_values_squared = total
 
-            if i == 0 or start >= i - 1:
-                nobs, x, xx, xxx, xxxx = 0, 0.0, 0.0, 0.0, 0.0
-                compensation_x, compensation_xx, compensation_xxx, compensation_xxxx = 0.0, 0.0, 0.0, 0.0
-                prev_value = array[start, col]
-                num_consecutive_same_value = 0
-                for j in range(start, end):
-                    nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx, \
-                    num_consecutive_same_value, prev_value = \
-                        add_kurt(array[j, col], nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx,
-                                    compensation_xxx, compensation_xxxx, num_consecutive_same_value, prev_value)
+        temp = -value * value * value - compensation_cubed
+        total = sum_values_cubed + temp
+        compensation_cubed = total - sum_values_cubed - temp
+        sum_values_cubed = total
+
+        temp = -value * value * value * value - compensation_fourth
+        total = sum_values_fourth + temp
+        compensation_fourth = total - sum_values_fourth - temp
+        sum_values_fourth = total
+
+    return (
+        observation_count,
+        sum_values,
+        sum_values_squared,
+        sum_values_cubed,
+        sum_values_fourth,
+        compensation_values,
+        compensation_squared,
+        compensation_cubed,
+        compensation_fourth,
+    )
+
+@njit
+def rolling_kurtosis(
+    array: NDArray[np.float32],
+    length: int,
+    min_length: int
+) -> NDArray[np.float32]:
+    num_rows, num_cols = array.shape
+    output: NDArray[np.float32] = np.empty((num_rows, num_cols), dtype=np.float32)
+    output.fill(np.nan)
+
+    for col in prange(num_cols):
+        observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth = 0, 0.0, 0.0, 0.0, 0.0
+        compensation_values, compensation_squared, compensation_cubed, compensation_fourth = 0.0, 0.0, 0.0, 0.0
+        previous_value = array[0, col]
+        consecutive_equal_count = 0
+
+        for row in range(num_rows):
+            start_idx = max(0, row - length + 1)
+            end_idx = row + 1
+
+            if row == 0 or start_idx >= row - 1:
+                observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth = 0, 0.0, 0.0, 0.0, 0.0
+                compensation_values, compensation_squared, compensation_cubed, compensation_fourth = 0.0, 0.0, 0.0, 0.0
+                previous_value = array[start_idx, col]
+                consecutive_equal_count = 0
+                for idx in range(start_idx, end_idx):
+                    observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth, compensation_values, compensation_squared, compensation_cubed, compensation_fourth, consecutive_equal_count, previous_value = \
+                        add_kurtosis_contribution(
+                            array[idx, col],
+                            observation_count,
+                            sum_values,
+                            sum_values_squared,
+                            sum_values_cubed,
+                            sum_values_fourth,
+                            compensation_values,
+                            compensation_squared,
+                            compensation_cubed,
+                            compensation_fourth,
+                            consecutive_equal_count,
+                            previous_value
+                        )
             else:
-                for j in range(max(0, i - length), start):
-                    nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx = \
-                        remove_kurt(array[j, col], nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx,
-                                    compensation_xxx, compensation_xxxx)
+                for idx in range(max(0, row - length), start_idx):
+                    observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth, compensation_values, compensation_squared, compensation_cubed, compensation_fourth = \
+                        remove_kurtosis_contribution(
+                            array[idx, col],
+                            observation_count,
+                            sum_values,
+                            sum_values_squared,
+                            sum_values_cubed,
+                            sum_values_fourth,
+                            compensation_values,
+                            compensation_squared,
+                            compensation_cubed,
+                            compensation_fourth
+                        )
 
-                nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx, compensation_xxx, compensation_xxxx, \
-                num_consecutive_same_value, prev_value = \
-                    add_kurt(array[i, col], nobs, x, xx, xxx, xxxx, compensation_x, compensation_xx,
-                                compensation_xxx, compensation_xxxx, num_consecutive_same_value, prev_value)
+                observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth, compensation_values, compensation_squared, compensation_cubed, compensation_fourth, consecutive_equal_count, previous_value = \
+                    add_kurtosis_contribution(
+                        array[row, col],
+                        observation_count,
+                        sum_values,
+                        sum_values_squared,
+                        sum_values_cubed,
+                        sum_values_fourth,
+                        compensation_values,
+                        compensation_squared,
+                        compensation_cubed,
+                        compensation_fourth,
+                        consecutive_equal_count,
+                        previous_value
+                    )
 
-            output[i, col] = calc_kurt(min_length, nobs, x, xx, xxx, xxxx, num_consecutive_same_value)
+            output[row, col] = calculate_kurtosis(
+                min_length,
+                observation_count,
+                sum_values,
+                sum_values_squared,
+                sum_values_cubed,
+                sum_values_fourth,
+                consecutive_equal_count
+            )
 
     return output
