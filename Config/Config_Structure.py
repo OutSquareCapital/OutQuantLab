@@ -4,14 +4,13 @@ from types import MappingProxyType
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from inspect import signature, Parameter
-
+import numpy as np
+from numpy.typing import NDArray
 from Files import (
 INDICATORS_PARAMS_FILE, 
 INDICATORS_TO_TEST_FILE, 
-INDICATORS_CLUSTERS_FILE, 
 INDICATORS_MODULE, 
 ASSETS_TO_TEST_CONFIG_FILE, 
-ASSETS_CLUSTERS_FILE, 
 FILE_PATH_YF
 )
 
@@ -43,24 +42,41 @@ class Asset(BaseEntity):
 
 @dataclass
 class Indicator(BaseEntity):
-    func: Callable
+    func: Callable[[NDArray[np.float32], *tuple[int, ...]], NDArray[np.float32]]
     array_type: str
     params: dict[str, list[int]] = field(default_factory=dict)
 
 T = TypeVar("T", bound=BaseEntity)
 
+class ClustersTree:
+    def __init__(self, clusters_file: str) -> None:
+        self.clusters_file: str = clusters_file
+        self.clusters = load_config_file(self.clusters_file)
+
+    def update_clusters_structure(self, new_structure: dict[str, Any]) -> None:
+        self.clusters = new_structure
+        
+    def map_nested_clusters_to_assets(self) -> dict[str, tuple[str, str]]:
+        return {
+            asset: (level1, level2)
+            for level1, subclusters in self.clusters.items()
+            for level2, assets in subclusters.items()
+            for asset in assets
+        }
+
+    def save(self):
+        save_config_file(self.clusters_file, self.clusters, indent=3)
+
 class BaseCollection(Generic[T]):
 
-    def __init__(self, entities_file: str, clusters_file: str, primary_keys_file: str):
+    def __init__(self, entities_file: str, primary_keys_file: str) -> None:
         self.entities_file: str = entities_file
-        self.clusters_file: str = clusters_file
         self.primary_keys_file: str = primary_keys_file
         self.entities: dict[str, T] = {}
-        self.clusters = load_config_file(self.clusters_file)
         self._load_entities()
 
     @abstractmethod
-    def _load_entities(self):
+    def _load_entities(self) -> None:
         pass
 
     @property
@@ -85,25 +101,21 @@ class BaseCollection(Generic[T]):
     def is_active(self, name: str) -> bool:
         return self.entities[name].active
 
-    def set_active(self, name: str, active: bool):
+    def set_active(self, name: str, active: bool) -> None:
         self.entities[name].active = active
-
-    def update_clusters_structure(self, new_structure: dict[str, Any]):
-        self.clusters = new_structure
 
     def get_attribute_dict(self, attr: str) -> dict[str, Any]:
         return {name: getattr(entity, attr) for name, entity in self.entities.items()}
     
-    def save(self):
+    def save(self) -> None:
         active_entities = self.get_attribute_dict("active")
         save_config_file(self.entities_file, active_entities, indent=3)
-        save_config_file(self.clusters_file, self.clusters, indent=3)
 
 class IndicatorsCollection(BaseCollection[Indicator]):
-    def __init__(self):
-        super().__init__(INDICATORS_TO_TEST_FILE, INDICATORS_CLUSTERS_FILE, INDICATORS_MODULE)
+    def __init__(self) -> None:
+        super().__init__(INDICATORS_TO_TEST_FILE, INDICATORS_MODULE)
 
-    def _load_entities(self):
+    def _load_entities(self) -> None:
         entities_to_test: dict[str, bool] = load_config_file(self.entities_file)
         entities_functions: dict[str, Callable] = get_all_indicators_from_module(self.primary_keys_file)
         params_config: dict[str, dict[str, list[int]]] = load_config_file(INDICATORS_PARAMS_FILE)
@@ -135,7 +147,7 @@ class IndicatorsCollection(BaseCollection[Indicator]):
             ))
         return result
 
-    def save(self):
+    def save(self) -> None:
         super().save()
         parameters_to_save = self.get_attribute_dict("params")
         save_config_file(INDICATORS_PARAMS_FILE, parameters_to_save, indent=3)
@@ -143,17 +155,17 @@ class IndicatorsCollection(BaseCollection[Indicator]):
     def get_params(self, name: str) -> dict[str, list[int]]:
         return self.entities[name].params
 
-    def set_params(self, name: str, new_params: dict[str, list[int]]):
+    def set_params(self, name: str, new_params: dict[str, list[int]]) -> None:
         self.entities[name].params = new_params
 
-    def update_param_values(self, name: str, param_key: str, values: list[int]):
+    def update_param_values(self, name: str, param_key: str, values: list[int]) -> None:
         self.entities[name].params[param_key] = values
     
 class AssetsCollection(BaseCollection[Asset]):
-    def __init__(self):
-        super().__init__(ASSETS_TO_TEST_CONFIG_FILE, ASSETS_CLUSTERS_FILE, FILE_PATH_YF)
+    def __init__(self) -> None:
+        super().__init__(ASSETS_TO_TEST_CONFIG_FILE, FILE_PATH_YF)
 
-    def _load_entities(self):
+    def _load_entities(self) -> None:
         entities_to_test = load_config_file(self.entities_file)
         entities_names = load_asset_names(self.primary_keys_file)
         for name in entities_names:

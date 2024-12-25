@@ -30,7 +30,8 @@ generate_plot_widget
 from .Config_UI import (
 AssetSelectionWidget, 
 IndicatorsConfigWidget, 
-TreeStructureWidget, 
+TreeStructureWidget,
+ClustersTree,
 AssetsCollection, 
 IndicatorsCollection
 )
@@ -40,6 +41,8 @@ def setup_home_page(
     parent: QMainWindow, 
     run_backtest_callback: Callable,
     refresh_data_callback: Callable,
+    assets_clusters: ClustersTree,
+    indicators_clusters: ClustersTree,
     assets_collection: AssetsCollection,
     indicators_collection: IndicatorsCollection
     ):
@@ -58,8 +61,8 @@ def setup_home_page(
     
     asset_widget = AssetSelectionWidget(assets_collection)
     indicator_widget = IndicatorsConfigWidget(indicators_collection)
-    asset_tree_widget = TreeStructureWidget(assets_collection)
-    method_tree_widget = TreeStructureWidget(indicators_collection)
+    asset_tree_widget = TreeStructureWidget(assets_collection, assets_clusters)
+    method_tree_widget = TreeStructureWidget(indicators_collection, indicators_clusters)
     
     create_button("Run Backtest", run_backtest_callback, buttons_layout)
     create_button("Refresh Data", refresh_data_callback, buttons_layout)

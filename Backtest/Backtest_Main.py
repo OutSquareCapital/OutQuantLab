@@ -11,7 +11,7 @@ generate_multi_index_process,
 process_data
 )
 from dataclasses import dataclass
-from Config import IndicatorParams
+from Config import IndicatorParams, ClustersTree
 
 @dataclass(slots=True)
 class BacktestData:
@@ -61,8 +61,8 @@ def initialize_backtest_config(
     file_path: str,
     asset_names: list[str],
     indicators_and_params: list[IndicatorParams],
-    asset_clusters: dict[str, dict[str, list[str]]],
-    indics_clusters: dict[str, dict[str, list[str]]]
+    asset_clusters: ClustersTree,
+    indics_clusters: ClustersTree
     ) -> tuple[BacktestData, BacktestStructure]:
     multi_index = generate_multi_index_process(indicators_and_params, asset_names, asset_clusters, indics_clusters)
     prices_df = load_prices(asset_names, file_path)

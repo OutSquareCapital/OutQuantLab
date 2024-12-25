@@ -22,7 +22,7 @@ QPushButton,
 QApplication
 )
 from PySide6.QtCore import Qt
-from Config import AssetsCollection, IndicatorsCollection, BaseCollection, Asset, Indicator
+from Config import AssetsCollection, BaseCollection, ClustersTree, IndicatorsCollection, Asset, Indicator, BaseCollection
 
 class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection, parent=None):
@@ -157,10 +157,11 @@ class IndicatorsConfigWidget(QWidget):
             checkbox.setChecked(False)
 
 class TreeStructureWidget(QWidget):
-    def __init__(self, collection: BaseCollection, parent=None):
+    def __init__(self, collection: BaseCollection, clusters: ClustersTree, parent=None):
         super().__init__(parent)
         self.collection = collection
-        self.tree_structure = self.collection.clusters
+        self.clusters_tree = clusters
+        self.tree_structure = self.clusters_tree.clusters
         self.data = set(self.collection.all_entities_names)
 
         self.tree = QTreeWidget()

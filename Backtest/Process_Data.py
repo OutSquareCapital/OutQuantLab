@@ -4,8 +4,8 @@ from numpy.typing import NDArray
 from Files import PERCENTAGE_FACTOR
 from Infrastructure import shift_array
 from Metrics import hv_composite
-import yfinance as yf
-from Config import IndicatorParams
+import yfinance as yf # type: ignore
+from Config import IndicatorParams, ClustersTree
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 
@@ -26,7 +26,6 @@ def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
     )
 
 def load_prices(asset_names: list[str], file_path: str) -> pd.DataFrame:
-    
     columns_to_load = ["Date"] + [name for name in asset_names]
 
     return pd.read_parquet(
@@ -74,23 +73,13 @@ def log_returns_np(prices_array: NDArray[np.float32]) -> NDArray[np.float32]:
 def generate_multi_index_process(
     indicators_and_params: list[IndicatorParams], 
     asset_names: list[str], 
-    assets_clusters: dict[str, dict[str, list[str]]], 
-    indics_clusters: dict[str, dict[str, list[str]]]
+    assets_clusters: ClustersTree, 
+    indics_clusters: ClustersTree
     ) -> pd.MultiIndex:
 
-    asset_to_clusters = {
-        asset: (cluster_level1, cluster_level2)
-        for cluster_level1, subclusters in assets_clusters.items()
-        for cluster_level2, assets in subclusters.items()
-        for asset in assets
-    }
+    asset_to_clusters = assets_clusters.map_nested_clusters_to_assets()
 
-    indic_to_clusters = {
-        indic: (cluster_level1, cluster_level2)
-        for cluster_level1, subclusters in indics_clusters.items()
-        for cluster_level2, indics in subclusters.items()
-        for indic in indics
-    }
+    indic_to_clusters = indics_clusters.map_nested_clusters_to_assets()
 
     multi_index_tuples = []
 

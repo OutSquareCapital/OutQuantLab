@@ -17,7 +17,9 @@ class MainApp(QMainWindow):
         run_backtest_callback=self.run_backtest,
         refresh_data_callback=self.outquantlab.refresh_data,
         assets_collection=self.outquantlab.assets_collection,
-        indicators_collection=self.outquantlab.indicators_collection
+        indicators_collection=self.outquantlab.indicators_collection,
+        assets_clusters=self.outquantlab.assets_clusters,
+        indicators_clusters=self.outquantlab.indicators_clusters
         )
 
     def update_progress(self, value, message):
