@@ -1,15 +1,15 @@
 '''
 import numbagg as nb
 
-def rolling_mean_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+def rolling_mean_(array: np.ndarray, length: int, min_length: int = 1) -> NDArray[np.float32]:
 
     return nb.move_mean(array, window=length, min_count=min_length, axis=0)
 
-def rolling_sum_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+def rolling_sum_(array: np.ndarray, length: int, min_length: int = 1) -> NDArray[np.float32]:
 
     return nb.move_sum(array, window=length, min_count=min_length, axis=0)
 
-def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> np.ndarray:
+def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> NDArray[np.float32]:
 
     return nb.move_std(array, window=length, min_count=min_length, axis=0)
 '''
@@ -439,10 +439,212 @@ adjusted_return = -0.000928 # Rendement ajusté en %
 # Calcul du nombre d'actions à acheter ou vendre
 shares_to_trade = calculate_shares_to_trade_from_adjusted_return(portfolio_size, asset_price, adjusted_return)
 '''
+'''import pandas as pd
+import numpy as np
+import os
+from datetime import datetime
 
+def random_fill(series: pd.Series) -> pd.Series:
+
+    nan_indices = series[series.isna()].index
+
+    non_nan_series = series.dropna()
+
+    for idx in nan_indices:
+        random_sample = non_nan_series.sample(n=1, replace=True)
+
+        series.at[idx] = random_sample
+
+    return series
+
+def adjust_prices_for_negativity(prices_df: pd.DataFrame) -> pd.DataFrame:
+
+    min_prices = prices_df.min()
+    adjustment = abs(min_prices) + (min_prices.abs().max() * 0.01)  
+    affected_columns = []
+
+    prices_df = prices_df.apply(lambda col: col + adjustment[col.name] if col.min() <= 0 else col)
+    
+    for col in prices_df.columns:
+        if min_prices[col] <= 0:
+            affected_columns.append(col)
+    
+    if affected_columns:
+        print(f"Colonnes affectées par l'ajustement pour prix négatifs: {affected_columns}")
+    else:
+        print("Aucune colonne affectée par l'ajustement pour prix négatifs")
+
+    return prices_df
+
+def adjust_returns_for_inversion(returns_df: pd.DataFrame, columns_list: list) -> pd.DataFrame:
+
+    for column in columns_list:
+        returns = returns_df[column]
+        inverted_returns = returns * -1
+        inverted_returns_df = inverted_returns.to_frame(name=column)
+        returns_df[column] = inverted_returns_df
+    
+    return returns_df
+
+def adjust_returns_for_nans(returns_df: pd.DataFrame) -> pd.DataFrame:
+
+    for col in returns_df.columns:
+        first_valid_index = returns_df[col].first_valid_index()
+        if first_valid_index is not None:
+
+            num_days = len(returns_df.loc[first_valid_index:])
+            
+            num_cells_filled_before = returns_df[col].loc[first_valid_index:].isna().sum()
+
+            returns_df.loc[first_valid_index:, col] = random_fill(returns_df.loc[first_valid_index:, col])
+
+            filled_pct = ((num_cells_filled_before / num_days) * 100).round(2) if num_days > 0 else 0
+            absolute_max_returns = returns_df[col].abs().max() * 100
+            absolute_median_returns = returns_df[col].abs().median() * 100
+            max_returns_date = returns_df[col].idxmax().strftime('%Y-%m-%d')
+
+            print(
+                f"Actif : {col}, "
+                f"Nombre de cellules aberrantes : {num_cells_filled_before}, "
+                f"Proportion d'aberrants: {filled_pct}%, "
+                f"Max absolu des rendements : {absolute_max_returns:.2f}% (le {max_returns_date}), "
+                f"Médiane absolue des rendements : {absolute_median_returns:.2f}%"
+            )
+
+    return returns_df
+
+
+def convert_txt_to_csv(base_dir: str, output_base_dir: str):
+
+    os.makedirs(output_base_dir, exist_ok=True)
+
+    for subdir, _, files in os.walk(base_dir):
+        if subdir == base_dir:
+            continue
+
+        subfolder_name = os.path.basename(subdir).upper()
+        output_dir = os.path.join(output_base_dir, subfolder_name)
+        os.makedirs(output_dir, exist_ok=True)
+
+        for file in files:
+            if file.endswith(".txt"):
+                file_path = os.path.join(subdir, file)
+                data_df = pd.read_csv(file_path, header=0 if pd.read_csv(file_path, nrows=0).shape[1] == 7 else None)
+
+                if data_df.shape[1] < 7:
+                    print(f"Avertissement : le fichier {file_path} a moins de 7 colonnes valides.")
+                    continue
+                
+                if data_df.shape[1] == 7:
+                    data_df.columns = ["Date", "Open", "High", "Low", "Close", "Volume", "OpenInt"]
+
+                def parse_date(date_str):
+                    try:
+                        year_prefix = '19' if int(date_str[:2]) >= 40 else '20'
+                        return datetime.strptime(year_prefix + date_str, '%Y%m%d').strftime('%Y-%m-%d')
+                    except ValueError:
+                        try:
+                            return datetime.strptime(date_str, '%m/%d/%Y').strftime('%Y-%m-%d')
+                        except ValueError:
+                            return pd.NaT
+
+                data_df["Date"] = data_df["Date"].astype(str).apply(parse_date)
+
+                output_file_path = os.path.join(output_dir, file.replace(".txt", ".csv"))
+                data_df.to_csv(output_file_path, index=False)
+
+    print("Conversion terminée pour tous les fichiers.")
+
+def combine_csv_files(output_folder, file_names, output_file) -> None:
+    dfs = [] 
+
+    for file_name in file_names:
+        file_path = os.path.join(output_folder, f"{file_name}.csv")
+        
+        df = pd.read_csv(file_path, parse_dates=['time'], index_col='time')
+        df.index.rename('date', inplace=True)
+        
+        df = df[['close']].rename(columns={'close': file_name})
+        
+        dfs.append(df)
+
+    combined_df = pd.concat(dfs, axis=1, join='outer')
+
+    combined_df.to_csv(os.path.join(output_folder, output_file))
+
+def raccommoder_prices_futures_etf(data_futures_returns_df, data_etf_returns_df, paires_futures_etf):
+
+    raccommodage_dfs = []
+
+    for future, etf in paires_futures_etf:
+        if future in data_futures_returns_df.columns and etf in data_etf_returns_df.columns:
+            future_returns = data_futures_returns_df[future]
+            etf_returns = data_etf_returns_df[etf]
+
+            first_valid_index = future_returns.first_valid_index()
+
+            etf_returns_limited = etf_returns.loc[:first_valid_index]
+
+            first_valid_etf_index = etf_returns_limited.first_valid_index()
+
+            if first_valid_etf_index:
+                etf_returns_limited = etf_returns.loc[first_valid_etf_index:first_valid_index]
+
+                combined_returns = future_returns.combine_first(etf_returns_limited)
+
+                print(f"Paire identifiée : {future} et {etf}")
+
+                if not etf_returns_limited.empty:
+                    print(f"Plage de rallongement pour {future} et {etf} : {etf_returns_limited.index[0]} à {etf_returns_limited.index[-1]}")
+
+                raccommodage_dfs.append(pd.DataFrame({future: combined_returns}))
+            else:
+                print(f"Paire ignorée (ETF entièrement NaN avant {first_valid_index}) : {future} et {etf}")
+
+    raccommodage_returns_df = pd.concat(raccommodage_dfs, axis=1)
+
+    final_df = data_futures_returns_df.copy()
+    final_df.update(raccommodage_returns_df)
+    
+    columns_raccommodated = raccommodage_returns_df.columns
+
+    columns_non_raccommodated = data_futures_returns_df.columns.difference(columns_raccommodated)
+
+    for col in columns_non_raccommodated:
+        assert final_df[col].equals(data_futures_returns_df[col]), f"Colonne {col} a été modifiée alors qu'elle ne devait pas l'être !"
+        
+    return final_df
+
+def reconstruct_bond_price_with_yield(yield_10y_df, maturity_years=10, face_value=100):
+
+    return face_value / (1 + yield_10y_df.iloc[:, 0] / 100) ** maturity_years
+
+def adjust_prices_with_risk_free_rate(returns_df: pd.DataFrame, risk_free_rate_df):
+
+    first_price_date = returns_df.index.min()
+    print(f"First date in prices_df: {first_price_date}")
+    risk_free_rate_df = risk_free_rate_df[risk_free_rate_df.index >= first_price_date]
+    print(f"First date in risk_free_rate_df after filtering: {risk_free_rate_df.index.min()}")
+
+    risk_free_rate_aligned = risk_free_rate_df.reindex(returns_df.index, method='ffill')
+
+    missing_dates = returns_df.index.difference(risk_free_rate_df.index)
+    if not missing_dates.empty:
+        print(f"Dates missing in risk_free_rate_df filled by ffill: {missing_dates}")
+
+    risk_free_daily = (1 + risk_free_rate_aligned.iloc[:, 0] / 100) ** (1 / 252) - 1
+
+    risk_free_daily_expanded = pd.DataFrame(
+        np.tile(risk_free_daily.values, (returns_df.shape[1], 1)).T,
+        index=returns_df.index,
+        columns=returns_df.columns,
+        dtype=np.float32
+    )
+
+    return returns_df.sub(risk_free_daily_expanded, axis=0)'''
 '''
 
-def snapshot_at_intervals(prices_array: np.ndarray, snapshot_interval: int) -> np.ndarray:
+def snapshot_at_intervals(prices_array: np.ndarray, snapshot_interval: int) -> NDArray[np.float32]:
 
     snapshot_indices = np.arange(0, prices_array.shape[0], snapshot_interval)
 
@@ -454,7 +656,7 @@ def snapshot_at_intervals(prices_array: np.ndarray, snapshot_interval: int) -> n
 
     return repeated_snapshots
 
-def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int)-> np.ndarray:
+def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int)-> NDArray[np.float32]:
     
     # Capture les snapshots à des intervalles réguliers
     repeated_snapshots_array = ft.snapshot_at_intervals(prices_array, LengthSnapshot)
@@ -464,7 +666,7 @@ def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthS
 
     abs_returns_array = abs(returns)
 
-    avg_move = SeasonalBreakout.calculate_avg_move_nan(abs_returns_array, LengthSnapshot, LengthMean)
+    avg_move = calculate_avg_move_nan(abs_returns_array, LengthSnapshot, LengthMean)
 
     amplitude_float = np.float32(amplitude)
     amplitude_adjustement = np.float32(10)
@@ -486,32 +688,15 @@ def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthS
 
 @njit
 def calculate_avg_move_nan(abs_returns_np: np.ndarray, LengthSnapshot:int, LengthMean:int):
-    """
-    Calculer la moyenne des mouvements absolus des rendements en excluant les NaN
-    sur une fenêtre de temps basée sur LengthPeriod et LengthMean.
 
-    Args:
-        abs_returns_np (np.ndarray): Un tableau 2D de rendements absolus (chaque colonne représente un actif).
-        LengthPeriod (int): La période entre chaque snapshot (prise de vue) dans l'historique.
-        LengthMean (int): Le nombre de snapshots à inclure dans le calcul de la moyenne.
-
-    Returns:
-        np.ndarray: Un tableau 2D où chaque cellule contient la moyenne des rendements sur la fenêtre, ou NaN si aucune donnée n'est disponible.
-    """
     
-    # Obtenir les dimensions du tableau de rendements : num_days est le nombre de lignes (jours), num_assets le nombre d'actifs (colonnes)
     num_days, num_assets = abs_returns_np.shape
 
-    # Créer un tableau vide pour stocker les moyennes calculées pour chaque jour et chaque actif
     avg_move = np.empty((num_days, num_assets), dtype=np.float32)
 
-    # Boucle sur chaque jour i (chaque ligne)
     for i in range(num_days):
-        # Générer les indices des snapshots à utiliser pour le calcul de la moyenne
-        # Commence à i, puis recule de LengthPeriod à chaque étape, et ne conserve que les LengthMean premiers indices
         snapshot_indices = np.arange(i, -1, -LengthSnapshot)[:LengthMean]
 
-        # Initialiser les variables pour stocker la somme des rendements et le nombre de valeurs valides (non-NaN) pour chaque actif
         total_sum = np.zeros(num_assets, dtype=np.float32)  # Tableau pour accumuler les sommes de rendements par actif
         valid_count = np.zeros(num_assets, dtype=np.float32)  # Compteur du nombre de valeurs valides (non-NaN) par actif
 
@@ -520,7 +705,6 @@ def calculate_avg_move_nan(abs_returns_np: np.ndarray, LengthSnapshot:int, Lengt
             # Extraire les rendements pour chaque actif à l'index donné (snapshot)
             values = abs_returns_np[idx]
 
-            # Pour chaque actif, vérifier s'il s'agit d'une valeur valide (non-NaN)
             for asset_idx in range(num_assets):
                 if not np.isnan(values[asset_idx]):  # Si la valeur n'est pas NaN, l'inclure dans le calcul
                     total_sum[asset_idx] += values[asset_idx]  # Ajouter la valeur à la somme courante pour cet actif
@@ -538,14 +722,13 @@ def calculate_avg_move_nan(abs_returns_np: np.ndarray, LengthSnapshot:int, Lengt
     # Retourner le tableau des moyennes calculées (ou NaN si aucune donnée valide)
     return avg_move
 
-    @staticmethod
-    def seasonal_breakout_returns_trend(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int, LenST: int, LenLT: int) -> np.ndarray:
+def seasonal_breakout_returns_trend(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int, LenST: int, LenLT: int) -> NDArray[np.float32]:
 
-        seasonal_breakout_signal = SeasonalBreakout.seasonal_breakout_returns(prices_array, LengthMean, LengthSnapshot, amplitude)
+    seasonal_breakout_signal = seasonal_breakout_returns(prices_array, LengthMean, LengthSnapshot, amplitude)
 
-        trend_signal = Trend.mean_price_ratio(prices_array, LenST, LenLT)
+    trend_signal = mean_price_ratio(prices_array, LenST, LenLT)
 
-        return sn.calculate_indicator_on_trend_signal(trend_signal, seasonal_breakout_signal)
+    return sn.calculate_indicator_on_trend_signal(trend_signal, seasonal_breakout_signal)
 '''
 
 '''
@@ -560,7 +743,7 @@ def generate_seasonal_trend_signal(
     group_mask_array: np.ndarray, 
     LenST: int, 
     LenLT: int
-) -> np.ndarray:
+) -> NDArray[np.float32]:
 
     # Extraction des retours sélectionnés en fonction du masque de groupe
     selected_returns_array = returns_array[group_mask_array]
@@ -577,7 +760,7 @@ def process_trend_signal(
     seasonal_trend_signal: np.ndarray, 
     group_mask_array: np.ndarray,
     shape: tuple
-) -> np.ndarray:
+) -> NDArray[np.float32]:
     
     processed_seasonal_trend_signal = np.zeros(shape, dtype=np.float32)
     processed_seasonal_trend_signal[group_mask_array] = seasonal_trend_signal
@@ -592,7 +775,7 @@ def generate_conditioned_seasonal_trend_signal(
     LenLT: int,
     TrendLenST: int, 
     TrendLenLT: int
-) -> np.ndarray:
+) -> NDArray[np.float32]:
 
     seasonal_trend_signal = Seasonality.generate_seasonal_trend_signal(returns_array, group_mask_array, LenST, LenLT)
 
@@ -610,7 +793,7 @@ def seasonal_trend( returns_array: np.ndarray,
                     GroupBy: int, 
                     GroupSelected: int, 
                     LenST: int, 
-                    LenLT: int) -> np.ndarray:
+                    LenLT: int) -> NDArray[np.float32]:
 
     group_mask_array = Seasonality.generate_group_mask(seasonal_array, GroupBy, GroupSelected)
 
@@ -632,7 +815,7 @@ def overall_seasonal_trend(returns_array: np.ndarray,
                             LenLT: int,
                             TrendLenST: int, 
                             TrendLenLT: int        
-                        ) -> np.ndarray:
+                        ) -> NDArray[np.float32]:
 
     group_mask_array = Seasonality.generate_group_mask(seasonal_array, GroupBy, GroupSelected)
     
