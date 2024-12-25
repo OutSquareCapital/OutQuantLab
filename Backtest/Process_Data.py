@@ -1,10 +1,9 @@
 import pandas as pd
 import numpy as np
 from numpy.typing import NDArray
-from Infrastructure import Fast_Tools as ft
 from Files import PERCENTAGE_FACTOR
 from collections.abc import Callable
-from Infrastructure.Fast_Tools import shift_array
+from Infrastructure import shift_array
 from Metrics import hv_composite
 import yfinance as yf
 
@@ -119,8 +118,8 @@ def process_data(
     
     returns_df = data_prices_df.pct_change(fill_method=None)
     pct_returns_array = returns_df.to_numpy(dtype=np.float32)
-    prices_array = ft.shift_array(calculate_equity_curves(pct_returns_array))
-    log_returns_array = ft.shift_array(log_returns_np(prices_array))
+    prices_array = shift_array(calculate_equity_curves(pct_returns_array))
+    log_returns_array = shift_array(log_returns_np(prices_array))
     hv_array = hv_composite(pct_returns_array)
     volatility_adjusted_pct_returns = calculate_volatility_adjusted_returns(
         pct_returns_array, 

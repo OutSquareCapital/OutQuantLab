@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-import Metrics as mt
-from Infrastructure.Fast_Tools import process_in_blocks_parallel
+from Metrics import rolling_sharpe_ratios, rolling_mean
+from Infrastructure import process_in_blocks_parallel
 import numexpr as ne
 
 def relative_sharpe_on_confidence_period(
@@ -14,7 +14,7 @@ def relative_sharpe_on_confidence_period(
     sharpe_array = process_in_blocks_parallel(
         returns_df.values, 
         block_size=block_size,
-        func=mt.rolling_sharpe_ratios,
+        func=rolling_sharpe_ratios,
         length = sharpe_lookback,
         min_length = 125
     )
@@ -22,7 +22,7 @@ def relative_sharpe_on_confidence_period(
     mean_sharpe_array = process_in_blocks_parallel(
         sharpe_array, 
         block_size=block_size,
-        func=mt.rolling_mean,
+        func=rolling_mean,
         length=20, min_length=1
     )
 

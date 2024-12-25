@@ -1,5 +1,5 @@
 import numpy as np
-from Infrastructure import Fast_Tools as ft
+from Infrastructure import shift_array
 from Metrics.Aggregation import rolling_mean
 from numpy.typing import NDArray
 
@@ -7,7 +7,7 @@ def rolling_autocorrelation(returns_array: NDArray[np.float32], length: int) -> 
 
     mean = rolling_mean(returns_array, length=length, min_length=20)
 
-    shifted_array = ft.shift_array(returns_array)
+    shifted_array = shift_array(returns_array)
 
     deviations = returns_array - mean
     deviations_shifted = shifted_array - mean

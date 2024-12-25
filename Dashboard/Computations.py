@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import skew
 from Files import PERCENTAGE_FACTOR, ANNUALIZATION_FACTOR, ANNUALIZED_PERCENTAGE_FACTOR
 from Backtest import calculate_equity_curves
-import Metrics as mt
+from Metrics import rolling_mean, rolling_sharpe_ratios, rolling_skewness, hv_composite
 
 def calculate_overall_returns(returns_df: pd.DataFrame) -> pd.Series:
 
@@ -75,7 +75,7 @@ def format_returns(returns_df: pd.DataFrame, limit: float) -> pd.DataFrame:
 
 def calculate_rolling_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
 
-    return pd.DataFrame(mt.hv_composite(returns_df.values), 
+    return pd.DataFrame(hv_composite(returns_df.values), 
                         index=returns_df.index,
                         columns=returns_df.columns
                         ).round(2)
@@ -83,7 +83,7 @@ def calculate_rolling_volatility(returns_df: pd.DataFrame) -> pd.DataFrame:
 def calculate_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int):
         
     return pd.DataFrame(
-        mt.rolling_sharpe_ratios(
+        rolling_sharpe_ratios(
         returns_df.values, 
         length=length, 
         min_length=length),
@@ -137,10 +137,10 @@ def calculate_correlation_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
 
 def calculate_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int) -> pd.DataFrame:
 
-    rolling_mean = mt.rolling_mean(returns_df.values, length=20, min_length=20)
+    smoothed_returns = rolling_mean(returns_df.values, length=20, min_length=20)
 
     return pd.DataFrame(
-        mt.rolling_skewness(rolling_mean, length=length, min_length=length),
+        rolling_skewness(smoothed_returns, length=length, min_length=length),
         index=returns_df.index,
         columns=returns_df.columns,
         dtype=np.float32
