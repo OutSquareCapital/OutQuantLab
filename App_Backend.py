@@ -1,6 +1,5 @@
 from Files import FILE_PATH_YF
-from Get_Data import get_yahoo_finance_data
-from Backtest import BacktestProcess, initialize_backtest_config
+from Backtest import calculate_strategy_returns, initialize_backtest_config, get_yahoo_finance_data
 from Portfolio import aggregate_raw_returns
 from Config import AssetsCollection, IndicatorsCollection
 from Dashboard import DashboardsCollection
@@ -17,6 +16,7 @@ class OutQuantLab:
         self.progress_callback = progress_callback
 
     def run_backtest(self):
+
         backtest_data, backtest_config = initialize_backtest_config(
             file_path=FILE_PATH_YF,
             asset_names=self.assets_collection.all_active_entities_names,
@@ -24,14 +24,8 @@ class OutQuantLab:
             asset_clusters=self.assets_collection.clusters,
             indics_clusters=self.indicators_collection.clusters
         )
-        
-        backtest_process = BacktestProcess(
-            backtest_data=backtest_data,
-            backtest_structure=backtest_config,
-            progress_callback=self.progress_callback
-        )
 
-        raw_adjusted_returns_df = backtest_process.calculate_strategy_returns()
+        raw_adjusted_returns_df = calculate_strategy_returns(backtest_data, backtest_config, self.progress_callback)
 
         self.dashboards.global_portfolio, self.dashboards.sub_portfolios = aggregate_raw_returns(raw_adjusted_returns_df)
 

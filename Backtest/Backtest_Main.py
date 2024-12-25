@@ -27,42 +27,33 @@ class BacktestStructure:
     total_returns_streams: int
     total_assets_count: int
 
-class BacktestProcess:
-    def __init__(
-        self,
-        backtest_data: BacktestData,
-        backtest_structure: BacktestStructure,
-        progress_callback: Callable
-    ):
-        self.data = backtest_data
-        self.structure = backtest_structure
-        self.progress_callback = progress_callback
+def calculate_strategy_returns(
+    backtest_data: BacktestData,
+    backtest_structure: BacktestStructure,
+    progress_callback: Callable[[int, str], None]
+) -> pd.DataFrame:
+    signal_col_index = 0
+    global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
 
-    def calculate_strategy_returns(self) -> pd.DataFrame:
-        signal_col_index = 0
-        global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
+    for func, array_type, params in backtest_data.indicators_and_params.values():
+        data_array = backtest_data.prices_array if array_type == 'prices_array' else backtest_data.log_returns_array
+        results = process_indicator_parallel(func, data_array, backtest_data.adjusted_returns_array, params, global_executor)
 
-        for func, array_type, params in self.data.indicators_and_params.values():
-            data_array = (
-                self.data.prices_array if array_type == 'prices_array' else self.data.log_returns_array
-            )
-            results = process_indicator_parallel(func, data_array, self.data.adjusted_returns_array, params, global_executor)
+        for result in results:
+            backtest_data.signals_array[:, signal_col_index:signal_col_index + backtest_structure.total_assets_count] = result
+            signal_col_index += backtest_structure.total_assets_count
 
-            for result in results:
-                self.data.signals_array[:, signal_col_index:signal_col_index + self.structure.total_assets_count] = result
-                signal_col_index += self.structure.total_assets_count
-
-            self.progress_callback(
-                int(100 * signal_col_index / self.structure.total_returns_streams),
-                f"Backtesting Strategies: {signal_col_index}/{self.structure.total_returns_streams}..."
-            )
-
-        return pd.DataFrame(
-            self.data.signals_array,
-            index=self.structure.dates_index,
-            columns=self.structure.multi_index,
-            dtype=np.float32,
+        progress_callback(
+            int(100 * signal_col_index / backtest_structure.total_returns_streams),
+            f"Backtesting Strategies: {signal_col_index}/{backtest_structure.total_returns_streams}..."
         )
+
+    return pd.DataFrame(
+        backtest_data.signals_array,
+        index=backtest_structure.dates_index,
+        columns=backtest_structure.multi_index,
+        dtype=np.float32,
+    )
 
 def initialize_backtest_config(
     file_path: str,

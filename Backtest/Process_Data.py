@@ -6,6 +6,26 @@ from Files import PERCENTAGE_FACTOR
 from collections.abc import Callable
 from Infrastructure.Fast_Tools import shift_array
 from Metrics import hv_composite
+import yfinance as yf
+
+def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
+
+    data: pd.DataFrame|None = yf.download(
+                            tickers=assets,
+                            interval="1d",
+                            auto_adjust=True,
+                            progress=False,
+                        )
+    
+    if data is None:
+        raise ValueError("Yahoo Finance Data Not Available")
+
+    data['Close'].to_parquet(
+        file_path,
+        index=True,
+        engine="pyarrow"
+    )
+
 def load_prices(asset_names: list[str], file_path: str) -> pd.DataFrame:
     
     columns_to_load = ["Date"] + [name for name in asset_names]
