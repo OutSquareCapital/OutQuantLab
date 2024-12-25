@@ -18,7 +18,7 @@ def process_indicator_parallel(
     adjusted_returns_array: NDArray[np.float32], 
     params: list[dict[str, int]],
     global_executor: ThreadPoolExecutor
-) -> list[np.ndarray]:
+) -> list[NDArray[np.float32]]:
     results = list(
         global_executor.map(
             lambda param: process_param(func, data_array, adjusted_returns_array, param),

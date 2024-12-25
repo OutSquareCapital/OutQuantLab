@@ -7,14 +7,14 @@ from numpy.typing import NDArray
 def ratio_normalization(nominator: NDArray[np.float32], denominator: NDArray[np.float32]) -> NDArray[np.float32]:
     return (nominator / denominator) - 1
 
-def sign_normalization(signal_array: np.ndarray) -> NDArray[np.float32]:
+def sign_normalization(signal_array: NDArray[np.float32]) -> NDArray[np.float32]:
     return np.sign(signal_array, out=signal_array)
 
 def relative_normalization(signal_array: NDArray[np.float32], length: int) -> NDArray[np.float32]:
     average_signal = rolling_mean(signal_array, length=length, min_length=1)
     return signal_array - average_signal
 
-def calculate_indicator_on_trend_signal(trend_signal: np.ndarray, indicator_signal: np.ndarray) -> NDArray[np.float32]:
+def calculate_indicator_on_trend_signal(trend_signal: NDArray[np.float32], indicator_signal: NDArray[np.float32]) -> NDArray[np.float32]:
     return np.where(
         ((trend_signal < 0) & (indicator_signal > 0)) | 
         ((trend_signal > 0) & (indicator_signal < 0)), 0, 

@@ -56,7 +56,7 @@ def hv_composite(
 
     return rolling_mean(composite_vol_array, length=4, min_length=1)
 
-def separate_volatility(array:np.ndarray, LenVol: int) -> tuple[np.ndarray, np.ndarray]:
+def separate_volatility(array:NDArray[np.float32], LenVol: int) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
 
     positive_returns = np.where(np.isnan(array), np.nan, np.where(array > 0, array, 0))
     negative_returns = np.where(np.isnan(array), np.nan, np.where(array < 0, array, 0))
