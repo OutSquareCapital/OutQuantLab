@@ -1,19 +1,20 @@
-import bottleneck as bn
+import bottleneck as bn  # type: ignore
 import numpy as np
 import polars as pl
 from numpy.typing import NDArray
 
+
 def rolling_mean(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
-    return bn.move_mean(array, window=length, min_count=min_length, axis=0)
+    return bn.move_mean(array, window=length, min_count=min_length, axis=0) # type: ignore
 
 def rolling_median(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
-    return bn.move_median(array, window=length, min_count=min_length, axis=0)
+    return bn.move_median(array, window=length, min_count=min_length, axis=0) # type: ignore
 
 def rolling_max(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
-    return bn.move_max(array, window=length, min_count=min_length, axis=0)
+    return bn.move_max(array, window=length, min_count=min_length, axis=0) # type: ignore
 
 def rolling_min(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
-    return bn.move_min(array, window=length, min_count=min_length, axis=0)
+    return bn.move_min(array, window=length, min_count=min_length, axis=0) # type: ignore
 
 def rolling_central(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
     upper = rolling_max(array, length=length, min_length=min_length)
@@ -21,7 +22,7 @@ def rolling_central(array: NDArray[np.float32], length: int, min_length: int = 1
     return (upper + lower) / 2
 
 def rolling_sum(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
-    return bn.move_sum(array, window=length, min_count=min_length, axis=0)
+    return bn.move_sum(array, window=length, min_count=min_length, axis=0) # type: ignore
 
 def rolling_weighted_mean(array: NDArray[np.float32], length: int) -> NDArray[np.float32]:
     wma_array = np.full(array.shape, np.nan, dtype=np.float32)

@@ -1,4 +1,4 @@
-import numexpr as ne
+import numexpr as ne # type: ignore
 import numpy as np
 from Metrics import rolling_mean, rolling_median, rolling_min, rolling_max, rolling_volatility
 from Infrastructure import bfill
@@ -34,7 +34,7 @@ def rolling_median_normalisation(
         "max": rolling_min(signal_array, length=window_length, min_length=window_length),
         "min": rolling_max(signal_array, length=window_length, min_length=window_length)
     }
-    ne.evaluate("((signal_array - median_array) / (max - min)) * 2", out=adjusted_signal_array, local_dict=dict)
+    ne.evaluate("((signal_array - median_array) / (max - min)) * 2", out=adjusted_signal_array, local_dict=dict) # type: ignore
 
     return np.clip(adjusted_signal_array, -limit, limit)
 
@@ -50,7 +50,7 @@ def rolling_std_normalisation(
         "median_array": rolling_median(signal_array, length=window_length, min_length=window_length),
         "rolling_std": rolling_volatility(signal_array, length=window_length, min_length=window_length)
     }
-    ne.evaluate("((signal_array - median_array) / rolling_std) * 0.5", out=adjusted_signal_array, local_dict=dict)
+    ne.evaluate("((signal_array - median_array) / rolling_std) * 0.5", out=adjusted_signal_array, local_dict=dict) # type: ignore
     
     return np.clip(adjusted_signal_array, -limit, limit)
 

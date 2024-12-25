@@ -139,8 +139,10 @@ def calculate_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int) -
 
     smoothed_returns = rolling_mean(returns_df.values, length=20, min_length=20)
 
+    skewness_array = rolling_skewness(array=smoothed_returns, length=length, min_length=length)
+
     return pd.DataFrame(
-        rolling_skewness(smoothed_returns, length=length, min_length=length),
+        data=skewness_array,
         index=returns_df.index,
         columns=returns_df.columns,
         dtype=np.float32

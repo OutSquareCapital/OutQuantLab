@@ -47,7 +47,7 @@ def bars(
             x=[item],
             y=[value],
             name=item,
-            marker=get_marker_config(color_map[item]),
+            marker=get_marker_config(color_map[item]), # type: ignore
             showlegend=True
         ))
 

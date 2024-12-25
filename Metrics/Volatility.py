@@ -1,12 +1,12 @@
 import numpy as np
 from numpy.typing import NDArray
 from Files import ANNUALIZED_PERCENTAGE_FACTOR
-import bottleneck as bn
+import bottleneck as bn # type: ignore
 from Metrics.Aggregation import rolling_mean, rolling_median
 
 def rolling_volatility(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
 
-    return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1)
+    return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1) # type: ignore
 
 def hv_short_term(
     returns_array: NDArray[np.float32], 
@@ -38,9 +38,9 @@ def hv_long_term(
 
 def hv_composite(
     returns_array: NDArray[np.float32], 
-    short_term_lengths=[8, 16, 32, 64], 
-    long_term_lengths=[256, 512, 1024, 2048, 4096], 
-    st_weight=0.6
+    short_term_lengths: list[int]=[8, 16, 32, 64], 
+    long_term_lengths: list[int]=[256, 512, 1024, 2048, 4096], 
+    st_weight: float =0.6
     ) -> NDArray[np.float32]:
 
     max_length = returns_array.shape[0]

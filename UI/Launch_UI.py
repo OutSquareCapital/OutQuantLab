@@ -15,7 +15,7 @@ from Files import (
     FONT_FAMILY, 
     FONT_SIZE, 
     FONT_TYPE)
-
+from typing import Any
 
 def apply_global_styles(app:QApplication):
     app.setWindowIcon(QIcon(APP_ICON_PHOTO)) 
@@ -27,7 +27,7 @@ def apply_global_styles(app:QApplication):
         }}
     """)
 
-def setup_launch_page(parent):
+def setup_launch_page(parent: Any) -> tuple[QMainWindow, QProgressBar]:
     progress_window = QMainWindow(parent)
     progress_window.setWindowTitle('OutQuantLab')
 

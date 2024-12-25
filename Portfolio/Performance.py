@@ -23,7 +23,8 @@ def relative_sharpe_on_confidence_period(
         sharpe_array, 
         block_size=block_size,
         func=rolling_mean,
-        length=20, min_length=1
+        length=20, 
+        min_length=1
     )
 
     non_nan_counts = process_in_blocks_parallel(

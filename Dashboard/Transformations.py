@@ -4,9 +4,9 @@ from numpy.typing import NDArray
 import re
 from collections import defaultdict
 from scipy.spatial.distance import squareform
-from scipy.cluster.hierarchy import linkage, leaves_list
+from scipy.cluster.hierarchy import linkage, leaves_list # type: ignore
 
-def convert_series_multiindex_labels(series):
+def convert_series_multiindex_labels(series) -> pd.Series:
     if isinstance(series.index, pd.MultiIndex):
         series.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in series.index]
     return series
@@ -93,7 +93,7 @@ def convert_params_to_4d(sharpe_ratios_df, params):
 
     return x_vals, y_vals, z_vals, sharpe_means
 
-def extract_params_from_name(name: str, param1: str, param2: str) -> tuple:
+def extract_params_from_name(name: str, param1: str, param2: str):
 
     pattern1 = re.compile(f"{param1}(\\d+)")
     pattern2 = re.compile(f"{param2}(\\d+)")

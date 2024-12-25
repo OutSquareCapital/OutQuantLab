@@ -4,7 +4,7 @@ import Dashboard.Widgets as Widgets
 import Dashboard.Computations as Computations
 from Portfolio import generate_static_clusters
 from collections.abc import Callable
-import plotly.graph_objects as go
+import plotly.graph_objects as go # type: ignore
 from dataclasses import dataclass
 
 @dataclass()

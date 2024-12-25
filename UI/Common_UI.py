@@ -71,7 +71,7 @@ def create_num_values_slider(num_values: int) -> QSlider:
     num_values_slider.setValue(num_values)
     return num_values_slider
 
-def param_range_values(start: int, end: int, num_values: int) -> list:
+def param_range_values(start: int, end: int, num_values: int) -> list[int]:
     if num_values == 1:
         return [int((start + end) / 2)]
     ratio = (end / start) ** (1 / (num_values - 1))
@@ -92,7 +92,7 @@ def create_scroll_area() ->tuple[QScrollArea, QWidget, QVBoxLayout]:
     scroll_area.setWidgetResizable(True)
     return scroll_area, scroll_widget, scroll_layout
 
-def create_info_labels(values: list) -> tuple[QLabel, QLabel, QLabel]:
+def create_info_labels(values: list[int]) -> tuple[QLabel, QLabel, QLabel]:
     range_info_label = QLabel(f"Range: {min(values)} - {max(values)}")
     num_values_info_label = QLabel(f"Num Values: {len(values)}")
     generated_values_label = QLabel(f"Generated Values: {values}")
@@ -172,7 +172,7 @@ def create_expandable_section(category_name: str) -> tuple[QGroupBox, QVBoxLayou
     return category_box, content_layout
 
 def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
-    def traverse(item):
+    def traverse(item) -> bool:
         if item.text(0) == element:
             return True
         for i in range(item.childCount()):
@@ -220,7 +220,7 @@ def connect_sliders_to_update(
     start_slider: QSlider, end_slider: QSlider, num_values_slider: QSlider,
     range_info_label: QLabel, num_values_info_label: QLabel, generated_values_label: QLabel,
     update_callback: Callable
-):
+) -> None:
     def update_values():
         start = index_to_value(start_slider.value())
         end = index_to_value(end_slider.value())
@@ -253,12 +253,12 @@ def add_select_buttons(layout: QHBoxLayout, select_callback: Callable, unselect_
     unselect_all_button.clicked.connect(unselect_callback)
     layout.addWidget(unselect_all_button)
 
-def set_frame_design(frame_style):
+def set_frame_design(frame_style) -> QFrame:
     frame = QFrame()
     frame.setStyleSheet(frame_style)
     return frame
 
-def set_background_image(widget: QWidget, image_path: str):
+def set_background_image(widget: QWidget, image_path: str) -> None:
     palette = QPalette()
     pixmap = QPixmap(image_path)
     palette.setBrush(QPalette.ColorRole.Window, QBrush(pixmap))
@@ -276,7 +276,7 @@ def setup_expandable_animation(
     animation.setDuration(animation_duration)
     animation.setEasingCurve(QEasingCurve.Type.InOutCubic)
 
-    def toggle_animation(checked: bool):
+    def toggle_animation(checked: bool) -> None:
         if checked:
             animation.setStartValue(0)
             animation.setEndValue(content_widget.sizeHint().height())
@@ -300,7 +300,7 @@ def create_button(
     parent_layout.addWidget(button)
     return button
 
-def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: dict[str, Callable]):
+def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: dict[str, Callable]) -> None:
 
     for btn_text in buttons_names:
         button = QPushButton(btn_text)
@@ -386,7 +386,7 @@ def display_dashboard_plot(parent, dashboards:DashboardsCollection, dashboard_na
     dialog.exec()
 
 
-def generate_stats_display(stats_results, metrics):
+def generate_stats_display(stats_results, metrics) -> QVBoxLayout:
     stats_button = QPushButton("Portfolio Statistics")
     stats_layout = QVBoxLayout()
     stats_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -413,7 +413,7 @@ def generate_stats_display(stats_results, metrics):
     
     return stats_layout
 
-def generate_home_button(back_to_home_callback):
+def generate_home_button(back_to_home_callback: Callable) -> QVBoxLayout:
     home_layout = QVBoxLayout()
     home_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -423,7 +423,7 @@ def generate_home_button(back_to_home_callback):
     
     return home_layout
 
-def generate_backtest_params_sliders(clusters_params):
+def generate_backtest_params_sliders(clusters_params) -> tuple[QVBoxLayout, QVBoxLayout]:
     clusters_toggle_button = QPushButton("Clusters Parameters")
     clusters_buttons_layout = QVBoxLayout()
     clusters_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
