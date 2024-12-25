@@ -1,6 +1,6 @@
 from Files import FILE_PATH_YF
 from Get_Data import get_yahoo_finance_data
-from Backtest import BacktestProcess
+from Backtest import BacktestProcess, BacktestStructure, BacktestData, initialize_backtest_config
 from Portfolio import aggregate_raw_returns
 from Config import AssetsCollection, IndicatorsCollection
 from Dashboard import DashboardsCollection
@@ -14,16 +14,26 @@ class OutQuantLab:
         self.assets_collection = AssetsCollection()
         self.indicators_collection = IndicatorsCollection()
         self.dashboards = DashboardsCollection(length=1250)
-        self.backtest_process = BacktestProcess(
+        self.backtest_data: BacktestData
+        self.backtest_structure: BacktestStructure
+        self.backtest_process:BacktestProcess
+        self.progress_callback = progress_callback
+
+    def run_backtest(self):
+        self.backtest_data, self.backtest_config = initialize_backtest_config(
             file_path=FILE_PATH_YF,
             asset_names=self.assets_collection.get_active_entities_names(),
             asset_clusters=self.assets_collection.clusters,
             indics_clusters=self.indicators_collection.clusters,
-            indicators_and_params=self.indicators_collection.get_indicators_and_parameters_for_backtest(),
-            progress_callback=progress_callback
-            )
+            indicators_and_params=self.indicators_collection.get_indicators_and_parameters_for_backtest()
+        )
+        
+        self.backtest_process = BacktestProcess(
+            backtest_data=self.backtest_data,
+            backtest_structure=self.backtest_config,
+            progress_callback=self.progress_callback
+        )
 
-    def run_backtest(self):
         raw_adjusted_returns_df = self.backtest_process.calculate_strategy_returns()
         self.dashboards.global_portfolio, self.dashboards.sub_portfolios = aggregate_raw_returns(raw_adjusted_returns_df)
 
@@ -33,7 +43,7 @@ class OutQuantLab:
     def close(self):
         self.assets_collection.save()
         self.indicators_collection.save()
-        
+
 if __name__ == "__main__":
     outquantlab = OutQuantLab(handle_progress)
     outquantlab.run_backtest()
