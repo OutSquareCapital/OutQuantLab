@@ -4,7 +4,7 @@ from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 
 def process_param(
-    func: Callable, 
+    func: Callable[..., NDArray[np.float32]], 
     data_array: NDArray[np.float32], 
     adjusted_returns_array: NDArray[np.float32], 
     param: dict[str, int]
@@ -13,16 +13,14 @@ def process_param(
     return func(data_array, **param) * adjusted_returns_array
 
 def process_indicator_parallel(
-    func: Callable, 
+    func: Callable[..., NDArray[np.float32]], 
     data_array: NDArray[np.float32], 
     adjusted_returns_array: NDArray[np.float32], 
     params: list[dict[str, int]],
     global_executor: ThreadPoolExecutor
 ) -> list[NDArray[np.float32]]:
-    results = list(
-        global_executor.map(
-            lambda param: process_param(func, data_array, adjusted_returns_array, param),
-            params
-        )
-    )
+    def process_single_param(param: dict[str, int]) -> NDArray[np.float32]:
+        return process_param(func, data_array, adjusted_returns_array, param)
+
+    results = list(global_executor.map(process_single_param, params))
     return results

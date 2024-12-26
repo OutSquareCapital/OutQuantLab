@@ -19,9 +19,9 @@ def shift_array(returns_array: NDArray[np.float32], step:int = 1) -> NDArray[np.
 def process_in_blocks_parallel(
     array: NDArray[np.float32], 
     block_size: int, 
-    func:Callable, 
-    *args, 
-    **kwargs
+    func:Callable[..., NDArray[np.float32]], 
+    *args: Any,
+    **kwargs: Any
     ) -> NDArray[np.float32]:
 
     num_cols: int = array.shape[1]

@@ -1,17 +1,17 @@
 from PySide6.QtWidgets import QMainWindow
 
 class MainApp(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
-    def initialize(self):
+    def initialize(self) -> None:
         self.progress_bar:QProgressBar
         self.log_output:QTextEdit
         self.outquantlab = OutQuantLab(self.update_progress)
         self.show_home_page()
         self.showMaximized()
 
-    def show_home_page(self):
+    def show_home_page(self) -> None:
         UI.setup_home_page(
         parent=self,
         run_backtest_callback=self.run_backtest,
@@ -22,16 +22,16 @@ class MainApp(QMainWindow):
         indicators_clusters=self.outquantlab.indicators_clusters
         )
 
-    def update_progress(self, value, message):
+    def update_progress(self, value: int, message: str) -> None:
         UI.update_progress_with_events(self.progress_bar, self.log_output, value, message)
 
 
-    def run_backtest(self):
+    def run_backtest(self) -> None:
         self.progress_bar, self.log_output = UI.setup_backtest_page(self)
         self.outquantlab.run_backtest()
         self.show_results_page()
 
-    def show_results_page(self):
+    def show_results_page(self) -> None:
         self.outquantlab.dashboards.metrics = self.outquantlab.dashboards.calculate_metrics()
 
         UI.setup_results_page(
@@ -41,7 +41,7 @@ class MainApp(QMainWindow):
         metrics=self.outquantlab.dashboards.metrics
         )
 
-    def closeEvent(self, event):
+    def closeEvent(self, event ) -> None:
         self.outquantlab.close()
         UI.cleanup_temp_files()
         super().closeEvent(event)

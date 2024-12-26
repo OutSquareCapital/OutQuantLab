@@ -11,8 +11,9 @@ separate_volatility
 )
 from .Signals_Normalization import ratio_normalization
 from numpy.typing import NDArray
+import pandas as pd
 
-def generate_seasonal_array(returns_df) -> NDArray:
+def generate_seasonal_array(returns_df: pd.DataFrame) -> NDArray[np.int32]:
 
     def assign_week_of_month(day: int) -> int:
         if day <= 6:
@@ -26,12 +27,12 @@ def generate_seasonal_array(returns_df) -> NDArray:
 
     seasonal_array = np.empty((returns_df.shape[0], 3), dtype=np.int32)
     
-    seasonal_array[:, 2] = returns_df.index.quarter
+    seasonal_array[:, 2] = returns_df.index.quarter # type: ignore
 
-    day_of_month = returns_df.groupby([returns_df.index.year, returns_df.index.month], observed=False).cumcount() + 1
-    seasonal_array[:, 1] = day_of_month.apply(assign_week_of_month).values
+    day_of_month = returns_df.groupby([returns_df.index.year, returns_df.index.month], observed=False).cumcount() + 1 # type: ignore
+    seasonal_array[:, 1] = day_of_month.apply(assign_week_of_month).values # type: ignore
 
-    seasonal_array[:, 0] = returns_df.index.dayofweek + 1
+    seasonal_array[:, 0] = returns_df.index.dayofweek + 1 # type: ignore
 
     return seasonal_array
 

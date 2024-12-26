@@ -1,50 +1,50 @@
-import bottleneck as bn
+import bottleneck as bn   # type: ignore
 import numpy as np
 import pandas as pd
 
 def calculate_portfolio_returns(
     returns_df: pd.DataFrame,
-    by_asset_cluster=False,
-    by_asset_cluster_sub=False,
-    by_asset=False,
-    by_indic_cluster=False,
-    by_indic_cluster_sub=False,
-    by_indic=False,
-    by_param=False
+    by_asset_cluster: bool = False,
+    by_asset_cluster_sub: bool = False,
+    by_asset: bool = False,
+    by_indic_cluster: bool = False,
+    by_indic_cluster_sub: bool = False,
+    by_indic: bool = False,
+    by_param: bool = False
     ) -> pd.DataFrame:
 
     grouping_levels = []
     if by_asset_cluster:
-        grouping_levels.append("AssetCluster")
+        grouping_levels.append("AssetCluster") # type: ignore
     if by_asset_cluster_sub:
-        grouping_levels.append("AssetSubCluster")
+        grouping_levels.append("AssetSubCluster") # type: ignore
     if by_asset:
-        grouping_levels.append("Asset")
+        grouping_levels.append("Asset") # type: ignore
     if by_indic_cluster:
-        grouping_levels.append("IndicCluster")
+        grouping_levels.append("IndicCluster") # type: ignore
     if by_indic_cluster_sub:
-        grouping_levels.append("IndicSubCluster")
+        grouping_levels.append("IndicSubCluster") # type: ignore
     if by_indic:
-        grouping_levels.append("Indicator")
+        grouping_levels.append("Indicator") # type: ignore
     if by_param:
-        grouping_levels.append("Param")
+        grouping_levels.append("Param") # type: ignore
 
     if grouping_levels:
-        grouped = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T
+        grouped = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T  # type: ignore
 
         return grouped
 
     return pd.DataFrame(
-        bn.nanmean(returns_df.values, axis=1), 
-        index=returns_df.index, 
+        bn.nanmean(returns_df.values, axis=1),  # type: ignore
+        index=returns_df.index,  # type: ignore
         columns=['Portfolio'], 
         dtype=np.float32
         )
 
-def aggregate_raw_returns(raw_adjusted_returns_df: pd.DataFrame):
+def aggregate_raw_returns(raw_adjusted_returns_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     
     df_indic = calculate_portfolio_returns(
-        raw_adjusted_returns_df.dropna(axis=0),
+        raw_adjusted_returns_df.dropna(axis=0), # type: ignore
         by_asset_cluster=True,
         by_asset_cluster_sub=True,
         by_asset=True,

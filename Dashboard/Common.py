@@ -77,7 +77,7 @@ def setup_figure_layout(
             trace.hovertemplate = f"<span style='color:{COLOR_ADJUSTMENT}'><b>%{{{hover_data}}}</b></span><extra><b>%{{fullData.name}}</b></extra>" # type: ignore
 
 
-def get_marker_config(color):
+def get_marker_config(color:str):
     return dict(
         color=color,
         line=dict(color=COLOR_ADJUSTMENT, width=1)

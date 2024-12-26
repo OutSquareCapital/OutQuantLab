@@ -23,7 +23,7 @@ class BacktestData:
 
 @dataclass(slots=True)
 class BacktestStructure:
-    dates_index: pd.Index
+    dates_index: pd.DatetimeIndex
     multi_index: pd.MultiIndex
     total_returns_streams: int
     total_assets_count: int
@@ -66,9 +66,9 @@ def initialize_backtest_config(
     ) -> tuple[BacktestData, BacktestStructure]:
     multi_index = generate_multi_index_process(indicators_and_params, asset_names, asset_clusters, indics_clusters)
     prices_df = load_prices(asset_names, file_path)
-    dates_index = prices_df.index
+    dates_index: pd.DatetimeIndex = prices_df.index # type: ignore
     prices_array, log_returns_array, adjusted_returns_array = process_data(prices_df)
-    total_returns_streams = multi_index.shape[0]
+    total_returns_streams = int(multi_index.shape[0]) # type: ignore
     total_assets_count = prices_array.shape[1]
     signals_array = np.empty((prices_array.shape[0], total_returns_streams), dtype=np.float32)
 

@@ -46,14 +46,14 @@ def create_scroll_with_buttons(
     select_callback: Callable,
     unselect_callback: Callable
 ) -> QVBoxLayout:
-    scroll_area, scroll_widget, scroll_layout = create_scroll_area()
+    scroll_area, _, scroll_layout = create_scroll_area()
     buttons_layout = QHBoxLayout()
     add_select_buttons(buttons_layout, select_callback, unselect_callback)
     parent_layout.addWidget(scroll_area)
     parent_layout.addLayout(buttons_layout)
     return scroll_layout
 
-def create_range_sliders(values: list) -> tuple[QSlider, QSlider]:
+def create_range_sliders(values: list[int]) -> tuple[QSlider, QSlider]:
     start_slider = QSlider(Qt.Orientation.Horizontal)
     end_slider = QSlider(Qt.Orientation.Horizontal)
     start_slider.setMinimum(0)
@@ -253,7 +253,7 @@ def add_select_buttons(layout: QHBoxLayout, select_callback: Callable, unselect_
     unselect_all_button.clicked.connect(unselect_callback)
     layout.addWidget(unselect_all_button)
 
-def set_frame_design(frame_style) -> QFrame:
+def set_frame_design(frame_style: str) -> QFrame:
     frame = QFrame()
     frame.setStyleSheet(frame_style)
     return frame
@@ -300,7 +300,7 @@ def create_button(
     parent_layout.addWidget(button)
     return button
 
-def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list, buttons_actions: dict[str, Callable]) -> None:
+def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list[str], buttons_actions: dict[str, Callable]) -> None:
 
     for btn_text in buttons_names:
         button = QPushButton(btn_text)

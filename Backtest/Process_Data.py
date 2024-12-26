@@ -9,21 +9,22 @@ from Config import IndicatorParams, ClustersTree
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 
-    data: pd.DataFrame|None = yf.download(
+    data: pd.DataFrame|None = yf.download( # type: ignore
                             tickers=assets,
                             interval="1d",
                             auto_adjust=True,
                             progress=False,
                         )
-    
-    if data is None:
+
+    if isinstance(data, pd.DataFrame):
+        data['Close'].to_parquet( # type: ignore
+            file_path,
+            index=True,
+            engine="pyarrow"
+        )
+    else:
         raise ValueError("Yahoo Finance Data Not Available")
 
-    data['Close'].to_parquet(
-        file_path,
-        index=True,
-        engine="pyarrow"
-    )
 
 def load_prices(asset_names: list[str], file_path: str) -> pd.DataFrame:
     columns_to_load = ["Date"] + [name for name in asset_names]
@@ -40,13 +41,13 @@ def calculate_volatility_adjusted_returns(
     target_volatility: int = 15
     ) -> NDArray[np.float32]:
 
-    vol_adj_position_size_shifted = shift_array(target_volatility / hv_array)
+    vol_adj_position_size_shifted:NDArray[np.float32] = shift_array(target_volatility / hv_array)
 
     return pct_returns_array * vol_adj_position_size_shifted
 
 def calculate_equity_curves(returns_array: NDArray[np.float32]) -> NDArray[np.float32]:
 
-    temp_array = returns_array.copy()
+    temp_array:NDArray[np.float32] = returns_array.copy()
 
     mask = np.isnan(temp_array)
     temp_array[mask] = 0
@@ -81,7 +82,7 @@ def generate_multi_index_process(
 
     indic_to_clusters = indics_clusters.map_nested_clusters_to_assets()
 
-    multi_index_tuples = []
+    multi_index_tuples: list[tuple[str, str, str, str, str, str, str]] = []
 
     for indic in indicators_and_params:
         for param in indic.param_combos:
@@ -95,7 +96,7 @@ def generate_multi_index_process(
                     indic.name, param_str
                 ))
 
-    return pd.MultiIndex.from_tuples(
+    return pd.MultiIndex.from_tuples( # type: ignore
         multi_index_tuples,
         names=["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
     )
@@ -105,8 +106,8 @@ def process_data(
     data_prices_df: pd.DataFrame
     ) -> tuple[NDArray[np.float32], NDArray[np.float32], NDArray[np.float32]]:
     
-    returns_df = data_prices_df.pct_change(fill_method=None)
-    pct_returns_array = returns_df.to_numpy(dtype=np.float32)
+    returns_df = data_prices_df.pct_change(fill_method=None) # type: ignore
+    pct_returns_array: NDArray[np.float32] = returns_df.to_numpy(dtype=np.float32) # type: ignore
     prices_array = shift_array(calculate_equity_curves(pct_returns_array))
     log_returns_array = shift_array(log_returns_np(prices_array))
     hv_array = hv_composite(pct_returns_array)

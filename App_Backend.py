@@ -4,12 +4,13 @@ from Portfolio import aggregate_raw_returns
 from Config import AssetsCollection, IndicatorsCollection, ClustersTree
 from Dashboard import DashboardsCollection
 from collections.abc import Callable
-
+import pandas as pd
+from typing import Any
 def handle_progress(progress: int, message: str) -> None:
     print(f"[{progress}%] {message}")
 
 class OutQuantLab:
-    def __init__(self, progress_callback: Callable) -> None:
+    def __init__(self, progress_callback: Callable[..., Any]) -> None:
         self.assets_collection = AssetsCollection()
         self.indicators_collection = IndicatorsCollection()
         self.assets_clusters = ClustersTree(ASSETS_CLUSTERS_FILE)
@@ -18,7 +19,6 @@ class OutQuantLab:
         self.progress_callback = progress_callback
 
     def run_backtest(self) -> None:
-
         backtest_data, backtest_config = initialize_backtest_config(
             file_path=FILE_PATH_YF,
             asset_names=self.assets_collection.all_active_entities_names,
@@ -27,7 +27,7 @@ class OutQuantLab:
             indics_clusters=self.indicators_clusters
         )
 
-        raw_adjusted_returns_df = calculate_strategy_returns(backtest_data, backtest_config, self.progress_callback)
+        raw_adjusted_returns_df:pd.DataFrame = calculate_strategy_returns(backtest_data, backtest_config, self.progress_callback)
 
         self.dashboards.global_portfolio, self.dashboards.sub_portfolios = aggregate_raw_returns(raw_adjusted_returns_df)
 

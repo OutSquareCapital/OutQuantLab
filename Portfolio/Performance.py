@@ -1,18 +1,24 @@
+from numpy.typing import NDArray
 import pandas as pd
 import numpy as np
 from Metrics import rolling_sharpe_ratios, rolling_mean
 from Infrastructure import process_in_blocks_parallel
-import numexpr as ne
+import numexpr as ne # type: ignore
 
 def relative_sharpe_on_confidence_period(
     returns_df:pd.DataFrame, 
     sharpe_lookback:int, 
-    confidence_lookback = 2500, 
-    block_size = 500
+    confidence_lookback: int = 2500, 
+    block_size: int = 500
     ) -> pd.DataFrame:
 
+    def count_non_nan(x: NDArray[np.float32]) -> NDArray[np.float32]:
+        return np.cumsum(~np.isnan(x), axis=0, dtype=np.float32)
+
+    returns_array: NDArray[np.float32] = returns_df.values # type: ignore
+    
     sharpe_array = process_in_blocks_parallel(
-        returns_df.values, 
+        returns_array, 
         block_size=block_size,
         func=rolling_sharpe_ratios,
         length = sharpe_lookback,
@@ -30,12 +36,12 @@ def relative_sharpe_on_confidence_period(
     non_nan_counts = process_in_blocks_parallel(
         mean_sharpe_array, 
         block_size=block_size,
-        func=lambda x: np.cumsum(~np.isnan(x), axis=0, dtype=np.float32)
+        func=count_non_nan
     )
 
     rolling_median_sharpe = np.nanmedian(mean_sharpe_array, axis=1)[:, np.newaxis]
 
-    normalized_sharpes = ne.evaluate(
+    normalized_sharpes: NDArray[np.float32] = ne.evaluate( # type: ignore
         "(mean_sharpe_array - rolling_median_sharpe) * ((non_nan_counts / confidence_lookback)**0.5) + 1",
         local_dict={
             "mean_sharpe_array": mean_sharpe_array,
@@ -50,7 +56,7 @@ def relative_sharpe_on_confidence_period(
 
     return pd.DataFrame(
         clipped_sharpes, 
-        index=returns_df.index, 
+        index=returns_df.index, # type: ignore
         columns= returns_df.columns,
         dtype=np.float32
         )

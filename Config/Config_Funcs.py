@@ -1,33 +1,36 @@
 import json
-import pyarrow.parquet as pq
+from numpy.typing import NDArray
+import pyarrow.parquet as pq # type: ignore
 from types import MappingProxyType
 from typing import Any
 from collections.abc import Callable
 import importlib
 from itertools import product
 from inspect import Parameter
+from numpy.typing import NDArray
+import numpy as np
 
 def load_config_file(file_path: str) -> dict[str, Any]:
     with open(file_path, "r") as file:
         return json.load(file)
 
-def save_config_file(file_path: str, dict_to_save: dict, indent: int):
+def save_config_file(file_path: str, dict_to_save: dict[str, Any], indent: int) -> None:
     with open(file_path, "w") as file:
         json.dump(dict_to_save, file, indent=indent)
 
 def load_asset_names(file_path: str) -> list[str]:
-    column_names = pq.ParquetFile(file_path).schema.names
-    return [col for col in column_names if col != "Date"]
+    column_names: list[str] = pq.ParquetFile(file_path).schema.names # type: ignore
+    return [col for col in column_names if col != "Date"] # type: ignore
 
-def get_all_indicators_from_module(module_name: str) -> dict[str, Callable]:
+def get_all_indicators_from_module(module_name: str) -> dict[str, Callable[..., NDArray[np.float32]]]:
     module = importlib.import_module(module_name)
     indicators = vars(module).items()
 
-    formatted_indicators: dict[str, Callable] = {}
+    formatted_indicators: dict[str, Callable[..., NDArray[np.float32]]] = {}
     for name, func in indicators:
         if callable(func):
             formatted_name:str = ''.join(word.title() for word in name.split('_'))
-            formatted_indicators[formatted_name] = func
+            formatted_indicators[formatted_name] = func # type: ignore
 
     return formatted_indicators
 
