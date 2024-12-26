@@ -10,7 +10,7 @@ process_data
 )
 from dataclasses import dataclass
 from Config import IndicatorParams, ClustersTree
-
+from Signals import SignalsNormalizeds
 @dataclass(slots=True)
 class BacktestData:
     prices_array: NDArrayFloat
@@ -33,11 +33,19 @@ def calculate_strategy_returns(
 ) -> pd.DataFrame:
     signal_col_index = 0
     global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
+    
+    signals = SignalsNormalizeds()
+    signals.prices_array = backtest_data.prices_array
+    signals.returns_array = backtest_data.log_returns_array
 
     for indic in backtest_data.indicators_and_params:
-
-        data_array = backtest_data.prices_array if indic.array_type == 'prices_array' else backtest_data.log_returns_array
-        results = process_indicator_parallel(indic.func, data_array, backtest_data.adjusted_returns_array, indic.param_combos, global_executor)
+        results = process_indicator_parallel(
+            signals,
+            indic.func, 
+            backtest_data.adjusted_returns_array, 
+            indic.param_combos, 
+            global_executor
+        )
 
         for result in results:
             backtest_data.signals_array[:, signal_col_index:signal_col_index + backtest_structure.total_assets_count] = result

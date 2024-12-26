@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Any, TypeVar, Generic
-from types import MappingProxyType
 from abc import ABC, abstractmethod
-from inspect import signature, Parameter
+
 from Files import (
 INDICATORS_PARAMS_FILE, 
 INDICATORS_TO_TEST_FILE, 
@@ -14,18 +13,16 @@ IndicatorFunc
 from .Config_Funcs import (
 load_config_file, 
 save_config_file,
-load_asset_names, 
-get_all_indicators_from_module, 
-determine_indicator_params, 
-filter_valid_pairs, 
-determine_array_type
+load_asset_names,
+filter_valid_pairs
 )
+
+from Signals import SignalsNormalizeds
 
 @dataclass(slots=True)
 class IndicatorParams:
     name: str
     func: IndicatorFunc
-    array_type: str
     param_combos: list[dict[str, int]]
 
 @dataclass
@@ -40,7 +37,6 @@ class Asset(BaseEntity):
 @dataclass
 class Indicator(BaseEntity):
     func: IndicatorFunc
-    array_type: str
     params: dict[str, list[int]] = field(default_factory=dict)
 
 T = TypeVar("T", bound=BaseEntity)
@@ -110,21 +106,18 @@ class IndicatorsCollection(BaseCollection[Indicator]):
         super().__init__(INDICATORS_TO_TEST_FILE, INDICATORS_MODULE)
 
     def _load_entities(self) -> None:
+        signals_class = SignalsNormalizeds()
         entities_to_test: dict[str, bool] = load_config_file(self.entities_file)
-        entities_functions: dict[str, IndicatorFunc] = get_all_indicators_from_module(self.primary_keys_file)
+        entities_functions: dict[str, IndicatorFunc] = signals_class.get_all_signals()
         params_config: dict[str, dict[str, list[int]]] = load_config_file(INDICATORS_PARAMS_FILE)
 
         for name, func in entities_functions.items():
-            func_signature: MappingProxyType[str, Parameter] = signature(func).parameters
             active: bool = entities_to_test.get(name, False)
-            array_type: str = determine_array_type(func_signature)
-            params: dict[str, list[int]] = determine_indicator_params(func_signature, name, params_config, array_type)
-
+            params: dict[str, list[int]] = signals_class.determine_params(name, params_config)
             self.entities[name] = Indicator(
                 name=name,
                 active=active,
                 func=func,
-                array_type=array_type,
                 params=params
             )
 
@@ -136,7 +129,6 @@ class IndicatorsCollection(BaseCollection[Indicator]):
             result.append(IndicatorParams(
                 name=indicator.name,
                 func=indicator.func,
-                array_type=indicator.array_type,
                 param_combos=valid_pairs
             ))
         return result

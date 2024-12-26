@@ -1,11 +1,7 @@
 import json
 import pyarrow.parquet as pq # type: ignore
-from types import MappingProxyType
 from typing import Any
-import importlib
 from itertools import product
-from inspect import Parameter
-from Files import IndicatorFunc
 
 def load_config_file(file_path: str) -> dict[str, Any]:
     with open(file_path, "r") as file:
@@ -18,36 +14,6 @@ def save_config_file(file_path: str, dict_to_save: dict[str, Any], indent: int) 
 def load_asset_names(file_path: str) -> list[str]:
     column_names: list[str] = pq.ParquetFile(file_path).schema.names # type: ignore
     return [col for col in column_names if col != "Date"] # type: ignore
-
-def get_all_indicators_from_module(module_name: str) -> dict[str, IndicatorFunc]:
-    module = importlib.import_module(module_name)
-    indicators: dict[str, IndicatorFunc] = vars(module).items() # type: ignore
-
-    formatted_indicators: dict[str, IndicatorFunc] = {}
-
-    for name, func in indicators:
-        if callable(func):
-            formatted_name:str = ''.join(word.title() for word in name.split('_'))
-            formatted_indicators[formatted_name] = func
-
-    return formatted_indicators
-
-def determine_array_type(func_params: MappingProxyType[str, Parameter]) -> str:
-    return 'returns_array' if 'returns_array' in func_params else 'prices_array'
-
-def determine_indicator_params(
-    func_signature: MappingProxyType[str, Parameter],
-    name: str,
-    params_config: dict[str, dict[str, list[int]]],
-    array_type: str
-) -> dict[str, list[int]]:
-    
-    param_values = params_config.get(name, {})
-    return {
-        param_name: param_values.get(param_name, [])
-        for param_name in func_signature.keys()
-        if param_name != array_type
-    }
 
 def is_valid_combination(parameters_dict: dict[str, int]) -> bool:
     short_term_param = next((k for k in parameters_dict if 'ST' in k), None)
