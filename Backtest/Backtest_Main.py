@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
-from collections.abc import Callable
-from Files import N_THREADS, NDArrayFloat
+from Files import N_THREADS, NDArrayFloat, ProgressFunc
 from concurrent.futures import ThreadPoolExecutor
 from .Process_Indicators import process_indicator_parallel
 from .Process_Data import (
@@ -30,7 +29,7 @@ class BacktestStructure:
 def calculate_strategy_returns(
     backtest_data: BacktestData,
     backtest_structure: BacktestStructure,
-    progress_callback: Callable[[int, str], None]
+    progress_callback: ProgressFunc
 ) -> pd.DataFrame:
     signal_col_index = 0
     global_executor = ThreadPoolExecutor(max_workers=N_THREADS)

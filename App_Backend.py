@@ -1,16 +1,15 @@
-from Files import FILE_PATH_YF, INDICATORS_CLUSTERS_FILE, ASSETS_CLUSTERS_FILE
+from Files import FILE_PATH_YF, INDICATORS_CLUSTERS_FILE, ASSETS_CLUSTERS_FILE, ProgressFunc
 from Backtest import calculate_strategy_returns, initialize_backtest_config, get_yahoo_finance_data
 from Portfolio import aggregate_raw_returns
 from Config import AssetsCollection, IndicatorsCollection, ClustersTree
 from Dashboard import DashboardsCollection
-from collections.abc import Callable
 import pandas as pd
-from typing import Any
+
 def handle_progress(progress: int, message: str) -> None:
     print(f"[{progress}%] {message}")
 
 class OutQuantLab:
-    def __init__(self, progress_callback: Callable[..., Any]) -> None:
+    def __init__(self, progress_callback: ProgressFunc) -> None:
         self.assets_collection = AssetsCollection()
         self.indicators_collection = IndicatorsCollection()
         self.assets_clusters = ClustersTree(ASSETS_CLUSTERS_FILE)
