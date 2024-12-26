@@ -17,7 +17,7 @@ load_asset_names,
 filter_valid_pairs
 )
 
-from Signals import SignalsNormalizeds
+from Indicators import IndicatorsMethods
 
 @dataclass(slots=True)
 class IndicatorParams:
@@ -106,14 +106,14 @@ class IndicatorsCollection(BaseCollection[Indicator]):
         super().__init__(INDICATORS_TO_TEST_FILE, INDICATORS_MODULE)
 
     def _load_entities(self) -> None:
-        signals_class = SignalsNormalizeds()
+        indics_methods = IndicatorsMethods()
         entities_to_test: dict[str, bool] = load_config_file(self.entities_file)
-        entities_functions: dict[str, IndicatorFunc] = signals_class.get_all_signals()
+        entities_functions: dict[str, IndicatorFunc] = indics_methods.get_all_signals()
         params_config: dict[str, dict[str, list[int]]] = load_config_file(INDICATORS_PARAMS_FILE)
 
         for name, func in entities_functions.items():
             active: bool = entities_to_test.get(name, False)
-            params: dict[str, list[int]] = signals_class.determine_params(name, params_config)
+            params: dict[str, list[int]] = indics_methods.determine_params(name, params_config)
             self.entities[name] = Indicator(
                 name=name,
                 active=active,

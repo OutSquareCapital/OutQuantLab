@@ -10,7 +10,7 @@ process_data
 )
 from dataclasses import dataclass
 from Config import IndicatorParams, ClustersTree
-from Signals import SignalsNormalizeds
+from Indicators import IndicatorsMethods
 @dataclass(slots=True)
 class BacktestData:
     prices_array: NDArrayFloat
@@ -34,13 +34,13 @@ def calculate_strategy_returns(
     signal_col_index = 0
     global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
     
-    signals = SignalsNormalizeds()
-    signals.prices_array = backtest_data.prices_array
-    signals.returns_array = backtest_data.log_returns_array
+    indicators = IndicatorsMethods()
+    indicators.prices_array = backtest_data.prices_array
+    indicators.returns_array = backtest_data.log_returns_array
 
     for indic in backtest_data.indicators_and_params:
         results = process_indicator_parallel(
-            signals,
+            indicators,
             indic.func, 
             backtest_data.adjusted_returns_array, 
             indic.param_combos, 

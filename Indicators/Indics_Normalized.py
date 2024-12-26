@@ -1,10 +1,10 @@
 import numpy as np
-from .Signals_Raw import *
-from .Signals_Normalization import sign_normalization, calculate_indicator_on_trend_signal, rolling_median_normalisation, relative_normalization
+from .Indics_Raw import *
+from .Indics_Normalization import sign_normalization, calculate_indicator_on_trend_signal, rolling_median_normalisation, relative_normalization
 from Files import NDArrayFloat, IndicatorFunc
 from inspect import signature
 
-class SignalsNormalizeds:
+class IndicatorsMethods:
     def __init__(self) -> None:
         self.prices_array : NDArrayFloat
         self.returns_array: NDArrayFloat

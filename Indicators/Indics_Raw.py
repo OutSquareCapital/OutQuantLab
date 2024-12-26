@@ -10,7 +10,7 @@ rolling_skewness,
 rolling_kurtosis,
 separate_volatility
 )
-from .Signals_Normalization import ratio_normalization
+from .Indics_Normalization import ratio_normalization
 from Files import NDArrayFloat
 import pandas as pd
 
