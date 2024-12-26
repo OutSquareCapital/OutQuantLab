@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-from numpy.typing import NDArray
-from Files import PERCENTAGE_FACTOR
+from Files import PERCENTAGE_FACTOR, NDArrayFloat
 from Infrastructure import shift_array
 from Metrics import hv_composite
 import yfinance as yf # type: ignore
@@ -36,18 +35,18 @@ def load_prices(asset_names: list[str], file_path: str) -> pd.DataFrame:
     )
 
 def calculate_volatility_adjusted_returns(
-    pct_returns_array: NDArray[np.float32], 
-    hv_array: NDArray[np.float32], 
+    pct_returns_array: NDArrayFloat, 
+    hv_array: NDArrayFloat, 
     target_volatility: int = 15
-    ) -> NDArray[np.float32]:
+    ) -> NDArrayFloat:
 
-    vol_adj_position_size_shifted:NDArray[np.float32] = shift_array(target_volatility / hv_array)
+    vol_adj_position_size_shifted:NDArrayFloat = shift_array(target_volatility / hv_array)
 
     return pct_returns_array * vol_adj_position_size_shifted
 
-def calculate_equity_curves(returns_array: NDArray[np.float32]) -> NDArray[np.float32]:
+def calculate_equity_curves(returns_array: NDArrayFloat) -> NDArrayFloat:
 
-    temp_array:NDArray[np.float32] = returns_array.copy()
+    temp_array:NDArrayFloat = returns_array.copy()
 
     mask = np.isnan(temp_array)
     temp_array[mask] = 0
@@ -58,7 +57,7 @@ def calculate_equity_curves(returns_array: NDArray[np.float32]) -> NDArray[np.fl
 
     return cumulative_returns * PERCENTAGE_FACTOR
 
-def log_returns_np(prices_array: NDArray[np.float32]) -> NDArray[np.float32]:
+def log_returns_np(prices_array: NDArrayFloat) -> NDArrayFloat:
 
     if prices_array.ndim == 1:
         log_returns_array = np.empty(prices_array.shape, dtype=np.float32)
@@ -104,10 +103,10 @@ def generate_multi_index_process(
 
 def process_data(
     data_prices_df: pd.DataFrame
-    ) -> tuple[NDArray[np.float32], NDArray[np.float32], NDArray[np.float32]]:
+    ) -> tuple[NDArrayFloat, NDArrayFloat, NDArrayFloat]:
     
     returns_df = data_prices_df.pct_change(fill_method=None) # type: ignore
-    pct_returns_array: NDArray[np.float32] = returns_df.to_numpy(dtype=np.float32) # type: ignore
+    pct_returns_array: NDArrayFloat = returns_df.to_numpy(dtype=np.float32) # type: ignore
     prices_array = shift_array(calculate_equity_curves(pct_returns_array))
     log_returns_array = shift_array(log_returns_np(prices_array))
     hv_array = hv_composite(pct_returns_array)

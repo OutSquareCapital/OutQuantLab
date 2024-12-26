@@ -33,8 +33,9 @@ from .Signals_Normalized import (
     relative_directional_volatility,
     normalised_directional_volatility,
     relative_directional_volatility_trend,
-    normalised_directional_volatility_trend,
+    normalised_directional_volatility_trend
 )
+
 
 __all__ = [
     "mean_price_ratio",
@@ -71,5 +72,5 @@ __all__ = [
     "relative_directional_volatility",
     "normalised_directional_volatility",
     "relative_directional_volatility_trend",
-    "normalised_directional_volatility_trend",
+    "normalised_directional_volatility_trend"
 ]

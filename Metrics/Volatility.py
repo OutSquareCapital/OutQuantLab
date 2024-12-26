@@ -1,17 +1,16 @@
 import numpy as np
-from numpy.typing import NDArray
-from Files import ANNUALIZED_PERCENTAGE_FACTOR
+from Files import ANNUALIZED_PERCENTAGE_FACTOR, NDArrayFloat
 import bottleneck as bn # type: ignore
 from Metrics.Aggregation import rolling_mean, rolling_median
 
-def rolling_volatility(array: NDArray[np.float32], length: int, min_length: int = 1) -> NDArray[np.float32]:
+def rolling_volatility(array: NDArrayFloat, length: int, min_length: int = 1) -> NDArrayFloat:
 
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1) # type: ignore
 
 def hv_short_term(
-    returns_array: NDArray[np.float32], 
+    returns_array: NDArrayFloat, 
     lengths_list: list[int]
-    ) -> NDArray[np.float32]:
+    ) -> NDArrayFloat:
 
     hv_arrays = np.array([
         rolling_volatility(
@@ -23,9 +22,9 @@ def hv_short_term(
     return np.mean(hv_arrays, axis=0)
 
 def hv_long_term(
-    short_term_vol_array: NDArray[np.float32], 
+    short_term_vol_array: NDArrayFloat, 
     long_term_lengths: list[int]
-    ) -> NDArray[np.float32]:
+    ) -> NDArrayFloat:
     
     long_term_vol_arrays = np.array([
         rolling_median(
@@ -37,11 +36,11 @@ def hv_long_term(
     return np.mean(long_term_vol_arrays, axis=0)
 
 def hv_composite(
-    returns_array: NDArray[np.float32], 
+    returns_array: NDArrayFloat, 
     short_term_lengths: list[int]=[8, 16, 32, 64], 
     long_term_lengths: list[int]=[256, 512, 1024, 2048, 4096], 
     st_weight: float =0.6
-    ) -> NDArray[np.float32]:
+    ) -> NDArrayFloat:
 
     max_length = returns_array.shape[0]
     adjusted_lengths = [length for length in long_term_lengths if length < max_length]
@@ -56,7 +55,7 @@ def hv_composite(
 
     return rolling_mean(composite_vol_array, length=4, min_length=1)
 
-def separate_volatility(array:NDArray[np.float32], LenVol: int) -> tuple[NDArray[np.float32], NDArray[np.float32]]:
+def separate_volatility(array:NDArrayFloat, LenVol: int) -> tuple[NDArrayFloat, NDArrayFloat]:
 
     positive_returns = np.where(np.isnan(array), np.nan, np.where(array > 0, array, 0))
     negative_returns = np.where(np.isnan(array), np.nan, np.where(array < 0, array, 0))

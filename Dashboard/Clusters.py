@@ -1,17 +1,16 @@
 from scipy.cluster.hierarchy import linkage, fcluster # type: ignore
 from scipy.spatial.distance import squareform
 import pandas as pd
-import numpy as np
-from numpy.typing import NDArray
+from Files import NDArrayFloat
 
 def calculate_distance_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
     return 1 - returns_df.corr()
 
-def perform_clustering(distance_matrix: pd.DataFrame, num_clusters: int, method: str = 'complete') -> NDArray[np.float32]:
+def perform_clustering(distance_matrix: pd.DataFrame, num_clusters: int, method: str = 'complete') -> NDArrayFloat:
     linkage_matrix = linkage(squareform(distance_matrix), method=method)
     return fcluster(linkage_matrix, num_clusters, criterion='maxclust')
 
-def create_cluster_dict(assets: list, clusters: NDArray[np.float32]) -> dict:
+def create_cluster_dict(assets: list, clusters: NDArrayFloat) -> dict:
     cluster_dict = {}
     for asset, cluster in zip(assets, clusters):
         if cluster not in cluster_dict:

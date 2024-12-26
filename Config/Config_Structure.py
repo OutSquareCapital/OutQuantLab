@@ -2,18 +2,15 @@ from dataclasses import dataclass, field
 from typing import Any, TypeVar, Generic
 from types import MappingProxyType
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from inspect import signature, Parameter
-import numpy as np
-from numpy.typing import NDArray
 from Files import (
 INDICATORS_PARAMS_FILE, 
 INDICATORS_TO_TEST_FILE, 
 INDICATORS_MODULE, 
 ASSETS_TO_TEST_CONFIG_FILE, 
-FILE_PATH_YF
+FILE_PATH_YF,
+IndicatorFunc
 )
-
 from .Config_Funcs import (
 load_config_file, 
 save_config_file,
@@ -27,7 +24,7 @@ determine_array_type
 @dataclass(slots=True)
 class IndicatorParams:
     name: str
-    func: Callable[..., NDArray[np.float32]]
+    func: IndicatorFunc
     array_type: str
     param_combos: list[dict[str, int]]
 
@@ -42,7 +39,7 @@ class Asset(BaseEntity):
 
 @dataclass
 class Indicator(BaseEntity):
-    func: Callable[..., NDArray[np.float32]]
+    func: IndicatorFunc
     array_type: str
     params: dict[str, list[int]] = field(default_factory=dict)
 
@@ -114,7 +111,7 @@ class IndicatorsCollection(BaseCollection[Indicator]):
 
     def _load_entities(self) -> None:
         entities_to_test: dict[str, bool] = load_config_file(self.entities_file)
-        entities_functions: dict[str, Callable[..., NDArray[np.float32]]] = get_all_indicators_from_module(self.primary_keys_file)
+        entities_functions: dict[str, IndicatorFunc] = get_all_indicators_from_module(self.primary_keys_file)
         params_config: dict[str, dict[str, list[int]]] = load_config_file(INDICATORS_PARAMS_FILE)
 
         for name, func in entities_functions.items():

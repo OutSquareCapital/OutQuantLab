@@ -1,8 +1,7 @@
 import numpy as np
-from numpy.typing import NDArray
 import pandas as pd
 from collections.abc import Callable
-from Files import N_THREADS
+from Files import N_THREADS, NDArrayFloat
 from concurrent.futures import ThreadPoolExecutor
 from .Process_Indicators import process_indicator_parallel
 from .Process_Data import (
@@ -15,10 +14,10 @@ from Config import IndicatorParams, ClustersTree
 
 @dataclass(slots=True)
 class BacktestData:
-    prices_array: NDArray[np.float32]
-    log_returns_array: NDArray[np.float32]
-    adjusted_returns_array: NDArray[np.float32]
-    signals_array: NDArray[np.float32]
+    prices_array: NDArrayFloat
+    log_returns_array: NDArrayFloat
+    adjusted_returns_array: NDArrayFloat
+    signals_array: NDArrayFloat
     indicators_and_params: list[IndicatorParams]
 
 @dataclass(slots=True)

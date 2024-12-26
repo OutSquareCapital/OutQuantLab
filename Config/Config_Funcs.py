@@ -1,14 +1,11 @@
 import json
-from numpy.typing import NDArray
 import pyarrow.parquet as pq # type: ignore
 from types import MappingProxyType
 from typing import Any
-from collections.abc import Callable
 import importlib
 from itertools import product
 from inspect import Parameter
-from numpy.typing import NDArray
-import numpy as np
+from Files import IndicatorFunc
 
 def load_config_file(file_path: str) -> dict[str, Any]:
     with open(file_path, "r") as file:
@@ -22,15 +19,16 @@ def load_asset_names(file_path: str) -> list[str]:
     column_names: list[str] = pq.ParquetFile(file_path).schema.names # type: ignore
     return [col for col in column_names if col != "Date"] # type: ignore
 
-def get_all_indicators_from_module(module_name: str) -> dict[str, Callable[..., NDArray[np.float32]]]:
+def get_all_indicators_from_module(module_name: str) -> dict[str, IndicatorFunc]:
     module = importlib.import_module(module_name)
-    indicators = vars(module).items()
+    indicators: dict[str, IndicatorFunc] = vars(module).items() # type: ignore
 
-    formatted_indicators: dict[str, Callable[..., NDArray[np.float32]]] = {}
+    formatted_indicators: dict[str, IndicatorFunc] = {}
+
     for name, func in indicators:
         if callable(func):
             formatted_name:str = ''.join(word.title() for word in name.split('_'))
-            formatted_indicators[formatted_name] = func # type: ignore
+            formatted_indicators[formatted_name] = func
 
     return formatted_indicators
 
