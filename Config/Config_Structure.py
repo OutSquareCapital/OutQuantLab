@@ -27,7 +27,7 @@ determine_array_type
 @dataclass(slots=True)
 class IndicatorParams:
     name: str
-    func: Callable
+    func: Callable[..., NDArray[np.float32]]
     array_type: str
     param_combos: list[dict[str, int]]
 
@@ -42,7 +42,7 @@ class Asset(BaseEntity):
 
 @dataclass
 class Indicator(BaseEntity):
-    func: Callable[[NDArray[np.float32], *tuple[int, ...]], NDArray[np.float32]]
+    func: Callable[..., NDArray[np.float32]]
     array_type: str
     params: dict[str, list[int]] = field(default_factory=dict)
 
@@ -55,7 +55,7 @@ class ClustersTree:
 
     def update_clusters_structure(self, new_structure: dict[str, Any]) -> None:
         self.clusters = new_structure
-        
+
     def map_nested_clusters_to_assets(self) -> dict[str, tuple[str, str]]:
         return {
             asset: (level1, level2)
@@ -64,7 +64,7 @@ class ClustersTree:
             for asset in assets
         }
 
-    def save(self):
+    def save(self) -> None:
         save_config_file(self.clusters_file, self.clusters, indent=3)
 
 class BaseCollection(Generic[T]):
@@ -104,11 +104,8 @@ class BaseCollection(Generic[T]):
     def set_active(self, name: str, active: bool) -> None:
         self.entities[name].active = active
 
-    def get_attribute_dict(self, attr: str) -> dict[str, Any]:
-        return {name: getattr(entity, attr) for name, entity in self.entities.items()}
-    
     def save(self) -> None:
-        active_entities = self.get_attribute_dict("active")
+        active_entities = {name: entity.active for name, entity in self.entities.items()}
         save_config_file(self.entities_file, active_entities, indent=3)
 
 class IndicatorsCollection(BaseCollection[Indicator]):
@@ -117,7 +114,7 @@ class IndicatorsCollection(BaseCollection[Indicator]):
 
     def _load_entities(self) -> None:
         entities_to_test: dict[str, bool] = load_config_file(self.entities_file)
-        entities_functions: dict[str, Callable] = get_all_indicators_from_module(self.primary_keys_file)
+        entities_functions: dict[str, Callable[..., NDArray[np.float32]]] = get_all_indicators_from_module(self.primary_keys_file)
         params_config: dict[str, dict[str, list[int]]] = load_config_file(INDICATORS_PARAMS_FILE)
 
         for name, func in entities_functions.items():
@@ -149,7 +146,7 @@ class IndicatorsCollection(BaseCollection[Indicator]):
 
     def save(self) -> None:
         super().save()
-        parameters_to_save = self.get_attribute_dict("params")
+        parameters_to_save = {name: indicator.params for name, indicator in self.entities.items()}
         save_config_file(INDICATORS_PARAMS_FILE, parameters_to_save, indent=3)
 
     def get_params(self, name: str) -> dict[str, list[int]]:
