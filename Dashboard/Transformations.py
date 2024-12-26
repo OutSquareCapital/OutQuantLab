@@ -2,11 +2,10 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 import re
-from collections import defaultdict
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import linkage, leaves_list # type: ignore
 
-def convert_series_multiindex_labels(series) -> pd.Series:
+def convert_series_multiindex_labels(series):
     if isinstance(series.index, pd.MultiIndex):
         series.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in series.index]
     return series
@@ -24,74 +23,15 @@ def compute_linkage_matrix(corr_matrix: pd.DataFrame) -> NDArray[np.float32]:
     condensed_distances = squareform(pairwise_distances.values)
     return linkage(condensed_distances, method='average')
 
-def sort_correlation_matrix(corr_matrix) -> pd.DataFrame:
+def sort_correlation_matrix(corr_matrix: pd.DataFrame) -> pd.DataFrame:
 
     linkage_matrix = compute_linkage_matrix(corr_matrix)
     ordered_indices = leaves_list(linkage_matrix)
 
     sorted_corr_matrix = corr_matrix.iloc[ordered_indices, ordered_indices]
-    np.fill_diagonal(sorted_corr_matrix.values, np.nan)
+    np.fill_diagonal(sorted_corr_matrix.values, np.nan) # type: ignore
 
-    return sorted_corr_matrix
-
-def convert_params_to_3d(sharpe_ratios_df, param1, param2):
-
-    sharpe_dict = defaultdict(list)
-
-    for index, row in sharpe_ratios_df.iterrows():
-        param1_value, param2_value = extract_params_from_name(index, param1, param2)
-        if param1_value is not None and param2_value is not None:
-            sharpe_dict[(param1_value, param2_value)].append(row['Sharpe Ratio'])
-    x_vals = []
-    y_vals = []
-    z_vals = []
-    for (p1, p2), sharpe_list in sharpe_dict.items():
-        x_vals.append(p1)
-        y_vals.append(p2)
-        z_vals.append(np.nanmean(sharpe_list))
-    
-    x_vals = np.array(x_vals)
-    y_vals = np.array(y_vals)
-    z_vals = np.array(z_vals)
-
-    x_unique = np.unique(x_vals)
-    y_unique = np.unique(y_vals)
-    X, Y = np.meshgrid(x_unique, y_unique)
-    Z = np.full_like(X, np.nan, dtype=np.float32)
-
-    for i in range(len(x_vals)):
-        x_idx = np.where(x_unique == x_vals[i])[0][0]
-        y_idx = np.where(y_unique == y_vals[i])[0][0]
-        Z[y_idx, x_idx] = z_vals[i]
-
-    return X, Y, Z
-
-def convert_params_to_4d(sharpe_ratios_df, params):
-
-    sharpe_dict = defaultdict(list)
-
-    for index, row in sharpe_ratios_df.iterrows():
-        param_values = extract_all_params_from_name(index, params)
-        if all(param_values):
-            key = tuple(param_values[:3])
-            sharpe_dict[key].append(row['Sharpe Ratio'])
-    x_vals = []
-    y_vals = []
-    z_vals = []
-    sharpe_means = []
-
-    for (p1, p2, p3), sharpe_list in sharpe_dict.items():
-        x_vals.append(p1)
-        y_vals.append(p2)
-        z_vals.append(p3)
-        sharpe_means.append(np.nanmean(sharpe_list))
-
-    x_vals = np.array(x_vals)
-    y_vals = np.array(y_vals)
-    z_vals = np.array(z_vals)
-    sharpe_means = np.array(sharpe_means)
-
-    return x_vals, y_vals, z_vals, sharpe_means
+    return sorted_corr_matrix # type: ignore
 
 def extract_params_from_name(name: str, param1: str, param2: str):
 
@@ -141,14 +81,14 @@ def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=No
     return labels, parents
 
 def sort_series(data: pd.Series, ascending: bool = True) -> pd.Series:
-    return data.sort_values(ascending=ascending)
+    return data.sort_values(ascending=ascending) # type: ignore
 
 def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool = True) -> pd.DataFrame:
     if use_final:
-        return data.sort_values(by=data.index[-1], axis=1, ascending=ascending)
+        return data.sort_values(by=data.index[-1], axis=1, ascending=ascending) # type: ignore
     else:
-        sorted_data = data.mean().sort_values(ascending=ascending)
-        return data[sorted_data.index]
+        sorted_data = data.mean().sort_values(ascending=ascending) # type: ignore
+        return data[sorted_data.index] # type: ignore
 
 def normalize_data_for_colormap(data: NDArray[np.float32]):
 

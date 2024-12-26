@@ -1,4 +1,4 @@
-from scipy.cluster.hierarchy import linkage, fcluster
+from scipy.cluster.hierarchy import linkage, fcluster # type: ignore
 from scipy.spatial.distance import squareform
 import pandas as pd
 import numpy as np

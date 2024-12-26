@@ -1,4 +1,4 @@
-import plotly.graph_objects as go
+import plotly.graph_objects as go # type: ignore
 from numpy.typing import NDArray
 import pandas as pd
 import numpy as np
@@ -17,7 +17,7 @@ def curves( x_values: pd.Index,
     color_map = get_color_map(y_values.columns.tolist())
 
     for column in y_values.columns:
-        fig.add_trace(go.Scatter(
+        fig.add_trace(go.Scatter( # type: ignore
             x=x_values,
             y=y_values[column],
             mode='lines',
@@ -27,7 +27,7 @@ def curves( x_values: pd.Index,
         ))
 
     if log_scale:
-        fig.update_layout(yaxis=dict(type="log"))
+        fig.update_layout(yaxis=dict(type="log")) # type: ignore
 
     setup_figure_layout(fig, title)
 
@@ -38,12 +38,14 @@ def bars(
     title: str
     ) -> go.Figure:
     
-    color_map = get_color_map(series.index.tolist())
+    index: pd.Index[str] = series.index # type: ignore
+
+    color_map = get_color_map(index.tolist())
 
     fig = go.Figure()
 
     for item, value in series.items():
-        fig.add_trace(go.Bar(
+        fig.add_trace(go.Bar( # type: ignore
             x=[item],
             y=[value],
             name=item,
@@ -51,7 +53,7 @@ def bars(
             showlegend=True
         ))
 
-    fig.update_layout(
+    fig.update_layout( # type: ignore
         xaxis=dict(showticklabels=False)
     )
 
@@ -63,8 +65,8 @@ def bars(
 
 def heatmap(
     z_values: NDArray[np.float32], 
-    x_labels: list, 
-    y_labels: list, 
+    x_labels: list[str], 
+    y_labels: list[str], 
     title: str
     ) -> go.Figure:
 
@@ -89,47 +91,12 @@ def heatmap(
     )
     ))
 
-    fig.update_layout(
+    fig.update_layout( # type: ignore
         yaxis=dict(showgrid=False, autorange="reversed")
     )
 
     setup_figure_layout(fig, title, hover_display_custom=False)
 
-    return fig
-
-def scatter_3d(
-    x_vals, 
-    y_vals, 
-    z_vals, 
-    values, 
-    params, 
-    title: str
-    ) -> go.Figure:
-    
-    fig = go.Figure(data=[go.Scatter3d(
-        x=x_vals,
-        y=y_vals,
-        z=z_vals,
-        mode='markers',
-        marker=dict(
-            size=8,
-            color=values,
-            colorscale='Jet_r',
-            colorbar=dict(title="Value"),
-            showscale=True
-        ),
-        text=['Value: {:.2f}'.format(v) for v in values],
-        hovertemplate='Param1: %{x}<br>Param2: %{y}<br>Param3: %{z}<br>Value: %{marker.color}<extra></extra>'
-    )])
-    fig.update_layout(
-        scene=dict(
-            xaxis_title=params[0],
-            yaxis_title=params[1],
-            zaxis_title=params[2]
-        )
-    )
-
-    setup_figure_layout(fig, title)
     return fig
 
 def violin(
@@ -142,7 +109,7 @@ def violin(
     color_map = get_color_map(data.columns.tolist())
 
     for column in data.columns:
-        fig.add_trace(go.Violin(
+        fig.add_trace(go.Violin( # type: ignore
             y=data[column],
             name=column,
             box_visible=True,
@@ -155,7 +122,7 @@ def violin(
 
     y_min = data.min().min()
     y_max = data.max().max()
-    fig.update_layout(
+    fig.update_layout( # type: ignore
         yaxis=dict(range=[y_min, y_max], showgrid=False),
         xaxis=dict(
             showticklabels=False,
@@ -176,21 +143,21 @@ def histogram(
     color_map = get_color_map(data.columns.tolist())
 
     for column in data.columns:
-        fig.add_trace(go.Histogram(
+        fig.add_trace(go.Histogram( # type: ignore
             x=data[column],
             name=column,
             marker=get_marker_config(color_map[column]),
             showlegend=True
         ))
-    fig.update_layout(
+    fig.update_layout( # type: ignore
         barmode="overlay"
     )
     setup_figure_layout(fig, title, hover_data='x')
     return fig
 
 def icicle(
-    labels: list, 
-    parents: list, 
+    labels: list[str], 
+    parents: list[str], 
     title: str
     ) -> go.Figure:
     

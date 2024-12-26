@@ -19,7 +19,206 @@ def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> 
 #data_prices_df_merged.to_csv(file_path_main_data)
 
 #test = CleanData.adjust_prices_with_risk_free_rate(etf_data, bill_data)
+'''
 
+def convert_params_to_3d(sharpe_ratios_df, param1, param2):
+
+    sharpe_dict = defaultdict(list)
+
+    for index, row in sharpe_ratios_df.iterrows():
+        param1_value, param2_value = extract_params_from_name(index, param1, param2)
+        if param1_value is not None and param2_value is not None:
+            sharpe_dict[(param1_value, param2_value)].append(row['Sharpe Ratio'])
+    x_vals = []
+    y_vals = []
+    z_vals = []
+    for (p1, p2), sharpe_list in sharpe_dict.items():
+        x_vals.append(p1)
+        y_vals.append(p2)
+        z_vals.append(np.nanmean(sharpe_list))
+    
+    x_vals = np.array(x_vals)
+    y_vals = np.array(y_vals)
+    z_vals = np.array(z_vals)
+
+    x_unique = np.unique(x_vals)
+    y_unique = np.unique(y_vals)
+    X, Y = np.meshgrid(x_unique, y_unique)
+    Z = np.full_like(X, np.nan, dtype=np.float32)
+
+    for i in range(len(x_vals)):
+        x_idx = np.where(x_unique == x_vals[i])[0][0]
+        y_idx = np.where(y_unique == y_vals[i])[0][0]
+        Z[y_idx, x_idx] = z_vals[i]
+
+    return X, Y, Z
+
+def convert_params_to_4d(sharpe_ratios_df, params):
+
+    sharpe_dict = defaultdict(list)
+
+    for index, row in sharpe_ratios_df.iterrows():
+        param_values = extract_all_params_from_name(index, params)
+        if all(param_values):
+            key = tuple(param_values[:3])
+            sharpe_dict[key].append(row['Sharpe Ratio'])
+    x_vals = []
+    y_vals = []
+    z_vals = []
+    sharpe_means = []
+
+    for (p1, p2, p3), sharpe_list in sharpe_dict.items():
+        x_vals.append(p1)
+        y_vals.append(p2)
+        z_vals.append(p3)
+        sharpe_means.append(np.nanmean(sharpe_list))
+
+    x_vals = np.array(x_vals)
+    y_vals = np.array(y_vals)
+    z_vals = np.array(z_vals)
+    sharpe_means = np.array(sharpe_means)
+
+    return x_vals, y_vals, z_vals, sharpe_means
+
+def scatter_3d(
+    x_vals, 
+    y_vals, 
+    z_vals, 
+    values, 
+    params, 
+    title: str
+    ) -> go.Figure:
+    
+    fig = go.Figure(data=[go.Scatter3d(
+        x=x_vals,
+        y=y_vals,
+        z=z_vals,
+        mode='markers',
+        marker=dict(
+            size=8,
+            color=values,
+            colorscale='Jet_r',
+            colorbar=dict(title="Value"),
+            showscale=True
+        ),
+        text=['Value: {:.2f}'.format(v) for v in values],
+        hovertemplate='Param1: %{x}<br>Param2: %{y}<br>Param3: %{z}<br>Value: %{marker.color}<extra></extra>'
+    )])
+    fig.update_layout( # type: ignore
+        scene=dict(
+            xaxis_title=params[0],
+            yaxis_title=params[1],
+            zaxis_title=params[2]
+        )
+    )
+
+    setup_figure_layout(fig, title)
+    return fig
+
+def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str) -> go.Figure:
+
+    sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(returns_df)
+    sharpe_ratios_df=Transformations.convert_dataframe_multiindex_labels(sharpe_ratios_df)
+    X, Y, Z = Transformations.convert_params_to_3d(sharpe_ratios_df, param1, param2)
+
+    return Widgets.heatmap(
+        z_values=Z,
+        x_labels=X[0],
+        y_labels=Y[:, 0].tolist(),
+        title=f"Sharpe Ratios for {param1} and {param2}")
+
+def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list) -> go.Figure:
+
+    sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(returns_df)
+    sharpe_ratios_df=Transformations.convert_dataframe_multiindex_labels(sharpe_ratios_df)
+    x_vals, y_vals, z_vals, sharpe_means = Transformations.convert_params_to_4d(sharpe_ratios_df, params)
+
+    return Widgets.scatter_3d(
+        x_vals=x_vals, 
+        y_vals=y_vals, 
+        z_vals=z_vals, 
+        values=sharpe_means, 
+        params=params,
+        title="Scatter Plot 3D")'''
+'''
+import pandas as pd
+import numpy as np
+from Metrics import rolling_sharpe_ratios, rolling_mean
+from numpy.typing import NDArray
+def calculate_cost_limit(
+    raw_rolling_sharpe_df: pd.DataFrame, 
+    net_rolling_sharpe_df: pd.DataFrame, 
+    asset_names: list[str], 
+    limit_treshold: float =0.05, 
+    ma_window: int=250, 
+    day_treshold: int = 60) -> pd.DataFrame:
+
+    cost_validation_df = pd.DataFrame(
+        0.0, 
+        index=raw_rolling_sharpe_df.index,
+        columns=raw_rolling_sharpe_df.columns, 
+        dtype=np.float32
+        )
+
+    for asset in asset_names:
+        raw_sharpe_columns = [col for col in raw_rolling_sharpe_df.columns if asset in col]
+        net_sharpe_columns = [col for col in net_rolling_sharpe_df.columns if asset in col]
+        
+        raw_sharpe: NDArray[np.float32] = raw_rolling_sharpe_df[raw_sharpe_columns].values
+        net_sharpe: NDArray[np.float32]  = net_rolling_sharpe_df[net_sharpe_columns].values
+        
+        sharpe_diff = (raw_sharpe + 100) - (net_sharpe + 100)
+        
+        ma_sharpe_diff = rolling_mean(sharpe_diff, length=ma_window, min_length=1)
+        
+        positive_invalid_costs = (raw_sharpe > 0) & (ma_sharpe_diff > (raw_sharpe * limit_treshold))
+        negative_invalid_costs = (raw_sharpe < 0) & (ma_sharpe_diff > ((raw_sharpe * limit_treshold)*-1))
+
+        invalid_costs = positive_invalid_costs | negative_invalid_costs
+
+        consecutive_days = np.zeros_like(invalid_costs, dtype=int)
+        for i in range(1, len(invalid_costs)):
+            consecutive_days[i] = np.where(invalid_costs[i], consecutive_days[i-1] + 1, 0)
+        
+        cost_validation_df[raw_sharpe_columns] = np.where(consecutive_days >= day_treshold, 0, 1)
+    
+    return cost_validation_df
+
+
+def adjust_returns_by_impact(net_adjusted_returns_df: pd.DataFrame, cost_validation_df: pd.DataFrame) -> pd.DataFrame:
+
+    adjusted_returns_df = net_adjusted_returns_df * cost_validation_df
+
+    return adjusted_returns_df
+
+def calculate_cost_adjusted_returns(
+    raw_adjusted_returns_df: pd.DataFrame, 
+    net_adjusted_returns_df: pd.DataFrame, 
+    asset_names: list, 
+    window_size: int = 250) -> pd.DataFrame:
+
+    raw_rolling_sharpe_df = pd.DataFrame(
+        rolling_sharpe_ratios(
+            raw_adjusted_returns_df.values, 
+            window_size, 
+            window_size),
+        index=raw_adjusted_returns_df.index,
+        columns=raw_adjusted_returns_df.columns)
+
+    net_rolling_sharpe_df = pd.DataFrame(
+        rolling_sharpe_ratios(
+            net_adjusted_returns_df.values, 
+            window_size, 
+            window_size),
+        index=net_adjusted_returns_df.index,
+        columns=net_adjusted_returns_df.columns)
+
+    cost_validation_df = calculate_cost_limit(raw_rolling_sharpe_df, net_rolling_sharpe_df, asset_names)
+    
+    cost_adjusted_returns_df = adjust_returns_by_impact(net_adjusted_returns_df, cost_validation_df)
+    
+    return cost_adjusted_returns_df
+'''
 
 paires_futures_etf = [
 ("6A", "AD"),

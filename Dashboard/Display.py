@@ -2,12 +2,12 @@ import pandas as pd
 import Dashboard.Transformations as Transformations
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations
-from Portfolio import generate_static_clusters
+from .Clusters import generate_static_clusters
 from collections.abc import Callable
 import plotly.graph_objects as go # type: ignore
 from dataclasses import dataclass
 
-@dataclass()
+@dataclass
 class DashboardPlot:
     name: str
     func: Callable
@@ -15,7 +15,7 @@ class DashboardPlot:
     length_required: bool
 
 class DashboardsCollection:
-    def __init__(self, length):
+    def __init__(self, length: int) -> None:
         self.global_portfolio: pd.DataFrame
         self.sub_portfolios: pd.DataFrame
         self.length: int = length
@@ -23,7 +23,7 @@ class DashboardsCollection:
         self.all_dashboards: dict[str, DashboardPlot] = self.__initialize_dashboards()
 
     def __initialize_dashboards(self) -> dict[str, DashboardPlot]:
-        all_dashboards = {}
+        all_dashboards:dict[str, DashboardPlot] = {}
         for name, func in globals().items():
             if callable(func) and name.startswith("plot_"):
                 formatted_name = name[5:].replace("_", " ").title()
@@ -43,7 +43,7 @@ class DashboardsCollection:
         return all_dashboards
 
     def calculate_metrics(self) -> list[float]:
-        metric_functions: list[Callable] = [
+        metric_functions: list[Callable[..., pd.Series]] = [
             Computations.calculate_overall_returns,
             Computations.calculate_overall_sharpe_ratio,
             Computations.calculate_overall_max_drawdown,
@@ -238,29 +238,3 @@ def plot_clusters_icicle(returns_df: pd.DataFrame, max_clusters=4, max_sub_clust
         labels=labels, 
         parents=parents, 
         title="Clusters")
-
-def plot_sharpe_ratio_heatmap(returns_df: pd.DataFrame, param1: str, param2: str) -> go.Figure:
-
-    sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(returns_df)
-    sharpe_ratios_df=Transformations.convert_dataframe_multiindex_labels(sharpe_ratios_df)
-    X, Y, Z = Transformations.convert_params_to_3d(sharpe_ratios_df, param1, param2)
-
-    return Widgets.heatmap(
-        z_values=Z,
-        x_labels=X[0],
-        y_labels=Y[:, 0].tolist(),
-        title=f"Sharpe Ratios for {param1} and {param2}")
-
-def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list) -> go.Figure:
-
-    sharpe_ratios_df = Computations.calculate_overall_sharpe_ratio(returns_df)
-    sharpe_ratios_df=Transformations.convert_dataframe_multiindex_labels(sharpe_ratios_df)
-    x_vals, y_vals, z_vals, sharpe_means = Transformations.convert_params_to_4d(sharpe_ratios_df, params)
-
-    return Widgets.scatter_3d(
-        x_vals=x_vals, 
-        y_vals=y_vals, 
-        z_vals=z_vals, 
-        values=sharpe_means, 
-        params=params,
-        title="Scatter Plot 3D")
