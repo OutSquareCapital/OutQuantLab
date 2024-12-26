@@ -31,10 +31,14 @@ def rolling_median_normalisation(
     dict = {
         "signal_array": signal_array,
         "median_array": rolling_median(signal_array, length=window_length, min_length=window_length),
-        "max": rolling_min(signal_array, length=window_length, min_length=window_length),
-        "min": rolling_max(signal_array, length=window_length, min_length=window_length)
+        "max_array": rolling_max(signal_array, length=window_length, min_length=window_length),
+        "min_array": rolling_min(signal_array, length=window_length, min_length=window_length)
     }
-    ne.evaluate("((signal_array - median_array) / (max - min)) * 2", out=adjusted_signal_array, local_dict=dict) # type: ignore
+    ne.evaluate(
+        "((signal_array - median_array) / (max_array - min_array)) * 2", 
+        out=adjusted_signal_array, 
+        local_dict=dict
+    )
 
     return np.clip(adjusted_signal_array, -limit, limit)
 
