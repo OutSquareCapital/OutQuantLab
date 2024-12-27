@@ -5,4 +5,4 @@ from typing import Any, TypeAlias
 
 NDArrayFloat: TypeAlias = NDArray[np.float32]
 ProgressFunc: TypeAlias = Callable[[int, str], Any]
-IndicatorFunc : TypeAlias = Callable[[list[int]], NDArrayFloat]
+IndicatorFunc : TypeAlias = Callable[..., NDArrayFloat]

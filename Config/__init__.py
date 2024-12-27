@@ -1,11 +1,10 @@
-from .Config_Structure import IndicatorsCollection, AssetsCollection, BaseCollection, Asset, Indicator, IndicatorParams, ClustersTree
+from .Config_Structure import IndicatorsCollection, AssetsCollection, Asset, IndicatorMethod, ClustersTree, IndicatorState
 
 __all__ = [
     'IndicatorsCollection',
     'AssetsCollection',
-    'BaseCollection',
     'Asset',
-    'Indicator',
-    'IndicatorParams',
+    'IndicatorMethod',
+    'IndicatorState',
     'ClustersTree'
 ]

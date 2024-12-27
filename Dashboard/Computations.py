@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import skew # type: ignore
 from Files import PERCENTAGE_FACTOR, ANNUALIZATION_FACTOR, ANNUALIZED_PERCENTAGE_FACTOR
-from Backtest import calculate_equity_curves
+from Indicators import calculate_equity_curves
 from Metrics import rolling_mean, rolling_sharpe_ratios, rolling_skewness, hv_composite
 
 def calculate_overall_returns(returns_df: pd.DataFrame) -> pd.Series:

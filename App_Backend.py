@@ -1,6 +1,7 @@
 from Files import FILE_PATH_YF, INDICATORS_CLUSTERS_FILE, ASSETS_CLUSTERS_FILE, ProgressFunc
 from Backtest import calculate_strategy_returns, initialize_backtest_config, get_yahoo_finance_data
 from Portfolio import aggregate_raw_returns
+from Indicators import IndicatorsMethods
 from Config import AssetsCollection, IndicatorsCollection, ClustersTree
 from Dashboard import DashboardsCollection
 import pandas as pd
@@ -16,17 +17,18 @@ class OutQuantLab:
         self.indicators_clusters = ClustersTree(INDICATORS_CLUSTERS_FILE)
         self.dashboards = DashboardsCollection(length=1250)
         self.progress_callback = progress_callback
-
     def run_backtest(self) -> None:
-        backtest_data, backtest_config = initialize_backtest_config(
+        indics_methods = IndicatorsMethods()
+        backtest_data = initialize_backtest_config(
             file_path=FILE_PATH_YF,
             asset_names=self.assets_collection.all_active_entities_names,
             indicators_and_params=self.indicators_collection.indicators_params_dict,
             asset_clusters=self.assets_clusters,
-            indics_clusters=self.indicators_clusters
+            indics_clusters=self.indicators_clusters,
+            indics_methods = indics_methods
         )
 
-        raw_adjusted_returns_df:pd.DataFrame = calculate_strategy_returns(backtest_data, backtest_config, self.progress_callback)
+        raw_adjusted_returns_df:pd.DataFrame = calculate_strategy_returns(backtest_data, indics_methods, self.progress_callback)
 
         self.dashboards.global_portfolio, self.dashboards.sub_portfolios = aggregate_raw_returns(raw_adjusted_returns_df)
 

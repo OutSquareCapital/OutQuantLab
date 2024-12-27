@@ -1,5 +1,6 @@
-from .Indics_Normalized import IndicatorsMethods
+from .Indics_Normalized import IndicatorsMethods, calculate_equity_curves
 
 __all__ = [
-    'IndicatorsMethods'
+    'IndicatorsMethods',
+    'calculate_equity_curves'
 ]

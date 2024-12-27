@@ -22,7 +22,7 @@ QPushButton,
 QApplication
 )
 from PySide6.QtCore import Qt
-from Config import AssetsCollection, BaseCollection, ClustersTree, IndicatorsCollection, Asset, Indicator, BaseCollection
+from Config import AssetsCollection, ClustersTree, IndicatorsCollection, Asset, IndicatorState
 
 class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection, parent=None):
@@ -32,7 +32,7 @@ class AssetSelectionWidget(QWidget):
         self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         layout = QVBoxLayout()
     
         scroll_layout = create_scroll_with_buttons(
@@ -52,14 +52,14 @@ class AssetSelectionWidget(QWidget):
 
         self.setLayout(layout)
         
-    def update_asset_state(self, asset_name: str, is_checked: bool):
+    def update_asset_state(self, asset_name: str, is_checked: bool) -> None:
         self.assets_collection.set_active(asset_name, is_checked)
 
-    def select_all_assets(self):
+    def select_all_assets(self) -> None:
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(True)
 
-    def unselect_all_assets(self):
+    def unselect_all_assets(self) -> None:
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(False)
 
@@ -68,12 +68,12 @@ class IndicatorsConfigWidget(QWidget):
     def __init__(self, indicators_collection: IndicatorsCollection, parent=None):
         super().__init__(parent)
         self.indicators_collection = indicators_collection
-        self.entities:list[Indicator] = self.indicators_collection.all_entities
+        self.entities:list[IndicatorState] = self.indicators_collection.all_entities
         self.param_widgets: dict[str, dict[str, dict[str, QSlider | QLabel]]] = {}
         self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         layout = QVBoxLayout()
         scroll_layout = create_scroll_with_buttons(
         layout, 
@@ -82,7 +82,7 @@ class IndicatorsConfigWidget(QWidget):
         )
 
         for indicator in self.entities:
-            self.add_indicator_section(indicator.name, indicator.active, indicator.params, scroll_layout)
+            self.add_indicator_section(indicator.name, indicator.active, indicator.params_values, scroll_layout)
             
         self.setLayout(layout)
 
@@ -91,7 +91,7 @@ class IndicatorsConfigWidget(QWidget):
         indicator_name: str, 
         is_active: bool, 
         params: dict[str, list[int]], 
-        layout: QVBoxLayout):
+        layout: QVBoxLayout) -> None:
 
         indicator_box, content_layout = create_expandable_section(indicator_name)
 
@@ -113,7 +113,7 @@ class IndicatorsConfigWidget(QWidget):
         indicator_name: str, 
         param_name: str, 
         values: list[int], 
-        layout: QVBoxLayout):
+        layout: QVBoxLayout) -> None:
         
         if not values:
             values = [1]
@@ -145,19 +145,19 @@ class IndicatorsConfigWidget(QWidget):
             "num_values_info_label": num_values_info_label,
         }
 
-    def update_indicator_state(self, indicator_name: str, is_checked: bool):
+    def update_indicator_state(self, indicator_name: str, is_checked: bool) -> None:
         self.indicators_collection.set_active(indicator_name, is_checked)
 
-    def select_all_indicators(self):
+    def select_all_indicators(self) -> None:
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(True)
 
-    def unselect_all_indicators(self):
+    def unselect_all_indicators(self) -> None:
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(False)
 
 class TreeStructureWidget(QWidget):
-    def __init__(self, collection: BaseCollection, clusters: ClustersTree, parent=None):
+    def __init__(self, collection, clusters: ClustersTree, parent=None) -> None:
         super().__init__(parent)
         self.collection = collection
         self.clusters_tree = clusters

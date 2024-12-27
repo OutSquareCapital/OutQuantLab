@@ -2,25 +2,18 @@ import numpy as np
 import pandas as pd
 from Files import N_THREADS, NDArrayFloat, ProgressFunc
 from concurrent.futures import ThreadPoolExecutor
-from .Process_Indicators import process_indicator_parallel
 from .Process_Data import (
 load_prices, 
 generate_multi_index_process,
-process_data
 )
 from dataclasses import dataclass
-from Config import IndicatorParams, ClustersTree
+from Config import IndicatorMethod, ClustersTree
 from Indicators import IndicatorsMethods
-@dataclass(slots=True)
-class BacktestData:
-    prices_array: NDArrayFloat
-    log_returns_array: NDArrayFloat
-    adjusted_returns_array: NDArrayFloat
-    signals_array: NDArrayFloat
-    indicators_and_params: list[IndicatorParams]
 
 @dataclass(slots=True)
-class BacktestStructure:
+class BacktestData:
+    signals_array: NDArrayFloat
+    indicators_and_params: list[IndicatorMethod]
     dates_index: pd.DatetimeIndex
     multi_index: pd.MultiIndex
     total_returns_streams: int
@@ -28,56 +21,49 @@ class BacktestStructure:
 
 def calculate_strategy_returns(
     backtest_data: BacktestData,
-    backtest_structure: BacktestStructure,
+    indics_methods: IndicatorsMethods,
     progress_callback: ProgressFunc
 ) -> pd.DataFrame:
     signal_col_index = 0
     global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
-    
-    indicators = IndicatorsMethods()
-    indicators.prices_array = backtest_data.prices_array
-    indicators.returns_array = backtest_data.log_returns_array
 
     for indic in backtest_data.indicators_and_params:
-        results = process_indicator_parallel(
-            indicators,
+        results = indics_methods.process_indicator_parallel(
             indic.func, 
-            backtest_data.adjusted_returns_array, 
             indic.param_combos, 
             global_executor
         )
 
         for result in results:
-            backtest_data.signals_array[:, signal_col_index:signal_col_index + backtest_structure.total_assets_count] = result
-            signal_col_index += backtest_structure.total_assets_count
+            backtest_data.signals_array[:, signal_col_index:signal_col_index + backtest_data.total_assets_count] = result
+            signal_col_index += backtest_data.total_assets_count
 
         progress_callback(
-            int(100 * signal_col_index / backtest_structure.total_returns_streams),
-            f"Backtesting Strategies: {signal_col_index}/{backtest_structure.total_returns_streams}..."
+            int(100 * signal_col_index / backtest_data.total_returns_streams),
+            f"Backtesting Strategies: {signal_col_index}/{backtest_data.total_returns_streams}..."
         )
 
     return pd.DataFrame(
-        backtest_data.signals_array,
-        index=backtest_structure.dates_index,
-        columns=backtest_structure.multi_index,
+        data=backtest_data.signals_array,
+        index=backtest_data.dates_index,
+        columns=backtest_data.multi_index,
         dtype=np.float32,
     )
 
 def initialize_backtest_config(
     file_path: str,
     asset_names: list[str],
-    indicators_and_params: list[IndicatorParams],
+    indicators_and_params: list[IndicatorMethod],
     asset_clusters: ClustersTree,
-    indics_clusters: ClustersTree
-    ) -> tuple[BacktestData, BacktestStructure]:
+    indics_clusters: ClustersTree,
+    indics_methods: IndicatorsMethods
+    ) -> BacktestData:
     multi_index = generate_multi_index_process(indicators_and_params, asset_names, asset_clusters, indics_clusters)
     prices_df = load_prices(asset_names, file_path)
     dates_index: pd.DatetimeIndex = prices_df.index # type: ignore
-    prices_array, log_returns_array, adjusted_returns_array = process_data(prices_df)
+    indics_methods.process_data(prices_df)
     total_returns_streams = int(multi_index.shape[0]) # type: ignore
-    total_assets_count = prices_array.shape[1]
-    signals_array = np.empty((prices_array.shape[0], total_returns_streams), dtype=np.float32)
+    total_assets_count = indics_methods.prices_array.shape[1]
+    signals_array = np.empty((indics_methods.prices_array.shape[0], total_returns_streams), dtype=np.float32)
 
-    price_data = BacktestData(prices_array, log_returns_array, adjusted_returns_array, signals_array, indicators_and_params)
-    signal_config = BacktestStructure(dates_index, multi_index, total_returns_streams, total_assets_count)
-    return price_data, signal_config
+    return BacktestData(signals_array, indicators_and_params, dates_index, multi_index, total_returns_streams, total_assets_count)
