@@ -1,4 +1,4 @@
-from Files import NDArrayFloat
+from Files import ArrayFloat
 import pandas as pd
 import numpy as np
 from Metrics import rolling_sharpe_ratios, rolling_mean
@@ -12,10 +12,10 @@ def relative_sharpe_on_confidence_period(
     block_size: int = 500
     ) -> pd.DataFrame:
 
-    def count_non_nan(x: NDArrayFloat) -> NDArrayFloat:
+    def count_non_nan(x: ArrayFloat) -> ArrayFloat:
         return np.cumsum(~np.isnan(x), axis=0, dtype=np.float32)
 
-    returns_array: NDArrayFloat = returns_df.values # type: ignore
+    returns_array: ArrayFloat = returns_df.values # type: ignore
     
     sharpe_array = process_in_blocks_parallel(
         returns_array, 
@@ -41,7 +41,7 @@ def relative_sharpe_on_confidence_period(
 
     rolling_median_sharpe = np.nanmedian(mean_sharpe_array, axis=1)[:, np.newaxis]
 
-    normalized_sharpes: NDArrayFloat = ne.evaluate( # type: ignore
+    normalized_sharpes: ArrayFloat = ne.evaluate( # type: ignore
         "(mean_sharpe_array - rolling_median_sharpe) * ((non_nan_counts / confidence_lookback)**0.5) + 1",
         local_dict={
             "mean_sharpe_array": mean_sharpe_array,

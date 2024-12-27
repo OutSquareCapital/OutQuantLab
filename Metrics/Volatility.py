@@ -1,16 +1,16 @@
 import numpy as np
-from Files import ANNUALIZED_PERCENTAGE_FACTOR, NDArrayFloat
+from Files import ANNUALIZED_PERCENTAGE_FACTOR, ArrayFloat
 import bottleneck as bn # type: ignore
 from Metrics.Aggregation import rolling_mean, rolling_median
 
-def rolling_volatility(array: NDArrayFloat, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_volatility(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
 
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1) # type: ignore
 
 def hv_short_term(
-    returns_array: NDArrayFloat, 
+    returns_array: ArrayFloat, 
     lengths_list: list[int]
-    ) -> NDArrayFloat:
+    ) -> ArrayFloat:
 
     hv_arrays = np.array([
         rolling_volatility(
@@ -22,9 +22,9 @@ def hv_short_term(
     return np.mean(hv_arrays, axis=0)
 
 def hv_long_term(
-    short_term_vol_array: NDArrayFloat, 
+    short_term_vol_array: ArrayFloat, 
     long_term_lengths: list[int]
-    ) -> NDArrayFloat:
+    ) -> ArrayFloat:
     
     long_term_vol_arrays = np.array([
         rolling_median(
@@ -36,11 +36,11 @@ def hv_long_term(
     return np.mean(long_term_vol_arrays, axis=0)
 
 def hv_composite(
-    returns_array: NDArrayFloat, 
+    returns_array: ArrayFloat, 
     short_term_lengths: list[int]=[8, 16, 32, 64], 
     long_term_lengths: list[int]=[256, 512, 1024, 2048, 4096], 
     st_weight: float =0.6
-    ) -> NDArrayFloat:
+    ) -> ArrayFloat:
 
     max_length = returns_array.shape[0]
     adjusted_lengths = [length for length in long_term_lengths if length < max_length]
@@ -55,7 +55,7 @@ def hv_composite(
 
     return rolling_mean(composite_vol_array, length=4, min_length=1)
 
-def separate_volatility(array:NDArrayFloat, LenVol: int) -> tuple[NDArrayFloat, NDArrayFloat]:
+def separate_volatility(array:ArrayFloat, LenVol: int) -> tuple[ArrayFloat, ArrayFloat]:
 
     positive_returns = np.where(np.isnan(array), np.nan, np.where(array > 0, array, 0))
     negative_returns = np.where(np.isnan(array), np.nan, np.where(array < 0, array, 0))

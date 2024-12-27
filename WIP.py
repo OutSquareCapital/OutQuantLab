@@ -1,15 +1,15 @@
 '''
 import numbagg as nb
 
-def rolling_mean_(array: np.ndarray, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_mean_(array: np.ndarray, length: int, min_length: int = 1) -> ArrayFloat:
 
     return nb.move_mean(array, window=length, min_count=min_length, axis=0)
 
-def rolling_sum_(array: np.ndarray, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_sum_(array: np.ndarray, length: int, min_length: int = 1) -> ArrayFloat:
 
     return nb.move_sum(array, window=length, min_count=min_length, axis=0)
 
-def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_volatility_(array: np.ndarray, length: int, min_length: int = 1) -> ArrayFloat:
 
     return nb.move_std(array, window=length, min_count=min_length, axis=0)
 '''
@@ -145,7 +145,7 @@ def plot_overall_sharpe_ratio_3d_scatter(returns_df: pd.DataFrame, params: list)
 import pandas as pd
 import numpy as np
 from Metrics import rolling_sharpe_ratios, rolling_mean
-from Files import NDArrayFloat
+from Files import ArrayFloat
 def calculate_cost_limit(
     raw_rolling_sharpe_df: pd.DataFrame, 
     net_rolling_sharpe_df: pd.DataFrame, 
@@ -165,8 +165,8 @@ def calculate_cost_limit(
         raw_sharpe_columns = [col for col in raw_rolling_sharpe_df.columns if asset in col]
         net_sharpe_columns = [col for col in net_rolling_sharpe_df.columns if asset in col]
         
-        raw_sharpe: NDArrayFloat = raw_rolling_sharpe_df[raw_sharpe_columns].values
-        net_sharpe: NDArrayFloat  = net_rolling_sharpe_df[net_sharpe_columns].values
+        raw_sharpe: ArrayFloat = raw_rolling_sharpe_df[raw_sharpe_columns].values
+        net_sharpe: ArrayFloat  = net_rolling_sharpe_df[net_sharpe_columns].values
         
         sharpe_diff = (raw_sharpe + 100) - (net_sharpe + 100)
         
@@ -716,7 +716,7 @@ def adjust_prices_with_risk_free_rate(returns_df: pd.DataFrame, risk_free_rate_d
     return returns_df.sub(risk_free_daily_expanded, axis=0)'''
 '''
 
-def snapshot_at_intervals(prices_array: np.ndarray, snapshot_interval: int) -> NDArrayFloat:
+def snapshot_at_intervals(prices_array: np.ndarray, snapshot_interval: int) -> ArrayFloat:
 
     snapshot_indices = np.arange(0, prices_array.shape[0], snapshot_interval)
 
@@ -728,7 +728,7 @@ def snapshot_at_intervals(prices_array: np.ndarray, snapshot_interval: int) -> N
 
     return repeated_snapshots
 
-def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int)-> NDArrayFloat:
+def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int)-> ArrayFloat:
     
     repeated_snapshots_array = ft.snapshot_at_intervals(prices_array, LengthSnapshot)
 
@@ -784,7 +784,7 @@ def calculate_avg_move_nan(abs_returns_np: np.ndarray, LengthSnapshot:int, Lengt
 
     return avg_move
 
-def seasonal_breakout_returns_trend(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int, LenST: int, LenLT: int) -> NDArrayFloat:
+def seasonal_breakout_returns_trend(prices_array: np.ndarray, LengthMean: int, LengthSnapshot: int, amplitude: int, LenST: int, LenLT: int) -> ArrayFloat:
 
     seasonal_breakout_signal = seasonal_breakout_returns(prices_array, LengthMean, LengthSnapshot, amplitude)
 
@@ -803,7 +803,7 @@ def generate_seasonal_trend_signal(
     group_mask_array: np.ndarray, 
     LenST: int, 
     LenLT: int
-) -> NDArrayFloat:
+) -> ArrayFloat:
 
     selected_returns_array = returns_array[group_mask_array]
     
@@ -819,7 +819,7 @@ def process_trend_signal(
     seasonal_trend_signal: np.ndarray, 
     group_mask_array: np.ndarray,
     shape: tuple
-) -> NDArrayFloat:
+) -> ArrayFloat:
     
     processed_seasonal_trend_signal = np.zeros(shape, dtype=np.float32)
     processed_seasonal_trend_signal[group_mask_array] = seasonal_trend_signal
@@ -834,7 +834,7 @@ def generate_conditioned_seasonal_trend_signal(
     LenLT: int,
     TrendLenST: int, 
     TrendLenLT: int
-) -> NDArrayFloat:
+) -> ArrayFloat:
 
     seasonal_trend_signal = Seasonality.generate_seasonal_trend_signal(returns_array, group_mask_array, LenST, LenLT)
 
@@ -850,7 +850,7 @@ def seasonal_trend( returns_array: np.ndarray,
                     GroupBy: int, 
                     GroupSelected: int, 
                     LenST: int, 
-                    LenLT: int) -> NDArrayFloat:
+                    LenLT: int) -> ArrayFloat:
 
     group_mask_array = Seasonality.generate_group_mask(seasonal_array, GroupBy, GroupSelected)
 
@@ -872,7 +872,7 @@ def overall_seasonal_trend(returns_array: np.ndarray,
                             LenLT: int,
                             TrendLenST: int, 
                             TrendLenLT: int        
-                        ) -> NDArrayFloat:
+                        ) -> ArrayFloat:
 
     group_mask_array = Seasonality.generate_group_mask(seasonal_array, GroupBy, GroupSelected)
     

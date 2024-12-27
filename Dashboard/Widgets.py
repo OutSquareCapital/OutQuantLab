@@ -1,5 +1,5 @@
 import plotly.graph_objects as go # type: ignore
-from Files import NDArrayFloat
+from Files import ArrayFloat
 import pandas as pd
 from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
 from .Transformations import normalize_data_for_colormap
@@ -63,7 +63,7 @@ def bars(
 
 
 def heatmap(
-    z_values: NDArrayFloat, 
+    z_values: ArrayFloat, 
     x_labels: list[str], 
     y_labels: list[str], 
     title: str

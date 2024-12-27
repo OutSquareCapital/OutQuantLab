@@ -6,6 +6,7 @@ from .custom_types import *
 __all__ = [
     'CONFIG',
     'MEDIA',
+    'N_THREADS',
     'Maths_Constants',
     'UI_Constants',
     'custom_types'

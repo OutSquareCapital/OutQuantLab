@@ -1,30 +1,30 @@
 import bottleneck as bn  # type: ignore
 import numpy as np
 import polars as pl
-from Files import NDArrayFloat
+from Files import ArrayFloat
 
 
-def rolling_mean(array: NDArrayFloat, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_mean(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_mean(array, window=length, min_count=min_length, axis=0) # type: ignore
 
-def rolling_median(array: NDArrayFloat, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_median(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_median(array, window=length, min_count=min_length, axis=0) # type: ignore
 
-def rolling_max(array: NDArrayFloat, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_max(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_max(array, window=length, min_count=min_length, axis=0) # type: ignore
 
-def rolling_min(array: NDArrayFloat, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_min(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_min(array, window=length, min_count=min_length, axis=0) # type: ignore
 
-def rolling_central(array: NDArrayFloat, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_central(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     upper = rolling_max(array, length=length, min_length=min_length)
     lower = rolling_min(array, length=length, min_length=min_length)
     return (upper + lower) / 2
 
-def rolling_sum(array: NDArrayFloat, length: int, min_length: int = 1) -> NDArrayFloat:
+def rolling_sum(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_sum(array, window=length, min_count=min_length, axis=0) # type: ignore
 
-def rolling_weighted_mean(array: NDArrayFloat, length: int) -> NDArrayFloat:
+def rolling_weighted_mean(array: ArrayFloat, length: int) -> ArrayFloat:
     wma_array = np.full(array.shape, np.nan, dtype=np.float32)
     weights = np.arange(1, length + 1, dtype=np.float32)
     weight_sum = weights.sum()
@@ -32,7 +32,7 @@ def rolling_weighted_mean(array: NDArrayFloat, length: int) -> NDArrayFloat:
     wma_array[length - 1:] = weighted_sum / weight_sum
     return wma_array
 
-def rolling_quantile_ratio(returns_array: NDArrayFloat, window: int, quantile_spread: float) -> NDArrayFloat:
+def rolling_quantile_ratio(returns_array: ArrayFloat, window: int, quantile_spread: float) -> ArrayFloat:
     quantile_low = 0.5 - quantile_spread
     quantile_high = 0.5 + quantile_spread
     df = pl.DataFrame(returns_array).with_columns([

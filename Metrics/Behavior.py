@@ -1,9 +1,9 @@
 import numpy as np
 from Infrastructure import shift_array
 from Metrics.Aggregation import rolling_mean
-from Files import NDArrayFloat
+from Files import ArrayFloat
 
-def rolling_autocorrelation(returns_array: NDArrayFloat, length: int) -> NDArrayFloat:
+def rolling_autocorrelation(returns_array: ArrayFloat, length: int) -> ArrayFloat:
 
     mean = rolling_mean(returns_array, length=length, min_length=20)
 

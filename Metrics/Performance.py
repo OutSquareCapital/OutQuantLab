@@ -1,9 +1,9 @@
-from Files import NDArrayFloat
+from Files import ArrayFloat
 from Files import ANNUALIZATION_FACTOR
 from .Aggregation import rolling_mean
 from .Volatility import rolling_volatility
 
-def expanding_sharpe_ratios(returns_array: NDArrayFloat) -> NDArrayFloat:
+def expanding_sharpe_ratios(returns_array: ArrayFloat) -> ArrayFloat:
 
     length = returns_array.shape[0]
 
@@ -13,7 +13,7 @@ def expanding_sharpe_ratios(returns_array: NDArrayFloat) -> NDArrayFloat:
     return expanding_mean/expanding_std * ANNUALIZATION_FACTOR
 
 
-def rolling_sharpe_ratios(returns_array: NDArrayFloat, length:int, min_length:int) -> NDArrayFloat:
+def rolling_sharpe_ratios(returns_array: ArrayFloat, length:int, min_length:int) -> ArrayFloat:
 
     mean = rolling_mean(returns_array, length=length, min_length=min_length)
 

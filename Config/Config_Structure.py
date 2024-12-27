@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any
-from Files import IndicatorFunc
+from Files import IndicatorFunc, JsonData, ParquetData
 from .Config_Funcs import (
 load_config_file, 
 save_config_file,
@@ -38,9 +38,9 @@ class Indicator:
 
 class IndicatorsCollection:
 
-    def __init__(self, indicators_to_test, indicators_params) -> None:
-        self.entities_file: str = indicators_to_test
-        self.params_file: str = indicators_params
+    def __init__(self, indicators_to_test: JsonData, indicators_params: JsonData) -> None:
+        self.entities_file: JsonData = indicators_to_test
+        self.params_file: JsonData = indicators_params
         self.entities: dict[str, Indicator] = {}
         self.load_entities()
 
@@ -112,18 +112,18 @@ class Asset:
     category: str
 
 class AssetsCollection:
-    def __init__(self, assets_to_test, assets_data) -> None:
-        self.entities_file: str = assets_to_test
-        self.primary_keys_file: str = assets_data
-        self.entities: dict[str, Asset] = {}
+    def __init__(self, assets_to_test: JsonData, assets_data: ParquetData) -> None:
+        self.assets_to_test: JsonData = assets_to_test
+        self.assets_data: ParquetData = assets_data
+        self.assets_objects: dict[str, Asset] = {}
         self.load_entities()
 
     def load_entities(self) -> None:
-        entities_to_test = load_config_file(self.entities_file)
-        entities_names = load_asset_names(self.primary_keys_file)
-        for name in entities_names:
-            is_active = entities_to_test.get(name, False)
-            self.entities[name] = Asset(
+        assets_to_test = load_config_file(self.assets_to_test)
+        asset_names = load_asset_names(self.assets_data)
+        for name in asset_names:
+            is_active = assets_to_test.get(name, False)
+            self.assets_objects[name] = Asset(
                 name=name, 
                 active=is_active,
                 category=''
@@ -131,29 +131,29 @@ class AssetsCollection:
 
     @property
     def all_entities_names(self) -> list[str]:
-        return list(self.entities.keys())
+        return list(self.assets_objects.keys())
 
     @property
     def all_entities(self) -> list[Asset]:
-        return list(self.entities.values())
+        return list(self.assets_objects.values())
 
     @property
     def all_active_entities_names(self) -> list[str]:
-        return [entity.name for entity in self.entities.values() if entity.active]
+        return [entity.name for entity in self.assets_objects.values() if entity.active]
 
     @property
     def all_active_entities(self) -> list[Asset]:
-        return [entity for entity in self.entities.values() if entity.active]
+        return [entity for entity in self.assets_objects.values() if entity.active]
 
     def get_entity(self, name: str) -> Asset:
-        return self.entities[name]
+        return self.assets_objects[name]
 
     def is_active(self, name: str) -> bool:
-        return self.entities[name].active
+        return self.assets_objects[name].active
 
     def set_active(self, name: str, active: bool) -> None:
-        self.entities[name].active = active
+        self.assets_objects[name].active = active
 
     def save(self) -> None:
-        active_entities = {name: entity.active for name, entity in self.entities.items()}
-        save_config_file(self.entities_file, active_entities, indent=3)
+        active_entities = {name: entity.active for name, entity in self.assets_objects.items()}
+        save_config_file(self.assets_to_test, active_entities, indent=3)

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from Files import NDArrayFloat
+from Files import ArrayFloat
 import re
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import linkage, leaves_list # type: ignore
@@ -17,7 +17,7 @@ def convert_dataframe_multiindex_labels(df):
         df.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in df.index]
     return df
 
-def compute_linkage_matrix(corr_matrix: pd.DataFrame) -> NDArrayFloat:
+def compute_linkage_matrix(corr_matrix: pd.DataFrame) -> ArrayFloat:
 
     pairwise_distances = 1 - corr_matrix.abs()
     condensed_distances = squareform(pairwise_distances.values)
@@ -90,7 +90,7 @@ def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool 
         sorted_data = data.mean().sort_values(ascending=ascending) # type: ignore
         return data[sorted_data.index] # type: ignore
 
-def normalize_data_for_colormap(data: NDArrayFloat):
+def normalize_data_for_colormap(data: ArrayFloat):
 
     z_min = np.nanmin(data)
     z_max = np.nanmax(data)

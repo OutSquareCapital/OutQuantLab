@@ -1,5 +1,5 @@
 import numpy as np
-from Files import NDArrayFloat
+from Files import ArrayFloat
 from numba import prange  # type: ignore
 from numba import njit  # type: ignore
 
@@ -135,12 +135,12 @@ def remove_skewness_contribution(
 
 @njit
 def rolling_skewness(
-    array: NDArrayFloat,
+    array: ArrayFloat,
     length: int,
     min_length: int
-) -> NDArrayFloat:
+) -> ArrayFloat:
     num_rows, num_cols = array.shape
-    output: NDArrayFloat = np.empty((num_rows, num_cols), dtype=np.float32)
+    output: ArrayFloat = np.empty((num_rows, num_cols), dtype=np.float32)
     output.fill(np.nan)
 
     for col in prange(num_cols):
@@ -365,12 +365,12 @@ def remove_kurtosis_contribution(
 
 @njit
 def rolling_kurtosis(
-    array: NDArrayFloat,
+    array: ArrayFloat,
     length: int,
     min_length: int
-) -> NDArrayFloat:
+) -> ArrayFloat:
     num_rows, num_cols = array.shape
-    output: NDArrayFloat = np.empty((num_rows, num_cols), dtype=np.float32)
+    output: ArrayFloat = np.empty((num_rows, num_cols), dtype=np.float32)
     output.fill(np.nan)
 
     for col in prange(num_cols):

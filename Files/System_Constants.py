@@ -1,9 +1,7 @@
 import os
 from typing import Final
 from dataclasses import dataclass
-
-from Files import WebpMedia
-from .custom_types import JSON_EXT, PARQUET_EXT, JsonData, ParquetData, PngMedia,  PNG_EXT, WEBP_EXT
+from .custom_types import JSON_EXT, PARQUET_EXT, JsonData, ParquetData, PngMedia,  WebpMedia, PNG_EXT, WEBP_EXT
 
 N_THREADS: Final = os.cpu_count() or 8
 
@@ -76,4 +74,3 @@ class MediaFiles:
 system_paths = SystemPaths()
 CONFIG = ConfigFiles(system_paths)
 MEDIA = MediaFiles(system_paths)
-print(CONFIG.assets_to_test)

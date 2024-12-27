@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import yfinance as yf # type: ignore
 from Config import Indicator, ClustersTree
-from Files import NDArrayFloat
+from Files import ArrayFloat
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 
@@ -23,7 +23,7 @@ def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
         raise ValueError("Yahoo Finance Data Not Available")
 
 
-def load_prices(asset_names: list[str], file_path: str) -> tuple[NDArrayFloat, pd.Index]:
+def load_prices(asset_names: list[str], file_path: str) -> tuple[ArrayFloat, pd.Index]:
     columns_to_load = ["Date"] + [name for name in asset_names]
 
     prices_df = pd.read_parquet(
@@ -32,7 +32,7 @@ def load_prices(asset_names: list[str], file_path: str) -> tuple[NDArrayFloat, p
         columns=columns_to_load
     )
     returns_df = prices_df.pct_change(fill_method=None) # type: ignore
-    pct_returns_array: NDArrayFloat = returns_df.to_numpy(dtype=np.float32) # type: ignore
+    pct_returns_array: ArrayFloat = returns_df.to_numpy(dtype=np.float32) # type: ignore
 
     return pct_returns_array, prices_df.index
 

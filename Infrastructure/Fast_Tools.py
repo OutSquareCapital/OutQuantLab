@@ -1,14 +1,14 @@
 import numpy as np
-from Files import NDArrayFloat, N_THREADS
+from Files import ArrayFloat, N_THREADS
 import numbagg as nb
 from concurrent.futures import ThreadPoolExecutor
 from collections.abc import Callable
 from typing import Any
 
-def bfill(array: NDArrayFloat) -> NDArrayFloat:
+def bfill(array: ArrayFloat) -> ArrayFloat:
     return nb.bfill(array, axis=0) # type: ignore
     
-def shift_array(returns_array: NDArrayFloat, step:int = 1) -> NDArrayFloat:
+def shift_array(returns_array: ArrayFloat, step:int = 1) -> ArrayFloat:
     shifted_array = np.empty_like(returns_array, dtype=np.float32)
     shifted_array[step:, :] = returns_array[:-step, :]
     shifted_array[:step, :] = np.nan
@@ -16,12 +16,12 @@ def shift_array(returns_array: NDArrayFloat, step:int = 1) -> NDArrayFloat:
 
 
 def process_in_blocks_parallel(
-    array: NDArrayFloat, 
+    array: ArrayFloat, 
     block_size: int, 
-    func:Callable[..., NDArrayFloat], 
+    func:Callable[..., ArrayFloat], 
     *args: Any,
     **kwargs: Any
-    ) -> NDArrayFloat:
+    ) -> ArrayFloat:
 
     num_cols: int = array.shape[1]
     num_blocks_to_process = max(int(num_cols/block_size), 1)

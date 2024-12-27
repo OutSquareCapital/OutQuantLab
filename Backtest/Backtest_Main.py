@@ -1,12 +1,12 @@
 import numpy as np
 import pandas as pd
-from Files import N_THREADS, NDArrayFloat, ProgressFunc
+from Files import N_THREADS, ArrayFloat, ProgressFunc
 from concurrent.futures import ThreadPoolExecutor
 from Config import Indicator
 from Indicators import IndicatorsMethods
 
 def calculate_strategy_returns(
-    pct_returns_array: NDArrayFloat, 
+    pct_returns_array: ArrayFloat, 
     indicators_params: list[Indicator],
     indics_methods: IndicatorsMethods,
     dates_index: pd.Index,

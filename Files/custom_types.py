@@ -3,9 +3,10 @@ import numpy as np
 from collections.abc import Callable
 from typing import Any, TypeAlias, Final
 
-NDArrayFloat: TypeAlias = NDArray[np.float32]
+ArrayFloat: TypeAlias = NDArray[np.float32]
+ArrayInt: TypeAlias = NDArray[np.int32]
 ProgressFunc: TypeAlias = Callable[[int, str], Any]
-IndicatorFunc : TypeAlias = Callable[..., NDArrayFloat]
+IndicatorFunc : TypeAlias = Callable[..., ArrayFloat]
 
 JsonData: TypeAlias = str
 ParquetData: TypeAlias = str

@@ -2,19 +2,19 @@ import numexpr as ne # type: ignore
 import numpy as np
 from Metrics import rolling_mean, rolling_median, rolling_min, rolling_max, rolling_volatility
 from Infrastructure import bfill
-from Files import NDArrayFloat
+from Files import ArrayFloat
 
-def ratio_normalization(nominator: NDArrayFloat, denominator: NDArrayFloat) -> NDArrayFloat:
+def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> ArrayFloat:
     return (nominator / denominator) - 1
 
-def sign_normalization(signal_array: NDArrayFloat) -> NDArrayFloat:
+def sign_normalization(signal_array: ArrayFloat) -> ArrayFloat:
     return np.sign(signal_array, out=signal_array)
 
-def relative_normalization(signal_array: NDArrayFloat, length: int) -> NDArrayFloat:
+def relative_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
     average_signal = rolling_mean(signal_array, length=length, min_length=1)
     return signal_array - average_signal
 
-def calculate_indicator_on_trend_signal(trend_signal: NDArrayFloat, indicator_signal: NDArrayFloat) -> NDArrayFloat:
+def calculate_indicator_on_trend_signal(trend_signal: ArrayFloat, indicator_signal: ArrayFloat) -> ArrayFloat:
     return np.where(
         ((trend_signal < 0) & (indicator_signal > 0)) | 
         ((trend_signal > 0) & (indicator_signal < 0)), 0, 
@@ -22,10 +22,10 @@ def calculate_indicator_on_trend_signal(trend_signal: NDArrayFloat, indicator_si
     )
 
 def rolling_median_normalisation(
-    signal_array: NDArrayFloat, 
+    signal_array: ArrayFloat, 
     window_length: int, 
     limit:int = 1
-    ) -> NDArrayFloat:
+    ) -> ArrayFloat:
 
     adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)
     dict = {
@@ -43,10 +43,10 @@ def rolling_median_normalisation(
     return np.clip(adjusted_signal_array, -limit, limit)
 
 def rolling_std_normalisation(
-    signal_array: NDArrayFloat, 
+    signal_array: ArrayFloat, 
     window_length: int, 
     limit:int = 1
-    ) -> NDArrayFloat:
+    ) -> ArrayFloat:
 
     adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)
     dict = {
@@ -59,11 +59,11 @@ def rolling_std_normalisation(
     return np.clip(adjusted_signal_array, -limit, limit)
 
 def rolling_scalar_normalisation(
-    signal_array: NDArrayFloat, 
+    signal_array: ArrayFloat, 
     window_length: int, 
     scalar:int = 1, 
     limit:int = 2
-    ) -> NDArrayFloat:
+    ) -> ArrayFloat:
     row_mean_array = np.nanmean(np.abs(signal_array), axis=1)
     median = rolling_median(row_mean_array, length=window_length, min_length=1)
     median = bfill(median)

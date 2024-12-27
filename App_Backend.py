@@ -10,7 +10,7 @@ def handle_progress(progress: int, message: str) -> None:
 
 class OutQuantLab:
     def __init__(self, progress_callback: ProgressFunc) -> None:
-        self.assets_collection = AssetsCollection(CONFIG.indics_to_test, CONFIG.price_data)
+        self.assets_collection = AssetsCollection(CONFIG.assets_to_test, CONFIG.price_data)
         self.indicators_collection = IndicatorsCollection(CONFIG.indics_to_test, CONFIG.indics_params)
         self.assets_clusters = ClustersTree(CONFIG.assets_clusters)
         self.indicators_clusters = ClustersTree(CONFIG.indics_clusters)
@@ -20,7 +20,12 @@ class OutQuantLab:
         indics_methods = IndicatorsMethods()
         indicators_params=self.indicators_collection.indicators_params
         asset_names = self.assets_collection.all_active_entities_names
-        multi_index = generate_multi_index_process(indicators_params, asset_names, self.assets_clusters, self.indicators_clusters)
+        multi_index = generate_multi_index_process(
+            indicators_params, 
+            asset_names, 
+            self.assets_clusters, 
+            self.indicators_clusters)
+
         pct_returns_array, dates_index = load_prices(asset_names, CONFIG.price_data)
 
         raw_adjusted_returns_df= calculate_strategy_returns(
