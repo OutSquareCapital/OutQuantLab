@@ -3,7 +3,6 @@ from .Indics_Raw import *
 from .Indics_Normalization import sign_normalization, calculate_indicator_on_trend_signal, rolling_median_normalisation, relative_normalization
 from Files import NDArrayFloat, IndicatorFunc, PERCENTAGE_FACTOR
 from inspect import signature
-import pandas as pd
 from Metrics import hv_composite
 from Infrastructure import shift_array
 from concurrent.futures import ThreadPoolExecutor
@@ -67,10 +66,8 @@ class IndicatorsMethods:
         results = list(global_executor.map(process_single_param, params))
         return results
 
-    def process_data(self, data_prices_df: pd.DataFrame) -> None:
-        
-        returns_df = data_prices_df.pct_change(fill_method=None) # type: ignore
-        pct_returns_array: NDArrayFloat = returns_df.to_numpy(dtype=np.float32) # type: ignore
+    def process_data(self, pct_returns_array: NDArrayFloat) -> None:
+
         self.prices_array = shift_array(calculate_equity_curves(pct_returns_array))
         self.log_returns_array = shift_array(log_returns_np(self.prices_array))
         hv_array = hv_composite(pct_returns_array)

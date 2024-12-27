@@ -1,6 +1,7 @@
 import pandas as pd
 import yfinance as yf # type: ignore
 from Config import IndicatorMethod, ClustersTree
+from Files import NDArrayFloat
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 
@@ -21,14 +22,18 @@ def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
         raise ValueError("Yahoo Finance Data Not Available")
 
 
-def load_prices(asset_names: list[str], file_path: str) -> pd.DataFrame:
+def load_prices(asset_names: list[str], file_path: str) -> tuple[NDArrayFloat, pd.Index]:
     columns_to_load = ["Date"] + [name for name in asset_names]
 
-    return pd.read_parquet(
+    prices_df = pd.read_parquet(
         file_path,
         engine="pyarrow",
         columns=columns_to_load
     )
+    returns_df = data_prices_df.pct_change(fill_method=None) # type: ignore
+    pct_returns_array: NDArrayFloat = returns_df.to_numpy(dtype=np.float32) # type: ignore
+
+    return pct_returns_array, prices_df.index
 
 def generate_multi_index_process(
     indicators_and_params: list[IndicatorMethod], 

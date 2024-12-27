@@ -24,8 +24,7 @@ class OutQuantLab:
             asset_names=self.assets_collection.all_active_entities_names,
             indicators_and_params=self.indicators_collection.indicators_params_dict,
             asset_clusters=self.assets_clusters,
-            indics_clusters=self.indicators_clusters,
-            indics_methods = indics_methods
+            indics_clusters=self.indicators_clusters
         )
 
         raw_adjusted_returns_df:pd.DataFrame = calculate_strategy_returns(backtest_data, indics_methods, self.progress_callback)
