@@ -10,9 +10,7 @@ QGridLayout
 )
 from collections.abc import Callable
 from Files import (
-BACKTEST_PAGE_PHOTO,
-HOME_PAGE_PHOTO,
-DASHBOARD_PAGE_PHOTO,
+MEDIA,
 BACKTEST_STATS_RESULTS,
 CLUSTERS_PARAMETERS,
 FRAME_STYLE
@@ -45,7 +43,7 @@ def setup_home_page(
     indicators_clusters: ClustersTree,
     assets_collection: AssetsCollection,
     indicators_collection: IndicatorsCollection
-    ):
+    ) -> None:
 
     parent.setWindowTitle("OutQuantLab")
     main_widget = QWidget()
@@ -57,7 +55,7 @@ def setup_home_page(
     bottom_frame = set_frame_design(FRAME_STYLE)
     right_upper_layout = QHBoxLayout(top_frame)
     right_lower_layout = QHBoxLayout(bottom_frame)
-    set_background_image(main_widget, HOME_PAGE_PHOTO)
+    set_background_image(main_widget, MEDIA.home_page)
     
     asset_widget = AssetSelectionWidget(assets_collection)
     indicator_widget = IndicatorsConfigWidget(indicators_collection)
@@ -79,10 +77,10 @@ def setup_home_page(
 
     parent.setCentralWidget(main_widget)
 
-def setup_backtest_page(parent: QMainWindow):
+def setup_backtest_page(parent: QMainWindow) -> tuple[QProgressBar, QTextEdit]:
     loading_widget = QWidget()
     main_layout = QVBoxLayout(loading_widget)
-    set_background_image(loading_widget, BACKTEST_PAGE_PHOTO)
+    set_background_image(loading_widget, MEDIA.loading_page)
     top_layout = QHBoxLayout()
     main_layout.addLayout(top_layout, stretch=9)
 
@@ -121,11 +119,11 @@ def setup_results_page(
     parent: QMainWindow,
     dashboards: DashboardsCollection,
     back_to_home_callback:Callable, 
-    metrics: list[float]):
+    metrics: list[float]) -> None:
 
     results_widget = QWidget()
     results_layout = QVBoxLayout(results_widget)
-    set_background_image(results_widget, DASHBOARD_PAGE_PHOTO)
+    set_background_image(results_widget, MEDIA.dashboard_page)
     top_frame = set_frame_design(FRAME_STYLE)
     bottom_frame = set_frame_design(FRAME_STYLE)
     top_layout = QHBoxLayout(top_frame)
@@ -167,7 +165,7 @@ def update_progress_with_events(
     progress_bar: QProgressBar, 
     log_output: QTextEdit, 
     value: int, 
-    message: str):
+    message: str) -> None:
     
     progress_bar.setValue(value)
     if message:

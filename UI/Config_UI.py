@@ -22,7 +22,7 @@ QPushButton,
 QApplication
 )
 from PySide6.QtCore import Qt
-from Config import AssetsCollection, ClustersTree, IndicatorsCollection, Asset, IndicatorState
+from Config import AssetsCollection, ClustersTree, IndicatorsCollection, Asset, Indicator
 
 class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection, parent=None):
@@ -68,7 +68,7 @@ class IndicatorsConfigWidget(QWidget):
     def __init__(self, indicators_collection: IndicatorsCollection, parent=None):
         super().__init__(parent)
         self.indicators_collection = indicators_collection
-        self.entities:list[IndicatorState] = self.indicators_collection.all_entities
+        self.entities:list[Indicator] = self.indicators_collection.all_entities
         self.param_widgets: dict[str, dict[str, dict[str, QSlider | QLabel]]] = {}
         self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()

@@ -1,8 +1,7 @@
 import numpy as np
-from Files import NDArrayFloat
+from Files import NDArrayFloat, N_THREADS
 import numbagg as nb
 from concurrent.futures import ThreadPoolExecutor
-from Files import N_THREADS
 from collections.abc import Callable
 from typing import Any
 

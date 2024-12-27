@@ -1,25 +1,79 @@
 import os
 from typing import Final
+from dataclasses import dataclass
 
-cpu_count = os.cpu_count() 
-if cpu_count is not None:
-    N_THREADS: Final = cpu_count
-else:
-    Exception("Could not determine the number of threads available on the system")
+from Files import WebpMedia
+from .custom_types import JSON_EXT, PARQUET_EXT, JsonData, ParquetData, PngMedia,  PNG_EXT, WEBP_EXT
 
-SAVED_DATA_FOLDER: Final = os.path.join(os.path.dirname(__file__), "Saved_Data")
+N_THREADS: Final = os.cpu_count() or 8
 
-ASSETS_TO_TEST_CONFIG_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "assets_to_backtest.json")
-INDICATORS_PARAMS_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "param_values.json")
-INDICATORS_TO_TEST_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "indics_to_backtest.json")
-INDICATORS_CLUSTERS_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "indics_clusters.json")
-ASSETS_CLUSTERS_FILE: Final = os.path.join(SAVED_DATA_FOLDER, "assets_clusters.json")
-INDICATORS_MODULE: Final = 'Signals'
+@dataclass(frozen=True)
+class SystemPaths:
+    base_dir: Final[str] = os.path.dirname(__file__)
+    
+    @property
+    def saved_data(self) -> str:
+        return os.path.join(self.base_dir, "Saved_Data")
+    
+    @property
+    def medias(self) -> str:
+        return os.path.join(self.base_dir, "Medias")
 
-FILE_PATH_YF: Final = os.path.join(SAVED_DATA_FOLDER, "price_data.parquet")
+@dataclass(frozen=True)
+class ConfigFiles:
+    paths: SystemPaths
 
-MEDIAS_FOLDER: Final = os.path.join(os.path.dirname(__file__), "Medias")
-HOME_PAGE_PHOTO: Final = os.path.join(MEDIAS_FOLDER, "home_page.webp")
-BACKTEST_PAGE_PHOTO: Final = os.path.join(MEDIAS_FOLDER, "loading_page.png")
-DASHBOARD_PAGE_PHOTO: Final = os.path.join(MEDIAS_FOLDER, "dashboard_page.png")
-APP_ICON_PHOTO: Final = os.path.join(MEDIAS_FOLDER, "app_logo.png")
+    def _make_path(self, name: str, ext_type: str) -> str:
+        return os.path.join(self.paths.saved_data, f"{name}{ext_type}")
+    
+    @property
+    def assets_to_test(self) -> JsonData:
+        return self._make_path('assets_to_test', JSON_EXT)
+
+    @property
+    def indics_params(self) -> JsonData:
+        return self._make_path('indics_params', JSON_EXT)
+    
+    @property
+    def indics_to_test(self) -> JsonData:
+        return self._make_path('indics_to_test', JSON_EXT)
+    
+    @property
+    def indics_clusters(self) -> JsonData:
+        return self._make_path('indics_clusters', JSON_EXT)
+    
+    @property
+    def assets_clusters(self) -> JsonData:
+        return self._make_path('assets_clusters', JSON_EXT)
+
+    @property
+    def price_data(self) -> ParquetData:
+        return self._make_path('price_data', PARQUET_EXT)
+
+@dataclass(frozen=True)
+class MediaFiles:
+    paths: SystemPaths
+
+    def _make_path(self, name: str, ext_type: str) -> str:
+        return os.path.join(self.paths.saved_data, f"{name}{ext_type}")
+
+    @property
+    def home_page(self) -> WebpMedia:
+        return self._make_path('home_page', WEBP_EXT)
+    
+    @property
+    def loading_page(self) -> PngMedia:
+        return self._make_path('loading_page', PNG_EXT)
+
+    @property
+    def dashboard_page(self) -> PngMedia:
+        return self._make_path('dashboard_page', PNG_EXT)
+    
+    @property
+    def app_logo(self) -> PngMedia:
+        return self._make_path('app_logo', PNG_EXT)
+
+system_paths = SystemPaths()
+CONFIG = ConfigFiles(system_paths)
+MEDIA = MediaFiles(system_paths)
+print(CONFIG.assets_to_test)

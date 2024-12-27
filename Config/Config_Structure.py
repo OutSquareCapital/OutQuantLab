@@ -1,12 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any
-from Files import (
-INDICATORS_PARAMS_FILE, 
-INDICATORS_TO_TEST_FILE,
-ASSETS_TO_TEST_CONFIG_FILE, 
-FILE_PATH_YF,
-IndicatorFunc
-)
+from Files import IndicatorFunc
 from .Config_Funcs import (
 load_config_file, 
 save_config_file,
@@ -23,7 +17,7 @@ class ClustersTree:
     def update_clusters_structure(self, new_structure: dict[str, Any]) -> None:
         self.clusters = new_structure
 
-    def map_nested_clusters_to_assets(self) -> dict[str, tuple[str, str]]:
+    def map_nested_clusters_to_entities(self) -> dict[str, tuple[str, str]]:
         return {
             asset: (level1, level2)
             for level1, subclusters in self.clusters.items()
@@ -35,34 +29,30 @@ class ClustersTree:
         save_config_file(self.clusters_file, self.clusters, indent=3)
 
 @dataclass(slots=True)
-class IndicatorState:
+class Indicator:
     name: str
     active: bool
     func: IndicatorFunc
+    param_combos: list[dict[str, int]] = field(default_factory=list)
     params_values: dict[str, list[int]] = field(default_factory=dict)
-
-@dataclass(slots=True)
-class IndicatorMethod:
-    name: str
-    func: IndicatorFunc
-    param_combos: list[dict[str, int]]
 
 class IndicatorsCollection:
 
-    def __init__(self) -> None:
-        self.entities_file: str = INDICATORS_TO_TEST_FILE
-        self.entities: dict[str, IndicatorState] = {}
+    def __init__(self, indicators_to_test, indicators_params) -> None:
+        self.entities_file: str = indicators_to_test
+        self.params_file: str = indicators_params
+        self.entities: dict[str, Indicator] = {}
         self.load_entities()
 
     def load_entities(self) -> None:
         entities_to_test: dict[str, bool] = load_config_file(self.entities_file)
-        entities_functions: dict[str, IndicatorFunc] = IndicatorsMethods.get_all_signals()
-        params_config: dict[str, dict[str, list[int]]] = load_config_file(INDICATORS_PARAMS_FILE)
+        entities_functions: dict[str, IndicatorFunc] = IndicatorsMethods.get_all_indicators()
+        params_config: dict[str, dict[str, list[int]]] = load_config_file(self.params_file)
 
         for name, func in entities_functions.items():
             active: bool = entities_to_test.get(name, False)
             params: dict[str, list[int]] = IndicatorsMethods.determine_params(name, params_config)
-            self.entities[name] = IndicatorState(
+            self.entities[name] = Indicator(
                 name=name,
                 active=active,
                 func=func,
@@ -70,23 +60,17 @@ class IndicatorsCollection:
             )
 
     @property
-    def indicators_params_dict(self) -> list[IndicatorMethod]:
-        result: list[IndicatorMethod] = []
+    def indicators_params(self) -> list[Indicator]:
         for indicator in self.all_active_entities:
-            valid_pairs = filter_valid_pairs(indicator.params_values)
-            result.append(IndicatorMethod(
-                name=indicator.name,
-                func=indicator.func,
-                param_combos=valid_pairs
-            ))
-        return result
+            indicator.param_combos = filter_valid_pairs(indicator.params_values)
+        return self.all_active_entities
 
     @property
     def all_entities_names(self) -> list[str]:
         return list(self.entities.keys())
 
     @property
-    def all_entities(self) -> list[IndicatorState]:
+    def all_entities(self) -> list[Indicator]:
         return list(self.entities.values())
 
     @property
@@ -94,10 +78,10 @@ class IndicatorsCollection:
         return [entity.name for entity in self.entities.values() if entity.active]
 
     @property
-    def all_active_entities(self) -> list[IndicatorState]:
+    def all_active_entities(self) -> list[Indicator]:
         return [entity for entity in self.entities.values() if entity.active]
 
-    def get_entity(self, name: str) -> IndicatorState:
+    def get_entity(self, name: str) -> Indicator:
         return self.entities[name]
 
     def is_active(self, name: str) -> bool:
@@ -119,7 +103,7 @@ class IndicatorsCollection:
         active_entities = {name: entity.active for name, entity in self.entities.items()}
         save_config_file(self.entities_file, active_entities, indent=3)
         parameters_to_save = {name: indicator.params_values for name, indicator in self.entities.items()}
-        save_config_file(INDICATORS_PARAMS_FILE, parameters_to_save, indent=3)
+        save_config_file(self.params_file, parameters_to_save, indent=3)
 
 @dataclass(slots=True)
 class Asset:
@@ -128,9 +112,9 @@ class Asset:
     category: str
 
 class AssetsCollection:
-    def __init__(self) -> None:
-        self.entities_file: str = ASSETS_TO_TEST_CONFIG_FILE
-        self.primary_keys_file: str = FILE_PATH_YF
+    def __init__(self, assets_to_test, assets_data) -> None:
+        self.entities_file: str = assets_to_test
+        self.primary_keys_file: str = assets_data
         self.entities: dict[str, Asset] = {}
         self.load_entities()
 

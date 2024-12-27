@@ -59,7 +59,7 @@ class IndicatorsMethods:
         func: IndicatorFunc, 
         params: list[dict[str, int]],
         global_executor: ThreadPoolExecutor
-    ) -> list[NDArrayFloat]:
+        ) -> list[NDArrayFloat]:
         def process_single_param(param: dict[str, int]) -> NDArrayFloat:
             return self.process_param(func, param)
 
@@ -67,7 +67,6 @@ class IndicatorsMethods:
         return results
 
     def process_data(self, pct_returns_array: NDArrayFloat) -> None:
-
         self.prices_array = shift_array(calculate_equity_curves(pct_returns_array))
         self.log_returns_array = shift_array(log_returns_np(self.prices_array))
         hv_array = hv_composite(pct_returns_array)
@@ -76,133 +75,135 @@ class IndicatorsMethods:
             hv_array
         )
 
+    @staticmethod
+    def indicator(func: IndicatorFunc) -> IndicatorFunc:
+        setattr(func, "_is_indicator", True)
+        setattr(func, "_params", list(signature(func).parameters.keys())[1:])
+        return func
+
     @classmethod
-    def get_all_signals(cls) -> dict[str, IndicatorFunc]:
-        signals: dict[str, IndicatorFunc] = {}
-        for name, func in vars(cls).items():
-            if callable(func) and not name.startswith('_') and name not in ['get_all_signals', 'determine_params']:
-                signals[name] = func # type: ignore
-        return signals
+    def get_all_indicators(cls) -> dict[str, IndicatorFunc]:
+        return {
+            name: func # type: ignore
+            for name, func in vars(cls).items()
+            if callable(func) and getattr(func, "_is_indicator", False)
+        }
 
     @classmethod
     def determine_params(cls, name: str, params_config: dict[str, dict[str, list[int]]]) -> dict[str, list[int]]:
         method = getattr(cls, name)
-        func_signature = signature(method).parameters
         param_values = params_config.get(name, {})
-        return {
-            param_name: param_values.get(param_name, [])
-            for param_name in func_signature.keys()
-            if param_name != 'self'
-        }
+        return {param_name: param_values.get(param_name, []) for param_name in method._params}
 
+    @indicator
     def mean_price_ratio(self, LenST: int, LenLT: int) -> NDArrayFloat:
         mean_price_ratio_raw = calculate_mean_price_ratio_raw(self.prices_array, LenST, LenLT)
         return sign_normalization(mean_price_ratio_raw)
-
+    @indicator
     def median_price_ratio(self, LenST: int, LenLT: int) -> NDArrayFloat:
         median_price_ratio_raw = calculate_median_price_ratio_raw(self.prices_array, LenST, LenLT)
         return sign_normalization(median_price_ratio_raw)
-
+    @indicator
     def central_price_ratio(self, LenST: int, LenLT: int) -> NDArrayFloat:
         central_price_ratio_raw = calculate_central_price_ratio_raw(self.prices_array, LenST, LenLT)
         return sign_normalization(central_price_ratio_raw)
-
+    @indicator
     def mean_rate_of_change(self, LenST: int, LenLT: int) -> NDArrayFloat:
         mean_roc_raw = calculate_mean_rate_of_change_raw(self.log_returns_array, LenST, LenLT)
         return sign_normalization(mean_roc_raw)
-
+    @indicator
     def median_rate_of_change(self, LenST: int, LenLT: int) -> NDArrayFloat:
         median_roc_raw = calculate_median_rate_of_change_raw(self.log_returns_array, LenST, LenLT)
         return sign_normalization(median_roc_raw)
-
+    @indicator
     def central_rate_of_change(self, LenST: int, LenLT: int) -> NDArrayFloat:
         central_roc_raw = calculate_central_rate_of_change_raw(self.log_returns_array, LenST, LenLT)
         return sign_normalization(central_roc_raw)
-
+    @indicator
     def mean_price_macd(self, LenST: int, LenLT: int, MacdLength: int) -> NDArrayFloat:
         mean_price_ratio_macd_raw = calculate_mean_price_macd_raw(self.prices_array, LenST, LenLT, MacdLength)
         return sign_normalization(mean_price_ratio_macd_raw)
-
+    @indicator
     def median_price_macd(self, LenST: int, LenLT: int, MacdLength: int) -> NDArrayFloat:
         median_price_ratio_macd_raw = calculate_median_price_macd_raw(self.prices_array, LenST, LenLT, MacdLength)
         return sign_normalization(median_price_ratio_macd_raw)
-
+    @indicator
     def central_price_macd(self, LenST: int, LenLT: int, MacdLength: int) -> NDArrayFloat:
         central_price_ratio_macd_raw = calculate_central_price_macd_raw(self.prices_array, LenST, LenLT, MacdLength)
         return sign_normalization(central_price_ratio_macd_raw)
-
+    @indicator
     def mean_rate_of_change_macd(self, LenST: int, LenLT: int, MacdLength: int) -> NDArrayFloat:
         mean_roc_macd_raw = calculate_mean_rate_of_change_macd_raw(self.log_returns_array, LenST, LenLT, MacdLength)
         return sign_normalization(mean_roc_macd_raw)
-
+    @indicator
     def median_rate_of_change_macd(self, LenST: int, LenLT: int, MacdLength: int) -> NDArrayFloat:
         median_roc_macd_raw = calculate_median_rate_of_change_macd_raw(self.log_returns_array, LenST, LenLT, MacdLength)
         return sign_normalization(median_roc_macd_raw)
-
+    @indicator
     def central_rate_of_change_macd(self, LenST: int, LenLT: int, MacdLength: int) -> NDArrayFloat:
         central_roc_macd_raw = calculate_central_rate_of_change_macd_raw(self.log_returns_array, LenST, LenLT, MacdLength)
         return sign_normalization(central_roc_macd_raw)
-
+    @indicator
     def mean_price_macd_trend(self, LenST: int, LenLT: int, MacdLength: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         mean_price_ratio_signal = self.mean_price_ratio(TrendLenST, TrendLenLT)
         mean_price_macd_signal = self.mean_price_macd(LenST, LenLT, MacdLength)
         return calculate_indicator_on_trend_signal(mean_price_ratio_signal, mean_price_macd_signal)
-
+    @indicator
     def median_price_macd_trend(self, LenST: int, LenLT: int, MacdLength: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         median_price_ratio_signal = self.median_price_ratio(TrendLenST, TrendLenLT)
         median_price_macd_signal = self.median_price_macd(LenST, LenLT, MacdLength)
         return calculate_indicator_on_trend_signal(median_price_ratio_signal, median_price_macd_signal)
-
+    @indicator
     def central_price_macd_trend(self, LenST: int, LenLT: int, MacdLength: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         central_price_ratio_signal = self.central_price_ratio(TrendLenST, TrendLenLT)
         central_price_macd_signal = self.central_price_macd(LenST, LenLT, MacdLength)
         return calculate_indicator_on_trend_signal(central_price_ratio_signal, central_price_macd_signal)
-
+    @indicator
     def mean_rate_of_change_macd_trend(self, LenST: int, LenLT: int, MacdLength: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         mean_roc_trend_signal = self.mean_rate_of_change(TrendLenST, TrendLenLT)
         mean_roc_macd_signal = self.mean_rate_of_change_macd(LenST, LenLT, MacdLength)
         return calculate_indicator_on_trend_signal(mean_roc_trend_signal, mean_roc_macd_signal)
-
+    @indicator
     def median_rate_of_change_macd_trend(self, LenST: int, LenLT: int, MacdLength: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         median_roc_trend_signal = self.median_rate_of_change(TrendLenST, TrendLenLT)
         median_roc_macd_signal = self.median_rate_of_change_macd(LenST, LenLT, MacdLength)
         return calculate_indicator_on_trend_signal(median_roc_trend_signal, median_roc_macd_signal)
-
+    @indicator
     def central_rate_of_change_macd_trend(self, LenST: int, LenLT: int, MacdLength: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         central_roc_trend_signal = self.central_rate_of_change(TrendLenST, TrendLenLT)
         central_roc_macd_signal = self.central_rate_of_change_macd(LenST, LenLT, MacdLength)
         return calculate_indicator_on_trend_signal(central_roc_trend_signal, central_roc_macd_signal)
-
+    @indicator
     def fixed_bias(self, Bias: int) -> NDArrayFloat:
         return np.full_like(self, Bias, dtype=np.float32)
-
+    @indicator
     def mean_price_ratio_normalised(self, SignalLength: int, PLength: int) -> NDArrayFloat:
         mean_price_ratio = calculate_mean_price_ratio_raw(self.prices_array, 1, SignalLength)
         return rolling_median_normalisation(-mean_price_ratio, PLength)
-
+    @indicator
     def mean_rate_of_change_normalised(self, SignalLength: int, PLength: int) -> NDArrayFloat:
         mean_roc = calculate_mean_rate_of_change_raw(self.log_returns_array, 1, SignalLength)
         return rolling_median_normalisation(-mean_roc, PLength)
-
+    @indicator
     def mean_price_ratio_normalised_trend(self, SignalLength: int, PLength: int, LenST: int, LenLT: int) -> NDArrayFloat:
         mean_reversion_signal = self.mean_price_ratio_normalised(SignalLength, PLength)
         trend_signal = self.mean_price_ratio(LenST, LenLT)
         return calculate_indicator_on_trend_signal(trend_signal, mean_reversion_signal)
-
+    @indicator
     def mean_rate_of_change_normalised_trend(self, SignalLength: int, PLength: int, LenST: int, LenLT: int) -> NDArrayFloat:
         mean_reversion_signal = self.mean_rate_of_change_normalised(SignalLength, PLength)
         trend_signal = self.mean_rate_of_change(LenST, LenLT)
         return calculate_indicator_on_trend_signal(trend_signal, mean_reversion_signal)
-
+    @indicator
     def skewness(self, LenSmooth: int, LenSkew: int) -> NDArrayFloat:
         skewness_array = smoothed_skewness(self.log_returns_array, LenSmooth, LenSkew)
         return sign_normalization(-skewness_array)
-
+    @indicator
     def relative_skewness(self, LenSmooth: int, LenSkew: int) -> NDArrayFloat:
         skewness_array = smoothed_skewness(self.log_returns_array, LenSmooth, LenSkew)
         relative_skew = relative_normalization(skewness_array, LenSkew*4)
         return sign_normalization(relative_skew)
-
+    @indicator
     def skewness_on_kurtosis(self, LenSmooth: int, LenSkew: int) -> NDArrayFloat:
         skewness_array = smoothed_skewness(self.log_returns_array, LenSmooth, LenSkew)
         kurtosis_array = smoothed_kurtosis(self.log_returns_array, LenSmooth, LenSkew)
@@ -212,7 +213,7 @@ class IndicatorsMethods:
         else:
             skew_on_kurt_signal = np.where(relative_kurt < 0, skewness_array, -skewness_array)
         return sign_normalization(skew_on_kurt_signal)
-
+    @indicator
     def relative_skewness_on_kurtosis(self, LenSmooth: int, LenSkew: int) -> NDArrayFloat:
         skewness_array = smoothed_skewness(self.log_returns_array, LenSmooth, LenSkew)
         kurtosis_array = smoothed_kurtosis(self.log_returns_array, LenSmooth, LenSkew)
@@ -223,41 +224,41 @@ class IndicatorsMethods:
         else:
             relative_skew_on_kurt_signal = np.where(relative_kurt < 0, relative_skew, -relative_skew)
         return sign_normalization(relative_skew_on_kurt_signal)
-
+    @indicator
     def skewness_trend(self, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         skewness_signal = self.skewness(LenSmooth, LenSkew)
         trend_signal = self.mean_rate_of_change(TrendLenST, TrendLenLT)
         return calculate_indicator_on_trend_signal(trend_signal, skewness_signal)
-
+    @indicator
     def relative_skewness_trend(self, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         relative_skewness_signal = self.relative_skewness( LenSmooth, LenSkew)
         trend_signal = self.mean_rate_of_change(TrendLenST, TrendLenLT)
         return calculate_indicator_on_trend_signal(trend_signal, relative_skewness_signal)
-
+    @indicator
     def skewness_on_kurtosis_trend(self, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         skew_on_kurt_signal = self.skewness_on_kurtosis(LenSmooth, LenSkew)
         trend_signal = self.mean_rate_of_change(TrendLenST, TrendLenLT)
         return calculate_indicator_on_trend_signal(trend_signal, skew_on_kurt_signal)
-
+    @indicator
     def relative_skewness_on_kurtosis_trend(self, LenSmooth: int, LenSkew: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         relative_skew_on_kurt_signal = self.relative_skewness_on_kurtosis(LenSmooth, LenSkew)
         trend_signal = self.mean_rate_of_change(TrendLenST, TrendLenLT)
         return calculate_indicator_on_trend_signal(trend_signal, relative_skew_on_kurt_signal)
-
+    @indicator
     def relative_directional_volatility(self, LenSmooth: int, LenRelative: int, LenVol: int) -> NDArrayFloat:
         directional_volatility_raw = smoothed_directional_volatility(self.log_returns_array, LenSmooth, LenVol)
         relative_directional_vol_raw = relative_normalization(directional_volatility_raw, LenRelative)
         return sign_normalization(relative_directional_vol_raw)
-
+    @indicator
     def normalised_directional_volatility(self, LenSmooth: int, LenNormalization: int, LenVol: int) -> NDArrayFloat:
         directional_volatility_raw = smoothed_directional_volatility(self.log_returns_array, LenSmooth, LenVol)
         return rolling_median_normalisation(-directional_volatility_raw, LenNormalization)
-
+    @indicator
     def relative_directional_volatility_trend(self, LenSmooth: int, LenRelative: int, LenVol: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         relative_directional_vol_signal = self.relative_directional_volatility(LenSmooth, LenRelative, LenVol)
         trend_signal = self.mean_rate_of_change(TrendLenST, TrendLenLT)
         return calculate_indicator_on_trend_signal(trend_signal, relative_directional_vol_signal)
-
+    @indicator
     def normalised_directional_volatility_trend(self, LenSmooth: int, LenNormalization: int, LenVol: int, TrendLenST: int, TrendLenLT: int) -> NDArrayFloat:
         normalised_directional_vol_signal = self.normalised_directional_volatility(LenSmooth, LenNormalization, LenVol)
         trend_signal = self.mean_rate_of_change(TrendLenST, TrendLenLT)

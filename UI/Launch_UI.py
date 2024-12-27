@@ -11,14 +11,14 @@ from PySide6.QtWidgets import (
     QLabel)
 from PySide6.QtGui import QPixmap, QIcon
 from Files import (
-    APP_ICON_PHOTO,
+    MEDIA,
     FONT_FAMILY, 
     FONT_SIZE, 
     FONT_TYPE)
 from typing import Any
 
-def apply_global_styles(app:QApplication):
-    app.setWindowIcon(QIcon(APP_ICON_PHOTO)) 
+def apply_global_styles(app:QApplication) -> None:
+    app.setWindowIcon(QIcon(MEDIA.app_logo)) 
     app.setStyleSheet(f"""
         * {{
             font-family: '{FONT_FAMILY}';
@@ -45,7 +45,7 @@ def setup_launch_page(parent: Any) -> tuple[QMainWindow, QProgressBar]:
             grid_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding), row, col)
 
     logo_label = QLabel()
-    pixmap = QPixmap(APP_ICON_PHOTO)
+    pixmap = QPixmap(MEDIA.icon)
     logo_label.setPixmap(pixmap)
     logo_label.setScaledContents(True) 
     grid_layout.addWidget(logo_label, 1, 1)

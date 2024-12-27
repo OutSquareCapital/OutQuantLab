@@ -1,6 +1,7 @@
 import pandas as pd
+import numpy as np
 import yfinance as yf # type: ignore
-from Config import IndicatorMethod, ClustersTree
+from Config import Indicator, ClustersTree
 from Files import NDArrayFloat
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
@@ -30,25 +31,25 @@ def load_prices(asset_names: list[str], file_path: str) -> tuple[NDArrayFloat, p
         engine="pyarrow",
         columns=columns_to_load
     )
-    returns_df = data_prices_df.pct_change(fill_method=None) # type: ignore
+    returns_df = prices_df.pct_change(fill_method=None) # type: ignore
     pct_returns_array: NDArrayFloat = returns_df.to_numpy(dtype=np.float32) # type: ignore
 
     return pct_returns_array, prices_df.index
 
 def generate_multi_index_process(
-    indicators_and_params: list[IndicatorMethod], 
+    indicators_params: list[Indicator], 
     asset_names: list[str], 
     assets_clusters: ClustersTree, 
     indics_clusters: ClustersTree
     ) -> pd.MultiIndex:
 
-    asset_to_clusters = assets_clusters.map_nested_clusters_to_assets()
+    asset_to_clusters = assets_clusters.map_nested_clusters_to_entities()
 
-    indic_to_clusters = indics_clusters.map_nested_clusters_to_assets()
+    indic_to_clusters = indics_clusters.map_nested_clusters_to_entities()
 
     multi_index_tuples: list[tuple[str, str, str, str, str, str, str]] = []
 
-    for indic in indicators_and_params:
+    for indic in indicators_params:
         for param in indic.param_combos:
             param_str = ''.join([f"{k}{v}" for k, v in param.items()])
             for asset in asset_names:
