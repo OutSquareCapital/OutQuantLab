@@ -45,7 +45,7 @@ def setup_launch_page(parent: Any) -> tuple[QMainWindow, QProgressBar]:
             grid_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding), row, col)
 
     logo_label = QLabel()
-    pixmap = QPixmap(MEDIA.icon)
+    pixmap = QPixmap(MEDIA.app_logo)
     logo_label.setPixmap(pixmap)
     logo_label.setScaledContents(True) 
     grid_layout.addWidget(logo_label, 1, 1)
