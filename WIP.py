@@ -67,7 +67,7 @@ def convert_params_to_3d(sharpe_ratios_df, param1, param2):
     x_unique = np.unique(x_vals)
     y_unique = np.unique(y_vals)
     X, Y = np.meshgrid(x_unique, y_unique)
-    Z = np.full_like(X, np.nan, dtype=np.float32)
+    Z = np.full_like(X, np.nan, dtype=np.np.float32)
 
     for i in range(len(x_vals)):
         x_idx = np.where(x_unique == x_vals[i])[0][0]
@@ -127,7 +127,7 @@ def scatter_3d(
         text=['Value: {:.2f}'.format(v) for v in values],
         hovertemplate='Param1: %{x}<br>Param2: %{y}<br>Param3: %{z}<br>Value: %{marker.color}<extra></extra>'
     )])
-    fig.update_layout( # type: ignore
+    fig.update_layout(
         scene=dict(
             xaxis_title=params[0],
             yaxis_title=params[1],
@@ -180,7 +180,7 @@ def calculate_cost_limit(
         0.0, 
         index=raw_rolling_sharpe_df.index,
         columns=raw_rolling_sharpe_df.columns, 
-        dtype=np.float32
+        dtype=np.np.float32
         )
 
     for asset in asset_names:
@@ -354,7 +354,7 @@ def identify_roll_dates(adjusted_df: pd.DataFrame, unadjusted_df: pd.DataFrame) 
 
     unadjusted_df['Price_Diff'] = adjusted_df['Close'] - unadjusted_df['Close']
 
-    unadjusted_df['Price_Diff_Change'] = unadjusted_df['Price_Diff'].pct_change().round(2)
+    unadjusted_df['Price_Diff_Change'] = unadjusted_df['Price_Diff'].pct_change()
 
     unadjusted_df['Roll_Day'] = (unadjusted_df['Price_Diff_Change'].abs() > 0).astype(int)
     
@@ -417,7 +417,7 @@ def normalize_returns_distribution_rolling(
     normalized_returns = pd.DataFrame(
         index=pct_returns_df.index, 
         columns=pct_returns_df.columns, 
-        dtype=np.float32)
+        dtype=np.np.float32)
 
     for end in range(window_size - 1, len(pct_returns_df)):
         window_df = pct_returns_df.iloc[end - window_size + 1 : end + 1]
@@ -477,7 +477,7 @@ def compute_group_diversification_multiplier(group_returns, weights, window):
     diversification_multiplier_series = pd.Series(
         [np.nan] * (window - 1) + diversification_multipliers, 
         index=group_returns.index, 
-        dtype=np.float32
+        dtype=np.np.float32
         )
 
     return diversification_multiplier_series
@@ -485,7 +485,7 @@ def compute_group_diversification_multiplier(group_returns, weights, window):
 def compute_diversification_for_group(group_assets, returns_df, window):
 
     group_returns = returns_df[group_assets]
-    weights = np.full(len(group_assets), 1.0 / len(group_assets), dtype=np.float32)
+    weights = np.full(len(group_assets), 1.0 / len(group_assets), dtype=np.np.float32)
 
     diversification_multiplier_series = compute_group_diversification_multiplier(
         group_returns, weights, window
@@ -498,7 +498,7 @@ def diversification_multiplier_by_group(returns_df, portfolio_dict, window):
     asset_groups = extract_asset_groups(portfolio_dict)
     valid_groups = [group for group in asset_groups if len([asset for asset in group if asset in returns_df.columns]) > 1]
 
-    diversification_multiplier_df = pd.DataFrame(1.0, index=returns_df.index, columns=returns_df.columns, dtype=np.float32)
+    diversification_multiplier_df = pd.DataFrame(1.0, index=returns_df.index, columns=returns_df.columns, dtype=np.np.float32)
 
     results = Parallel(n_jobs=-1)(delayed(compute_diversification_for_group)(
         [asset for asset in group if asset in returns_df.columns], 
@@ -592,7 +592,7 @@ def adjust_returns_for_nans(returns_df: pd.DataFrame) -> pd.DataFrame:
 
             returns_df.loc[first_valid_index:, col] = random_fill(returns_df.loc[first_valid_index:, col])
 
-            filled_pct = ((num_cells_filled_before / num_days) * 100).round(2) if num_days > 0 else 0
+            filled_pct = ((num_cells_filled_before / num_days) * 100) if num_days > 0 else 0
             absolute_max_returns = returns_df[col].abs().max() * 100
             absolute_median_returns = returns_df[col].abs().median() * 100
             max_returns_date = returns_df[col].idxmax().strftime('%Y-%m-%d')
@@ -732,7 +732,7 @@ def adjust_prices_with_risk_free_rate(returns_df: pd.DataFrame, risk_free_rate_d
         np.tile(risk_free_daily.values, (returns_df.shape[1], 1)).T,
         index=returns_df.index,
         columns=returns_df.columns,
-        dtype=np.float32
+        dtype=np.np.float32
     )
 
     return returns_df.sub(risk_free_daily_expanded, axis=0)'''
@@ -760,8 +760,8 @@ def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthS
 
     avg_move = calculate_avg_move_nan(abs_returns_array, LengthSnapshot, LengthMean)
 
-    amplitude_float = np.float32(amplitude)
-    amplitude_adjustement = np.float32(10)
+    amplitude_float = np.np.float32(amplitude)
+    amplitude_adjustement = np.np.float32(10)
 
     adjusted_amplitude = amplitude_float / amplitude_adjustement
 
@@ -772,7 +772,7 @@ def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthS
                     np.where(returns > upper_bound, 1, 
                                 np.where(returns < lower_bound, -1, 0)))
     
-    signals = signals.astype(np.float32)
+    signals = signals.astype(np.np.float32)
 
     return signals*-1
 
@@ -782,13 +782,13 @@ def calculate_avg_move_nan(abs_returns_np: np.ndarray, LengthSnapshot:int, Lengt
     
     num_days, num_assets = abs_returns_np.shape
 
-    avg_move = np.empty((num_days, num_assets), dtype=np.float32)
+    avg_move = np.empty((num_days, num_assets), dtype=np.np.float32)
 
     for i in range(num_days):
         snapshot_indices = np.arange(i, -1, -LengthSnapshot)[:LengthMean]
 
-        total_sum = np.zeros(num_assets, dtype=np.float32) 
-        valid_count = np.zeros(num_assets, dtype=np.float32)
+        total_sum = np.zeros(num_assets, dtype=np.np.float32) 
+        valid_count = np.zeros(num_assets, dtype=np.np.float32)
 
         for idx in snapshot_indices:
             values = abs_returns_np[idx]
@@ -843,7 +843,7 @@ def process_trend_signal(
     shape: tuple
 ) -> ArrayFloat:
     
-    processed_seasonal_trend_signal = np.zeros(shape, dtype=np.float32)
+    processed_seasonal_trend_signal = np.zeros(shape, dtype=np.np.float32)
     processed_seasonal_trend_signal[group_mask_array] = seasonal_trend_signal
 
     return processed_seasonal_trend_signal

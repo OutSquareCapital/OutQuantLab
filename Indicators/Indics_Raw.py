@@ -10,7 +10,7 @@ rolling_kurtosis,
 separate_volatility
 )
 from .Indics_Normalization import ratio_normalization
-from Files import ArrayFloat, ArrayInt, DataFrameFloat
+from Files import ArrayFloat, ArrayInt, DataFrameFloat, Int32
 
 def generate_seasonal_array(returns_df: DataFrameFloat) -> ArrayInt:
 
@@ -24,14 +24,14 @@ def generate_seasonal_array(returns_df: DataFrameFloat) -> ArrayInt:
         else:
             return 4
 
-    seasonal_array = np.empty((returns_df.shape[0], 3), dtype=np.int32)
+    seasonal_array = np.empty((returns_df.shape[0], 3), dtype=Int32)
     
-    seasonal_array[:, 2] = returns_df.index.quarter # type: ignore
+    seasonal_array[:, 2] = returns_df.index.quarter
 
     day_of_month = returns_df.groupby([returns_df.index.year, returns_df.index.month], observed=False).cumcount() + 1 # type: ignore
-    seasonal_array[:, 1] = day_of_month.apply(assign_week_of_month).values # type: ignore
+    seasonal_array[:, 1] = day_of_month.apply(assign_week_of_month).to_numpy() # type: ignore
 
-    seasonal_array[:, 0] = returns_df.index.dayofweek + 1 # type: ignore
+    seasonal_array[:, 0] = returns_df.index.dayofweek + 1
 
     return seasonal_array
 

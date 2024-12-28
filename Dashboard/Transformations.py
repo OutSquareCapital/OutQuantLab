@@ -20,7 +20,7 @@ def convert_dataframe_multiindex_labels(df: DataFrameFloat) -> DataFrameFloat:
 def compute_linkage_matrix(corr_matrix: DataFrameFloat) -> ArrayFloat:
 
     pairwise_distances = DataFrameFloat(1 - corr_matrix.abs())
-    condensed_distances = squareform(pairwise_distances.values)
+    condensed_distances = squareform(pairwise_distances.nparray)
     return linkage(condensed_distances, method='average')
 
 def sort_correlation_matrix(corr_matrix: DataFrameFloat) -> DataFrameFloat:

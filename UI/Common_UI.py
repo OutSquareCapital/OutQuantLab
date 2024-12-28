@@ -223,10 +223,14 @@ def populate_tree_from_dict(
                 tree.addTopLevelItem(orphan_item)
 
 def connect_sliders_to_update(
-    start_slider: QSlider, end_slider: QSlider, num_values_slider: QSlider,
-    range_info_label: QLabel, num_values_info_label: QLabel, generated_values_label: QLabel,
+    start_slider: QSlider, 
+    end_slider: QSlider, 
+    num_values_slider: QSlider,
+    range_info_label: QLabel, 
+    num_values_info_label: QLabel, 
+    generated_values_label: QLabel,
     update_callback: Callable[[list[int]], None]
-) -> None:
+    ) -> None:
     def update_values() -> None:
         start = index_to_value(start_slider.value())
         end = index_to_value(end_slider.value())
@@ -457,7 +461,9 @@ def generate_backtest_params_sliders(clusters_params: list[str]) -> tuple[QVBoxL
         slider.setRange(0, 10)
         slider.setValue(5)
         slider_label = QLabel(f"{param}: {slider.value()}")
-        slider.valueChanged.connect(lambda value, lbl=slider_label, txt=param: lbl.setText(f"{txt}: {value}"))
+        def update_slider_label(value: int, label:QLabel=slider_label, txt: str = param) -> None:
+            label.setText(f"{txt}: {value}")
+        slider.valueChanged.connect(update_slider_label)
         clusters_buttons_inner_layout.addWidget(slider_label)
         clusters_buttons_inner_layout.addWidget(slider)
 
@@ -475,7 +481,7 @@ def generate_backtest_params_sliders(clusters_params: list[str]) -> tuple[QVBoxL
     length_slider.setRange(6, 12)
     length_slider.setValue(10)
     length_label = QLabel(f"Rolling Length: {2 ** length_slider.value()}")
-    length_slider.valueChanged.connect(lambda value: length_label.setText(f"Rolling Length: {2 ** value}"))
+    length_slider.valueChanged.connect(lambda value: length_label.setText(f"Rolling Length: {value ** 2}"))
     backtest_parameters_inner_layout.addWidget(length_label)
     backtest_parameters_inner_layout.addWidget(length_slider)
 

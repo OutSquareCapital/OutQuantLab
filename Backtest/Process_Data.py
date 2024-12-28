@@ -33,7 +33,7 @@ def load_prices(asset_names: list[str], file_path: str) -> tuple[ArrayFloat, pd.
         columns=columns_to_load
     ))
     
-    pct_returns_array = pct_returns_np(prices_df.values)
+    pct_returns_array = pct_returns_np(prices_df.nparray)
 
     return pct_returns_array, prices_df.index
 

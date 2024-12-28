@@ -16,7 +16,7 @@ def relative_sharpe_on_confidence_period(
 
 
     sharpe_array = process_in_blocks_parallel(
-        returns_df.values, 
+        returns_df.nparray, 
         block_size=block_size,
         func=rolling_sharpe_ratios,
         length = sharpe_lookback,

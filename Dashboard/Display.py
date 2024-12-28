@@ -52,7 +52,7 @@ class DashboardsCollection:
         ]
         func_results = [func(self.global_portfolio) for func in metric_functions]
         
-        return [result.values.round(2).tolist() for result in func_results]
+        return [result.nparray.tolist() for result in func_results]
 
     def plot(self, dashboard_name: str, global_plot:bool = False) -> go.Figure:
         
@@ -225,7 +225,7 @@ def plot_correlation_heatmap(returns_df: DataFrameFloat) -> go.Figure:
     sorted_correlation_matrix = Transformations.sort_correlation_matrix(correlation_matrix)
     sorted_correlation_matrix = Transformations.convert_dataframe_multiindex_labels(sorted_correlation_matrix)
     return Widgets.heatmap(
-        z_values=sorted_correlation_matrix.values,
+        z_values=sorted_correlation_matrix.nparray,
         x_labels=sorted_correlation_matrix.columns.to_list(),
         y_labels=sorted_correlation_matrix.columns.to_list(),
         title="Correlation Matrix")

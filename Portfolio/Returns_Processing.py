@@ -34,7 +34,7 @@ def calculate_portfolio_returns(
         return DataFrameFloat(grouped)
 
     return DataFrameFloat(
-        bn.nanmean(returns_df.values, axis=1), # type: ignore
+        bn.nanmean(returns_df.nparray, axis=1), # type: ignore
         index=returns_df.index,
         columns=['Portfolio']
         )

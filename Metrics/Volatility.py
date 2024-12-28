@@ -66,5 +66,4 @@ def separate_volatility(array:ArrayFloat, LenVol: int) -> tuple[ArrayFloat, Arra
     return vol_positive, vol_negative
 
 def overall_volatility(array: ArrayFloat) -> ArrayFloat:
-
-    return bn.nanstd(array, axis=0, ddof=1)  * ANNUALIZED_PERCENTAGE_FACTOR # type: ignore
+    return bn.nanstd(x, axis=0, ddof=1) # type: ignore
