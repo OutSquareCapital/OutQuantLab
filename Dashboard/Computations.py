@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import skew # type: ignore
-from Files import PERCENTAGE_FACTOR, DataFrameFloat, SeriesFloat
+from Utilitary import PERCENTAGE_FACTOR, DataFrameFloat, SeriesFloat, Float32
 from Indicators import calculate_equity_curves
 from Metrics import rolling_mean, rolling_sharpe_ratios, rolling_skewness, hv_composite, overall_volatility
 from Metrics.Performance import overall_sharpe_ratio
@@ -17,7 +17,7 @@ def calculate_overall_returns(returns_df: DataFrameFloat) -> SeriesFloat:
         equity_curves.iloc[-1]-100), # type: ignore
         index=returns_df.columns)
 
-def calculate_overall_volatility(returns_df: DataFrameFloat) -> SeriesFloat|np.float32:
+def calculate_overall_volatility(returns_df: DataFrameFloat) -> SeriesFloat|Float32:
 
     overall_vol = overall_volatility(returns_df.nparray)
 
@@ -48,7 +48,7 @@ def calculate_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
     
     return monthly_returns_df.apply(
         calculate_skew
-        ).astype(np.float32
+        ).astype(Float32
         )
 
 def calculate_overall_average_correlation(returns_df: DataFrameFloat) -> SeriesFloat:
@@ -124,7 +124,7 @@ def calculate_rolling_average_correlation(returns_df: DataFrameFloat, length: in
     ).corr( # type: ignore
     ).groupby(level=0
     ).mean(
-    ).astype(np.float32
+    ).astype(Float32
     )
 
     return DataFrameFloat(rolling_avg_corr)

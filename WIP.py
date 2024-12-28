@@ -67,7 +67,7 @@ def convert_params_to_3d(sharpe_ratios_df, param1, param2):
     x_unique = np.unique(x_vals)
     y_unique = np.unique(y_vals)
     X, Y = np.meshgrid(x_unique, y_unique)
-    Z = np.full_like(X, np.nan, dtype=np.np.float32)
+    Z = np.full_like(X, np.nan, dtype=np.Float32)
 
     for i in range(len(x_vals)):
         x_idx = np.where(x_unique == x_vals[i])[0][0]
@@ -180,7 +180,7 @@ def calculate_cost_limit(
         0.0, 
         index=raw_rolling_sharpe_df.index,
         columns=raw_rolling_sharpe_df.columns, 
-        dtype=np.np.float32
+        dtype=np.Float32
         )
 
     for asset in asset_names:
@@ -242,7 +242,29 @@ def calculate_cost_adjusted_returns(
     
     return cost_adjusted_returns_df
 '''
+'''
+import logging
+from psutil import virtual_memory
+from .custom_types import ArrayFloat
+MEMORY_SAFETY_BUFFER: Final = 0.8
+MEMORY_PER_THREAD: Final = 100 * 1024 * 1024
 
+def get_memory_available(array:ArrayFloat, N_THREADS:int) -> int:
+    
+    memory_available = virtual_memory().available * MEMORY_SAFETY_BUFFER
+    
+    array_size = array.nbytes if hasattr(array, 'nbytes') else array.memory_usage().sum()
+    
+    total_memory_needed = array_size + (N_THREADS * MEMORY_PER_THREAD)
+    
+    if total_memory_needed > memory_available:
+        logging.warning(f"Memory constraint detected. Reducing threads from {N_THREADS}")
+        # Calculate max possible threads
+        max_threads = int((memory_available - array_size) // MEMORY_PER_THREAD)
+        return max(1, max_threads)
+    
+    return N_THREADS
+'''
 paires_futures_etf = [
 ("6A", "AD"),
 ("6B", "BP"),
@@ -417,7 +439,7 @@ def normalize_returns_distribution_rolling(
     normalized_returns = pd.DataFrame(
         index=pct_returns_df.index, 
         columns=pct_returns_df.columns, 
-        dtype=np.np.float32)
+        dtype=np.Float32)
 
     for end in range(window_size - 1, len(pct_returns_df)):
         window_df = pct_returns_df.iloc[end - window_size + 1 : end + 1]
@@ -477,7 +499,7 @@ def compute_group_diversification_multiplier(group_returns, weights, window):
     diversification_multiplier_series = pd.Series(
         [np.nan] * (window - 1) + diversification_multipliers, 
         index=group_returns.index, 
-        dtype=np.np.float32
+        dtype=np.Float32
         )
 
     return diversification_multiplier_series
@@ -485,7 +507,7 @@ def compute_group_diversification_multiplier(group_returns, weights, window):
 def compute_diversification_for_group(group_assets, returns_df, window):
 
     group_returns = returns_df[group_assets]
-    weights = np.full(len(group_assets), 1.0 / len(group_assets), dtype=np.np.float32)
+    weights = np.full(len(group_assets), 1.0 / len(group_assets), dtype=np.Float32)
 
     diversification_multiplier_series = compute_group_diversification_multiplier(
         group_returns, weights, window
@@ -498,7 +520,7 @@ def diversification_multiplier_by_group(returns_df, portfolio_dict, window):
     asset_groups = extract_asset_groups(portfolio_dict)
     valid_groups = [group for group in asset_groups if len([asset for asset in group if asset in returns_df.columns]) > 1]
 
-    diversification_multiplier_df = pd.DataFrame(1.0, index=returns_df.index, columns=returns_df.columns, dtype=np.np.float32)
+    diversification_multiplier_df = pd.DataFrame(1.0, index=returns_df.index, columns=returns_df.columns, dtype=np.Float32)
 
     results = Parallel(n_jobs=-1)(delayed(compute_diversification_for_group)(
         [asset for asset in group if asset in returns_df.columns], 
@@ -732,7 +754,7 @@ def adjust_prices_with_risk_free_rate(returns_df: pd.DataFrame, risk_free_rate_d
         np.tile(risk_free_daily.values, (returns_df.shape[1], 1)).T,
         index=returns_df.index,
         columns=returns_df.columns,
-        dtype=np.np.float32
+        dtype=np.Float32
     )
 
     return returns_df.sub(risk_free_daily_expanded, axis=0)'''
@@ -760,8 +782,8 @@ def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthS
 
     avg_move = calculate_avg_move_nan(abs_returns_array, LengthSnapshot, LengthMean)
 
-    amplitude_float = np.np.float32(amplitude)
-    amplitude_adjustement = np.np.float32(10)
+    amplitude_float = np.Float32(amplitude)
+    amplitude_adjustement = np.Float32(10)
 
     adjusted_amplitude = amplitude_float / amplitude_adjustement
 
@@ -772,7 +794,7 @@ def seasonal_breakout_returns(prices_array: np.ndarray, LengthMean: int, LengthS
                     np.where(returns > upper_bound, 1, 
                                 np.where(returns < lower_bound, -1, 0)))
     
-    signals = signals.astype(np.np.float32)
+    signals = signals.astype(np.Float32)
 
     return signals*-1
 
@@ -782,13 +804,13 @@ def calculate_avg_move_nan(abs_returns_np: np.ndarray, LengthSnapshot:int, Lengt
     
     num_days, num_assets = abs_returns_np.shape
 
-    avg_move = np.empty((num_days, num_assets), dtype=np.np.float32)
+    avg_move = np.empty((num_days, num_assets), dtype=np.Float32)
 
     for i in range(num_days):
         snapshot_indices = np.arange(i, -1, -LengthSnapshot)[:LengthMean]
 
-        total_sum = np.zeros(num_assets, dtype=np.np.float32) 
-        valid_count = np.zeros(num_assets, dtype=np.np.float32)
+        total_sum = np.zeros(num_assets, dtype=np.Float32) 
+        valid_count = np.zeros(num_assets, dtype=np.Float32)
 
         for idx in snapshot_indices:
             values = abs_returns_np[idx]
@@ -843,7 +865,7 @@ def process_trend_signal(
     shape: tuple
 ) -> ArrayFloat:
     
-    processed_seasonal_trend_signal = np.zeros(shape, dtype=np.np.float32)
+    processed_seasonal_trend_signal = np.zeros(shape, dtype=np.Float32)
     processed_seasonal_trend_signal[group_mask_array] = seasonal_trend_signal
 
     return processed_seasonal_trend_signal

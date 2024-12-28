@@ -1,4 +1,4 @@
-from Files import ArrayFloat, DataFrameFloat
+from Utilitary import ArrayFloat, DataFrameFloat, Float32
 import numpy as np
 from Metrics import rolling_sharpe_ratios, rolling_mean
 from Infrastructure import process_in_blocks_parallel
@@ -12,7 +12,7 @@ def relative_sharpe_on_confidence_period(
     ) -> DataFrameFloat:
 
     def count_non_nan(x: ArrayFloat) -> ArrayFloat:
-        return np.cumsum(~np.isnan(x), axis=0, dtype=np.float32)
+        return np.cumsum(~np.isnan(x), axis=0, dtype=Float32)
 
 
     sharpe_array = process_in_blocks_parallel(

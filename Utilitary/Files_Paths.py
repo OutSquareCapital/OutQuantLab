@@ -1,9 +1,7 @@
-import os
 from typing import Final
 from dataclasses import dataclass
+import os
 from .custom_types import JSON_EXT, PARQUET_EXT, JsonData, ParquetData, PngMedia,  WebpMedia, PNG_EXT, WEBP_EXT
-
-N_THREADS: Final = os.cpu_count() or 8
 
 @dataclass(frozen=True)
 class SystemPaths:

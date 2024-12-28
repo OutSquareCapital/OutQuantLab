@@ -2,7 +2,7 @@ import numexpr as ne # type: ignore
 import numpy as np
 from Metrics import rolling_mean, rolling_median, rolling_min, rolling_max, rolling_volatility
 from Infrastructure import bfill
-from Files import ArrayFloat
+from Utilitary import ArrayFloat, Float32
 
 def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> ArrayFloat:
     return (nominator / denominator) - 1
@@ -27,7 +27,7 @@ def rolling_median_normalisation(
     limit:int = 1
     ) -> ArrayFloat:
 
-    adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)
+    adjusted_signal_array = np.empty_like(signal_array, dtype=Float32)
     dict = {
         "signal_array": signal_array,
         "median_array": rolling_median(signal_array, length=window_length, min_length=window_length),
@@ -48,7 +48,7 @@ def rolling_std_normalisation(
     limit:int = 1
     ) -> ArrayFloat:
 
-    adjusted_signal_array = np.empty_like(signal_array, dtype=np.float32)
+    adjusted_signal_array = np.empty_like(signal_array, dtype=Float32)
     dict = {
         "signal_array": signal_array,
         "median_array": rolling_median(signal_array, length=window_length, min_length=window_length),

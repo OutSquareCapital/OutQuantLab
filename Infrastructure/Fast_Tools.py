@@ -1,5 +1,5 @@
 import numpy as np
-from Files import ArrayFloat, N_THREADS
+from Utilitary import ArrayFloat, N_THREADS, Float32
 import numbagg as nb
 from concurrent.futures import ThreadPoolExecutor
 from collections.abc import Callable
@@ -9,7 +9,7 @@ def bfill(array: ArrayFloat) -> ArrayFloat:
     return nb.bfill(array, axis=0) # type: ignore
     
 def shift_array(returns_array: ArrayFloat, step:int = 1) -> ArrayFloat:
-    shifted_array = np.empty_like(returns_array, dtype=np.float32)
+    shifted_array = np.empty_like(returns_array, dtype=Float32)
     shifted_array[step:, :] = returns_array[:-step, :]
     shifted_array[:step, :] = np.nan
     return shifted_array

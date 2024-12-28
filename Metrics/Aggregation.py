@@ -1,7 +1,7 @@
 import bottleneck as bn  # type: ignore
 import numpy as np
 import polars as pl
-from Files import ArrayFloat
+from Utilitary import ArrayFloat, Float32
 
 def overall_mean(array: ArrayFloat, axis: int = 0) -> ArrayFloat:
     return bn.nanmean(array, axis) # type: ignore
@@ -30,8 +30,8 @@ def rolling_weighted_mean(array: ArrayFloat, length: int) -> ArrayFloat:
     def convolve_with_weights(x: ArrayFloat, weights: ArrayFloat) -> ArrayFloat:
         return np.convolve(x, weights[::-1], mode='valid')
 
-    wma_array = np.full(array.shape, np.nan, dtype=np.float32)
-    weights = np.arange(1, length + 1, dtype=np.float32)
+    wma_array = np.full(array.shape, np.nan, dtype=Float32)
+    weights = np.arange(1, length + 1, dtype=Float32)
     weight_sum = weights.sum()
     weighted_sum = np.apply_along_axis(convolve_with_weights, axis=0, arr=array, weights=weights)
     wma_array[length - 1:] = weighted_sum / weight_sum

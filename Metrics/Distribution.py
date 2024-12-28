@@ -1,5 +1,5 @@
 import numpy as np
-from Files import ArrayFloat
+from Utilitary import ArrayFloat, Float32
 from numba import prange  # type: ignore
 from numba import njit  # type: ignore
 
@@ -140,7 +140,7 @@ def rolling_skewness(
     min_length: int
 ) -> ArrayFloat:
     num_rows, num_cols = array.shape
-    output: ArrayFloat = np.empty((num_rows, num_cols), dtype=np.float32)
+    output: ArrayFloat = np.empty((num_rows, num_cols), dtype=Float32)
     output.fill(np.nan)
 
     for col in prange(num_cols):
@@ -220,7 +220,7 @@ def calculate_kurtosis(
     sum_values_cubed: float,
     sum_values_fourth: float,
     consecutive_equal_count: int
-) -> float|np.float32:
+) -> float|Float32:
     if observation_count >= min_length:
         if observation_count < 4:
             return np.nan
@@ -370,7 +370,7 @@ def rolling_kurtosis(
     min_length: int
 ) -> ArrayFloat:
     num_rows, num_cols = array.shape
-    output: ArrayFloat = np.empty((num_rows, num_cols), dtype=np.float32)
+    output: ArrayFloat = np.empty((num_rows, num_cols), dtype=Float32)
     output.fill(np.nan)
 
     for col in prange(num_cols):

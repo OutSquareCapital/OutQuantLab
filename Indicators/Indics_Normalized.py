@@ -1,7 +1,7 @@
 import numpy as np
 from .Indics_Raw import *
 from .Indics_Normalization import sign_normalization, calculate_indicator_on_trend_signal, rolling_median_normalisation, relative_normalization
-from Files import ArrayFloat, IndicatorFunc, PERCENTAGE_FACTOR
+from Utilitary import ArrayFloat, IndicatorFunc, PERCENTAGE_FACTOR, Float32
 from inspect import signature
 from Metrics import hv_composite
 from Infrastructure import shift_array
@@ -30,11 +30,11 @@ def calculate_equity_curves(returns_array: ArrayFloat) -> ArrayFloat:
 def log_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
 
     if prices_array.ndim == 1:
-        log_returns_array = np.empty(prices_array.shape, dtype=np.float32)
+        log_returns_array = np.empty(prices_array.shape, dtype=Float32)
         log_returns_array[0] = np.nan
         log_returns_array[1:] = np.log(prices_array[1:] / prices_array[:-1])
     else:
-        log_returns_array = np.empty(prices_array.shape, dtype=np.float32)
+        log_returns_array = np.empty(prices_array.shape, dtype=Float32)
         log_returns_array[0, :] = np.nan
         log_returns_array[1:, :] = np.log(prices_array[1:] / prices_array[:-1])
 
@@ -43,11 +43,11 @@ def log_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
 def pct_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
 
     if prices_array.ndim == 1:
-        pct_returns_array = np.empty(prices_array.shape, dtype=np.float32)
+        pct_returns_array = np.empty(prices_array.shape, dtype=Float32)
         pct_returns_array[0] = np.nan
         pct_returns_array[1:] = prices_array[1:] / prices_array[:-1] - 1
     else:
-        pct_returns_array = np.empty(prices_array.shape, dtype=np.float32)
+        pct_returns_array = np.empty(prices_array.shape, dtype=Float32)
         pct_returns_array[0, :] = np.nan
         pct_returns_array[1:, :] = prices_array[1:] / prices_array[:-1] - 1
 
@@ -188,7 +188,7 @@ class IndicatorsMethods:
         return calculate_indicator_on_trend_signal(central_roc_trend_signal, central_roc_macd_signal)
     @indicator
     def fixed_bias(self, Bias: int) -> ArrayFloat:
-        return np.full_like(self, Bias, dtype=np.float32)
+        return np.full_like(self, Bias, dtype=Float32)
     @indicator
     def mean_price_ratio_normalised(self, SignalLength: int, PLength: int) -> ArrayFloat:
         mean_price_ratio = calculate_mean_price_ratio_raw(self.prices_array, 1, SignalLength)

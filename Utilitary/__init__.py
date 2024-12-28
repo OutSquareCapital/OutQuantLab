@@ -1,4 +1,5 @@
-from .System_Constants import CONFIG, MEDIA, N_THREADS
+from .Files_Paths import CONFIG, MEDIA
+from .System_Management import N_THREADS
 from .Maths_Constants import *
 from .UI_Constants import *
 from .custom_types import *

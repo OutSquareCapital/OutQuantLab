@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from Files import N_THREADS, ArrayFloat, ProgressFunc, DataFrameFloat
+from Utilitary import N_THREADS, ArrayFloat, ProgressFunc, DataFrameFloat, Float32
 from concurrent.futures import ThreadPoolExecutor
 from Config import Indicator
 from Indicators import IndicatorsMethods
@@ -17,7 +17,7 @@ def calculate_strategy_returns(
     global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
     indics_methods.process_data(pct_returns_array)
     total_returns_streams = int(multi_index.shape[0]) # type: ignore
-    signals_array: ArrayFloat = np.empty((pct_returns_array.shape[0], total_returns_streams), dtype=np.float32)
+    signals_array: ArrayFloat = np.empty((pct_returns_array.shape[0], total_returns_streams), dtype=Float32)
     total_assets_count = pct_returns_array.shape[1]
 
     import time
