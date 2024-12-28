@@ -1,29 +1,29 @@
 import numpy as np
 import pandas as pd
-from Files import ArrayFloat
-import re
+from Files import ArrayFloat, DataFrameFloat, SeriesFloat
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import linkage, leaves_list # type: ignore
+from typing import Any
 
-def convert_series_multiindex_labels(series):
+def convert_series_multiindex_labels(series: SeriesFloat) -> SeriesFloat:
     if isinstance(series.index, pd.MultiIndex):
         series.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in series.index]
     return series
 
-def convert_dataframe_multiindex_labels(df):
+def convert_dataframe_multiindex_labels(df: DataFrameFloat) -> DataFrameFloat:
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = ["_".join(map(str, col)) if isinstance(col, tuple) else str(col) for col in df.columns]
     if isinstance(df.index, pd.MultiIndex):
         df.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(idx) for idx in df.index]
     return df
 
-def compute_linkage_matrix(corr_matrix: pd.DataFrame) -> ArrayFloat:
+def compute_linkage_matrix(corr_matrix: DataFrameFloat) -> ArrayFloat:
 
-    pairwise_distances = 1 - corr_matrix.abs()
+    pairwise_distances = DataFrameFloat(1 - corr_matrix.abs())
     condensed_distances = squareform(pairwise_distances.values)
     return linkage(condensed_distances, method='average')
 
-def sort_correlation_matrix(corr_matrix: pd.DataFrame) -> pd.DataFrame:
+def sort_correlation_matrix(corr_matrix: DataFrameFloat) -> DataFrameFloat:
 
     linkage_matrix = compute_linkage_matrix(corr_matrix)
     ordered_indices = leaves_list(linkage_matrix)
@@ -33,30 +33,12 @@ def sort_correlation_matrix(corr_matrix: pd.DataFrame) -> pd.DataFrame:
 
     return sorted_corr_matrix # type: ignore
 
-def extract_params_from_name(name: str, param1: str, param2: str):
-
-    pattern1 = re.compile(f"{param1}(\\d+)")
-    pattern2 = re.compile(f"{param2}(\\d+)")
-    
-    match1 = pattern1.search(name)
-    match2 = pattern2.search(name)
-    
-    param1_value = int(match1.group(1)) if match1 else None
-    param2_value = int(match2.group(1)) if match2 else None
-    
-    return param1_value, param2_value
-
-def extract_all_params_from_name(name: str, params: list) -> list:
-
-    extracted_values = []
-    for param in params:
-        pattern = re.compile(f"{param}(\\d+)")
-        match = pattern.search(name)
-        extracted_values.append(int(match.group(1)) if match else None)
-    
-    return extracted_values
-
-def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=None):
+def prepare_sunburst_data(
+    cluster_dict:dict[str, Any], 
+    parent_label:str="", 
+    labels: list[str]|None = None, 
+    parents: list[str]|None = None
+    ) -> tuple[list[str], list[str]]:
 
     if labels is None:
         labels = []
@@ -66,7 +48,7 @@ def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=No
     for key, value in cluster_dict.items():
         current_label = parent_label + str(key) if parent_label else str(key)
         if isinstance(value, dict):
-            prepare_sunburst_data(value, current_label, labels, parents)
+            prepare_sunburst_data(value, current_label, labels, parents) # type: ignore
         else:
             for asset in value:
                 labels.append(asset)
@@ -80,10 +62,10 @@ def prepare_sunburst_data(cluster_dict, parent_label="", labels=None, parents=No
             
     return labels, parents
 
-def sort_series(data: pd.Series, ascending: bool = True) -> pd.Series:
+def sort_series(data: SeriesFloat, ascending: bool = True) -> SeriesFloat:
     return data.sort_values(ascending=ascending) # type: ignore
 
-def sort_dataframe(data: pd.DataFrame, use_final: bool = False, ascending: bool = True) -> pd.DataFrame:
+def sort_dataframe(data: DataFrameFloat, use_final: bool = False, ascending: bool = True) -> DataFrameFloat:
     if use_final:
         return data.sort_values(by=data.index[-1], axis=1, ascending=ascending) # type: ignore
     else:

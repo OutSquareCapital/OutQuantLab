@@ -1,12 +1,12 @@
 import plotly.graph_objects as go # type: ignore
-from Files import ArrayFloat
+from Files import ArrayFloat, DataFrameFloat, SeriesFloat
 import pandas as pd
 from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
 from .Transformations import normalize_data_for_colormap
 from Files import COLOR_ADJUSTMENT
 
-def curves( x_values: pd.Index,
-            y_values: pd.DataFrame,  
+def curves( x_values: pd.DatetimeIndex,
+            y_values: DataFrameFloat,  
             title: str,
             log_scale: bool = False
             ) -> go.Figure:
@@ -33,7 +33,7 @@ def curves( x_values: pd.Index,
     return fig
 
 def bars(
-    series: pd.Series, 
+    series: SeriesFloat, 
     title: str
     ) -> go.Figure:
     
@@ -43,7 +43,7 @@ def bars(
 
     fig = go.Figure()
 
-    for item, value in series.items():
+    for item, value in series.items(): # type: ignore
         fig.add_trace(go.Bar( # type: ignore
             x=[item],
             y=[value],
@@ -99,7 +99,7 @@ def heatmap(
     return fig
 
 def violin(
-    data: pd.DataFrame, 
+    data: DataFrameFloat, 
     title: str
     ) -> go.Figure:
     
@@ -119,10 +119,10 @@ def violin(
             hoverinfo="y" 
         ))
 
-    y_min = data.min().min()
-    y_max = data.max().max()
+    y_min = data.min().min() # type: ignore
+    y_max = data.max().max() # type: ignore
     fig.update_layout( # type: ignore
-        yaxis=dict(range=[y_min, y_max], showgrid=False),
+        yaxis=dict(range=[y_min, y_max], showgrid=False), # type: ignore
         xaxis=dict(
             showticklabels=False,
             )
@@ -133,7 +133,7 @@ def violin(
     return fig
 
 def histogram(
-    data: pd.DataFrame, 
+    data: DataFrameFloat, 
     title: str
     ) -> go.Figure:
 

@@ -37,8 +37,8 @@ from Dashboard import DashboardsCollection
 
 def setup_home_page(
     parent: QMainWindow, 
-    run_backtest_callback: Callable,
-    refresh_data_callback: Callable,
+    run_backtest_callback: Callable[..., None],
+    refresh_data_callback: Callable[..., None],
     assets_clusters: ClustersTree,
     indicators_clusters: ClustersTree,
     assets_collection: AssetsCollection,
@@ -118,7 +118,7 @@ def setup_backtest_page(parent: QMainWindow) -> tuple[QProgressBar, QTextEdit]:
 def setup_results_page(
     parent: QMainWindow,
     dashboards: DashboardsCollection,
-    back_to_home_callback:Callable, 
+    back_to_home_callback:Callable[..., None], 
     metrics: list[float]) -> None:
 
     results_widget = QWidget()

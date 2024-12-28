@@ -14,7 +14,8 @@ QTreeWidgetItem,
 QMessageBox,
 QInputDialog,
 QLayout,
-QDialog
+QDialog,
+QMainWindow
 )
 from functools import partial
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt, QDate
@@ -43,8 +44,8 @@ def create_param_widget(
         
 def create_scroll_with_buttons(
     parent_layout: QVBoxLayout,
-    select_callback: Callable,
-    unselect_callback: Callable
+    select_callback: Callable[[], None],
+    unselect_callback: Callable[[], None]
 ) -> QVBoxLayout:
     scroll_area, _, scroll_layout = create_scroll_area()
     buttons_layout = QHBoxLayout()
@@ -128,7 +129,7 @@ def create_param_sliders(values: list[int]) -> tuple[QHBoxLayout, QHBoxLayout, Q
 
     return sliders_layout, num_values_layout, start_slider, end_slider, num_values_slider
 
-def add_cluster(tree: QTreeWidget, tree_structure: dict[str, Any]):
+def add_cluster(tree: QTreeWidget, tree_structure: dict[str, Any]) -> None:
     cluster_name, ok = QInputDialog.getText(tree, "New Cluster", "Cluster Name:")
     if ok and cluster_name:
         if cluster_name in tree_structure:
@@ -185,7 +186,12 @@ def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
             return True
     return False
 
-def populate_tree_from_dict(tree: QTreeWidget, data: dict[str, Any], data_set: set, parent_item=None):
+def populate_tree_from_dict(
+    tree: QTreeWidget, 
+    data: dict[str, str|dict[str, str|list[str]]], 
+    data_set: set[str], 
+    parent_item: QTreeWidget|None=None
+    ) -> None:
     if parent_item is None:
         parent_item = tree
 
@@ -219,9 +225,9 @@ def populate_tree_from_dict(tree: QTreeWidget, data: dict[str, Any], data_set: s
 def connect_sliders_to_update(
     start_slider: QSlider, end_slider: QSlider, num_values_slider: QSlider,
     range_info_label: QLabel, num_values_info_label: QLabel, generated_values_label: QLabel,
-    update_callback: Callable
+    update_callback: Callable[[list[int]], None]
 ) -> None:
-    def update_values():
+    def update_values() -> None:
         start = index_to_value(start_slider.value())
         end = index_to_value(end_slider.value())
         num_values = num_values_slider.value()
@@ -244,7 +250,11 @@ def connect_sliders_to_update(
     end_slider.valueChanged.connect(update_values)
     num_values_slider.valueChanged.connect(update_values)
     
-def add_select_buttons(layout: QHBoxLayout, select_callback: Callable, unselect_callback: Callable):
+def add_select_buttons(
+    layout: QHBoxLayout, 
+    select_callback: Callable[[], None], 
+    unselect_callback: Callable[[], None]
+    ) -> None:
     select_all_button = QPushButton("Select All")
     select_all_button.clicked.connect(select_callback)
     layout.addWidget(select_all_button)
@@ -291,7 +301,7 @@ def setup_expandable_animation(
 
 def create_button(
     text: str, 
-    callback: Callable, 
+    callback: Callable[[Any], None], 
     parent_layout: QLayout
     ) -> QPushButton:
     
@@ -300,7 +310,11 @@ def create_button(
     parent_layout.addWidget(button)
     return button
 
-def create_buttons_from_list(layout: QVBoxLayout, buttons_names: list[str], buttons_actions: dict[str, Callable]) -> None:
+def create_buttons_from_list(
+    layout: QVBoxLayout, 
+    buttons_names: list[str], 
+    buttons_actions: dict[str, str]
+    ) -> None:
 
     for btn_text in buttons_names:
         button = QPushButton(btn_text)
@@ -321,7 +335,7 @@ def create_checkbox_item(
 def create_expandable_buttons_list(
     toggle_button_name: str, 
     buttons_names: list[str], 
-    buttons_actions: dict[str, Callable], 
+    buttons_actions: dict[str, str], 
     open_on_launch: bool = False
     ) -> QVBoxLayout:
     
@@ -340,15 +354,18 @@ def create_expandable_buttons_list(
 
 def organize_buttons_by_category(dashboards:DashboardsCollection):
 
-    categorized_buttons = {"overall": [], "rolling": [], "other": []}
-    actions = {"overall": {}, "rolling": {}, "other": {}}
+    categorized_buttons: dict[str, list[str]] = {"overall": [], "rolling": [], "other": []}
+    actions: dict[str, dict[str, str]] = {"overall": {}, "rolling": {}, "other": {}}
 
-    for name, dashboard in dashboards.all_dashboards.items():
+    for _, dashboard in dashboards.all_dashboards.items():
         categorized_buttons[dashboard.category].append(dashboard.name)
 
     return categorized_buttons, actions
     
-def generate_graphs_buttons(dashboards:DashboardsCollection, parent_window):
+def generate_graphs_buttons(
+    dashboards:DashboardsCollection, 
+    parent_window: QMainWindow
+    ) -> tuple[QVBoxLayout, QVBoxLayout, QVBoxLayout]:
     categorized_buttons, actions = organize_buttons_by_category(dashboards)
 
     for category, buttons in categorized_buttons.items():
@@ -369,7 +386,12 @@ def generate_graphs_buttons(dashboards:DashboardsCollection, parent_window):
 
     return overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout
 
-def display_dashboard_plot(parent, dashboards:DashboardsCollection, dashboard_name: str, global_plot: bool = False):
+def display_dashboard_plot(
+    parent: QMainWindow, 
+    dashboards:DashboardsCollection, 
+    dashboard_name: str, 
+    global_plot: bool = False
+    ) -> None:
 
     fig = dashboards.plot(dashboard_name, global_plot=global_plot)
     
@@ -386,7 +408,7 @@ def display_dashboard_plot(parent, dashboards:DashboardsCollection, dashboard_na
     dialog.exec()
 
 
-def generate_stats_display(stats_results, metrics) -> QVBoxLayout:
+def generate_stats_display(stats_results: list[str], metrics: list[float]) -> QVBoxLayout:
     stats_button = QPushButton("Portfolio Statistics")
     stats_layout = QVBoxLayout()
     stats_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -413,7 +435,7 @@ def generate_stats_display(stats_results, metrics) -> QVBoxLayout:
     
     return stats_layout
 
-def generate_home_button(back_to_home_callback: Callable) -> QVBoxLayout:
+def generate_home_button(back_to_home_callback: Callable[..., None]) -> QVBoxLayout:
     home_layout = QVBoxLayout()
     home_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -423,7 +445,7 @@ def generate_home_button(back_to_home_callback: Callable) -> QVBoxLayout:
     
     return home_layout
 
-def generate_backtest_params_sliders(clusters_params) -> tuple[QVBoxLayout, QVBoxLayout]:
+def generate_backtest_params_sliders(clusters_params: list[str]) -> tuple[QVBoxLayout, QVBoxLayout]:
     clusters_toggle_button = QPushButton("Clusters Parameters")
     clusters_buttons_layout = QVBoxLayout()
     clusters_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignTop)

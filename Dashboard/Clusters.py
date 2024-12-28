@@ -1,41 +1,43 @@
 from scipy.cluster.hierarchy import linkage, fcluster # type: ignore
 from scipy.spatial.distance import squareform
-import pandas as pd
-from Files import ArrayFloat
+from Files import ArrayFloat, DataFrameFloat
+from typing import Any
 
-def calculate_distance_matrix(returns_df: pd.DataFrame) -> pd.DataFrame:
-    return 1 - returns_df.corr()
+def calculate_distance_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
+    corr_matrix = returns_df.corr()
+    return DataFrameFloat(1 - corr_matrix)
 
-def perform_clustering(distance_matrix: pd.DataFrame, num_clusters: int, method: str = 'complete') -> ArrayFloat:
+def perform_clustering(distance_matrix: DataFrameFloat, num_clusters: int, method: str = 'complete') -> ArrayFloat:
     linkage_matrix = linkage(squareform(distance_matrix), method=method)
     return fcluster(linkage_matrix, num_clusters, criterion='maxclust')
 
-def create_cluster_dict(assets: list, clusters: ArrayFloat) -> dict:
-    cluster_dict = {}
+def create_cluster_dict(assets: list[str], clusters: ArrayFloat) -> dict[str, list[str]]:
+    cluster_dict: dict[str, list[str]] = {}
     for asset, cluster in zip(assets, clusters):
         if cluster not in cluster_dict:
             cluster_dict[cluster] = []
         cluster_dict[cluster].append(asset)
     return {k: cluster_dict[k] for k in sorted(cluster_dict)}
 
-def cluster_subdivision(returns_df: pd.DataFrame, assets: list, max_subclusters: int, method: str = 'ward'):
+def cluster_subdivision(returns_df: DataFrameFloat, assets: list[str], max_subclusters: int, method: str = 'ward') -> list[str] | dict[str, list[str]]:
     if len(assets) <= 1:
         return assets
-    sub_distance_matrix = calculate_distance_matrix(returns_df[assets])
+    sub_assets_group = DataFrameFloat(returns_df[assets])
+    sub_distance_matrix = calculate_distance_matrix(sub_assets_group)
     sub_clusters = perform_clustering(sub_distance_matrix, max_subclusters, method=method)
     return create_cluster_dict(assets, sub_clusters)
 
 def recursive_subdivision(
-    returns_df: pd.DataFrame, 
-    cluster_dict: dict, 
+    returns_df: DataFrameFloat, 
+    cluster_dict: dict[str, Any], 
     max_subclusters: int, 
     max_subsubclusters: int
-) -> dict:
+) -> dict[str, dict[str, list[str]]]:
     for main_cluster, assets in cluster_dict.items():
-        if isinstance(assets, list) and len(assets) > 1:
+        if len(assets) > 1:
             subcluster_dict = cluster_subdivision(returns_df, assets, max_subclusters)
             if max_subsubclusters:
-                for sub_cluster, sub_assets in subcluster_dict.items(): # type: ignore
+                for sub_cluster, sub_assets in subcluster_dict.items():
                     if len(sub_assets) > 1:
                         sub_subcluster_dict = cluster_subdivision(returns_df, sub_assets, max_subsubclusters, method='average')
                         subcluster_dict[sub_cluster] = sub_subcluster_dict
@@ -43,11 +45,11 @@ def recursive_subdivision(
     return cluster_dict
 
 def generate_static_clusters(
-    returns_df: pd.DataFrame, 
+    returns_df: DataFrameFloat, 
     max_clusters: int = 3, 
     max_subclusters: int = 1, 
     max_subsubclusters: int = 1
-) -> dict:
+) -> dict[str, list[str]]:
     distance_matrix = calculate_distance_matrix(returns_df)
     main_clusters = perform_clustering(distance_matrix, max_clusters)
     cluster_dict = create_cluster_dict(list(returns_df.columns), main_clusters)
@@ -58,7 +60,7 @@ def generate_static_clusters(
     return flatten_singleton_clusters(cluster_dict)
 
 
-def flatten_singleton_clusters(cluster_dict):
+def flatten_singleton_clusters(cluster_dict: dict[str, list[str]]) -> dict[Any, Any]:
 
     new_cluster_dict = {}
     
@@ -66,7 +68,7 @@ def flatten_singleton_clusters(cluster_dict):
         if isinstance(value, dict):
             flattened_value = flatten_singleton_clusters(value)
             
-            if len(flattened_value) == 1 and all(isinstance(sub_value, list) for sub_value in flattened_value.values()):
+            if len(flattened_value) == 1:
                 new_cluster_dict[key] = [item for sublist in flattened_value.values() for item in sublist]
             elif all(isinstance(sub_value, list) and len(sub_value) == 1 for sub_value in flattened_value.values()):
                 new_cluster_dict[key] = [item for sublist in flattened_value.values() for item in sublist]

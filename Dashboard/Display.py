@@ -1,4 +1,4 @@
-import pandas as pd
+from Files import DataFrameFloat, SeriesFloat
 import Dashboard.Transformations as Transformations
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations
@@ -10,14 +10,14 @@ from dataclasses import dataclass
 @dataclass
 class DashboardPlot:
     name: str
-    func: Callable
+    func: Callable[..., go.Figure]
     category: str
     length_required: bool
 
 class DashboardsCollection:
     def __init__(self, length: int) -> None:
-        self.global_portfolio: pd.DataFrame
-        self.sub_portfolios: pd.DataFrame
+        self.global_portfolio: DataFrameFloat
+        self.sub_portfolios: DataFrameFloat
         self.length: int = length
         self.metrics: list[float]
         self.all_dashboards: dict[str, DashboardPlot] = self.__initialize_dashboards()
@@ -43,15 +43,16 @@ class DashboardsCollection:
         return all_dashboards
 
     def calculate_metrics(self) -> list[float]:
-        metric_functions: list[Callable[..., pd.Series]] = [
+        metric_functions: list[Callable[..., SeriesFloat]] = [
             Computations.calculate_overall_returns,
             Computations.calculate_overall_sharpe_ratio,
             Computations.calculate_overall_max_drawdown,
             Computations.calculate_overall_volatility,
             Computations.calculate_overall_monthly_skew,
         ]
-
-        return [round(func(self.global_portfolio).item(), 2) for func in metric_functions]
+        func_results = [func(self.global_portfolio) for func in metric_functions]
+        
+        return [result.values.round(2).tolist() for result in func_results]
 
     def plot(self, dashboard_name: str, global_plot:bool = False) -> go.Figure:
         
@@ -62,7 +63,7 @@ class DashboardsCollection:
             return dashboard.func(portfolio, length=self.length)
         return dashboard.func(portfolio)
 
-def plot_equity(returns_df: pd.DataFrame) -> go.Figure:
+def plot_equity(returns_df: DataFrameFloat) -> go.Figure:
 
     equity_curves = Computations.calculate_equity_curves_df(returns_df)
     
@@ -79,7 +80,7 @@ def plot_equity(returns_df: pd.DataFrame) -> go.Figure:
         title="Equity Curve", 
         log_scale=True)
 
-def plot_rolling_volatility(returns_df: pd.DataFrame) -> go.Figure:
+def plot_rolling_volatility(returns_df: DataFrameFloat) -> go.Figure:
 
     rolling_volatility_df = Computations.calculate_rolling_volatility(returns_df)
     sorted_rolling_volatility_df = Transformations.sort_dataframe(
@@ -93,7 +94,7 @@ def plot_rolling_volatility(returns_df: pd.DataFrame) -> go.Figure:
         y_values=sorted_rolling_volatility_df, 
         title="Rolling Volatility %")
 
-def plot_rolling_drawdown(returns_df: pd.DataFrame, length: int) -> go.Figure:
+def plot_rolling_drawdown(returns_df: DataFrameFloat, length: int) -> go.Figure:
     
     drawdowns = Computations.calculate_rolling_drawdown(returns_df, length)
     sorted_drawdowns = Transformations.sort_dataframe(
@@ -106,7 +107,7 @@ def plot_rolling_drawdown(returns_df: pd.DataFrame, length: int) -> go.Figure:
         y_values=sorted_drawdowns, 
         title="Rolling Drawdown %")
 
-def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int) -> go.Figure:
+def plot_rolling_sharpe_ratio(returns_df: DataFrameFloat, length: int) -> go.Figure:
 
     rolling_sharpe_ratio_df = Computations.calculate_rolling_sharpe_ratio(returns_df, length)
     sorted_rolling_sharpe_ratio_df = Transformations.sort_dataframe(
@@ -118,7 +119,7 @@ def plot_rolling_sharpe_ratio(returns_df: pd.DataFrame, length: int) -> go.Figur
         y_values=sorted_rolling_sharpe_ratio_df, 
         title="Rolling Sharpe Ratio")
     
-def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int) -> go.Figure:
+def plot_rolling_smoothed_skewness(returns_df: DataFrameFloat, length: int) -> go.Figure:
 
     rolling_skewness_df = Computations.calculate_rolling_smoothed_skewness(returns_df, length)
     sorted_rolling_skewness_df = Transformations.sort_dataframe(
@@ -130,7 +131,7 @@ def plot_rolling_smoothed_skewness(returns_df: pd.DataFrame, length: int) -> go.
         y_values=sorted_rolling_skewness_df, 
         title="Rolling Smoothed Skewnesss")
 
-def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: int) -> go.Figure:
+def plot_rolling_average_inverted_correlation(returns_df: DataFrameFloat, length: int) -> go.Figure:
     
     rolling_correlations = Computations.calculate_rolling_average_correlation(returns_df, length)
     inverted_correlations = rolling_correlations * -1
@@ -143,7 +144,7 @@ def plot_rolling_average_inverted_correlation(returns_df: pd.DataFrame, length: 
         title=f"Rolling Average Inverted Correlation"
     )
 
-def plot_overall_returns(returns_df: pd.DataFrame) -> go.Figure:
+def plot_overall_returns(returns_df: DataFrameFloat) -> go.Figure:
 
     total_returns = Computations.calculate_overall_returns(returns_df)
     
@@ -156,7 +157,7 @@ def plot_overall_returns(returns_df: pd.DataFrame) -> go.Figure:
         series=sorted_total_returns,
         title="Total Returns")
 
-def plot_overall_sharpe_ratio(returns_df: pd.DataFrame) -> go.Figure:
+def plot_overall_sharpe_ratio(returns_df: DataFrameFloat) -> go.Figure:
 
     sharpe_ratios = Computations.calculate_overall_sharpe_ratio(returns_df)
     sorted_sharpe_ratios = Transformations.sort_series(sharpe_ratios, ascending=True)
@@ -165,7 +166,7 @@ def plot_overall_sharpe_ratio(returns_df: pd.DataFrame) -> go.Figure:
         series=sorted_sharpe_ratios, 
         title="Sharpe Ratio")
 
-def plot_overall_volatility(returns_df: pd.DataFrame) -> go.Figure:
+def plot_overall_volatility(returns_df: DataFrameFloat) -> go.Figure:
 
     volatility = Computations.calculate_overall_volatility(returns_df)
     sorted_volatility = Transformations.sort_series(volatility, ascending=True)
@@ -174,7 +175,7 @@ def plot_overall_volatility(returns_df: pd.DataFrame) -> go.Figure:
         series=sorted_volatility, 
         title="Volatility %")
     
-def plot_overall_average_drawdown(returns_df: pd.DataFrame, length: int) -> go.Figure:
+def plot_overall_average_drawdown(returns_df: DataFrameFloat, length: int) -> go.Figure:
 
     drawdowns = Computations.calculate_overall_average_drawdown(returns_df, length)
     sorted_drawdowns = Transformations.sort_series(drawdowns, ascending=True)
@@ -183,16 +184,17 @@ def plot_overall_average_drawdown(returns_df: pd.DataFrame, length: int) -> go.F
         series=sorted_drawdowns, 
         title="Average Drawdowns %")
 
-def plot_overall_average_inverted_correlation(returns_df: pd.DataFrame) -> go.Figure:
+def plot_overall_average_inverted_correlation(returns_df: DataFrameFloat) -> go.Figure:
 
-    average_correlations = Computations.calculate_overall_average_correlation(returns_df) * -1
-    sorted_correlations = Transformations.sort_series(average_correlations, ascending=True)
+    average_correlations = Computations.calculate_overall_average_correlation(returns_df)
+    inverted_average_correlations = SeriesFloat(average_correlations * -1)
+    sorted_correlations = Transformations.sort_series(inverted_average_correlations, ascending=True)
     sorted_correlations=Transformations.convert_series_multiindex_labels(sorted_correlations)
     return Widgets.bars(
         series=sorted_correlations, 
         title="Average Inverted Correlation")
 
-def plot_overall_monthly_skew(returns_df: pd.DataFrame) -> go.Figure:
+def plot_overall_monthly_skew(returns_df: DataFrameFloat) -> go.Figure:
 
     skew_series = Computations.calculate_overall_monthly_skew(returns_df)
     sorted_skew_series = Transformations.sort_series(skew_series, ascending=True)
@@ -201,7 +203,7 @@ def plot_overall_monthly_skew(returns_df: pd.DataFrame) -> go.Figure:
         series=sorted_skew_series, 
         title="Monthly Skew")
 
-def plot_returns_distribution_violin(returns_df: pd.DataFrame, limit:float=0.05) -> go.Figure:
+def plot_returns_distribution_violin(returns_df: DataFrameFloat, limit:float=0.05) -> go.Figure:
 
     pct_returns = Computations.format_returns(returns_df, limit)
     pct_returns = Transformations.convert_dataframe_multiindex_labels(pct_returns)
@@ -209,7 +211,7 @@ def plot_returns_distribution_violin(returns_df: pd.DataFrame, limit:float=0.05)
         data=pct_returns,
         title="Violin of % Returns Distribution")
 
-def plot_returns_distribution_histogram(returns_df: pd.DataFrame, limit: float = 0.05) -> go.Figure:
+def plot_returns_distribution_histogram(returns_df: DataFrameFloat, limit: float = 0.05) -> go.Figure:
 
     formatted_returns_df = Computations.format_returns(returns_df, limit=limit)
     formatted_returns_df = Transformations.convert_dataframe_multiindex_labels(formatted_returns_df)
@@ -217,7 +219,7 @@ def plot_returns_distribution_histogram(returns_df: pd.DataFrame, limit: float =
         data=formatted_returns_df,
         title="Histogram of % Returns Distribution")
 
-def plot_correlation_heatmap(returns_df: pd.DataFrame) -> go.Figure:
+def plot_correlation_heatmap(returns_df: DataFrameFloat) -> go.Figure:
 
     correlation_matrix = Computations.calculate_correlation_matrix(returns_df)
     sorted_correlation_matrix = Transformations.sort_correlation_matrix(correlation_matrix)
@@ -228,7 +230,12 @@ def plot_correlation_heatmap(returns_df: pd.DataFrame) -> go.Figure:
         y_labels=sorted_correlation_matrix.columns.to_list(),
         title="Correlation Matrix")
 
-def plot_clusters_icicle(returns_df: pd.DataFrame, max_clusters=4, max_sub_clusters=2, max_sub_sub_clusters=1) -> go.Figure:
+def plot_clusters_icicle(
+    returns_df: DataFrameFloat, 
+    max_clusters: int = 4, 
+    max_sub_clusters: int = 2, 
+    max_sub_sub_clusters: int = 1
+    ) -> go.Figure:
     
     renamed_returns_df=Transformations.convert_dataframe_multiindex_labels(returns_df)
     clusters_dict = generate_static_clusters(renamed_returns_df, max_clusters, max_sub_clusters, max_sub_sub_clusters)

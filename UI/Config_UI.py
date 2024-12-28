@@ -1,3 +1,4 @@
+from Files import Any
 from .Common_UI import (
 create_checkbox_item, 
 create_expandable_section,
@@ -25,8 +26,8 @@ from PySide6.QtCore import Qt
 from Config import AssetsCollection, ClustersTree, IndicatorsCollection, Asset, Indicator
 
 class AssetSelectionWidget(QWidget):
-    def __init__(self, assets_collection: AssetsCollection, parent=None):
-        super().__init__(parent)
+    def __init__(self, assets_collection: AssetsCollection) -> None:
+        super().__init__()
         self.assets_collection = assets_collection
         self.entities: list[Asset] = self.assets_collection.all_entities
         self.checkboxes: dict[str, QCheckBox] = {}
@@ -65,8 +66,8 @@ class AssetSelectionWidget(QWidget):
 
 class IndicatorsConfigWidget(QWidget):
 
-    def __init__(self, indicators_collection: IndicatorsCollection, parent=None):
-        super().__init__(parent)
+    def __init__(self, indicators_collection: IndicatorsCollection) -> None:
+        super().__init__()
         self.indicators_collection = indicators_collection
         self.entities:list[Indicator] = self.indicators_collection.all_entities
         self.param_widgets: dict[str, dict[str, dict[str, QSlider | QLabel]]] = {}
@@ -131,10 +132,13 @@ class IndicatorsConfigWidget(QWidget):
         num_values_slider
         ) = create_param_widget(param_box, param_layout, values)
 
+        def update_param_values(unique_values: list[int]) -> None:
+            self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
+
         connect_sliders_to_update(
         start_slider, end_slider, num_values_slider,
         range_info_label, num_values_info_label, generated_values_label,
-        lambda unique_values: self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
+        update_param_values
         )
 
         self.param_widgets.setdefault(indicator_name, {})[param_name] = {
@@ -157,8 +161,8 @@ class IndicatorsConfigWidget(QWidget):
             checkbox.setChecked(False)
 
 class TreeStructureWidget(QWidget):
-    def __init__(self, collection, clusters: ClustersTree, parent=None) -> None:
-        super().__init__(parent)
+    def __init__(self, collection: AssetsCollection|IndicatorsCollection, clusters: ClustersTree) -> None:
+        super().__init__()
         self.collection = collection
         self.clusters_tree = clusters
         self.tree_structure = self.clusters_tree.clusters
@@ -191,7 +195,7 @@ class TreeStructureWidget(QWidget):
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
 
-    def handle_item_click(self, item):
+    def handle_item_click(self, item: Any) -> None:
         if Qt.KeyboardModifier.ControlModifier & QApplication.keyboardModifiers():
             item.setSelected(not item.isSelected())
         elif Qt.KeyboardModifier.ShiftModifier & QApplication.keyboardModifiers():
