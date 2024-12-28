@@ -1,12 +1,8 @@
 from dataclasses import dataclass, field
+from Database import load_config_file, save_config_file, load_asset_names
 from Utilitary import IndicatorFunc, JsonData, ParquetData, DictVariableDepth
-from .Config_Funcs import (
-load_config_file, 
-save_config_file,
-load_asset_names,
-filter_valid_pairs
-)
-from Indicators import IndicatorsMethods
+from .Config_Funcs import filter_valid_pairs
+from Indicators import IndicatorsMethods, IndicatorMetadata
 
 class ClustersTree:
     def __init__(self, clusters_file: str) -> None:
@@ -45,12 +41,13 @@ class IndicatorsCollection:
 
     def load_entities(self) -> None:
         entities_to_test: dict[str, bool] = load_config_file(self.entities_file)
-        entities_functions: dict[str, IndicatorFunc] = IndicatorsMethods.get_all_indicators()
+        entities_functions: dict[str, IndicatorMetadata] = IndicatorsMethods.get_all_indicators()
         params_config: dict[str, dict[str, list[int]]] = load_config_file(self.params_file)
 
-        for name, func in entities_functions.items():
+        for name, indicator_meta_data in entities_functions.items():
             active: bool = entities_to_test.get(name, False)
             params: dict[str, list[int]] = IndicatorsMethods.determine_params(name, params_config)
+            func = indicator_meta_data.func
             self.entities[name] = Indicator(
                 name=name,
                 active=active,

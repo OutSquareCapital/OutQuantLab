@@ -1,19 +1,4 @@
-import json
-import pyarrow.parquet as pq # type: ignore
-from Utilitary import DictVariableDepth
 from itertools import product
-
-def load_config_file(file_path: str) -> DictVariableDepth:
-    with open(file_path, "r") as file:
-        return json.load(file)
-
-def save_config_file(file_path: str, dict_to_save: DictVariableDepth, indent: int) -> None:
-    with open(file_path, "w") as file:
-        json.dump(dict_to_save, file, indent=indent)
-
-def load_asset_names(file_path: str) -> list[str]:
-    column_names: list[str] = pq.ParquetFile(file_path).schema.names # type: ignore
-    return [col for col in column_names if col != "Date"] # type: ignore
 
 def is_valid_combination(parameters_dict: dict[str, int]) -> bool:
     short_term_param = next((k for k in parameters_dict if 'ST' in k), None)

@@ -1,5 +1,6 @@
-from .Indics_Normalized import IndicatorsMethods
+from .Indics_Normalized import IndicatorsMethods, IndicatorMetadata
 
 __all__ = [
-    'IndicatorsMethods'
+    'IndicatorsMethods',
+    'IndicatorMetadata',
 ]

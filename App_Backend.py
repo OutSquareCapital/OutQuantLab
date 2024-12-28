@@ -1,5 +1,5 @@
 from Utilitary import ProgressFunc
-from Database import CONFIG
+from Database import CONFIG, load_prices, get_yahoo_finance_data
 from Backtest import calculate_strategy_returns, generate_multi_index_process
 from Portfolio import aggregate_raw_returns
 from Indicators import IndicatorsMethods

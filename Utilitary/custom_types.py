@@ -30,7 +30,7 @@ class SeriesFloat(Series): # type: ignore
     def __init__(
         self, 
         data: ArrayFloat|Series, # type: ignore
-        index: Index[str]|list[str]|None = None,
+        index: Index|list[str]|None = None, # type: ignore
         dtype: type = Float32
         ) -> None:
         if isinstance(data, Series):
@@ -41,7 +41,7 @@ class SeriesFloat(Series): # type: ignore
         super().__init__(data=data, index=index, dtype=dtype) # type: ignore
 
     @property
-    def names(self) -> Index[str]:
+    def names(self) -> Index: # type: ignore
         return super().index # type: ignore
     @property
     def data(self) -> ArrayFloat:
@@ -69,7 +69,7 @@ class DataFrameFloat(DataFrame):
         self, 
         data: ArrayFloat|DataFrame,
         index: DatetimeIndex|None = None,
-        columns: list[str]|MultiIndex|Index[str]|None = None,
+        columns: list[str]|MultiIndex|Index|None = None, # type: ignore
         dtype: type=Float32,
         ) -> None:
         if isinstance(data, DataFrame):

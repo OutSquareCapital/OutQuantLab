@@ -28,8 +28,8 @@ def generate_seasonal_array(returns_df: DataFrameFloat) -> ArrayInt:
     
     seasonal_array[:, 2] = returns_df.dates.quarter
 
-    day_of_month = returns_df.groupby([returns_df.dates.year, returns_df.dates.month], observed=False).cumcount() + 1 # type: ignore
-    seasonal_array[:, 1] = day_of_month.apply(assign_week_of_month).to_numpy() # type: ignore
+    day_of_month = returns_df.groupby([returns_df.dates.year, returns_df.dates.month], observed=False).cumcount() + 1
+    seasonal_array[:, 1] = day_of_month.apply(assign_week_of_month).to_numpy()
 
     seasonal_array[:, 0] = returns_df.dates.dayofweek + 1
 

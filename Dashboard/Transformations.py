@@ -28,9 +28,9 @@ def sort_correlation_matrix(corr_matrix: DataFrameFloat) -> DataFrameFloat:
     ordered_indices = leaves_list(linkage_matrix)
 
     sorted_corr_matrix = corr_matrix.iloc[ordered_indices, ordered_indices]
-    np.fill_diagonal(sorted_corr_matrix.values, np.nan) # type: ignore
+    np.fill_diagonal(sorted_corr_matrix.values, np.nan)
 
-    return sorted_corr_matrix # type: ignore
+    return sorted_corr_matrix
 
 def prepare_sunburst_data(
     cluster_dict:DictVariableDepth, 
@@ -62,14 +62,14 @@ def prepare_sunburst_data(
     return labels, parents
 
 def sort_series(data: SeriesFloat, ascending: bool = True) -> SeriesFloat:
-    return data.sort_values(ascending=ascending) # type: ignore
+    return data.sort_values(ascending=ascending)
 
 def sort_dataframe(data: DataFrameFloat, use_final: bool = False, ascending: bool = True) -> DataFrameFloat:
     if use_final:
-        return data.sort_values(by=data.dates[-1], axis=1, ascending=ascending) # type: ignore
+        return data.sort_values(by=data.dates[-1], axis=1, ascending=ascending)
     else:
         sorted_data = data.mean().sort_values(ascending=ascending)
-        return data[sorted_data.index] # type: ignore
+        return data[sorted_data.index]
 
 def normalize_data_for_colormap(data: ArrayFloat):
 

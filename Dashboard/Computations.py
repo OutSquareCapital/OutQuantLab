@@ -51,11 +51,11 @@ def calculate_overall_max_drawdown(returns_df: DataFrameFloat) -> SeriesFloat:
 
 def calculate_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
 
-    monthly_returns_df= returns_df.resample('ME').mean() # type: ignore
+    monthly_returns_df= returns_df.resample('ME').mean()
     print(f'Monthly Returns: {monthly_returns_df}')
     length_to_use = len(monthly_returns_df)
     print(f'Length to use: {length_to_use}')
-    montly_returns_array: ArrayFloat = monthly_returns_df.to_numpy() # type: ignore
+    montly_returns_array: ArrayFloat = monthly_returns_df.to_numpy()
     print(f'Monthly Returns Array: {montly_returns_array}')
     overall_skew = rolling_skewness(montly_returns_array, length=length_to_use, min_length=4)
     print(f'Overall Skew: {overall_skew}')
@@ -64,13 +64,13 @@ def calculate_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
 
 def calculate_overall_average_correlation(returns_df: DataFrameFloat) -> SeriesFloat:
     
-    return SeriesFloat(returns_df.corr().mean(), index=returns_df.columns) # type: ignore
+    return SeriesFloat(returns_df.corr().mean(), index=returns_df.columns)
 
 def format_returns(returns_df: DataFrameFloat, limit: float) -> DataFrameFloat:
-    lower_threshold = SeriesFloat(returns_df.quantile(limit, axis=0) ) # type: ignore
-    upper_threshold = SeriesFloat(returns_df.quantile(1-limit, axis=0) ) # type: ignore
+    lower_threshold = SeriesFloat(returns_df.quantile(limit, axis=0) ) 
+    upper_threshold = SeriesFloat(returns_df.quantile(1-limit, axis=0) )
     
-    formatted_returns_df = DataFrameFloat(returns_df.where((returns_df >= lower_threshold) & (returns_df <= upper_threshold), np.nan)) # type: ignore
+    formatted_returns_df = DataFrameFloat(returns_df.where((returns_df >= lower_threshold) & (returns_df <= upper_threshold), np.nan))
 
     return formatted_returns_df * PERCENTAGE_FACTOR
 
@@ -97,7 +97,7 @@ def calculate_rolling_average_correlation(returns_df: DataFrameFloat, length: in
     rolling_avg_corr = returns_df.rolling( 
         window=length, 
         min_periods=length
-    ).corr( # type: ignore
+    ).corr(
     ).groupby(level=0
     ).mean(
     ).astype(Float32

@@ -41,7 +41,7 @@ def bars(
 
     fig = go.Figure()
 
-    for item, value in series.items(): # type: ignore
+    for item, value in series.items():
         fig.add_trace(go.Bar( # type: ignore
             x=[item],
             y=[value],
@@ -117,8 +117,8 @@ def violin(
             hoverinfo="y" 
         ))
 
-    y_min = data.min().min() # type: ignore
-    y_max = data.max().max() # type: ignore
+    y_min = data.min().min()
+    y_max = data.max().max()
     fig.update_layout( # type: ignore
         yaxis=dict(range=[y_min, y_max], showgrid=False), # type: ignore
         xaxis=dict(
