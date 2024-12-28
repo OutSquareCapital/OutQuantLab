@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any
-from Files import IndicatorFunc, JsonData, ParquetData
+from Utilitary import IndicatorFunc, JsonData, ParquetData
 from .Config_Funcs import (
 load_config_file, 
 save_config_file,

@@ -1,5 +1,5 @@
-from Files import ArrayFloat
-from Files import ANNUALIZATION_FACTOR
+from Utilitary import ArrayFloat
+from Utilitary import ANNUALIZATION_FACTOR
 from .Aggregation import rolling_mean, overall_mean
 from .Volatility import rolling_volatility, overall_volatility
 

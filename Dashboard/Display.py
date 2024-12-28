@@ -1,4 +1,4 @@
-from Files import DataFrameFloat, SeriesFloat
+from Utilitary import DataFrameFloat, SeriesFloat
 import Dashboard.Transformations as Transformations
 import Dashboard.Widgets as Widgets 
 import Dashboard.Computations as Computations

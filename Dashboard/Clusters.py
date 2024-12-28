@@ -1,6 +1,6 @@
 from scipy.cluster.hierarchy import linkage, fcluster # type: ignore
 from scipy.spatial.distance import squareform
-from Files import ArrayFloat, DataFrameFloat
+from Utilitary import ArrayFloat, DataFrameFloat
 from typing import Any
 
 def calculate_distance_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:

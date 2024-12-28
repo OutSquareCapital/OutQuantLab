@@ -1,7 +1,7 @@
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWebEngineCore import QWebEngineSettings
 from PySide6.QtCore import QUrl
-from Files import BACKGROUND_APP_DARK
+from Utilitary import BACKGROUND_APP_DARK
 import os
 import tempfile
 from plotly import graph_objects as go # type: ignore

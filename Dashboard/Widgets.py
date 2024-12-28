@@ -1,9 +1,9 @@
 import plotly.graph_objects as go # type: ignore
-from Files import ArrayFloat, DataFrameFloat, SeriesFloat
+from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat
 import pandas as pd
 from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
 from .Transformations import normalize_data_for_colormap
-from Files import COLOR_ADJUSTMENT
+from Utilitary import COLOR_ADJUSTMENT
 
 def curves( x_values: pd.DatetimeIndex,
             y_values: DataFrameFloat,  

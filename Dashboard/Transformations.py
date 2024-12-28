@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from Files import ArrayFloat, DataFrameFloat, SeriesFloat
+from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import linkage, leaves_list # type: ignore
 from typing import Any

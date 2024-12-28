@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QSpacerItem,
     QLabel)
 from PySide6.QtGui import QPixmap, QIcon
-from Files import (
+from Utilitary import (
     MEDIA,
     FONT_FAMILY, 
     FONT_SIZE, 

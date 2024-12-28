@@ -1,7 +1,7 @@
 import numpy as np
 from Infrastructure import shift_array
 from Metrics.Aggregation import rolling_mean
-from Files import ArrayFloat
+from Utilitary import ArrayFloat
 
 def rolling_autocorrelation(returns_array: ArrayFloat, length: int) -> ArrayFloat:
 

@@ -9,7 +9,7 @@ QApplication,
 QGridLayout
 )
 from collections.abc import Callable
-from Files import (
+from Utilitary import (
 MEDIA,
 BACKTEST_STATS_RESULTS,
 CLUSTERS_PARAMETERS,

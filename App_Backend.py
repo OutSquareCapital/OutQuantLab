@@ -1,4 +1,4 @@
-from Files import CONFIG, ProgressFunc
+from Utilitary import CONFIG, ProgressFunc
 from Backtest import calculate_strategy_returns, get_yahoo_finance_data, load_prices, generate_multi_index_process
 from Portfolio import aggregate_raw_returns
 from Indicators import IndicatorsMethods

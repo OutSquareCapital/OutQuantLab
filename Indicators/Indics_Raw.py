@@ -10,7 +10,7 @@ rolling_kurtosis,
 separate_volatility
 )
 from .Indics_Normalization import ratio_normalization
-from Files import ArrayFloat, ArrayInt, DataFrameFloat, Int32
+from Utilitary import ArrayFloat, ArrayInt, DataFrameFloat, Int32
 
 def generate_seasonal_array(returns_df: DataFrameFloat) -> ArrayInt:
 

@@ -2,7 +2,7 @@ import pandas as pd
 from Indicators import pct_returns_np
 import yfinance as yf # type: ignore
 from Config import Indicator, ClustersTree
-from Files import ArrayFloat, DataFrameFloat
+from Utilitary import ArrayFloat, DataFrameFloat
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 
