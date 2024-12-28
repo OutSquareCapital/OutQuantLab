@@ -5,37 +5,7 @@ from Utilitary import ArrayFloat, ProgressFunc, DataFrameFloat, Float32
 from concurrent.futures import ThreadPoolExecutor
 from Config import Indicator
 from Indicators import IndicatorsMethods
-from Config import Indicator, ClustersTree
-
-def generate_multi_index_process(
-    indicators_params: list[Indicator], 
-    asset_names: list[str], 
-    assets_clusters: ClustersTree, 
-    indics_clusters: ClustersTree
-    ) -> pd.MultiIndex:
-
-    asset_to_clusters = assets_clusters.map_nested_clusters_to_entities()
-
-    indic_to_clusters = indics_clusters.map_nested_clusters_to_entities()
-
-    multi_index_tuples: list[tuple[str, str, str, str, str, str, str]] = []
-
-    for indic in indicators_params:
-        for param in indic.param_combos:
-            param_str = ''.join([f"{k}{v}" for k, v in param.items()])
-            for asset in asset_names:
-                asset_cluster1, asset_cluster2 = asset_to_clusters[asset]
-                indic_cluster1, indic_cluster2 = indic_to_clusters[indic.name]
-                multi_index_tuples.append((
-                    asset_cluster1, asset_cluster2, asset, 
-                    indic_cluster1, indic_cluster2, 
-                    indic.name, param_str
-                ))
-
-    return pd.MultiIndex.from_tuples( # type: ignore
-        multi_index_tuples,
-        names=["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
-    )
+from Metrics import calculate_overall_mean
 
 def calculate_strategy_returns(
     pct_returns_array: ArrayFloat, 
@@ -76,3 +46,99 @@ def calculate_strategy_returns(
         index=dates_index,
         columns=multi_index
         )
+
+
+def calculate_portfolio_returns(
+    returns_df: DataFrameFloat,
+    by_asset_cluster: bool = False,
+    by_asset_cluster_sub: bool = False,
+    by_asset: bool = False,
+    by_indic_cluster: bool = False,
+    by_indic_cluster_sub: bool = False,
+    by_indic: bool = False,
+    by_param: bool = False
+    ) -> DataFrameFloat:
+
+    grouping_levels:list[str] = []
+    if by_asset_cluster:
+        grouping_levels.append("AssetCluster")
+    if by_asset_cluster_sub:
+        grouping_levels.append("AssetSubCluster")
+    if by_asset:
+        grouping_levels.append("Asset")
+    if by_indic_cluster:
+        grouping_levels.append("IndicCluster")
+    if by_indic_cluster_sub:
+        grouping_levels.append("IndicSubCluster")
+    if by_indic:
+        grouping_levels.append("Indicator")
+    if by_param:
+        grouping_levels.append("Param")
+
+    if grouping_levels:
+        grouped = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T
+
+        return DataFrameFloat(grouped)
+
+    global_portfolio = calculate_overall_mean(returns_df.nparray, axis=1)
+    return DataFrameFloat(
+        data=global_portfolio,
+        index=returns_df.dates,
+        columns=['Portfolio']
+        )
+
+def aggregate_raw_returns(raw_adjusted_returns_df: DataFrameFloat, all_history: bool = False) -> tuple[DataFrameFloat, DataFrameFloat]:
+    
+    if not all_history:
+        raw_adjusted_returns_df= raw_adjusted_returns_df.dropna(axis=0) # type: ignore
+    
+    df_indic = calculate_portfolio_returns(
+        raw_adjusted_returns_df,
+        by_asset_cluster=True,
+        by_asset_cluster_sub=True,
+        by_asset=True,
+        by_indic_cluster=True,
+        by_indic_cluster_sub=True,
+        by_indic=True
+    )
+
+    df_indic_subcluster = calculate_portfolio_returns(
+        df_indic,
+        by_asset_cluster=True,
+        by_asset_cluster_sub=True,
+        by_asset=True,
+        by_indic_cluster=True,
+        by_indic_cluster_sub=True
+    )
+
+    df_indic_cluster = calculate_portfolio_returns(
+        df_indic_subcluster,
+        by_asset_cluster=True,
+        by_asset_cluster_sub=True,
+        by_asset=True,
+        by_indic_cluster=True
+    )
+
+    df_asset = calculate_portfolio_returns(
+        df_indic_cluster,
+        by_asset_cluster=True,
+        by_asset_cluster_sub=True,
+        by_asset=True
+    )
+
+    df_asset_subcluster = calculate_portfolio_returns(
+        df_asset,
+        by_asset_cluster=True,
+        by_asset_cluster_sub=True
+    )
+
+    df_asset_cluster = calculate_portfolio_returns(
+        df_asset_subcluster,
+        by_asset_cluster=True
+    )
+
+    df_global = calculate_portfolio_returns(
+        df_asset_cluster
+    )
+
+    return df_global, df_asset

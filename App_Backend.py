@@ -1,9 +1,8 @@
 from Utilitary import ProgressFunc
 from Database import CONFIG, load_prices, get_yahoo_finance_data
-from Backtest import calculate_strategy_returns, generate_multi_index_process
-from Portfolio import aggregate_raw_returns
+from Backtest import calculate_strategy_returns, aggregate_raw_returns
 from Indicators import IndicatorsMethods
-from Config import AssetsCollection, IndicatorsCollection, ClustersTree
+from Config import AssetsCollection, IndicatorsCollection, ClustersTree, generate_multi_index_process
 from Dashboard import DashboardsCollection
 
 def handle_progress(progress: int, message: str) -> None:

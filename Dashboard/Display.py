@@ -1,8 +1,8 @@
 from Utilitary import DataFrameFloat, SeriesFloat
 import Dashboard.Transformations as Transformations
 import Dashboard.Widgets as Widgets 
-import Dashboard.Computations as Computations
-from .Clusters import generate_static_clusters
+import Metrics as Computations
+from Config import generate_static_clusters, sort_correlation_matrix
 from collections.abc import Callable
 import plotly.graph_objects as go # type: ignore
 from dataclasses import dataclass
@@ -227,7 +227,7 @@ def plot_returns_distribution_histogram(returns_df: DataFrameFloat, limit: float
 def plot_correlation_heatmap(returns_df: DataFrameFloat) -> go.Figure:
 
     correlation_matrix = Computations.calculate_correlation_matrix(returns_df)
-    sorted_correlation_matrix = Transformations.sort_correlation_matrix(correlation_matrix)
+    sorted_correlation_matrix = sort_correlation_matrix(correlation_matrix)
     sorted_correlation_matrix = Transformations.convert_dataframe_multiindex_labels(sorted_correlation_matrix)
     return Widgets.heatmap(
         z_values=sorted_correlation_matrix.nparray,

@@ -1,8 +1,8 @@
 import numpy as np
 from .Indics_Raw import *
 from .Indics_Normalization import sign_normalization, calculate_indicator_on_trend_signal, rolling_median_normalisation, relative_normalization
-from Utilitary import ArrayFloat, IndicatorFunc, Float32, shift_array, Callable
-from Metrics import hv_composite, calculate_volatility_adjusted_returns, calculate_equity_curves, log_returns_np
+from Utilitary import ArrayFloat, IndicatorFunc, Float32, Callable
+from Metrics import hv_composite, calculate_volatility_adjusted_returns, calculate_equity_curves, log_returns_np, shift_array
 from concurrent.futures import ThreadPoolExecutor
 from inspect import signature
 

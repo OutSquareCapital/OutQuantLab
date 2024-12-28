@@ -15,7 +15,7 @@ def save_config_file(file_path: str, dict_to_save: DictVariableDepth, indent: in
 
 def load_asset_names(file_path: str) -> list[str]:
     column_names: list[str] = pq.ParquetFile(file_path).schema.names # type: ignore
-    return [col for col in column_names if col != "Date"] # type: ignore
+    return [col for col in column_names if col != "Date"]
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 

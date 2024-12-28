@@ -1,7 +1,13 @@
-from Utilitary import ANNUALIZATION_FACTOR, PERCENTAGE_FACTOR, ArrayFloat, shift_array, Float32
+from Utilitary import ANNUALIZATION_FACTOR, PERCENTAGE_FACTOR, ArrayFloat, Float32
 from .Aggregation import rolling_mean, calculate_overall_mean, rolling_max, calculate_overall_max
 from .Volatility import rolling_volatility, overall_volatility
 import numpy as np
+
+def shift_array(returns_array: ArrayFloat, step:int = 1) -> ArrayFloat:
+    shifted_array = np.empty_like(returns_array, dtype=Float32)
+    shifted_array[step:, :] = returns_array[:-step, :]
+    shifted_array[:step, :] = np.nan
+    return shifted_array
 
 def calculate_volatility_adjusted_returns(
     pct_returns_array: ArrayFloat, 

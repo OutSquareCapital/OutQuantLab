@@ -32,10 +32,32 @@ from .Performance import (
     calculate_rolling_drawdown,
     log_returns_np,
     pct_returns_np,
-    calculate_max_drawdown
+    calculate_max_drawdown,
+    shift_array
 )
 
+from .Analysis import (
+    calculate_overall_mean,
+    calculate_overall_volatility,
+    calculate_overall_sharpe_ratio,
+    calculate_overall_average_drawdown,
+    calculate_overall_max_drawdown,
+    calculate_overall_monthly_skew,
+    calculate_overall_average_correlation,
+    format_returns,
+    calculate_overall_returns,
+    calculate_rolling_volatility,
+    calculate_rolling_sharpe_ratio,
+    calculate_correlation_matrix,
+    calculate_rolling_average_correlation,
+    calculate_rolling_smoothed_skewness
+    
+)
 __all__ = [
+    'calculate_rolling_smoothed_skewness',
+    'calculate_rolling_average_correlation',
+    'calculate_correlation_matrix',
+    'calculate_rolling_sharpe_ratio',
     "calculate_overall_mean",
     "rolling_mean", 
     "rolling_median",
@@ -59,5 +81,17 @@ __all__ = [
     'calculate_rolling_drawdown',
     'log_returns_np',
     'pct_returns_np',
-    'calculate_max_drawdown'
+    'calculate_max_drawdown',
+    'shift_array',
+    'calculate_overall_mean',
+    'calculate_overall_volatility',
+    'calculate_overall_sharpe_ratio',
+    'calculate_overall_average_drawdown',
+    'calculate_overall_max_drawdown',
+    'calculate_overall_monthly_skew',
+    'calculate_overall_average_correlation',
+    'format_returns',
+    'calculate_overall_returns',
+    'calculate_rolling_volatility'
+    
 ]

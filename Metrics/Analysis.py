@@ -1,17 +1,9 @@
 import numpy as np
 from Utilitary import PERCENTAGE_FACTOR, ArrayFloat, DataFrameFloat, SeriesFloat, Float32
-from Metrics import (
-    rolling_mean, 
-    rolling_sharpe_ratios, 
-    rolling_skewness, 
-    hv_composite, 
-    overall_volatility, 
-    calculate_equity_curves, 
-    calculate_overall_mean, 
-    overall_sharpe_ratio, 
-    calculate_max_drawdown, 
-    calculate_rolling_drawdown,
-    )
+from .Aggregation import rolling_mean, calculate_overall_mean
+from .Performance import calculate_rolling_drawdown, calculate_max_drawdown, calculate_equity_curves, overall_sharpe_ratio, rolling_sharpe_ratios
+from .Distribution import rolling_skewness
+from .Volatility import overall_volatility, hv_composite
 
 def calculate_overall_returns(returns_df: DataFrameFloat) -> SeriesFloat:
     
@@ -52,13 +44,9 @@ def calculate_overall_max_drawdown(returns_df: DataFrameFloat) -> SeriesFloat:
 def calculate_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
 
     monthly_returns_df= returns_df.resample('ME').mean()
-    print(f'Monthly Returns: {monthly_returns_df}')
     length_to_use = len(monthly_returns_df)
-    print(f'Length to use: {length_to_use}')
     montly_returns_array: ArrayFloat = monthly_returns_df.to_numpy()
-    print(f'Monthly Returns Array: {montly_returns_array}')
     overall_skew = rolling_skewness(montly_returns_array, length=length_to_use, min_length=4)
-    print(f'Overall Skew: {overall_skew}')
     average_overall_skew = calculate_overall_mean(overall_skew)
     return SeriesFloat(average_overall_skew, index=returns_df.columns)
 

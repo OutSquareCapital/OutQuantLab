@@ -1,3 +1,112 @@
+'''import numpy as np
+from .Aggregation import rolling_mean
+from Utilitary import ArrayFloat, shift_array
+
+def rolling_autocorrelation(returns_array: ArrayFloat, length: int) -> ArrayFloat:
+
+    mean = rolling_mean(returns_array, length=length, min_length=20)
+
+    shifted_array = shift_array(returns_array)
+
+    deviations = returns_array - mean
+    deviations_shifted = shifted_array - mean
+
+    rolling_covariance = rolling_mean(deviations * deviations_shifted, length=length, min_length=20)
+
+    rolling_variance = rolling_mean(deviations ** 2, length=length, min_length=20)
+    rolling_variance_shifted = rolling_mean(deviations_shifted ** 2, length=length, min_length=20)
+
+    autocorr_result = rolling_covariance / np.sqrt(rolling_variance * rolling_variance_shifted)
+
+    autocorr_mean = rolling_mean(autocorr_result, length=250, min_length=1)
+
+    return autocorr_mean'''
+'''from Utilitary import ArrayFloat, DataFrameFloat, Float32
+import numpy as np
+from Metrics import rolling_sharpe_ratios, rolling_mean
+import numexpr as ne # type: ignore
+from concurrent.futures import ThreadPoolExecutor
+from collections.abc import Callable
+from typing import Any
+from Database import N_THREADS
+
+def process_in_blocks_parallel(
+    array: ArrayFloat, 
+    block_size: int, 
+    func:Callable[..., ArrayFloat], 
+    *args: Any,
+    **kwargs: Any
+    ) -> ArrayFloat:
+
+    num_cols: int = array.shape[1]
+    num_blocks_to_process = max(int(num_cols/block_size), 1)
+    max_threads = min(N_THREADS, num_blocks_to_process)
+    
+    with ThreadPoolExecutor(max_workers=max_threads) as executor:
+        futures = [
+            executor.submit(
+                func, array[:, start_col:min(start_col + block_size, num_cols)], *args, **kwargs # type: ignore
+            )
+            for start_col in range(0, num_cols, block_size)
+        ]
+        results = [future.result() for future in futures]
+
+    return np.hstack(results)
+
+def relative_sharpe_on_confidence_period(
+    returns_df: DataFrameFloat,
+    sharpe_lookback:int, 
+    confidence_lookback: int = 2500, 
+    block_size: int = 500
+    ) -> DataFrameFloat:
+
+    def count_non_nan(x: ArrayFloat) -> ArrayFloat:
+        return np.cumsum(~np.isnan(x), axis=0, dtype=Float32)
+
+
+    sharpe_array = process_in_blocks_parallel(
+        returns_df.nparray, 
+        block_size=block_size,
+        func=rolling_sharpe_ratios,
+        length = sharpe_lookback,
+        min_length = 125
+    )
+
+    mean_sharpe_array = process_in_blocks_parallel(
+        sharpe_array, 
+        block_size=block_size,
+        func=rolling_mean,
+        length=20, 
+        min_length=1
+    )
+
+    non_nan_counts = process_in_blocks_parallel(
+        mean_sharpe_array, 
+        block_size=block_size,
+        func=count_non_nan
+    )
+
+    rolling_median_sharpe = np.nanmedian(mean_sharpe_array, axis=1)[:, np.newaxis]
+
+    normalized_sharpes: ArrayFloat = ne.evaluate( # type: ignore
+        "(mean_sharpe_array - rolling_median_sharpe) * ((non_nan_counts / confidence_lookback)**0.5) + 1",
+        local_dict={
+            "mean_sharpe_array": mean_sharpe_array,
+            "rolling_median_sharpe": rolling_median_sharpe,
+            "non_nan_counts": non_nan_counts,
+            "confidence_lookback": confidence_lookback
+        }
+    )
+
+
+    clipped_sharpes = np.clip(normalized_sharpes, 0, None)
+
+    return DataFrameFloat(
+        data=clipped_sharpes, 
+        index=returns_df.dates,
+        columns= returns_df.columns
+        )
+'''
 '''
 import numbagg as nb
 
@@ -265,6 +374,7 @@ def get_memory_available(array:ArrayFloat, N_THREADS:int) -> int:
     
     return N_THREADS
 '''
+'''
 paires_futures_etf = [
 ("6A", "AD"),
 ("6B", "BP"),
@@ -301,6 +411,7 @@ portfolio_futures = {
     'Base Metals': ['HG'],
     }
 }
+'''
 '''
 import pandas as pd
 import numpy as np
