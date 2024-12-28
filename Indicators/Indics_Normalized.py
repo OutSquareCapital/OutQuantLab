@@ -40,6 +40,19 @@ def log_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
 
     return log_returns_array
 
+def pct_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
+
+    if prices_array.ndim == 1:
+        pct_returns_array = np.empty(prices_array.shape, dtype=np.float32)
+        pct_returns_array[0] = np.nan
+        pct_returns_array[1:] = prices_array[1:] / prices_array[:-1] - 1
+    else:
+        pct_returns_array = np.empty(prices_array.shape, dtype=np.float32)
+        pct_returns_array[0, :] = np.nan
+        pct_returns_array[1:, :] = prices_array[1:] / prices_array[:-1] - 1
+
+    return pct_returns_array
+
 class IndicatorsMethods:
 
     def __init__(self) -> None:

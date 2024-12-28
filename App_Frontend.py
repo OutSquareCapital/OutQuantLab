@@ -41,7 +41,7 @@ class MainApp(QMainWindow):
         metrics=self.outquantlab.dashboards.metrics
         )
 
-    def closeEvent(self, event ) -> None:
+    def closeEvent(self, event) -> None: # type: ignore
         self.outquantlab.close()
         UI.cleanup_temp_files()
         super().closeEvent(event)

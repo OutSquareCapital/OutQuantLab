@@ -36,7 +36,7 @@ class OutQuantLab:
         multi_index, 
         self.progress_callback)
 
-        self.dashboards.global_portfolio, self.dashboards.sub_portfolios = aggregate_raw_returns(raw_adjusted_returns_df)
+        self.dashboards.global_portfolio, self.dashboards.sub_portfolios = aggregate_raw_returns(raw_adjusted_returns_df, all_history=False)
 
     def refresh_data(self) -> None:
         get_yahoo_finance_data(self.assets_collection.all_entities_names, CONFIG.price_data)

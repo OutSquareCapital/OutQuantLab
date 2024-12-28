@@ -34,7 +34,7 @@ def rolling_median_normalisation(
         "max_array": rolling_max(signal_array, length=window_length, min_length=window_length),
         "min_array": rolling_min(signal_array, length=window_length, min_length=window_length)
     }
-    ne.evaluate(
+    ne.evaluate( # type: ignore
         "((signal_array - median_array) / (max_array - min_array)) * 2", 
         out=adjusted_signal_array, 
         local_dict=dict

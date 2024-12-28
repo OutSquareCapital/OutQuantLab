@@ -1,24 +1,22 @@
-from Files import ArrayFloat
-import pandas as pd
+from Files import ArrayFloat, DataFrameFloat
 import numpy as np
 from Metrics import rolling_sharpe_ratios, rolling_mean
 from Infrastructure import process_in_blocks_parallel
 import numexpr as ne # type: ignore
 
 def relative_sharpe_on_confidence_period(
-    returns_df:pd.DataFrame, 
+    returns_df: DataFrameFloat,
     sharpe_lookback:int, 
     confidence_lookback: int = 2500, 
     block_size: int = 500
-    ) -> pd.DataFrame:
+    ) -> DataFrameFloat:
 
     def count_non_nan(x: ArrayFloat) -> ArrayFloat:
         return np.cumsum(~np.isnan(x), axis=0, dtype=np.float32)
 
-    returns_array: ArrayFloat = returns_df.values # type: ignore
-    
+
     sharpe_array = process_in_blocks_parallel(
-        returns_array, 
+        returns_df.values, 
         block_size=block_size,
         func=rolling_sharpe_ratios,
         length = sharpe_lookback,
@@ -54,9 +52,8 @@ def relative_sharpe_on_confidence_period(
 
     clipped_sharpes = np.clip(normalized_sharpes, 0, None)
 
-    return pd.DataFrame(
-        clipped_sharpes, 
+    return DataFrameFloat(
+        data=clipped_sharpes, 
         index=returns_df.index, # type: ignore
-        columns= returns_df.columns,
-        dtype=np.float32
+        columns= returns_df.columns
         )

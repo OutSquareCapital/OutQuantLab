@@ -1,19 +1,19 @@
 import pandas as pd
-import numpy as np
+from Indicators import pct_returns_np
 import yfinance as yf # type: ignore
 from Config import Indicator, ClustersTree
-from Files import ArrayFloat
+from Files import ArrayFloat, DataFrameFloat
 
 def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
 
     data: pd.DataFrame|None = yf.download( # type: ignore
-                            tickers=assets,
-                            interval="1d",
-                            auto_adjust=True,
-                            progress=False,
-                        )
+        tickers=assets,
+        interval="1d",
+        auto_adjust=True,
+        progress=False,
+    )
 
-    if isinstance(data, pd.DataFrame):
+    if isinstance(data, DataFrameFloat):
         data['Close'].to_parquet( # type: ignore
             file_path,
             index=True,
@@ -23,18 +23,20 @@ def get_yahoo_finance_data(assets: list[str], file_path: str) -> None:
         raise ValueError("Yahoo Finance Data Not Available")
 
 
-def load_prices(asset_names: list[str], file_path: str) -> tuple[ArrayFloat, pd.Index]:
+def load_prices(asset_names: list[str], file_path: str) -> tuple[ArrayFloat, pd.DatetimeIndex]:
+
     columns_to_load = ["Date"] + [name for name in asset_names]
 
-    prices_df = pd.read_parquet(
+    prices_df = DataFrameFloat(pd.read_parquet(
         file_path,
         engine="pyarrow",
         columns=columns_to_load
-    )
-    returns_df = prices_df.pct_change(fill_method=None) # type: ignore
-    pct_returns_array: ArrayFloat = returns_df.to_numpy(dtype=np.float32) # type: ignore
+    ))
+    
+    pct_returns_array = pct_returns_np(prices_df.values)
 
     return pct_returns_array, prices_df.index
+
 
 def generate_multi_index_process(
     indicators_params: list[Indicator], 

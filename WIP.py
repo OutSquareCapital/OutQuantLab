@@ -22,6 +22,28 @@ test = CleanData.adjust_prices_with_risk_free_rate(etf_data, bill_data)
 '''
 '''
 
+def extract_params_from_name(name: str, param1: str, param2: str):
+
+    pattern1 = re.compile(f"{param1}(\\d+)")
+    pattern2 = re.compile(f"{param2}(\\d+)")
+    
+    match1 = pattern1.search(name)
+    match2 = pattern2.search(name)
+    
+    param1_value = int(match1.group(1)) if match1 else None
+    param2_value = int(match2.group(1)) if match2 else None
+    
+    return param1_value, param2_value
+def extract_all_params_from_name(name: str, params: list) -> list:
+
+    extracted_values = []
+    for param in params:
+        pattern = re.compile(f"{param}(\\d+)")
+        match = pattern.search(name)
+        extracted_values.append(int(match.group(1)) if match else None)
+    
+    return extracted_values
+
 def convert_params_to_3d(sharpe_ratios_df, param1, param2):
 
     sharpe_dict = defaultdict(list)

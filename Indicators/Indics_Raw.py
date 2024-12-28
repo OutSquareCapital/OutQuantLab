@@ -10,10 +10,9 @@ rolling_kurtosis,
 separate_volatility
 )
 from .Indics_Normalization import ratio_normalization
-from Files import ArrayFloat, ArrayInt
-import pandas as pd
+from Files import ArrayFloat, ArrayInt, DataFrameFloat
 
-def generate_seasonal_array(returns_df: pd.DataFrame) -> ArrayInt:
+def generate_seasonal_array(returns_df: DataFrameFloat) -> ArrayInt:
 
     def assign_week_of_month(day: int) -> int:
         if day <= 6:

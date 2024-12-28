@@ -53,7 +53,7 @@ class MediaFiles:
     paths: SystemPaths
 
     def _make_path(self, name: str, ext_type: str) -> str:
-        return os.path.join(self.paths.saved_data, f"{name}{ext_type}")
+        return os.path.join(self.paths.medias, f"{name}{ext_type}")
 
     @property
     def home_page(self) -> WebpMedia:

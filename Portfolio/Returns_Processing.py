@@ -1,9 +1,8 @@
 import bottleneck as bn   # type: ignore
-import numpy as np
-import pandas as pd
+from Files import DataFrameFloat
 
 def calculate_portfolio_returns(
-    returns_df: pd.DataFrame,
+    returns_df: DataFrameFloat,
     by_asset_cluster: bool = False,
     by_asset_cluster_sub: bool = False,
     by_asset: bool = False,
@@ -11,7 +10,7 @@ def calculate_portfolio_returns(
     by_indic_cluster_sub: bool = False,
     by_indic: bool = False,
     by_param: bool = False
-    ) -> pd.DataFrame:
+    ) -> DataFrameFloat:
 
     grouping_levels = []
     if by_asset_cluster:
@@ -32,19 +31,21 @@ def calculate_portfolio_returns(
     if grouping_levels:
         grouped = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T  # type: ignore
 
-        return grouped
+        return DataFrameFloat(grouped)
 
-    return pd.DataFrame(
-        bn.nanmean(returns_df.values, axis=1),  # type: ignore
-        index=returns_df.index,  # type: ignore
-        columns=['Portfolio'], 
-        dtype=np.float32
+    return DataFrameFloat(
+        bn.nanmean(returns_df.values, axis=1), # type: ignore
+        index=returns_df.index,
+        columns=['Portfolio']
         )
 
-def aggregate_raw_returns(raw_adjusted_returns_df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def aggregate_raw_returns(raw_adjusted_returns_df: DataFrameFloat, all_history: bool = False) -> tuple[DataFrameFloat, DataFrameFloat]:
+    
+    if not all_history:
+        raw_adjusted_returns_df= raw_adjusted_returns_df.dropna(axis=0) # type: ignore
     
     df_indic = calculate_portfolio_returns(
-        raw_adjusted_returns_df.dropna(axis=0), # type: ignore
+        raw_adjusted_returns_df,
         by_asset_cluster=True,
         by_asset_cluster_sub=True,
         by_asset=True,

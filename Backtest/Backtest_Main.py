@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from Files import N_THREADS, ArrayFloat, ProgressFunc
+from Files import N_THREADS, ArrayFloat, ProgressFunc, DataFrameFloat
 from concurrent.futures import ThreadPoolExecutor
 from Config import Indicator
 from Indicators import IndicatorsMethods
@@ -9,15 +9,15 @@ def calculate_strategy_returns(
     pct_returns_array: ArrayFloat, 
     indicators_params: list[Indicator],
     indics_methods: IndicatorsMethods,
-    dates_index: pd.Index,
+    dates_index: pd.DatetimeIndex,
     multi_index: pd.MultiIndex,
     progress_callback: ProgressFunc
-    ) -> pd.DataFrame:
+    ) -> DataFrameFloat:
     signal_col_index = 0
     global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
     indics_methods.process_data(pct_returns_array)
-    total_returns_streams = int(multi_index.shape[0])
-    signals_array = np.zeros((pct_returns_array.shape[0], total_returns_streams), dtype=np.float32)
+    total_returns_streams = int(multi_index.shape[0]) # type: ignore
+    signals_array: ArrayFloat = np.empty((pct_returns_array.shape[0], total_returns_streams), dtype=np.float32)
     total_assets_count = pct_returns_array.shape[1]
 
     import time
@@ -39,10 +39,8 @@ def calculate_strategy_returns(
         )
     end = time.perf_counter() - start
     print(f"Time taken: {end:.2f} seconds")
-
-    return pd.DataFrame(
+    return DataFrameFloat(
         data=signals_array,
         index=dates_index,
-        columns=multi_index,
-        dtype=np.float32
+        columns=multi_index
         )

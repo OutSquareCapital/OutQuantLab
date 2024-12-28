@@ -17,7 +17,8 @@ from .Distribution import (
 from .Volatility import (
     rolling_volatility, 
     hv_composite,
-    separate_volatility
+    separate_volatility,
+    overall_volatility
 )
 
 from .Performance import (
@@ -40,5 +41,6 @@ __all__ = [
     "hv_composite",
     "separate_volatility",
     "rolling_sharpe_ratios",
-    "expanding_sharpe_ratios"
+    "expanding_sharpe_ratios",
+    'overall_volatility'
 ]
