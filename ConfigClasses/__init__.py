@@ -1,4 +1,4 @@
-from .Config_Structure import AssetsCollection, Asset
+from .Assets import AssetsCollection, Asset
 from .Indicators import IndicatorsCollection, Indicator
 from .Clusters import generate_static_clusters, ClustersTree, generate_multi_index_process, sort_correlation_matrix
 __all__ = [

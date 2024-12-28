@@ -23,7 +23,7 @@ QPushButton,
 QApplication
 )
 from PySide6.QtCore import Qt
-from Config import AssetsCollection, ClustersTree, IndicatorsCollection, Asset, Indicator
+from ConfigClasses import AssetsCollection, ClustersTree, IndicatorsCollection, Asset, Indicator
 
 class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection) -> None:

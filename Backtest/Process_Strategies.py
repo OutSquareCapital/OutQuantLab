@@ -3,7 +3,7 @@ import pandas as pd
 from Database import N_THREADS
 from Utilitary import ArrayFloat, ProgressFunc, DataFrameFloat, Float32
 from concurrent.futures import ThreadPoolExecutor
-from Config import Indicator
+from ConfigClasses import Indicator
 from Indicators import IndicatorsMethods
 from Metrics import calculate_overall_mean
 

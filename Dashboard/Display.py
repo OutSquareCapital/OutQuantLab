@@ -2,7 +2,7 @@ from Utilitary import DataFrameFloat, SeriesFloat
 import Dashboard.Transformations as Transformations
 import Dashboard.Widgets as Widgets 
 import Metrics as Computations
-from Config import generate_static_clusters, sort_correlation_matrix
+from ConfigClasses import generate_static_clusters, sort_correlation_matrix
 from collections.abc import Callable
 import plotly.graph_objects as go # type: ignore
 from dataclasses import dataclass
