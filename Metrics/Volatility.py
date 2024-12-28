@@ -3,8 +3,10 @@ from Utilitary import ANNUALIZED_PERCENTAGE_FACTOR, ArrayFloat
 import bottleneck as bn # type: ignore
 from Metrics.Aggregation import rolling_mean, rolling_median
 
-def rolling_volatility(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
+def overall_volatility(array: ArrayFloat) -> ArrayFloat:
+    return bn.nanstd(array, axis=0, ddof=1) # type: ignore
 
+def rolling_volatility(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1) # type: ignore
 
 def hv_short_term(
@@ -46,13 +48,10 @@ def hv_composite(
     adjusted_lengths = [length for length in long_term_lengths if length < max_length]
     
     short_term_vol_array = hv_short_term(returns_array, lengths_list=short_term_lengths)
-
     long_term_vol_array = hv_long_term(short_term_vol_array, long_term_lengths=adjusted_lengths)
-
     lt_weight = 1 - st_weight
     
     composite_vol_array = ((st_weight * short_term_vol_array) + (lt_weight * long_term_vol_array)) * ANNUALIZED_PERCENTAGE_FACTOR
-
     return rolling_mean(composite_vol_array, length=4, min_length=1)
 
 def separate_volatility(array:ArrayFloat, LenVol: int) -> tuple[ArrayFloat, ArrayFloat]:
@@ -65,5 +64,3 @@ def separate_volatility(array:ArrayFloat, LenVol: int) -> tuple[ArrayFloat, Arra
 
     return vol_positive, vol_negative
 
-def overall_volatility(array: ArrayFloat) -> ArrayFloat:
-    return bn.nanstd(x, axis=0, ddof=1) # type: ignore

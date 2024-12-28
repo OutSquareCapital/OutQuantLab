@@ -1,7 +1,6 @@
 from scipy.cluster.hierarchy import linkage, fcluster # type: ignore
 from scipy.spatial.distance import squareform
-from Utilitary import ArrayFloat, DataFrameFloat
-from typing import Any
+from Utilitary import ArrayFloat, DataFrameFloat, DictVariableDepth
 
 def calculate_distance_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
     corr_matrix = returns_df.corr()
@@ -19,7 +18,13 @@ def create_cluster_dict(assets: list[str], clusters: ArrayFloat) -> dict[str, li
         cluster_dict[cluster].append(asset)
     return {k: cluster_dict[k] for k in sorted(cluster_dict)}
 
-def cluster_subdivision(returns_df: DataFrameFloat, assets: list[str], max_subclusters: int, method: str = 'ward') -> list[str] | dict[str, list[str]]:
+def cluster_subdivision(
+    returns_df: DataFrameFloat, 
+    assets: list[str], 
+    max_subclusters: int, 
+    method: str = 'ward'
+    ) -> list[str] | dict[str, list[str]]:
+
     if len(assets) <= 1:
         return assets
     sub_assets_group = DataFrameFloat(returns_df[assets])
@@ -29,7 +34,7 @@ def cluster_subdivision(returns_df: DataFrameFloat, assets: list[str], max_subcl
 
 def recursive_subdivision(
     returns_df: DataFrameFloat, 
-    cluster_dict: dict[str, Any], 
+    cluster_dict: DictVariableDepth, 
     max_subclusters: int, 
     max_subsubclusters: int
 ) -> dict[str, dict[str, list[str]]]:
@@ -49,7 +54,7 @@ def generate_static_clusters(
     max_clusters: int = 3, 
     max_subclusters: int = 1, 
     max_subsubclusters: int = 1
-) -> dict[str, list[str]]:
+) -> DictVariableDepth:
     distance_matrix = calculate_distance_matrix(returns_df)
     main_clusters = perform_clustering(distance_matrix, max_clusters)
     cluster_dict = create_cluster_dict(list(returns_df.columns), main_clusters)
@@ -60,7 +65,7 @@ def generate_static_clusters(
     return flatten_singleton_clusters(cluster_dict)
 
 
-def flatten_singleton_clusters(cluster_dict: dict[str, list[str]]) -> dict[Any, Any]:
+def flatten_singleton_clusters(cluster_dict: dict[str, list[str]]) -> DictVariableDepth:
 
     new_cluster_dict = {}
     

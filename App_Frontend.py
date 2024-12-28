@@ -41,7 +41,7 @@ class MainApp(QMainWindow):
         metrics=self.outquantlab.dashboards.metrics
         )
 
-    def closeEvent(self, event) -> None: # type: ignore
+    def closeEvent(self, event) -> None:
         self.outquantlab.close()
         UI.cleanup_temp_files()
         super().closeEvent(event)
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     import UI
     app = QApplication(sys.argv)
     UI.apply_global_styles(app)
-    progress_window, progress_bar = UI.setup_launch_page(None)
+    progress_window, progress_bar = UI.setup_launch_page()
 
     QApplication.processEvents()
     progress_bar.setValue(30)

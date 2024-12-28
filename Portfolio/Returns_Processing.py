@@ -1,4 +1,4 @@
-import bottleneck as bn   # type: ignore
+from Metrics import calculate_overall_mean
 from Utilitary import DataFrameFloat
 
 def calculate_portfolio_returns(
@@ -12,30 +12,31 @@ def calculate_portfolio_returns(
     by_param: bool = False
     ) -> DataFrameFloat:
 
-    grouping_levels = []
+    grouping_levels:list[str] = []
     if by_asset_cluster:
-        grouping_levels.append("AssetCluster") # type: ignore
+        grouping_levels.append("AssetCluster")
     if by_asset_cluster_sub:
-        grouping_levels.append("AssetSubCluster") # type: ignore
+        grouping_levels.append("AssetSubCluster")
     if by_asset:
-        grouping_levels.append("Asset") # type: ignore
+        grouping_levels.append("Asset")
     if by_indic_cluster:
-        grouping_levels.append("IndicCluster") # type: ignore
+        grouping_levels.append("IndicCluster")
     if by_indic_cluster_sub:
-        grouping_levels.append("IndicSubCluster") # type: ignore
+        grouping_levels.append("IndicSubCluster")
     if by_indic:
-        grouping_levels.append("Indicator") # type: ignore
+        grouping_levels.append("Indicator")
     if by_param:
-        grouping_levels.append("Param") # type: ignore
+        grouping_levels.append("Param")
 
     if grouping_levels:
-        grouped = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T  # type: ignore
+        grouped = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T # type: ignore
 
         return DataFrameFloat(grouped)
 
+    global_portfolio = calculate_overall_mean(returns_df.nparray, axis=1)
     return DataFrameFloat(
-        bn.nanmean(returns_df.nparray, axis=1), # type: ignore
-        index=returns_df.index,
+        data=global_portfolio,
+        index=returns_df.dates,
         columns=['Portfolio']
         )
 

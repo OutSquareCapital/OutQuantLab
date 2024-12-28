@@ -1,8 +1,7 @@
 import numexpr as ne # type: ignore
 import numpy as np
 from Metrics import rolling_mean, rolling_median, rolling_min, rolling_max, rolling_volatility
-from Infrastructure import bfill
-from Utilitary import ArrayFloat, Float32
+from Utilitary import ArrayFloat, Float32, bfill
 
 def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> ArrayFloat:
     return (nominator / denominator) - 1

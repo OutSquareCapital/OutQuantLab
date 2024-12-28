@@ -65,7 +65,7 @@ class DashboardsCollection:
 
 def plot_equity(returns_df: DataFrameFloat) -> go.Figure:
 
-    equity_curves = Computations.calculate_equity_curves_df(returns_df)
+    equity_curves = Computations.calculate_equity_curves(returns_df.nparray)
     
     sorted_equity_curves = Transformations.sort_dataframe(
         equity_curves, 
@@ -75,7 +75,7 @@ def plot_equity(returns_df: DataFrameFloat) -> go.Figure:
     sorted_equity_curves=Transformations.convert_dataframe_multiindex_labels(sorted_equity_curves)
 
     return Widgets.curves(
-        x_values=sorted_equity_curves.index,
+        x_values=sorted_equity_curves.dates,
         y_values=sorted_equity_curves,
         title="Equity Curve", 
         log_scale=True)
@@ -90,20 +90,25 @@ def plot_rolling_volatility(returns_df: DataFrameFloat) -> go.Figure:
     sorted_rolling_volatility_df=Transformations.convert_dataframe_multiindex_labels(sorted_rolling_volatility_df)
 
     return Widgets.curves(
-        x_values=sorted_rolling_volatility_df.index,
+        x_values=sorted_rolling_volatility_df.dates,
         y_values=sorted_rolling_volatility_df, 
         title="Rolling Volatility %")
 
 def plot_rolling_drawdown(returns_df: DataFrameFloat, length: int) -> go.Figure:
     
-    drawdowns = Computations.calculate_rolling_drawdown(returns_df, length)
+    drawdowns = DataFrameFloat(
+        Computations.calculate_rolling_drawdown(returns_df.nparray, length),
+        returns_df.dates,
+        returns_df.columns
+        )
+    
     sorted_drawdowns = Transformations.sort_dataframe(
         drawdowns,
         ascending=True)
     sorted_drawdowns=Transformations.convert_dataframe_multiindex_labels(sorted_drawdowns)
 
     return Widgets.curves(
-        x_values=sorted_drawdowns.index, 
+        x_values=sorted_drawdowns.dates, 
         y_values=sorted_drawdowns, 
         title="Rolling Drawdown %")
 
@@ -115,7 +120,7 @@ def plot_rolling_sharpe_ratio(returns_df: DataFrameFloat, length: int) -> go.Fig
         ascending=True)
     sorted_rolling_sharpe_ratio_df=Transformations.convert_dataframe_multiindex_labels(sorted_rolling_sharpe_ratio_df)
     return Widgets.curves(
-        x_values=sorted_rolling_sharpe_ratio_df.index,
+        x_values=sorted_rolling_sharpe_ratio_df.dates,
         y_values=sorted_rolling_sharpe_ratio_df, 
         title="Rolling Sharpe Ratio")
     
@@ -127,7 +132,7 @@ def plot_rolling_smoothed_skewness(returns_df: DataFrameFloat, length: int) -> g
         ascending=True)
     sorted_rolling_skewness_df=Transformations.convert_dataframe_multiindex_labels(sorted_rolling_skewness_df)
     return Widgets.curves(
-        x_values=sorted_rolling_skewness_df.index,
+        x_values=sorted_rolling_skewness_df.dates,
         y_values=sorted_rolling_skewness_df, 
         title="Rolling Smoothed Skewnesss")
 
@@ -139,7 +144,7 @@ def plot_rolling_average_inverted_correlation(returns_df: DataFrameFloat, length
     sorted_correlations=Transformations.convert_dataframe_multiindex_labels(sorted_correlations)
     
     return Widgets.curves(
-        x_values=sorted_correlations.index,
+        x_values=sorted_correlations.dates,
         y_values=sorted_correlations,
         title=f"Rolling Average Inverted Correlation"
     )

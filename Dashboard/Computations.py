@@ -1,83 +1,84 @@
 import numpy as np
-from scipy.stats import skew # type: ignore
-from Utilitary import PERCENTAGE_FACTOR, DataFrameFloat, SeriesFloat, Float32
-from Indicators import calculate_equity_curves
-from Metrics import rolling_mean, rolling_sharpe_ratios, rolling_skewness, hv_composite, overall_volatility
-from Metrics.Performance import overall_sharpe_ratio
+from Utilitary import PERCENTAGE_FACTOR, ArrayFloat, DataFrameFloat, SeriesFloat, Float32
+from Metrics import (
+    rolling_mean, 
+    rolling_sharpe_ratios, 
+    rolling_skewness, 
+    hv_composite, 
+    overall_volatility, 
+    calculate_equity_curves, 
+    calculate_overall_mean, 
+    overall_sharpe_ratio, 
+    calculate_max_drawdown, 
+    calculate_rolling_drawdown,
+    )
 
 def calculate_overall_returns(returns_df: DataFrameFloat) -> SeriesFloat:
     
     equity_curves = DataFrameFloat(
         calculate_equity_curves(returns_df.nparray),
-        index=returns_df.index,
+        index=returns_df.dates,
         columns=returns_df.columns
         )
     
     return SeriesFloat((
-        equity_curves.iloc[-1]-100), # type: ignore
+        equity_curves.iloc[-1]-100),
         index=returns_df.columns)
 
-def calculate_overall_volatility(returns_df: DataFrameFloat) -> SeriesFloat|Float32:
+def calculate_overall_volatility(returns_df: DataFrameFloat) -> SeriesFloat:
 
     overall_vol = overall_volatility(returns_df.nparray)
 
-    return SeriesFloat(
-        data=overall_vol, 
-        index=returns_df.columns
-        )
+    return SeriesFloat(data=overall_vol, index=returns_df.columns)
 
-def calculate_overall_sharpe_ratio(returns_df: DataFrameFloat | SeriesFloat) -> SeriesFloat:
+def calculate_overall_sharpe_ratio(returns_df: DataFrameFloat) -> SeriesFloat:
+
     sharpes = overall_sharpe_ratio(returns_df.nparray)
     
     return SeriesFloat(sharpes, index=returns_df.columns)
 
 def calculate_overall_average_drawdown(returns_df: DataFrameFloat, length: int) -> SeriesFloat:
+    
+    rolling_dd = calculate_rolling_drawdown(returns_df.nparray, length)
 
-    return calculate_rolling_drawdown(returns_df, length).mean()
+    mean_rolling_dd = calculate_overall_mean(rolling_dd)
+
+    return SeriesFloat(mean_rolling_dd, index=returns_df.columns)
 
 def calculate_overall_max_drawdown(returns_df: DataFrameFloat) -> SeriesFloat:
 
-    return calculate_ath_drawdown(returns_df).mean()
+    return SeriesFloat(calculate_max_drawdown(returns_df.nparray), returns_df.columns)
 
 def calculate_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
 
-    def calculate_skew(series: SeriesFloat):
-        return skew(series, nan_policy='omit')
-
-    monthly_returns_df = returns_df.resample('ME').mean()
-    
-    return monthly_returns_df.apply(
-        calculate_skew
-        ).astype(Float32
-        )
+    monthly_returns_df= returns_df.resample('ME').mean() # type: ignore
+    print(f'Monthly Returns: {monthly_returns_df}')
+    length_to_use = len(monthly_returns_df)
+    print(f'Length to use: {length_to_use}')
+    montly_returns_array: ArrayFloat = monthly_returns_df.to_numpy() # type: ignore
+    print(f'Monthly Returns Array: {montly_returns_array}')
+    overall_skew = rolling_skewness(montly_returns_array, length=length_to_use, min_length=4)
+    print(f'Overall Skew: {overall_skew}')
+    average_overall_skew = calculate_overall_mean(overall_skew)
+    return SeriesFloat(average_overall_skew, index=returns_df.columns)
 
 def calculate_overall_average_correlation(returns_df: DataFrameFloat) -> SeriesFloat:
-
-    return returns_df.corr().mean()
-
-def calculate_equity_curves_df(returns_df: DataFrameFloat) -> DataFrameFloat:
-
     
-    return DataFrameFloat(
-        calculate_equity_curves(returns_df.nparray),
-        index=returns_df.index,
-        columns=returns_df.columns
-        )
+    return SeriesFloat(returns_df.corr().mean(), index=returns_df.columns) # type: ignore
 
 def format_returns(returns_df: DataFrameFloat, limit: float) -> DataFrameFloat:
-    lower_threshold = returns_df.quantile(limit, axis=0) 
-    upper_threshold = returns_df.quantile(1-limit, axis=0) 
+    lower_threshold = SeriesFloat(returns_df.quantile(limit, axis=0) ) # type: ignore
+    upper_threshold = SeriesFloat(returns_df.quantile(1-limit, axis=0) ) # type: ignore
     
-    formatted_returns_df = returns_df.where((returns_df >= lower_threshold) & (returns_df <= upper_threshold), np.nan) 
-    formatted_returns_df = formatted_returns_df * PERCENTAGE_FACTOR
+    formatted_returns_df = DataFrameFloat(returns_df.where((returns_df >= lower_threshold) & (returns_df <= upper_threshold), np.nan)) # type: ignore
 
-    return DataFrameFloat(formatted_returns_df)
+    return formatted_returns_df * PERCENTAGE_FACTOR
 
 def calculate_rolling_volatility(returns_df: DataFrameFloat) -> DataFrameFloat:
 
     return DataFrameFloat(
         hv_composite(returns_df.nparray),
-        index=returns_df.index,
+        index=returns_df.dates,
         columns=returns_df.columns
         )
 
@@ -88,34 +89,9 @@ def calculate_rolling_sharpe_ratio(returns_df: DataFrameFloat, length: int) -> D
         returns_df.nparray,
         length=length, 
         min_length=length),
-        index=returns_df.index,
+        index=returns_df.dates,
         columns=returns_df.columns
         )
-
-def calculate_rolling_drawdown(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
-    
-    equity_curves = DataFrameFloat(
-        calculate_equity_curves(returns_df.nparray), 
-        index=returns_df.index, 
-        columns=returns_df.columns
-        )
-    
-    rolling_max = equity_curves.rolling(window=length, min_periods=1).max()
-
-    return (equity_curves - rolling_max) / rolling_max * PERCENTAGE_FACTOR
-
-def calculate_ath_drawdown(returns_df: DataFrameFloat) -> DataFrameFloat:
-    
-    equity_curves = DataFrameFloat(
-        calculate_equity_curves(returns_df.nparray), 
-        index=returns_df.index, 
-        columns=returns_df.columns
-        )
-    
-    equity_max = equity_curves.max(axis=0) 
-    drawdowns = (equity_curves - equity_max) / equity_max * PERCENTAGE_FACTOR
-
-    return drawdowns
 
 def calculate_rolling_average_correlation(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
     rolling_avg_corr = returns_df.rolling( 
@@ -141,6 +117,6 @@ def calculate_rolling_smoothed_skewness(returns_df: DataFrameFloat, length: int)
 
     return DataFrameFloat( 
         data=skewness_array,
-        index=returns_df.index, 
+        index=returns_df.dates, 
         columns=returns_df.columns
         )

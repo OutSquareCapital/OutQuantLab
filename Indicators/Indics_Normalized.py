@@ -1,57 +1,10 @@
 import numpy as np
 from .Indics_Raw import *
 from .Indics_Normalization import sign_normalization, calculate_indicator_on_trend_signal, rolling_median_normalisation, relative_normalization
-from Utilitary import ArrayFloat, IndicatorFunc, PERCENTAGE_FACTOR, Float32
+from Utilitary import ArrayFloat, IndicatorFunc, Float32, shift_array
 from inspect import signature
-from Metrics import hv_composite
-from Infrastructure import shift_array
+from Metrics import hv_composite, calculate_volatility_adjusted_returns, calculate_equity_curves, log_returns_np
 from concurrent.futures import ThreadPoolExecutor
-
-def calculate_volatility_adjusted_returns(
-    pct_returns_array: ArrayFloat, 
-    hv_array: ArrayFloat, 
-    target_volatility: int = 15
-    ) -> ArrayFloat:
-
-    vol_adj_position_size_shifted:ArrayFloat = shift_array(target_volatility / hv_array)
-
-    return pct_returns_array * vol_adj_position_size_shifted
-
-def calculate_equity_curves(returns_array: ArrayFloat) -> ArrayFloat:
-
-    temp_array:ArrayFloat = returns_array.copy()
-    mask = np.isnan(temp_array)
-    temp_array[mask] = 0
-    cumulative_returns = np.cumprod(1 + temp_array, axis=0)
-    cumulative_returns[mask] = np.nan
-
-    return cumulative_returns * PERCENTAGE_FACTOR
-
-def log_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
-
-    if prices_array.ndim == 1:
-        log_returns_array = np.empty(prices_array.shape, dtype=Float32)
-        log_returns_array[0] = np.nan
-        log_returns_array[1:] = np.log(prices_array[1:] / prices_array[:-1])
-    else:
-        log_returns_array = np.empty(prices_array.shape, dtype=Float32)
-        log_returns_array[0, :] = np.nan
-        log_returns_array[1:, :] = np.log(prices_array[1:] / prices_array[:-1])
-
-    return log_returns_array
-
-def pct_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
-
-    if prices_array.ndim == 1:
-        pct_returns_array = np.empty(prices_array.shape, dtype=Float32)
-        pct_returns_array[0] = np.nan
-        pct_returns_array[1:] = prices_array[1:] / prices_array[:-1] - 1
-    else:
-        pct_returns_array = np.empty(prices_array.shape, dtype=Float32)
-        pct_returns_array[0, :] = np.nan
-        pct_returns_array[1:, :] = prices_array[1:] / prices_array[:-1] - 1
-
-    return pct_returns_array
 
 class IndicatorsMethods:
 

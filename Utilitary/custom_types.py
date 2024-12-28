@@ -8,8 +8,9 @@ Float32: TypeAlias = np.float32
 Int32: TypeAlias = np.int32
 ArrayFloat: TypeAlias = NDArray[Float32]
 ArrayInt: TypeAlias = NDArray[Int32]
-ProgressFunc: TypeAlias = Callable[[int, str], Any]
+ProgressFunc: TypeAlias = Callable[[int, str], None]
 IndicatorFunc : TypeAlias = Callable[..., ArrayFloat]
+DictVariableDepth: TypeAlias = dict[str, Any]
 
 JsonData: TypeAlias = str
 ParquetData: TypeAlias = str
@@ -29,7 +30,7 @@ class SeriesFloat(Series): # type: ignore
     def __init__(
         self, 
         data: ArrayFloat|Series, # type: ignore
-        index: Index|list[str]|None = None, # type: ignore
+        index: Index[str]|list[str]|None = None,
         dtype: type = Float32
         ) -> None:
         if isinstance(data, Series):
@@ -40,11 +41,18 @@ class SeriesFloat(Series): # type: ignore
         super().__init__(data=data, index=index, dtype=dtype) # type: ignore
 
     @property
+    def names(self) -> Index[str]:
+        return super().index # type: ignore
+    @property
+    def data(self) -> ArrayFloat:
+        return super().values # type: ignore
+
+    @property
     def nparray(
         self, 
         dtype: DTypeLike = Float32, 
         copy: bool = False, 
-        na_value: Any = np.nan
+        na_value: float = np.nan
         ) -> ArrayFloat:
         """override to_numpy method to strictly return Float32 array"""
         array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value) # type: ignore
@@ -61,7 +69,7 @@ class DataFrameFloat(DataFrame):
         self, 
         data: ArrayFloat|DataFrame,
         index: DatetimeIndex|None = None,
-        columns: list[str]|MultiIndex|Index|None = None, # type: ignore
+        columns: list[str]|MultiIndex|Index[str]|None = None,
         dtype: type=Float32,
         ) -> None:
         if isinstance(data, DataFrame):
@@ -75,7 +83,7 @@ class DataFrameFloat(DataFrame):
         super().__init__(data=data, index=index, columns=columns, dtype=dtype) # type: ignore
 
     @property
-    def index(self) -> DatetimeIndex:
+    def dates(self) -> DatetimeIndex:
         return super().index # type: ignore
 
     @property
@@ -83,7 +91,7 @@ class DataFrameFloat(DataFrame):
         self, 
         dtype: DTypeLike = Float32, 
         copy: bool = False, 
-        na_value: Any = np.nan
+        na_value: float = np.nan
         ) -> ArrayFloat:
         """override to_numpy method to strictly return Float32 array"""
         array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value) # type: ignore

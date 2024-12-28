@@ -1,7 +1,7 @@
 from typing import Final
 from dataclasses import dataclass
 import os
-from .custom_types import JSON_EXT, PARQUET_EXT, JsonData, ParquetData, PngMedia,  WebpMedia, PNG_EXT, WEBP_EXT
+from Utilitary import JSON_EXT, PARQUET_EXT, JsonData, ParquetData, PngMedia,  WebpMedia, PNG_EXT, WEBP_EXT
 
 @dataclass(frozen=True)
 class SystemPaths:

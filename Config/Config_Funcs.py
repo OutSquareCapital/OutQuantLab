@@ -1,13 +1,13 @@
 import json
 import pyarrow.parquet as pq # type: ignore
-from typing import Any
+from Utilitary import DictVariableDepth
 from itertools import product
 
-def load_config_file(file_path: str) -> dict[str, Any]:
+def load_config_file(file_path: str) -> DictVariableDepth:
     with open(file_path, "r") as file:
         return json.load(file)
 
-def save_config_file(file_path: str, dict_to_save: dict[str, Any], indent: int) -> None:
+def save_config_file(file_path: str, dict_to_save: DictVariableDepth, indent: int) -> None:
     with open(file_path, "w") as file:
         json.dump(dict_to_save, file, indent=indent)
 

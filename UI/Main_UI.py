@@ -10,11 +10,11 @@ QGridLayout
 )
 from collections.abc import Callable
 from Utilitary import (
-MEDIA,
 BACKTEST_STATS_RESULTS,
 CLUSTERS_PARAMETERS,
 FRAME_STYLE
 )
+from Database import MEDIA
 from .Common_UI import (
 generate_backtest_params_sliders, 
 set_background_image, 

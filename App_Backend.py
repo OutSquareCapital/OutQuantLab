@@ -1,5 +1,6 @@
-from Utilitary import CONFIG, ProgressFunc
-from Backtest import calculate_strategy_returns, get_yahoo_finance_data, load_prices, generate_multi_index_process
+from Utilitary import ProgressFunc
+from Database import CONFIG
+from Backtest import calculate_strategy_returns, generate_multi_index_process
 from Portfolio import aggregate_raw_returns
 from Indicators import IndicatorsMethods
 from Config import AssetsCollection, IndicatorsCollection, ClustersTree

@@ -1,7 +1,75 @@
-from Utilitary import ArrayFloat
-from Utilitary import ANNUALIZATION_FACTOR
-from .Aggregation import rolling_mean, overall_mean
+from Utilitary import ANNUALIZATION_FACTOR, PERCENTAGE_FACTOR, ArrayFloat, shift_array, Float32
+from .Aggregation import rolling_mean, calculate_overall_mean, rolling_max, calculate_overall_max
 from .Volatility import rolling_volatility, overall_volatility
+import numpy as np
+
+def calculate_volatility_adjusted_returns(
+    pct_returns_array: ArrayFloat, 
+    hv_array: ArrayFloat, 
+    target_volatility: int = 15
+    ) -> ArrayFloat:
+
+    vol_adj_position_size_shifted:ArrayFloat = shift_array(target_volatility / hv_array)
+
+    return pct_returns_array * vol_adj_position_size_shifted
+
+def calculate_equity_curves(returns_array: ArrayFloat) -> ArrayFloat:
+
+    temp_array:ArrayFloat = returns_array.copy()
+    mask = np.isnan(temp_array)
+    temp_array[mask] = 0
+    cumulative_returns = np.cumprod(1 + temp_array, axis=0)
+    cumulative_returns[mask] = np.nan
+
+    return cumulative_returns * PERCENTAGE_FACTOR
+
+def log_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
+
+    if prices_array.ndim == 1:
+        log_returns_array = np.empty(prices_array.shape, dtype=Float32)
+        log_returns_array[0] = np.nan
+        log_returns_array[1:] = np.log(prices_array[1:] / prices_array[:-1])
+    else:
+        log_returns_array = np.empty(prices_array.shape, dtype=Float32)
+        log_returns_array[0, :] = np.nan
+        log_returns_array[1:, :] = np.log(prices_array[1:] / prices_array[:-1])
+
+    return log_returns_array
+
+def pct_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
+
+    if prices_array.ndim == 1:
+        pct_returns_array = np.empty(prices_array.shape, dtype=Float32)
+        pct_returns_array[0] = np.nan
+        pct_returns_array[1:] = prices_array[1:] / prices_array[:-1] - 1
+    else:
+        pct_returns_array = np.empty(prices_array.shape, dtype=Float32)
+        pct_returns_array[0, :] = np.nan
+        pct_returns_array[1:, :] = prices_array[1:] / prices_array[:-1] - 1
+
+    return pct_returns_array
+
+def calculate_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayFloat:
+    
+    equity_curves = calculate_equity_curves(returns_array)
+    
+    period_max = rolling_max(equity_curves, length=length, min_length=1)
+
+    return (equity_curves - period_max) / period_max * PERCENTAGE_FACTOR
+
+def calculate_ath_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
+    
+    equity_curves = calculate_equity_curves(returns_array)
+
+    equity_max = calculate_overall_max(equity_curves)
+
+    return (equity_curves - equity_max) / equity_max * PERCENTAGE_FACTOR
+
+def calculate_max_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
+    
+    drawdown = calculate_ath_drawdown(returns_array)
+    
+    return calculate_overall_max(drawdown)
 
 def expanding_sharpe_ratios(returns_array: ArrayFloat) -> ArrayFloat:
 
@@ -22,7 +90,7 @@ def rolling_sharpe_ratios(returns_array: ArrayFloat, length:int, min_length:int)
 
 def overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
 
-    mean = overall_mean(returns_array)
+    mean = calculate_overall_mean(returns_array)
     volatility = overall_volatility(returns_array)
 
     return mean / volatility * ANNUALIZATION_FACTOR

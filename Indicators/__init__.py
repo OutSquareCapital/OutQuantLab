@@ -1,7 +1,5 @@
-from .Indics_Normalized import IndicatorsMethods, calculate_equity_curves, pct_returns_np
+from .Indics_Normalized import IndicatorsMethods
 
 __all__ = [
-    'pct_returns_np',
-    'IndicatorsMethods',
-    'calculate_equity_curves'
+    'IndicatorsMethods'
 ]

@@ -3,7 +3,7 @@ import numpy as np
 import polars as pl
 from Utilitary import ArrayFloat, Float32
 
-def overall_mean(array: ArrayFloat, axis: int = 0) -> ArrayFloat:
+def calculate_overall_mean(array: ArrayFloat, axis: int = 0) -> ArrayFloat:
     return bn.nanmean(array, axis) # type: ignore
 
 def rolling_mean(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
@@ -11,6 +11,9 @@ def rolling_mean(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFl
 
 def rolling_median(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_median(array, window=length, min_count=min_length, axis=0) # type: ignore
+
+def calculate_overall_max(array: ArrayFloat, axis: int = 0) -> ArrayFloat:
+    return np.nanmax(array, axis=axis)
 
 def rolling_max(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_max(array, window=length, min_count=min_length, axis=0) # type: ignore

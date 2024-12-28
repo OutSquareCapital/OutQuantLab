@@ -11,11 +11,10 @@ from PySide6.QtWidgets import (
     QLabel)
 from PySide6.QtGui import QPixmap, QIcon
 from Utilitary import (
-    MEDIA,
     FONT_FAMILY, 
     FONT_SIZE, 
     FONT_TYPE)
-from typing import Any
+from Database import MEDIA
 
 def apply_global_styles(app:QApplication) -> None:
     app.setWindowIcon(QIcon(MEDIA.app_logo)) 
@@ -27,8 +26,8 @@ def apply_global_styles(app:QApplication) -> None:
         }}
     """)
 
-def setup_launch_page(parent: Any) -> tuple[QMainWindow, QProgressBar]:
-    progress_window = QMainWindow(parent)
+def setup_launch_page() -> tuple[QMainWindow, QProgressBar]:
+    progress_window = QMainWindow()
     progress_window.setWindowTitle('OutQuantLab')
 
     main_widget = QWidget(progress_window)

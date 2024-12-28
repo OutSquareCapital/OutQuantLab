@@ -1,5 +1,5 @@
 from .Aggregation import (
-    overall_mean,
+    calculate_overall_mean,
     rolling_mean, 
     rolling_median,
     rolling_min,
@@ -25,11 +25,18 @@ from .Volatility import (
 from .Performance import (
     rolling_sharpe_ratios,
     expanding_sharpe_ratios,
-    overall_sharpe_ratio
+    overall_sharpe_ratio,
+    overall_volatility,
+    calculate_volatility_adjusted_returns,
+    calculate_equity_curves,
+    calculate_rolling_drawdown,
+    log_returns_np,
+    pct_returns_np,
+    calculate_max_drawdown
 )
 
 __all__ = [
-    "overall_mean",
+    "calculate_overall_mean",
     "rolling_mean", 
     "rolling_median",
     "rolling_min",
@@ -46,5 +53,11 @@ __all__ = [
     "rolling_sharpe_ratios",
     "expanding_sharpe_ratios",
     'overall_volatility',
-    'overall_sharpe_ratio'
+    'overall_sharpe_ratio',
+    'calculate_volatility_adjusted_returns',
+    'calculate_equity_curves',
+    'calculate_rolling_drawdown',
+    'log_returns_np',
+    'pct_returns_np',
+    'calculate_max_drawdown'
 ]

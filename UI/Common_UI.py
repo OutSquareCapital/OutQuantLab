@@ -21,10 +21,10 @@ from functools import partial
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt, QDate
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from PySide6.QtGui import QFont
-from typing import Any
 from collections.abc import Callable
 from .Results_UI import generate_plot_widget
 from Dashboard import DashboardsCollection
+from Utilitary import DictVariableDepth
 
 def create_param_widget(
     param_box: QGroupBox, 
@@ -129,7 +129,7 @@ def create_param_sliders(values: list[int]) -> tuple[QHBoxLayout, QHBoxLayout, Q
 
     return sliders_layout, num_values_layout, start_slider, end_slider, num_values_slider
 
-def add_cluster(tree: QTreeWidget, tree_structure: dict[str, Any]) -> None:
+def add_cluster(tree: QTreeWidget, tree_structure: DictVariableDepth) -> None:
     cluster_name, ok = QInputDialog.getText(tree, "New Cluster", "Cluster Name:")
     if ok and cluster_name:
         if cluster_name in tree_structure:
@@ -141,7 +141,7 @@ def add_cluster(tree: QTreeWidget, tree_structure: dict[str, Any]) -> None:
         category_item.setFlags(category_item.flags() | Qt.ItemFlag.ItemIsDropEnabled)
         tree.addTopLevelItem(category_item)
 
-def delete_cluster(tree: QTreeWidget, tree_structure: dict[str, Any]) -> None:
+def delete_cluster(tree: QTreeWidget, tree_structure: DictVariableDepth) -> None:
     selected_cluster = tree.currentItem()
     if selected_cluster:
         cluster_name = selected_cluster.text(0)
@@ -173,7 +173,7 @@ def create_expandable_section(category_name: str) -> tuple[QGroupBox, QVBoxLayou
     return category_box, content_layout
 
 def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
-    def traverse(item) -> bool:
+    def traverse(item:QTreeWidgetItem) -> bool:
         if item.text(0) == element:
             return True
         for i in range(item.childCount()):
@@ -206,7 +206,7 @@ def populate_tree_from_dict(
         else:
             parent_item.addChild(category_item)
 
-        if isinstance(value, dict):
+        if isinstance(value, DictVariableDepth):
             populate_tree_from_dict(tree, value, data_set, category_item)
         elif isinstance(value, list):
             for element in value:
@@ -305,7 +305,7 @@ def setup_expandable_animation(
 
 def create_button(
     text: str, 
-    callback: Callable[[Any], None], 
+    callback: Callable[..., None], 
     parent_layout: QLayout
     ) -> QPushButton:
     
@@ -481,7 +481,7 @@ def generate_backtest_params_sliders(clusters_params: list[str]) -> tuple[QVBoxL
     length_slider.setRange(6, 12)
     length_slider.setValue(10)
     length_label = QLabel(f"Rolling Length: {2 ** length_slider.value()}")
-    length_slider.valueChanged.connect(lambda value: length_label.setText(f"Rolling Length: {value ** 2}"))
+    length_slider.valueChanged.connect(lambda value : length_label.setText(f"Rolling Length: {value ** 2}"))
     backtest_parameters_inner_layout.addWidget(length_label)
     backtest_parameters_inner_layout.addWidget(length_slider)
 

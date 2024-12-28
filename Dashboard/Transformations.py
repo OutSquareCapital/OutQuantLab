@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
-from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat
+from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, DictVariableDepth
 from scipy.spatial.distance import squareform
 from scipy.cluster.hierarchy import linkage, leaves_list # type: ignore
-from typing import Any
 
 def convert_series_multiindex_labels(series: SeriesFloat) -> SeriesFloat:
     if isinstance(series.index, pd.MultiIndex):
@@ -34,7 +33,7 @@ def sort_correlation_matrix(corr_matrix: DataFrameFloat) -> DataFrameFloat:
     return sorted_corr_matrix # type: ignore
 
 def prepare_sunburst_data(
-    cluster_dict:dict[str, Any], 
+    cluster_dict:DictVariableDepth, 
     parent_label:str="", 
     labels: list[str]|None = None, 
     parents: list[str]|None = None
@@ -67,9 +66,9 @@ def sort_series(data: SeriesFloat, ascending: bool = True) -> SeriesFloat:
 
 def sort_dataframe(data: DataFrameFloat, use_final: bool = False, ascending: bool = True) -> DataFrameFloat:
     if use_final:
-        return data.sort_values(by=data.index[-1], axis=1, ascending=ascending) # type: ignore
+        return data.sort_values(by=data.dates[-1], axis=1, ascending=ascending) # type: ignore
     else:
-        sorted_data = data.mean().sort_values(ascending=ascending) # type: ignore
+        sorted_data = data.mean().sort_values(ascending=ascending)
         return data[sorted_data.index] # type: ignore
 
 def normalize_data_for_colormap(data: ArrayFloat):

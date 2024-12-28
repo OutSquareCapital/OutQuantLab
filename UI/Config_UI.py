@@ -1,4 +1,3 @@
-from Utilitary import Any
 from .Common_UI import (
 create_checkbox_item, 
 create_expandable_section,
@@ -19,6 +18,7 @@ QGroupBox,
 QHBoxLayout, 
 QSlider, 
 QTreeWidget, 
+QTreeWidgetItem,
 QPushButton, 
 QApplication
 )
@@ -195,7 +195,7 @@ class TreeStructureWidget(QWidget):
         layout.addLayout(buttons_layout)
         self.setLayout(layout)
 
-    def handle_item_click(self, item: Any) -> None:
+    def handle_item_click(self, item: QTreeWidgetItem) -> None:
         if Qt.KeyboardModifier.ControlModifier & QApplication.keyboardModifiers():
             item.setSelected(not item.isSelected())
         elif Qt.KeyboardModifier.ShiftModifier & QApplication.keyboardModifiers():

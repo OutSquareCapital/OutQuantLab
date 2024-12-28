@@ -36,10 +36,8 @@ def bars(
     series: SeriesFloat, 
     title: str
     ) -> go.Figure:
-    
-    index: pd.Index[str] = series.index # type: ignore
 
-    color_map = get_color_map(index.tolist())
+    color_map = get_color_map(series.names.tolist())
 
     fig = go.Figure()
 

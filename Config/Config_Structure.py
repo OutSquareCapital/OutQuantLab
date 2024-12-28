@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any
-from Utilitary import IndicatorFunc, JsonData, ParquetData
+from Utilitary import IndicatorFunc, JsonData, ParquetData, DictVariableDepth
 from .Config_Funcs import (
 load_config_file, 
 save_config_file,
@@ -14,7 +13,7 @@ class ClustersTree:
         self.clusters_file: str = clusters_file
         self.clusters = load_config_file(self.clusters_file)
 
-    def update_clusters_structure(self, new_structure: dict[str, Any]) -> None:
+    def update_clusters_structure(self, new_structure: DictVariableDepth) -> None:
         self.clusters = new_structure
 
     def map_nested_clusters_to_entities(self) -> dict[str, tuple[str, str]]:

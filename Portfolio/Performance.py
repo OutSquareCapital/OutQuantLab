@@ -1,8 +1,34 @@
 from Utilitary import ArrayFloat, DataFrameFloat, Float32
 import numpy as np
 from Metrics import rolling_sharpe_ratios, rolling_mean
-from Infrastructure import process_in_blocks_parallel
 import numexpr as ne # type: ignore
+from concurrent.futures import ThreadPoolExecutor
+from collections.abc import Callable
+from typing import Any
+from Database import N_THREADS
+
+def process_in_blocks_parallel(
+    array: ArrayFloat, 
+    block_size: int, 
+    func:Callable[..., ArrayFloat], 
+    *args: Any,
+    **kwargs: Any
+    ) -> ArrayFloat:
+
+    num_cols: int = array.shape[1]
+    num_blocks_to_process = max(int(num_cols/block_size), 1)
+    max_threads = min(N_THREADS, num_blocks_to_process)
+    
+    with ThreadPoolExecutor(max_workers=max_threads) as executor:
+        futures = [
+            executor.submit(
+                func, array[:, start_col:min(start_col + block_size, num_cols)], *args, **kwargs # type: ignore
+            )
+            for start_col in range(0, num_cols, block_size)
+        ]
+        results = [future.result() for future in futures]
+
+    return np.hstack(results)
 
 def relative_sharpe_on_confidence_period(
     returns_df: DataFrameFloat,
@@ -54,6 +80,6 @@ def relative_sharpe_on_confidence_period(
 
     return DataFrameFloat(
         data=clipped_sharpes, 
-        index=returns_df.index, # type: ignore
+        index=returns_df.dates,
         columns= returns_df.columns
         )
