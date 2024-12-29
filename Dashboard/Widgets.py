@@ -2,9 +2,9 @@ import plotly.graph_objects as go # type: ignore
 from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat
 import pandas as pd
 from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
-from .Transformations import normalize_data_for_colormap
+from Dashboard.Transformations import normalize_data_for_colormap
 from Utilitary import COLOR_ADJUSTMENT
-
+from Metrics import calculate_overall_min
 def curves( x_values: pd.DatetimeIndex,
             y_values: DataFrameFloat,  
             title: str,
@@ -13,10 +13,10 @@ def curves( x_values: pd.DatetimeIndex,
 
     fig = go.Figure()
 
-    color_map = get_color_map(y_values.columns.tolist())
+    color_map: dict[str, str] = get_color_map(assets=y_values.columns.tolist())
 
     for column in y_values.columns:
-        fig.add_trace(go.Scatter( # type: ignore
+        fig.add_trace(trace=go.Scatter( # type: ignore
             x=x_values,
             y=y_values[column],
             mode='lines',
@@ -28,7 +28,7 @@ def curves( x_values: pd.DatetimeIndex,
     if log_scale:
         fig.update_layout(yaxis=dict(type="log")) # type: ignore
 
-    setup_figure_layout(fig, title)
+    setup_figure_layout(fig=fig, figtitle=title)
 
     return fig
 
@@ -37,16 +37,15 @@ def bars(
     title: str
     ) -> go.Figure:
 
-    color_map = get_color_map(series.names.tolist())
+    color_map: dict[str, str] = get_color_map(assets=series.names)
 
     fig = go.Figure()
-
-    for item, value in series.items():
-        fig.add_trace(go.Bar( # type: ignore
-            x=[item],
+    for label, value in zip(series.names, series.nparray):
+        fig.add_trace(trace=go.Bar( # type: ignore
+            x=[label],
             y=[value],
-            name=item,
-            marker=get_marker_config(color_map[item]), # type: ignore
+            name=label,
+            marker=get_marker_config(color=color_map[label]),
             showlegend=True
         ))
 
@@ -54,10 +53,9 @@ def bars(
         xaxis=dict(showticklabels=False)
     )
 
-    setup_figure_layout(fig, title)
+    setup_figure_layout(fig=fig, figtitle=title)
 
     return fig
-
 
 
 def heatmap(
@@ -67,7 +65,7 @@ def heatmap(
     title: str
     ) -> go.Figure:
 
-    z_normalized = normalize_data_for_colormap(z_values)
+    z_normalized = normalize_data_for_colormap(data=z_values)
 
     colorscale = get_heatmap_colorscale()
 
@@ -92,7 +90,7 @@ def heatmap(
         yaxis=dict(showgrid=False, autorange="reversed")
     )
 
-    setup_figure_layout(fig, title, hover_display_custom=False)
+    setup_figure_layout(fig=fig, figtitle=title, hover_display_custom=False)
 
     return fig
 
@@ -103,30 +101,36 @@ def violin(
     
     fig = go.Figure()
 
-    color_map = get_color_map(data.columns.tolist())
+    color_map: dict[str, str] = get_color_map(assets=data.columns.tolist())
 
     for column in data.columns:
-        fig.add_trace(go.Violin( # type: ignore
+        fig.add_trace(trace=go.Violin( # type: ignore
             y=data[column],
             name=column,
             box_visible=True,
             points=False,
-            marker=get_marker_config(color_map[column]),
+            marker=get_marker_config(color=color_map[column]),
             box_line_color=COLOR_ADJUSTMENT,
             hoveron="violins",
             hoverinfo="y" 
         ))
 
-    y_min = data.min().min()
-    y_max = data.max().max()
+    min_by_column: ArrayFloat = calculate_overall_min(array=data.nparray)
+    overall_min: ArrayFloat = calculate_overall_min(array=min_by_column)
+    
+    max_by_column: ArrayFloat = calculate_overall_min(array=data.nparray)
+    overall_max: ArrayFloat = calculate_overall_min(array=max_by_column)
+    
+    y_min: float = overall_min.item()
+    y_max: float = overall_max.item()
     fig.update_layout( # type: ignore
-        yaxis=dict(range=[y_min, y_max], showgrid=False), # type: ignore
+        yaxis=dict(range=[y_min, y_max], showgrid=False), 
         xaxis=dict(
             showticklabels=False,
             )
         )
-    
-    setup_figure_layout(fig, title)
+
+    setup_figure_layout(fig, figtitle=title)
 
     return fig
 
@@ -137,19 +141,19 @@ def histogram(
 
     fig = go.Figure()
 
-    color_map = get_color_map(data.columns.tolist())
+    color_map: dict[str, str] = get_color_map(assets=data.columns.tolist())
 
     for column in data.columns:
-        fig.add_trace(go.Histogram( # type: ignore
+        fig.add_trace(trace=go.Histogram( # type: ignore
             x=data[column],
             name=column,
-            marker=get_marker_config(color_map[column]),
+            marker=get_marker_config(color=color_map[column]),
             showlegend=True
         ))
     fig.update_layout( # type: ignore
         barmode="overlay"
     )
-    setup_figure_layout(fig, title, hover_data='x')
+    setup_figure_layout(fig=fig, figtitle=title, hover_data='x')
     return fig
 
 def icicle(
@@ -159,12 +163,12 @@ def icicle(
     ) -> go.Figure:
     
     fig = go.Figure(
-        go.Icicle(
+        data=go.Icicle(
             labels=labels,            
             parents=parents,          
             tiling=dict(orientation="v"),
         )
     )
-    setup_figure_layout(fig, title, hover_display_custom=False)
+    setup_figure_layout(fig=fig, figtitle=title, hover_display_custom=False)
     
     return fig
