@@ -1,5 +1,5 @@
 from typing import Final
-from .custom_types import Float32
+from Utilitary.custom_types import Float32
 
 TRADING_DAYS_PER_WEEK: Final = Float32(5)
 TRADING_DAYS_PER_MONTH: Final = Float32(TRADING_DAYS_PER_WEEK*4 + 1)

@@ -20,10 +20,3 @@ CLUSTERS_PARAMETERS: Final = [
     "Max Sub Clusters", 
     "Max Sub-Sub Clusters"
     ]
-BACKTEST_STATS_RESULTS: Final = [
-    "Total Return %",
-    "Sharpe Ratio",
-    "Maximum Drawdown %",
-    "Volatility %",
-    "Monthly Skewness"
-    ]

@@ -10,12 +10,11 @@ QGridLayout
 )
 from collections.abc import Callable
 from Utilitary import (
-BACKTEST_STATS_RESULTS,
 CLUSTERS_PARAMETERS,
 FRAME_STYLE
 )
 from Database import MEDIA
-from .Common_UI import (
+from UI.Common_UI import (
 generate_backtest_params_sliders, 
 set_background_image, 
 set_frame_design, 
@@ -25,7 +24,7 @@ generate_stats_display,
 generate_home_button,
 generate_plot_widget
 )
-from .Config_UI import (
+from UI.Config_UI import (
 AssetSelectionWidget, 
 IndicatorsConfigWidget, 
 TreeStructureWidget,
@@ -119,7 +118,7 @@ def setup_results_page(
     parent: QMainWindow,
     dashboards: DashboardsCollection,
     back_to_home_callback:Callable[..., None], 
-    metrics: list[float]) -> None:
+    metrics: dict[str, float]) -> None:
 
     results_widget = QWidget()
     results_layout = QVBoxLayout(results_widget)
@@ -131,7 +130,7 @@ def setup_results_page(
 
     overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout = generate_graphs_buttons(dashboards, parent)
 
-    stats_layout = generate_stats_display(BACKTEST_STATS_RESULTS, metrics)
+    stats_layout = generate_stats_display( metrics)
     backtest_parameters_layout, clusters_buttons_layout = generate_backtest_params_sliders(CLUSTERS_PARAMETERS)
     home_layout = generate_home_button(back_to_home_callback)
 

@@ -12,6 +12,7 @@ ProgressFunc: TypeAlias = Callable[[int, str], None]
 IndicatorFunc : TypeAlias = Callable[..., ArrayFloat]
 DictVariableDepth: TypeAlias = dict[str, Any]
 
+
 JsonData: TypeAlias = str
 ParquetData: TypeAlias = str
 WebpMedia: TypeAlias = str
@@ -41,11 +42,8 @@ class SeriesFloat(Series): # type: ignore
         super().__init__(data=data, index=index, dtype=dtype) # type: ignore
 
     @property
-    def names(self) -> Index: # type: ignore
+    def names(self) -> list[str]: # type: ignore
         return super().index # type: ignore
-    @property
-    def data(self) -> ArrayFloat:
-        return super().values # type: ignore
 
     @property
     def nparray(

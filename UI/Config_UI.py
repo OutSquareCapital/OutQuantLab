@@ -1,4 +1,4 @@
-from .Common_UI import (
+from UI.Common_UI import (
 create_checkbox_item, 
 create_expandable_section,
 connect_sliders_to_update, 
@@ -119,7 +119,7 @@ class IndicatorsConfigWidget(QWidget):
         if not values:
             values = [1]
 
-        param_box = QGroupBox(param_name)
+        param_box = QGroupBox(title=param_name)
         param_layout = QVBoxLayout()
         layout.addWidget(param_box)
         
@@ -136,9 +136,13 @@ class IndicatorsConfigWidget(QWidget):
             self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
 
         connect_sliders_to_update(
-        start_slider, end_slider, num_values_slider,
-        range_info_label, num_values_info_label, generated_values_label,
-        update_param_values
+        start_slider=start_slider, 
+        end_slider=end_slider, 
+        num_values_slider=num_values_slider,
+        range_info_label=range_info_label, 
+        num_values_info_label=num_values_info_label, 
+        generated_values_label=generated_values_label,
+        update_callback=update_param_values
         )
 
         self.param_widgets.setdefault(indicator_name, {})[param_name] = {
@@ -163,8 +167,8 @@ class IndicatorsConfigWidget(QWidget):
 class TreeStructureWidget(QWidget):
     def __init__(self, collection: AssetsCollection|IndicatorsCollection, clusters: ClustersTree) -> None:
         super().__init__()
-        self.collection = collection
-        self.clusters_tree = clusters
+        self.collection: AssetsCollection | IndicatorsCollection = collection
+        self.clusters_tree: ClustersTree = clusters
         self.tree_structure = self.clusters_tree.clusters
         self.data = set(self.collection.all_entities_names)
 
@@ -172,21 +176,21 @@ class TreeStructureWidget(QWidget):
         self.tree.setHeaderHidden(True)
         self.tree.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.tree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.tree.itemClicked.connect(self.handle_item_click)
+        self.tree.itemClicked.connect(slot=self.handle_item_click)
 
         self.init_ui()
 
-    def init_ui(self):
+    def init_ui(self) -> None:
         layout = QVBoxLayout()
-        populate_tree_from_dict(self.tree, self.tree_structure, self.data)
-        layout.addWidget(self.tree)
+        populate_tree_from_dict(tree=self.tree, data=self.tree_structure, data_set=self.data)
+        layout.addWidget(arg__1=self.tree)
 
         buttons_layout = QHBoxLayout()
-        add_button = QPushButton("Add Cluster")
-        delete_button = QPushButton("Delete Cluster")
+        add_button = QPushButton(text="Add Cluster")
+        delete_button = QPushButton(text="Delete Cluster")
 
-        add_button.clicked.connect(lambda: add_cluster(self.tree, self.tree_structure))
-        delete_button.clicked.connect(lambda: delete_cluster(self.tree, self.tree_structure))
+        add_button.clicked.connect(slot=lambda: add_cluster(tree=self.tree, tree_structure=self.tree_structure))
+        delete_button.clicked.connect(slot=lambda: delete_cluster(tree=self.tree, tree_structure=self.tree_structure))
 
 
         buttons_layout.addWidget(add_button)
@@ -199,7 +203,7 @@ class TreeStructureWidget(QWidget):
         if Qt.KeyboardModifier.ControlModifier & QApplication.keyboardModifiers():
             item.setSelected(not item.isSelected())
         elif Qt.KeyboardModifier.ShiftModifier & QApplication.keyboardModifiers():
-            current_items = self.tree.selectedItems()
+            current_items: list[QTreeWidgetItem] = self.tree.selectedItems()
             if current_items:
                 start = self.tree.indexOfTopLevelItem(current_items[0])
                 end = self.tree.indexOfTopLevelItem(item)

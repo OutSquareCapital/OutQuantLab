@@ -22,7 +22,7 @@ from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt, QDate
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from PySide6.QtGui import QFont
 from collections.abc import Callable
-from .Results_UI import generate_plot_widget
+from UI.Results_UI import generate_plot_widget
 from Dashboard import DashboardsCollection
 from Utilitary import DictVariableDepth
 
@@ -412,7 +412,7 @@ def display_dashboard_plot(
     dialog.exec()
 
 
-def generate_stats_display(stats_results: list[str], metrics: list[float]) -> QVBoxLayout:
+def generate_stats_display(metrics: dict[str, float]) -> QVBoxLayout:
     stats_button = QPushButton("Portfolio Statistics")
     stats_layout = QVBoxLayout()
     stats_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -420,7 +420,7 @@ def generate_stats_display(stats_results: list[str], metrics: list[float]) -> QV
     stats_inner_layout = QVBoxLayout(stats_widget)
     stats_inner_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-    for label, value in zip(stats_results, metrics):
+    for label, value in metrics.items():
         row_layout = QHBoxLayout()
         
         left_label = QLabel(label)
