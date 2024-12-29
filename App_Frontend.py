@@ -7,7 +7,7 @@ class MainApp(QMainWindow):
     def initialize(self) -> None:
         self.progress_bar:QProgressBar
         self.log_output:QTextEdit
-        self.outquantlab = OutQuantLab(self.update_progress)
+        self.outquantlab = OutQuantLab(progress_callback=self.update_progress)
         self.show_home_page()
         self.showMaximized()
 
@@ -23,16 +23,15 @@ class MainApp(QMainWindow):
         )
 
     def update_progress(self, value: int, message: str) -> None:
-        UI.update_progress_with_events(self.progress_bar, self.log_output, value, message)
+        UI.update_progress_with_events(progress_bar=self.progress_bar, log_output=self.log_output, value=value, message=message)
 
 
     def run_backtest(self) -> None:
-        self.progress_bar, self.log_output = UI.setup_backtest_page(self)
+        self.progress_bar, self.log_output = UI.setup_backtest_page(parent=self)
         self.outquantlab.run_backtest()
         self.show_results_page()
 
     def show_results_page(self) -> None:
-        self.outquantlab.dashboards.metrics = self.outquantlab.dashboards.calculate_metrics()
 
         UI.setup_results_page(
         parent=self,
@@ -44,7 +43,7 @@ class MainApp(QMainWindow):
     def closeEvent(self, event: QCloseEvent) -> None:
         self.outquantlab.close()
         UI.cleanup_temp_files()
-        super().closeEvent(event)
+        super().closeEvent(event=event)
 
 if __name__ == "__main__":
 
@@ -52,8 +51,8 @@ if __name__ == "__main__":
     from PySide6.QtWidgets import QApplication, QProgressBar, QTextEdit
 
     import UI
-    app = QApplication(sys.argv)
-    UI.apply_global_styles(app)
+    app = QApplication(arg__1=sys.argv)
+    UI.apply_global_styles(app=app)
     progress_window, progress_bar = UI.setup_launch_page()
     QApplication.processEvents()
     progress_bar.setValue(30)

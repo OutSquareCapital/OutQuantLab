@@ -1,3 +1,3 @@
-from .Display import DashboardsCollection
+from Dashboard.Display import DashboardsCollection
 
 __all__ = ["DashboardsCollection"]

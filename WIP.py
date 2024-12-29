@@ -1,3 +1,15 @@
+'''
+def rolling_weighted_mean(array: ArrayFloat, length: int) -> ArrayFloat:
+    def convolve_with_weights(x: ArrayFloat, weights: ArrayFloat) -> ArrayFloat:
+        return np.convolve(x, weights[::-1], mode='valid')
+
+    wma_array = np.full(array.shape, np.nan, dtype=Float32)
+    weights = np.arange(1, length + 1, dtype=Float32)
+    weight_sum = weights.sum()
+    weighted_sum = np.apply_along_axis(convolve_with_weights, axis=0, arr=array, weights=weights)
+    wma_array[length - 1:] = weighted_sum / weight_sum
+    return wma_array
+'''
 '''import numpy as np
 from .Aggregation import rolling_mean
 from Utilitary import ArrayFloat, shift_array
@@ -595,7 +607,7 @@ def extract_asset_groups(portfolio_dict):
 
 def compute_group_diversification_multiplier(group_returns, weights, window):
 
-    rolling_corr = group_returns.rolling(window=window).corr(pairwise=True)
+    rolling_corr = calculate_rolling_pairwise_correlation(group_returns, window)
 
     num_assets = len(weights)
     diversification_multipliers = []
