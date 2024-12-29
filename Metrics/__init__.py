@@ -48,7 +48,6 @@ from .Analysis import (
     calculate_overall_returns,
     calculate_rolling_volatility,
     calculate_rolling_sharpe_ratio,
-    calculate_correlation_matrix,
     calculate_rolling_average_correlation,
     calculate_rolling_smoothed_skewness
     
@@ -56,7 +55,6 @@ from .Analysis import (
 __all__ = [
     'calculate_rolling_smoothed_skewness',
     'calculate_rolling_average_correlation',
-    'calculate_correlation_matrix',
     'calculate_rolling_sharpe_ratio',
     "calculate_overall_mean",
     "rolling_mean", 

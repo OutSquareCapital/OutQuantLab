@@ -1,7 +1,6 @@
 import numpy as np
 from Utilitary import ArrayFloat, Float32
-from numba import prange  # type: ignore
-from numba import njit  # type: ignore
+from numba import prange, njit  # type: ignore
 
 @njit
 def calculate_skewness(

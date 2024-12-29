@@ -4,6 +4,7 @@ from Utilitary import ArrayFloat, DataFrameFloat, DictVariableDepth
 from Database import load_config_file, save_config_file
 import pandas as pd
 from .Indicators import Indicator
+import numpy as np
 
 class ClustersTree:
     def __init__(self, clusters_file: str) -> None:
@@ -23,25 +24,6 @@ class ClustersTree:
 
     def save(self) -> None:
         save_config_file(self.clusters_file, self.clusters, indent=3)
-
-
-def calculate_distance_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
-    corr_matrix = returns_df.corr()
-    return DataFrameFloat(1 - corr_matrix)
-
-def perform_clustering(distance_matrix: DataFrameFloat, num_clusters: int, method: str = 'complete') -> ArrayFloat:
-    linkage_matrix = linkage(squareform(distance_matrix), method=method)
-    return fcluster(linkage_matrix, num_clusters, criterion='maxclust')
-
-def create_cluster_dict(assets: list[str], clusters: ArrayFloat) -> dict[str, list[str]]:
-    cluster_dict: dict[str, list[str]] = {}
-    for asset, cluster in zip(assets, clusters):
-        if cluster not in cluster_dict:
-            cluster_dict[cluster] = []
-        cluster_dict[cluster].append(asset)
-    return {k: cluster_dict[k] for k in sorted(cluster_dict)}
-
-
 
 def generate_multi_index_process(
     indicators_params: list[Indicator], 
@@ -72,6 +54,41 @@ def generate_multi_index_process(
         multi_index_tuples,
         names=["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
     )
+
+def calculate_correlation_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
+    return DataFrameFloat(returns_df.corr())
+
+def calculate_distance_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
+    corr_matrix = returns_df.corr()
+    return DataFrameFloat(1 - corr_matrix)
+
+def perform_clustering(distance_matrix: DataFrameFloat, num_clusters: int, method: str = 'complete') -> ArrayFloat:
+    linkage_matrix = linkage(squareform(distance_matrix), method=method)
+    return fcluster(linkage_matrix, num_clusters, criterion='maxclust')
+
+def create_cluster_dict(assets: list[str], clusters: ArrayFloat) -> dict[str, list[str]]:
+    cluster_dict: dict[str, list[str]] = {}
+    for asset, cluster in zip(assets, clusters):
+        if cluster not in cluster_dict:
+            cluster_dict[cluster] = []
+        cluster_dict[cluster].append(asset)
+    return {k: cluster_dict[k] for k in sorted(cluster_dict)}
+
+def compute_linkage_matrix(corr_matrix: DataFrameFloat) -> ArrayFloat:
+
+    pairwise_distances = DataFrameFloat(1 - corr_matrix.abs())
+    condensed_distances = squareform(pairwise_distances.nparray)
+    return linkage(condensed_distances, method='average')
+
+def sort_correlation_matrix(corr_matrix: DataFrameFloat) -> DataFrameFloat:
+
+    linkage_matrix = compute_linkage_matrix(corr_matrix)
+    ordered_indices = leaves_list(linkage_matrix)
+
+    sorted_corr_matrix = corr_matrix.iloc[ordered_indices, ordered_indices]
+    np.fill_diagonal(sorted_corr_matrix.values, np.nan)
+
+    return sorted_corr_matrix
 
 def cluster_subdivision(
     returns_df: DataFrameFloat, 
@@ -137,20 +154,3 @@ def flatten_singleton_clusters(cluster_dict: dict[str, list[str]]) -> DictVariab
         else:
             new_cluster_dict[key] = value
     return new_cluster_dict
-
-
-def compute_linkage_matrix(corr_matrix: DataFrameFloat) -> ArrayFloat:
-
-    pairwise_distances = DataFrameFloat(1 - corr_matrix.abs())
-    condensed_distances = squareform(pairwise_distances.nparray)
-    return linkage(condensed_distances, method='average')
-
-def sort_correlation_matrix(corr_matrix: DataFrameFloat) -> DataFrameFloat:
-
-    linkage_matrix = compute_linkage_matrix(corr_matrix)
-    ordered_indices = leaves_list(linkage_matrix)
-
-    sorted_corr_matrix = corr_matrix.iloc[ordered_indices, ordered_indices]
-    np.fill_diagonal(sorted_corr_matrix.values, np.nan)
-
-    return sorted_corr_matrix

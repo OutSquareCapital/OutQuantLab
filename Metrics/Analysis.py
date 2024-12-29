@@ -93,10 +93,6 @@ def calculate_rolling_average_correlation(returns_df: DataFrameFloat, length: in
 
     return DataFrameFloat(rolling_avg_corr)
 
-def calculate_correlation_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
-
-    return DataFrameFloat(returns_df.corr())
-
 def calculate_rolling_smoothed_skewness(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
 
     smoothed_returns = rolling_mean(returns_df.nparray, length=20, min_length=20) 
