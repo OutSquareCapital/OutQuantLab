@@ -1,33 +1,31 @@
 from Indicators import IndicatorsMethods, IndicatorMetadata
 from itertools import product
-from Utilitary import IndicatorFunc, JsonData
+from Utilitary import IndicatorFunc
 from dataclasses import dataclass, field
-from Database import load_config_file, save_config_file
 
 @dataclass(slots=True)
 class Indicator:
     name: str
     active: bool
     func: IndicatorFunc
+    strategies_nb: int = 0
     param_combos: list[dict[str, int]] = field(default_factory=list)
     params_values: dict[str, list[int]] = field(default_factory=dict)
 
 class IndicatorsCollection:
 
-    def __init__(self, indicators_to_test: JsonData, indicators_params: JsonData) -> None:
-        self.entities_file: JsonData = indicators_to_test
-        self.params_file: JsonData = indicators_params
+    def __init__(self, indicators_to_test: dict[str, bool], params_config: dict[str, dict[str, list[int]]]) -> None:
+        self.indicators_to_test: dict[str, bool] = indicators_to_test
+        self.params_config: dict[str, dict[str, list[int]]] = params_config
         self.entities: dict[str, Indicator] = {}
         self.load_entities()
 
-    def load_entities(self) -> None:
-        entities_to_test: dict[str, bool] = load_config_file(self.entities_file)
+    def load_entities(self) -> None: 
         entities_functions: dict[str, IndicatorMetadata] = IndicatorsMethods.get_all_indicators()
-        params_config: dict[str, dict[str, list[int]]] = load_config_file(self.params_file)
 
         for name, indicator_meta_data in entities_functions.items():
-            active: bool = entities_to_test.get(name, False)
-            params: dict[str, list[int]] = IndicatorsMethods.determine_params(name, params_config)
+            active: bool = self.indicators_to_test.get(name, False)
+            params: dict[str, list[int]] = IndicatorsMethods.determine_params(name=name, params_config=self.params_config)
             func = indicator_meta_data.func
             self.entities[name] = Indicator(
                 name=name,
@@ -61,7 +59,7 @@ class IndicatorsCollection:
 
         for combination in parameter_values_combinations:
             combination_dict = dict(zip(parameter_names, combination))
-            if self.is_valid_combination(combination_dict):
+            if self.is_valid_combination(parameters_dict=combination_dict):
                 valid_pairs.append(combination_dict)
 
         return valid_pairs
@@ -69,7 +67,8 @@ class IndicatorsCollection:
     @property
     def indicators_params(self) -> list[Indicator]:
         for indicator in self.all_active_entities:
-            indicator.param_combos = self.filter_valid_pairs(indicator.params_values)
+            indicator.param_combos = self.filter_valid_pairs(params=indicator.params_values)
+            indicator.strategies_nb = len(indicator.param_combos)
         return self.all_active_entities
 
     @property
@@ -87,6 +86,14 @@ class IndicatorsCollection:
     @property
     def all_active_entities(self) -> list[Indicator]:
         return [entity for entity in self.entities.values() if entity.active]
+    
+    @property
+    def all_active_entities_dict(self) -> dict[str, bool]:
+        return {name: entity.active for name, entity in self.entities.items()}
+
+    @property
+    def all_params_config(self) -> dict[str, dict[str, list[int]]]:
+        return {name: indicator.params_values for name, indicator in self.entities.items()}
 
     def get_entity(self, name: str) -> Indicator:
         return self.entities[name]
@@ -105,9 +112,3 @@ class IndicatorsCollection:
 
     def update_param_values(self, name: str, param_key: str, values: list[int]) -> None:
         self.entities[name].params_values[param_key] = values
-
-    def save(self) -> None:
-        active_entities = {name: entity.active for name, entity in self.entities.items()}
-        save_config_file(self.entities_file, active_entities, indent=3)
-        parameters_to_save = {name: indicator.params_values for name, indicator in self.entities.items()}
-        save_config_file(self.params_file, parameters_to_save, indent=3)

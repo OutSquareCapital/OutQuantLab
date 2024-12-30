@@ -45,7 +45,7 @@ from Metrics.Correlation import (
     calculate_pairwise_distances,
     calculate_rolling_paired_correlation_matrix,
     calculate_rolling_average_correlation,
-    calculate_overall_average_correlation
+    calculate_overall_average_correlation,
 )
 __all__: list[str] = [
     'calculate_overall_monthly_skewness',
@@ -83,5 +83,5 @@ __all__: list[str] = [
     'calculate_distance_matrix',
     'calculate_pairwise_distances',
     'calculate_rolling_paired_correlation_matrix',
-    'calculate_total_returns'
+    'calculate_total_returns',
 ]

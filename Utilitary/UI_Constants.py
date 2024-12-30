@@ -7,7 +7,7 @@ BACKGROUND_APP_DARK: Final = '#2A2A2A'
 FONT_FAMILY: Final = 'Arial'
 FONT_SIZE: Final = 12
 FONT_TYPE: Final = 'bold'
-BASE_COLORS: Final = ["black", "brown", "red","orange", "yellow", "green", "lime", "blue", "cyan", "white"]
+BASE_COLORS: Final = ["brown", "red","orange", "yellow", "green", "lime", "blue", "cyan"]
 
 FRAME_STYLE: Final = f"""
         QFrame {{

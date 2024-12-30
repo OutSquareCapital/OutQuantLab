@@ -17,18 +17,18 @@ def calculate_strategy_returns(
     ) -> DataFrameFloat:
     signal_col_index = 0
     global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
-    indics_methods.process_data(pct_returns_array)
-    total_returns_streams = int(multi_index.shape[0])
-    signals_array: ArrayFloat = np.empty((pct_returns_array.shape[0], total_returns_streams), dtype=Float32)
-    total_assets_count = pct_returns_array.shape[1]
+    indics_methods.process_data(pct_returns_array=pct_returns_array)
+    total_assets_count: int = pct_returns_array.shape[1]
+    total_returns_streams: int = total_assets_count * sum([indic.strategies_nb for indic in indicators_params])
+    signals_array: ArrayFloat = np.empty(shape=(pct_returns_array.shape[0], total_returns_streams), dtype=Float32)
 
     import time
-    start = time.perf_counter()
+    start: float = time.perf_counter()
     for indic in indicators_params:
-        results = indics_methods.process_indicator_parallel(
-            indic.func, 
-            indic.param_combos, 
-            global_executor
+        results: list[ArrayFloat] = indics_methods.process_indicator_parallel(
+            func=indic.func, 
+            params=indic.param_combos, 
+            global_executor=global_executor
         )
 
         for result in results:
@@ -39,14 +39,13 @@ def calculate_strategy_returns(
             int(100 * signal_col_index / total_returns_streams),
             f"Backtesting Strategies: {signal_col_index}/{total_returns_streams}..."
         )
-    end = time.perf_counter() - start
+    end: float = time.perf_counter() - start
     print(f"Time taken: {end:.2f} seconds")
     return DataFrameFloat(
         data=signals_array,
         index=dates_index,
         columns=multi_index
         )
-
 
 def calculate_portfolio_returns(
     returns_df: DataFrameFloat,
@@ -76,11 +75,11 @@ def calculate_portfolio_returns(
         grouping_levels.append("Param")
 
     if grouping_levels:
-        grouped = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T
+        grouped: pd.DataFrame = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T
 
-        return DataFrameFloat(grouped)
+        return DataFrameFloat(data=grouped)
 
-    global_portfolio = calculate_overall_mean(returns_df.nparray, axis=1)
+    global_portfolio: ArrayFloat = calculate_overall_mean(returns_df.nparray, axis=1)
     return DataFrameFloat(
         data=global_portfolio,
         index=returns_df.dates,
@@ -92,8 +91,8 @@ def aggregate_raw_returns(raw_adjusted_returns_df: DataFrameFloat, all_history: 
     if not all_history:
         raw_adjusted_returns_df= raw_adjusted_returns_df.dropna(axis=0) # type: ignore
     
-    df_indic = calculate_portfolio_returns(
-        raw_adjusted_returns_df,
+    df_indic: DataFrameFloat = calculate_portfolio_returns(
+        returns_df=raw_adjusted_returns_df,
         by_asset_cluster=True,
         by_asset_cluster_sub=True,
         by_asset=True,
@@ -102,8 +101,8 @@ def aggregate_raw_returns(raw_adjusted_returns_df: DataFrameFloat, all_history: 
         by_indic=True
     )
 
-    df_indic_subcluster = calculate_portfolio_returns(
-        df_indic,
+    df_indic_subcluster: DataFrameFloat = calculate_portfolio_returns(
+        returns_df=df_indic,
         by_asset_cluster=True,
         by_asset_cluster_sub=True,
         by_asset=True,
@@ -111,34 +110,34 @@ def aggregate_raw_returns(raw_adjusted_returns_df: DataFrameFloat, all_history: 
         by_indic_cluster_sub=True
     )
 
-    df_indic_cluster = calculate_portfolio_returns(
-        df_indic_subcluster,
+    df_indic_cluster: DataFrameFloat = calculate_portfolio_returns(
+        returns_df=df_indic_subcluster,
         by_asset_cluster=True,
         by_asset_cluster_sub=True,
         by_asset=True,
         by_indic_cluster=True
     )
 
-    df_asset = calculate_portfolio_returns(
-        df_indic_cluster,
+    df_asset: DataFrameFloat = calculate_portfolio_returns(
+        returns_df=df_indic_cluster,
         by_asset_cluster=True,
         by_asset_cluster_sub=True,
         by_asset=True
     )
 
-    df_asset_subcluster = calculate_portfolio_returns(
-        df_asset,
+    df_asset_subcluster: DataFrameFloat = calculate_portfolio_returns(
+        returns_df=df_asset,
         by_asset_cluster=True,
         by_asset_cluster_sub=True
     )
 
-    df_asset_cluster = calculate_portfolio_returns(
-        df_asset_subcluster,
+    df_asset_cluster: DataFrameFloat = calculate_portfolio_returns(
+        returns_df=df_asset_subcluster,
         by_asset_cluster=True
     )
 
-    df_global = calculate_portfolio_returns(
-        df_asset_cluster
+    df_global: DataFrameFloat = calculate_portfolio_returns(
+        returns_df=df_asset_cluster
     )
 
     return df_global, df_asset

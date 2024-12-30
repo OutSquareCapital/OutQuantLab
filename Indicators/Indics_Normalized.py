@@ -43,7 +43,7 @@ class IndicatorsMethods:
         global_executor: ThreadPoolExecutor
         ) -> list[ArrayFloat]:
         def process_single_param(param: dict[str, int]) -> ArrayFloat:
-            return self.process_param(func, param)
+            return self.process_param(func=func, param=param)
 
         results = list(global_executor.map(process_single_param, params))
         return results
@@ -53,8 +53,8 @@ class IndicatorsMethods:
         self.log_returns_array = shift_array(returns_array=log_returns_np(prices_array=self.prices_array))
         hv_array: ArrayFloat = hv_composite(returns_array=pct_returns_array)
         self.adjusted_returns_array = calculate_volatility_adjusted_returns(
-            pct_returns_array, 
-            hv_array
+            pct_returns_array=pct_returns_array, 
+            hv_array=hv_array
         )
 
     @classmethod
@@ -63,11 +63,15 @@ class IndicatorsMethods:
 
     @classmethod
     def determine_params(cls, name: str, params_config: dict[str, dict[str, list[int]]]) -> dict[str, list[int]]:
-        metadata = cls._indicators_registry[name]
+        metadata: IndicatorMetadata = cls._indicators_registry[name]
         params: dict[str, list[int]] = {}
         for param in metadata.params:
             params[param] = params_config.get(name, {}).get(param, [])
         return params
+
+    @property
+    def indicators_nb(self) -> int:
+        return len(self._indicators_registry)
 
     @indic(_indicators_registry)
     def mean_price_ratio(self, LenST: int, LenLT: int) -> ArrayFloat:

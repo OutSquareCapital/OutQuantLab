@@ -3,34 +3,26 @@ import pandas as pd
 from Metrics import calculate_overall_mean
 from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, DictVariableDepth, PERCENTAGE_FACTOR, Float32, ArrayInt
 
-def format_returns(returns_df: DataFrameFloat, limit: float) -> DataFrameFloat:
-    lower_threshold = SeriesFloat(data=returns_df.quantile(q=limit, axis=0) ) 
-    upper_threshold = SeriesFloat(data=returns_df.quantile(q=1-limit, axis=0) )
-    
+def fill_correlation_matrix(corr_matrix: ArrayFloat) -> ArrayFloat:
+    np.fill_diagonal(a=corr_matrix, val=np.nan)
+    return corr_matrix
+
+def format_returns(returns_array: ArrayFloat, limit: float) -> ArrayFloat:
+    lower_threshold: ArrayFloat = np.quantile(a=returns_array, q=limit, axis=0)
+    upper_threshold: ArrayFloat = np.quantile(a=returns_array, q=1-limit, axis=0)
+
     limited_returns_array: ArrayFloat = np.where(
-        (returns_df >= lower_threshold) & (returns_df <= upper_threshold), 
-        returns_df, 
+        (returns_array >= lower_threshold) & (returns_array <= upper_threshold), 
+        returns_array, 
         np.nan)
 
-    formatted_returns_df = DataFrameFloat(
-        data=limited_returns_array, 
-        columns=returns_df.columns, 
-        index=returns_df.dates
-        )
+    return limited_returns_array * PERCENTAGE_FACTOR
 
-    return formatted_returns_df * PERCENTAGE_FACTOR
-
-def convert_series_multiindex_labels(series: SeriesFloat) -> SeriesFloat:
-    if isinstance(series.index, pd.MultiIndex):
-        series.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(object=idx) for idx in series.index]
-    return series
-
-def convert_dataframe_multiindex_labels(df: DataFrameFloat) -> DataFrameFloat:
-    if isinstance(df.columns, pd.MultiIndex):
-        df.columns = ["_".join(map(str, col)) if isinstance(col, tuple) else str(object=col) for col in df.columns]
-    if isinstance(df.index, pd.MultiIndex):
-        df.index = ["_".join(map(str, idx)) if isinstance(idx, tuple) else str(object=idx) for idx in df.index]
-    return df
+def convert_multiindex_to_labels(df: DataFrameFloat) -> list[str]:
+    multi_index: pd.MultiIndex = df.columns # type: ignore
+    flattened_index: pd.Index = multi_index.map(mapper="_".join) # type: ignore
+    labels: list[str] = flattened_index.to_list()
+    return labels
 
 def prepare_sunburst_data(
     cluster_dict:DictVariableDepth, 
@@ -43,9 +35,9 @@ def prepare_sunburst_data(
         labels = []
     if parents is None:
         parents = []
-        
+
     for key, value in cluster_dict.items():
-        current_label = parent_label + str(key) if parent_label else str(key)
+        current_label: str = parent_label + str(key) if parent_label else str(key)
         if isinstance(value, dict):
             prepare_sunburst_data(value, current_label, labels, parents) # type: ignore
         else:
@@ -58,7 +50,7 @@ def prepare_sunburst_data(
         else:
             labels.append(current_label)
             parents.append("")
-            
+
     return labels, parents
 
 def sort_series(
@@ -69,7 +61,6 @@ def sort_series(
         sorted_array: ArrayFloat = np.sort(a=series.nparray)
     else:
         sorted_array: ArrayFloat = np.sort(a=series.nparray)[::-1]
-
     return SeriesFloat(data=sorted_array, index=series.names)
 
 def sort_dataframe(
@@ -78,11 +69,10 @@ def sort_dataframe(
     ascending: bool = True
     ) -> DataFrameFloat:
     if use_final:
-        sorted_indices: ArrayInt = np.argsort(a=df.nparray[:, -1])
+        sorted_indices: ArrayInt = np.argsort(a=df.nparray[-1, :])
     else:
         mean_values: ArrayFloat = calculate_overall_mean(array=df.nparray, axis=0)
         sorted_indices: ArrayInt = np.argsort(a=mean_values)
-    
     if not ascending:
         sorted_indices = sorted_indices[::-1]
 
@@ -92,7 +82,6 @@ def sort_dataframe(
     return DataFrameFloat(data=sorted_data, columns=sorted_columns, index=df.dates)
 
 def normalize_data_for_colormap(data: ArrayFloat):
-
     z_min: Float32 = np.nanmin(data)
     z_max: Float32 = np.nanmax(data)
     normalized_data = (data - z_min) / (z_max - z_min) if z_max > z_min else np.zeros_like(a=data)

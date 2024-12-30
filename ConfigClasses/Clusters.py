@@ -1,19 +1,16 @@
-from scipy.cluster.hierarchy import linkage, fcluster, leaves_list # type: ignore
+from scipy.cluster.hierarchy import linkage, fcluster # type: ignore
 from scipy.spatial.distance import squareform
 from Utilitary import ArrayFloat, DataFrameFloat, DictVariableDepth
-from Database import load_config_file, save_config_file
 import pandas as pd
 from ConfigClasses.Indicators import Indicator
-import numpy as np
 from typing import TypeAlias
 from Metrics import calculate_distance_matrix, calculate_pairwise_distances
 
 ClustersDict: TypeAlias = dict[str, dict[str, list[str]]]
 
 class ClustersTree:
-    def __init__(self, clusters_file: str) -> None:
-        self.clusters_file: str = clusters_file
-        self.clusters: ClustersDict = load_config_file(self.clusters_file)
+    def __init__(self, clusters: ClustersDict) -> None:
+        self.clusters: ClustersDict = clusters
 
     def update_clusters_structure(self, new_structure: ClustersDict) -> None:
         self.clusters = new_structure
@@ -25,9 +22,6 @@ class ClustersTree:
             for level2, assets in subclusters.items()
             for asset in assets
         }
-
-    def save(self) -> None:
-        save_config_file(self.clusters_file, self.clusters, indent=3)
 
 def generate_multi_index_process(
     indicators_params: list[Indicator], 
@@ -77,15 +71,6 @@ def compute_linkage_matrix(
     condensed_distances = squareform(pairwise_distances.nparray)
     return linkage(condensed_distances, method=method)
 
-def sort_correlation_matrix(corr_matrix: DataFrameFloat) -> DataFrameFloat:
-    linkage_matrix = compute_linkage_matrix(corr_matrix)
-    ordered_indices = leaves_list(linkage_matrix)
-
-    sorted_corr_matrix = corr_matrix.iloc[ordered_indices, ordered_indices]
-    np.fill_diagonal(sorted_corr_matrix.values, np.nan)
-
-    return sorted_corr_matrix
-
 def create_cluster_dict(assets: list[str], clusters: ArrayFloat) -> dict[str, list[str]]:
     cluster_dict: dict[str, list[str]] = {}
     for asset, cluster in zip(assets, clusters):
@@ -110,36 +95,30 @@ def cluster_subdivision(
 
 def recursive_subdivision(
     returns_df: DataFrameFloat, 
-    cluster_dict: ClustersDict, 
-    max_subclusters: int, 
-    max_subsubclusters: int
-) -> ClustersDict:
+    cluster_dict: dict[str, list[str]], 
+    max_subclusters: int
+) -> dict[str, dict[str, list[str]]]:
     for main_cluster, assets in cluster_dict.items():
         if len(assets) > 1:
-            subcluster_dict = cluster_subdivision(returns_df, assets, max_subclusters)
-            if max_subsubclusters:
-                for sub_cluster, sub_assets in subcluster_dict.items():
-                    if len(sub_assets) > 1:
-                        sub_subcluster_dict = cluster_subdivision(returns_df, sub_assets, max_subsubclusters, method='average')
-                        subcluster_dict[sub_cluster] = sub_subcluster_dict
+            subcluster_dict = cluster_subdivision(
+                returns_df=returns_df, 
+                assets=assets, 
+                max_subclusters=max_subclusters)
             cluster_dict[main_cluster] = subcluster_dict
     return cluster_dict
 
 def generate_static_clusters(
     returns_df: DataFrameFloat, 
     max_clusters: int = 3, 
-    max_subclusters: int = 1, 
-    max_subsubclusters: int = 1
-) -> DictVariableDepth:
+    max_subclusters: int = 1
+) -> dict[str, dict[str, list[str]]]:
 
-    distance_matrix = calculate_distance_matrix(returns_df)
-    main_clusters = perform_clustering(distance_matrix, max_clusters)
-    cluster_dict = create_cluster_dict(list(returns_df.columns), main_clusters)
+    distance_matrix: DataFrameFloat = calculate_distance_matrix(returns_df=returns_df)
+    main_clusters: ArrayFloat = perform_clustering(distance_matrix=distance_matrix, num_clusters=max_clusters)
+    main_cluster_dict: dict[str, list[str]] = create_cluster_dict(assets=list(returns_df.columns), clusters=main_clusters)
+    cluster_dict: dict[str, dict[str, list[str]]] = recursive_subdivision(returns_df=returns_df, cluster_dict=main_cluster_dict, max_subclusters=max_subclusters)
 
-    if max_subclusters:
-        cluster_dict = recursive_subdivision(returns_df, cluster_dict, max_subclusters, max_subsubclusters)
-
-    return flatten_singleton_clusters(cluster_dict)
+    return flatten_singleton_clusters(cluster_dict=cluster_dict)
 
 
 def flatten_singleton_clusters(cluster_dict: dict[str, list[str]]) -> DictVariableDepth:

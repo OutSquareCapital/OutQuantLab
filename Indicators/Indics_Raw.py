@@ -111,9 +111,8 @@ def calculate_central_rate_of_change_macd_raw(returns_array: ArrayFloat, LenST: 
 
 
 def smoothed_skewness(returns_array: ArrayFloat, LenSmooth: int, LenSkew: int) -> ArrayFloat:
-    smoothed_array = rolling_mean(returns_array, length=LenSmooth, min_length=LenSmooth)
-
-    return rolling_skewness(smoothed_array, length=LenSkew, min_length=LenSkew)
+    smoothed_array = rolling_mean(array=returns_array, length=LenSmooth, min_length=LenSmooth)
+    return rolling_skewness(array=smoothed_array, length=LenSkew, min_length=LenSkew)
 
 
 def smoothed_kurtosis(returns_array: ArrayFloat, LenSmooth: int, LenSkew: int) -> ArrayFloat:

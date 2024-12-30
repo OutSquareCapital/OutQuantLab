@@ -4,7 +4,8 @@ import pandas as pd
 from Dashboard.Common import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
 from Dashboard.Transformations import normalize_data_for_colormap
 from Utilitary import COLOR_ADJUSTMENT
-from Metrics import calculate_overall_min
+from Metrics import calculate_overall_max, calculate_overall_min
+
 def curves( x_values: pd.DatetimeIndex,
             y_values: DataFrameFloat,  
             title: str,
@@ -116,13 +117,11 @@ def violin(
         ))
 
     min_by_column: ArrayFloat = calculate_overall_min(array=data.nparray)
-    overall_min: ArrayFloat = calculate_overall_min(array=min_by_column)
+    y_min: ArrayFloat = calculate_overall_min(array=min_by_column)
     
-    max_by_column: ArrayFloat = calculate_overall_min(array=data.nparray)
-    overall_max: ArrayFloat = calculate_overall_min(array=max_by_column)
-    
-    y_min: float = overall_min.item()
-    y_max: float = overall_max.item()
+    max_by_column: ArrayFloat = calculate_overall_max(array=data.nparray)
+    y_max: ArrayFloat = calculate_overall_max(array=max_by_column)
+
     fig.update_layout( # type: ignore
         yaxis=dict(range=[y_min, y_max], showgrid=False), 
         xaxis=dict(
