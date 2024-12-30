@@ -1,7 +1,7 @@
 from numpy.typing import DTypeLike, NDArray
 import numpy as np
 from collections.abc import Callable
-from typing import Any, TypeAlias, Final
+from typing import Any, TypeAlias
 from pandas import DataFrame, DatetimeIndex, MultiIndex, Index, Series
 
 Float32: TypeAlias = np.float32
@@ -11,11 +11,6 @@ ArrayInt: TypeAlias = NDArray[Int32]
 ProgressFunc: TypeAlias = Callable[[int, str], None]
 IndicatorFunc : TypeAlias = Callable[..., ArrayFloat]
 DictVariableDepth: TypeAlias = dict[str, Any]
-
-JSON_EXT: Final = ".json"
-PARQUET_EXT: Final = ".parquet"
-WEBP_EXT: Final = ".webp"
-PNG_EXT: Final = ".png"
 
 class SeriesFloat(Series): # type: ignore
     '''
@@ -67,13 +62,11 @@ class DataFrameFloat(DataFrame):
         dtype: type=Float32,
         ) -> None:
         if isinstance(data, DataFrame):
-            data = data.astype(Float32) # type: ignore
+            data = data.astype(dtype=Float32) # type: ignore
         else:
             if not isinstance(index, (DatetimeIndex)):
                 raise TypeError("index must be a pandas {DatetimeIndex}")
-            if not isinstance(columns, (list, MultiIndex, Index)):
-                raise TypeError("columns must be a {list} of strings or a pandas {MultiIndex} or {Index}")
-        
+
         super().__init__(data=data, index=index, columns=columns, dtype=dtype) # type: ignore
 
     @property

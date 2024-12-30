@@ -7,6 +7,7 @@ from collections.abc import Callable
 import plotly.graph_objects as go # type: ignore
 from dataclasses import dataclass
 from Indicators.Indics_Raw import smoothed_skewness
+from Database import process_html_temp_file
 
 @dataclass
 class DashboardPlot:
@@ -67,7 +68,7 @@ class DashboardsCollection:
             for name, result in zip(metric_names, results)
         }
 
-    def plot(self, dashboard_name: str, global_plot:bool = False) -> go.Figure:
+    def get_fig(self, dashboard_name: str, global_plot:bool = False) -> go.Figure:
         
         dashboard: DashboardPlot = self.all_dashboards[dashboard_name]
         portfolio: DataFrameFloat = self.global_portfolio if global_plot else self.sub_portfolios
@@ -75,6 +76,19 @@ class DashboardsCollection:
         if dashboard.length_required:
             return dashboard.func(portfolio, length=self.length)
         return dashboard.func(portfolio)
+
+    def plot(self, dashboard_name: str, global_plot:bool = False, show_legend:bool=True, to_html: bool = False) -> str:
+        graph_fig:go.Figure = self.get_fig(dashboard_name=dashboard_name, global_plot=global_plot) # type: ignore
+
+        if not show_legend:
+            graph_fig.update_layout(showlegend=False) # type: ignore
+            
+        if to_html:
+            html_fig: Unknown = graph_fig.to_html(full_html=True, include_plotlyjs='True', config={"responsive": True}) # type: ignore
+            return process_html_temp_file(html_content=html_fig) # type: ignore
+
+        return graph_fig.show() # type: ignore
+
 
     @staticmethod
     def plot_equity(returns_df: DataFrameFloat) -> go.Figure:

@@ -31,10 +31,6 @@ from Utilitary.custom_types import (
     ProgressFunc,
     IndicatorFunc,
     DictVariableDepth,
-    JSON_EXT,
-    PARQUET_EXT,
-    WEBP_EXT,
-    PNG_EXT,
     SeriesFloat,
     DataFrameFloat
 )
@@ -67,10 +63,6 @@ __all__ = [
     'ProgressFunc',
     'IndicatorFunc',
     'DictVariableDepth',
-    'JSON_EXT',
-    'PARQUET_EXT',
-    'WEBP_EXT',
-    'PNG_EXT',
     'SeriesFloat',
     'DataFrameFloat'
 ]

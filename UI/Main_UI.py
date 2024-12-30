@@ -5,15 +5,13 @@ QVBoxLayout,
 QProgressBar, 
 QTextEdit,
 QMainWindow,
-QApplication,
-QGridLayout
+QApplication
 )
 from collections.abc import Callable
 from Utilitary import (
 CLUSTERS_PARAMETERS,
 FRAME_STYLE
 )
-from Database import MEDIA
 from UI.Common_UI import (
 generate_backtest_params_sliders, 
 set_background_image, 
@@ -22,7 +20,7 @@ generate_graphs_buttons,
 create_button,
 generate_stats_display,
 generate_home_button,
-generate_plot_widget
+setup_results_graphs
 )
 from UI.Config_UI import (
 AssetSelectionWidget, 
@@ -37,11 +35,11 @@ from Dashboard import DashboardsCollection
 def setup_home_page(
     parent: QMainWindow, 
     run_backtest_callback: Callable[..., None],
-    refresh_data_callback: Callable[..., None],
     assets_clusters: ClustersTree,
     indicators_clusters: ClustersTree,
     assets_collection: AssetsCollection,
-    indicators_collection: IndicatorsCollection
+    indicators_collection: IndicatorsCollection,
+    background:str
     ) -> None:
 
     parent.setWindowTitle("OutQuantLab")
@@ -54,7 +52,7 @@ def setup_home_page(
     bottom_frame = set_frame_design(FRAME_STYLE)
     right_upper_layout = QHBoxLayout(top_frame)
     right_lower_layout = QHBoxLayout(bottom_frame)
-    set_background_image(main_widget, MEDIA.home_page)
+    set_background_image(widget=main_widget, image_path=background)
     
     asset_widget = AssetSelectionWidget(assets_collection)
     indicator_widget = IndicatorsConfigWidget(indicators_collection)
@@ -62,7 +60,6 @@ def setup_home_page(
     method_tree_widget = TreeStructureWidget(indicators_collection, indicators_clusters)
     
     create_button("Run Backtest", run_backtest_callback, buttons_layout)
-    create_button("Refresh Data", refresh_data_callback, buttons_layout)
     
     left_layout.addLayout(buttons_layout)
     right_upper_layout.addWidget(asset_widget, stretch=1)
@@ -76,10 +73,10 @@ def setup_home_page(
 
     parent.setCentralWidget(main_widget)
 
-def setup_backtest_page(parent: QMainWindow) -> tuple[QProgressBar, QTextEdit]:
+def setup_backtest_page(parent: QMainWindow, background: str) -> tuple[QProgressBar, QTextEdit]:
     loading_widget = QWidget()
     main_layout = QVBoxLayout(loading_widget)
-    set_background_image(loading_widget, MEDIA.loading_page)
+    set_background_image(loading_widget, background)
     top_layout = QHBoxLayout()
     main_layout.addLayout(top_layout, stretch=9)
 
@@ -118,15 +115,16 @@ def setup_results_page(
     parent: QMainWindow,
     dashboards: DashboardsCollection,
     back_to_home_callback:Callable[..., None], 
-    metrics: dict[str, float]) -> None:
+    metrics: dict[str, float],
+    background: str) -> None:
 
     results_widget = QWidget()
     results_layout = QVBoxLayout(results_widget)
-    set_background_image(results_widget, MEDIA.dashboard_page)
+    set_background_image(results_widget, background)
     top_frame = set_frame_design(FRAME_STYLE)
     bottom_frame = set_frame_design(FRAME_STYLE)
     top_layout = QHBoxLayout(top_frame)
-    bottom_layout = QGridLayout(bottom_frame)
+    setup_results_graphs(parent=bottom_frame, dashboards=dashboards)
 
     overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout = generate_graphs_buttons(dashboards, parent)
 
@@ -134,20 +132,6 @@ def setup_results_page(
     backtest_parameters_layout, clusters_buttons_layout = generate_backtest_params_sliders(CLUSTERS_PARAMETERS)
     home_layout = generate_home_button(back_to_home_callback)
 
-    equity_plot = generate_plot_widget((dashboards.plot("Equity", global_plot=True)), show_legend=False)
-    sharpe_plot = generate_plot_widget(dashboards.plot("Rolling Sharpe Ratio", global_plot=True), show_legend=False)
-    drawdown_plot = generate_plot_widget(dashboards.plot("Rolling Drawdown", global_plot=True), show_legend=False)
-    vol_plot = generate_plot_widget(dashboards.plot("Rolling Volatility", global_plot=True), show_legend=False)
-    distribution_plot = generate_plot_widget(dashboards.plot("Returns Distribution Histogram", global_plot=True), show_legend=False)
-    violin_plot = generate_plot_widget(dashboards.plot("Returns Distribution Violin", global_plot=True), show_legend=False)
-    
-    bottom_layout.addWidget(equity_plot, 0, 0)
-    bottom_layout.addWidget(drawdown_plot, 1, 0)
-    bottom_layout.addWidget(sharpe_plot, 0, 1)
-    bottom_layout.addWidget(vol_plot, 1, 1)
-    bottom_layout.addWidget(distribution_plot, 0, 2)
-    bottom_layout.addWidget(violin_plot, 1, 2)
-    
     top_layout.addLayout(stats_layout, stretch=2)
     top_layout.addLayout(overall_metrics_layout, stretch=2)
     top_layout.addLayout(rolling_metrics_layout, stretch=2)

@@ -14,10 +14,9 @@ from Utilitary import (
     FONT_FAMILY, 
     FONT_SIZE, 
     FONT_TYPE)
-from Database import MEDIA
 
-def apply_global_styles(app:QApplication) -> None:
-    app.setWindowIcon(QIcon(MEDIA.app_logo)) 
+def apply_global_styles(app:QApplication, background: str) -> None:
+    app.setWindowIcon(QIcon(background)) 
     app.setStyleSheet(f"""
         * {{
             font-family: '{FONT_FAMILY}';
@@ -26,7 +25,7 @@ def apply_global_styles(app:QApplication) -> None:
         }}
     """)
 
-def setup_launch_page() -> tuple[QMainWindow, QProgressBar]:
+def setup_launch_page(background:str) -> tuple[QMainWindow, QProgressBar]:
     progress_window = QMainWindow()
     progress_window.setWindowTitle('OutQuantLab')
 
@@ -44,7 +43,7 @@ def setup_launch_page() -> tuple[QMainWindow, QProgressBar]:
             grid_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding), row, col)
 
     logo_label = QLabel()
-    pixmap = QPixmap(MEDIA.app_logo)
+    pixmap = QPixmap(background)
     logo_label.setPixmap(pixmap)
     logo_label.setScaledContents(True) 
     grid_layout.addWidget(logo_label, 1, 1)

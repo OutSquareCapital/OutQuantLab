@@ -7,9 +7,9 @@ class Asset:
     category: str
 
 class AssetsCollection:
-    def __init__(self, assets_to_test: dict[str, bool], assets_data: list[str]) -> None:
+    def __init__(self, assets_to_test: dict[str, bool], asset_names: list[str]) -> None:
         self.assets_to_test: dict[str, bool] = assets_to_test
-        self.asset_names: list[str] = assets_data
+        self.asset_names: list[str] = asset_names
         self.assets_objects: dict[str, Asset] = {}
         self.load_entities()
 

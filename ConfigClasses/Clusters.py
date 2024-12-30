@@ -4,7 +4,7 @@ from Utilitary import ArrayFloat, DataFrameFloat, DictVariableDepth
 import pandas as pd
 from ConfigClasses.Indicators import Indicator
 from typing import TypeAlias
-from Metrics import calculate_distance_matrix, calculate_pairwise_distances
+from Metrics import calculate_correlation_matrix
 
 ClustersDict: TypeAlias = dict[str, dict[str, list[str]]]
 
@@ -49,12 +49,12 @@ def generate_multi_index_process(
                 ))
 
     return pd.MultiIndex.from_tuples( # type: ignore
-        multi_index_tuples,
+        tuples=multi_index_tuples,
         names=["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
     )
 
 def perform_clustering(
-    distance_matrix: DataFrameFloat, 
+    distance_matrix: ArrayFloat, 
     num_clusters: int, 
     method: str = 'complete', 
     criterion: str='maxclust'
@@ -62,14 +62,6 @@ def perform_clustering(
     
     linkage_matrix = linkage(squareform(distance_matrix), method=method)
     return fcluster(linkage_matrix, num_clusters, criterion=criterion)
-
-def compute_linkage_matrix(
-    corr_matrix: DataFrameFloat, 
-    method:str = 'average'
-    ) -> ArrayFloat:
-    pairwise_distances = calculate_pairwise_distances(corr_matrix)
-    condensed_distances = squareform(pairwise_distances.nparray)
-    return linkage(condensed_distances, method=method)
 
 def create_cluster_dict(assets: list[str], clusters: ArrayFloat) -> dict[str, list[str]]:
     cluster_dict: dict[str, list[str]] = {}
@@ -89,8 +81,8 @@ def cluster_subdivision(
     if len(assets) <= 1:
         return assets
     sub_assets_group = DataFrameFloat(data=returns_df[assets])
-    sub_distance_matrix: DataFrameFloat = calculate_distance_matrix(returns_df=sub_assets_group)
-    sub_clusters: ArrayFloat = perform_clustering(distance_matrix=sub_distance_matrix, num_clusters=max_subclusters, method=method)
+    sub_distance_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=sub_assets_group.nparray)
+    sub_clusters: ArrayFloat = perform_clustering(distance_matrix=-sub_distance_matrix, num_clusters=max_subclusters, method=method)
     return create_cluster_dict(assets=assets, clusters=sub_clusters)
 
 def recursive_subdivision(
@@ -113,8 +105,8 @@ def generate_static_clusters(
     max_subclusters: int = 1
 ) -> dict[str, dict[str, list[str]]]:
 
-    distance_matrix: DataFrameFloat = calculate_distance_matrix(returns_df=returns_df)
-    main_clusters: ArrayFloat = perform_clustering(distance_matrix=distance_matrix, num_clusters=max_clusters)
+    distance_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_df.nparray)
+    main_clusters: ArrayFloat = perform_clustering(distance_matrix=-distance_matrix, num_clusters=max_clusters)
     main_cluster_dict: dict[str, list[str]] = create_cluster_dict(assets=list(returns_df.columns), clusters=main_clusters)
     cluster_dict: dict[str, dict[str, list[str]]] = recursive_subdivision(returns_df=returns_df, cluster_dict=main_cluster_dict, max_subclusters=max_subclusters)
 

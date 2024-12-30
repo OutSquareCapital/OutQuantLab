@@ -15,16 +15,19 @@ QMessageBox,
 QInputDialog,
 QLayout,
 QDialog,
-QMainWindow
+QMainWindow,
+QGridLayout
 )
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWebEngineCore import QWebEnginePage, QWebEngineSettings
+from PySide6.QtCore import QUrl
 from functools import partial
 from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt, QDate
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from PySide6.QtGui import QFont
 from collections.abc import Callable
-from UI.Results_UI import generate_plot_widget
 from Dashboard import DashboardsCollection
-from Utilitary import DictVariableDepth
+from Utilitary import DictVariableDepth, BACKGROUND_APP_DARK
 
 def create_param_widget(
     param_box: QGroupBox, 
@@ -390,6 +393,16 @@ def generate_graphs_buttons(
 
     return overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout
 
+def plot_graph_in_webview(temp_file_path:str) -> QWebEngineView:
+    plot_widget = QWebEngineView()
+    page: QWebEnginePage = plot_widget.page()
+    page.settings().setAttribute(QWebEngineSettings.WebAttribute.ShowScrollBars, False)
+    page.setBackgroundColor(color=BACKGROUND_APP_DARK)
+    plot_widget.load(url=QUrl.fromLocalFile(localfile=temp_file_path))
+
+    return plot_widget
+
+
 def display_dashboard_plot(
     parent: QMainWindow, 
     dashboards:DashboardsCollection, 
@@ -397,13 +410,12 @@ def display_dashboard_plot(
     global_plot: bool = False
     ) -> None:
 
-    fig = dashboards.plot(dashboard_name, global_plot=global_plot)
-    
     dialog = QDialog(parent)
     dialog.setWindowTitle(f"{dashboard_name} Plot")
     dialog.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint)
     
-    plot_widget = generate_plot_widget(fig)
+    graph_path: str = dashboards.plot(dashboard_name=dashboard_name, global_plot=global_plot, to_html=True)
+    plot_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=graph_path)
     layout = QVBoxLayout(dialog)
     layout.addWidget(plot_widget)
     dialog.setLayout(layout)
@@ -438,6 +450,29 @@ def generate_stats_display(metrics: dict[str, float]) -> QVBoxLayout:
     stats_button.setChecked(True)
     
     return stats_layout
+
+def setup_results_graphs(parent:QFrame, dashboards:DashboardsCollection) -> None:
+    bottom_layout = QGridLayout(parent=parent)
+    equity_plot: str = dashboards.plot(dashboard_name="Equity", global_plot=True, show_legend=False, to_html=True)
+    sharpe_plot: str = dashboards.plot(dashboard_name="Rolling Sharpe Ratio", global_plot=True, show_legend=False, to_html=True)
+    drawdown_plot: str = dashboards.plot(dashboard_name="Rolling Drawdown", global_plot=True, show_legend=False, to_html=True)
+    vol_plot: str = dashboards.plot(dashboard_name="Rolling Volatility", global_plot=True, show_legend=False, to_html=True)
+    distribution_plot: str = dashboards.plot(dashboard_name="Returns Distribution Histogram", global_plot=True, show_legend=False, to_html=True)
+    violin_plot: str = dashboards.plot(dashboard_name="Returns Distribution Violin", global_plot=True, show_legend=False, to_html=True)
+    
+    equity_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=equity_plot)
+    sharpe_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=sharpe_plot)
+    drawdown_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=drawdown_plot)
+    vol_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=vol_plot)
+    distribution_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=distribution_plot)
+    violin_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=violin_plot)
+    
+    bottom_layout.addWidget(equity_widget, 0, 0)
+    bottom_layout.addWidget(sharpe_widget, 1, 0)
+    bottom_layout.addWidget(drawdown_widget, 0, 1)
+    bottom_layout.addWidget(vol_widget, 1, 1)
+    bottom_layout.addWidget(distribution_widget, 0, 2)
+    bottom_layout.addWidget(violin_widget, 1, 2)
 
 def generate_home_button(back_to_home_callback: Callable[..., None]) -> QVBoxLayout:
     home_layout = QVBoxLayout()

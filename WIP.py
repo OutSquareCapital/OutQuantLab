@@ -1,4 +1,12 @@
 '''
+from pathlib import Path
+def extract_files_info(directory_path: str) -> dict[str, str]:
+    files_info: dict[str, str] = {}
+    for file in Path(directory_path).iterdir():
+        if file.is_file():
+            files_info[file.stem] = file.suffix
+    return files_info'''
+'''
 def rolling_weighted_mean(array: ArrayFloat, length: int) -> ArrayFloat:
     def convolve_with_weights(x: ArrayFloat, weights: ArrayFloat) -> ArrayFloat:
         return np.convolve(x, weights[::-1], mode='valid')
@@ -39,15 +47,15 @@ from Metrics import rolling_sharpe_ratios, rolling_mean
 import numexpr as ne
 from concurrent.futures import ThreadPoolExecutor
 from collections.abc import Callable
-from typing import Any
+
 from Database import N_THREADS
 
 def process_in_blocks_parallel(
     array: ArrayFloat, 
     block_size: int, 
     func:Callable[..., ArrayFloat], 
-    *args: Any,
-    **kwargs: Any
+    *args: Unknown,
+    **kwargs: Unknown
     ) -> ArrayFloat:
 
     num_cols: int = array.shape[1]
@@ -683,7 +691,6 @@ shares_to_trade = calculate_shares_to_trade_from_adjusted_return(portfolio_size,
 '''
 '''import pandas as pd
 import numpy as np
-import os
 from datetime import datetime
 
 def random_fill(series: pd.Series) -> pd.Series:
