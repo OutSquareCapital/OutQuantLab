@@ -2,7 +2,7 @@ import bottleneck as bn  # type: ignore
 import polars as pl
 from Utilitary import ArrayFloat
 
-def calculate_overall_mean(array: ArrayFloat, axis: int = 0) -> ArrayFloat:
+def calculate_overall_mean(array: ArrayFloat, axis: None|int = 0) -> ArrayFloat:
     return bn.nanmean(array, axis) # type: ignore
 
 def rolling_mean(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:

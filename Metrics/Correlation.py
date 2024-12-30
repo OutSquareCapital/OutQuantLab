@@ -1,20 +1,12 @@
-from Utilitary import SeriesFloat, DataFrameFloat
+from Utilitary import ArrayFloat, Float32
+import numpy as np
 
-def calculate_correlation_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
-    return DataFrameFloat(data=returns_df.corr())
+def calculate_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:
+    return np.corrcoef(returns_array, rowvar=False, dtype=Float32)
 
-def calculate_distance_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
-    return DataFrameFloat(data=1 - calculate_correlation_matrix(returns_df=returns_df))
-
-def calculate_pairwise_distances(returns_df: DataFrameFloat) -> DataFrameFloat:
-    corr_matrix: DataFrameFloat = calculate_correlation_matrix(returns_df=returns_df)
-    return DataFrameFloat(data=1 - corr_matrix.abs())
-
-def calculate_rolling_paired_correlation_matrix(returns_df: DataFrameFloat, window: int) -> DataFrameFloat:
-    return DataFrameFloat(data=returns_df.rolling(window=window).corr(pairwise=True))
-
-def calculate_rolling_average_correlation(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
-    return DataFrameFloat(data=returns_df.rolling(window=length, min_periods=length).corr().groupby(level=0).mean())
-
-def calculate_overall_average_correlation(returns_df: DataFrameFloat) -> SeriesFloat:
-    return SeriesFloat(data=returns_df.corr().mean(), index=returns_df.columns)
+def calculate_overall_average_correlation(returns_array: ArrayFloat) -> ArrayFloat:
+    corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)
+    sum_correlations: ArrayFloat = np.sum(corr_matrix, axis=1)
+    sum_without_diagonal: ArrayFloat = sum_correlations - 1
+    mean_correlations: ArrayFloat = sum_without_diagonal / (corr_matrix.shape[1] - 1)
+    return mean_correlations

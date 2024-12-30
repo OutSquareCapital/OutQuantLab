@@ -7,9 +7,9 @@ rolling_sum,
 rolling_quantile_ratio,
 rolling_skewness,
 rolling_kurtosis,
-separate_volatility
+separate_volatility,
+ratio_normalization
 )
-from Indicators.Indics_Normalization import ratio_normalization
 from Utilitary import ArrayFloat, ArrayInt, DataFrameFloat, Int32
 
 def generate_seasonal_array(returns_df: DataFrameFloat) -> ArrayInt:

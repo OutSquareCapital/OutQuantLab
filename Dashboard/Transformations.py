@@ -39,7 +39,7 @@ def prepare_sunburst_data(
     for key, value in cluster_dict.items():
         current_label: str = parent_label + str(key) if parent_label else str(key)
         if isinstance(value, dict):
-            prepare_sunburst_data(value, current_label, labels, parents) # type: ignore
+            prepare_sunburst_data(cluster_dict=value, parent_label=current_label, labels=labels, parents=parents)
         else:
             for asset in value:
                 labels.append(asset)
@@ -57,11 +57,12 @@ def sort_series(
     series: SeriesFloat, 
     ascending: bool = True
     ) -> SeriesFloat:
-    if ascending:
-        sorted_array: ArrayFloat = np.sort(a=series.nparray)
-    else:
-        sorted_array: ArrayFloat = np.sort(a=series.nparray)[::-1]
-    return SeriesFloat(data=sorted_array, index=series.names)
+    sorted_indices: ArrayInt = np.argsort(series.nparray)
+    if not ascending:
+        sorted_indices = sorted_indices[::-1]
+    sorted_array: ArrayFloat = series.nparray[sorted_indices]
+    sorted_index: list[str] = [series.names[i] for i in sorted_indices]
+    return SeriesFloat(data=sorted_array, index=sorted_index)
 
 def sort_dataframe(
     df: DataFrameFloat, 

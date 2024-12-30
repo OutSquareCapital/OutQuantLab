@@ -41,17 +41,22 @@ from Metrics.Performance import (
 
 from Metrics.Correlation import (
     calculate_correlation_matrix,
-    calculate_distance_matrix,
-    calculate_pairwise_distances,
-    calculate_rolling_paired_correlation_matrix,
-    calculate_rolling_average_correlation,
     calculate_overall_average_correlation,
+)
+
+from Metrics.Normalization import (
+    rolling_scalar_normalisation,
+    rolling_median_normalisation,
+    rolling_std_normalisation,
+    ratio_normalization,
+    sign_normalization,
+    relative_normalization,
+    calculate_indicator_on_trend_signal
 )
 __all__: list[str] = [
     'calculate_overall_monthly_skewness',
     'calculate_overall_min',
     'calculate_overall_max',
-    'calculate_rolling_average_correlation',
     "calculate_overall_mean",
     "rolling_mean", 
     "rolling_median",
@@ -80,8 +85,12 @@ __all__: list[str] = [
     'calculate_overall_mean',
     'calculate_overall_average_correlation',
     'calculate_correlation_matrix',
-    'calculate_distance_matrix',
-    'calculate_pairwise_distances',
-    'calculate_rolling_paired_correlation_matrix',
     'calculate_total_returns',
+    'rolling_scalar_normalisation',
+    'rolling_median_normalisation',
+    'rolling_std_normalisation',
+    'ratio_normalization',
+    'sign_normalization',
+    'relative_normalization',
+    'calculate_indicator_on_trend_signal'
 ]

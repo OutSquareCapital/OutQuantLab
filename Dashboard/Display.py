@@ -167,22 +167,7 @@ class DashboardsCollection:
             title="Rolling Smoothed Skewness"
         )
 
-    @staticmethod
-    def plot_rolling_average_correlation(returns_df: DataFrameFloat, length: int) -> go.Figure:
-        rolling_corr = DataFrameFloat(
-            data=Computations.calculate_rolling_average_correlation(returns_df=returns_df, length=length),
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
-        )
-        sorted_corr: DataFrameFloat = sort_dataframe(
-            df=rolling_corr, 
-            ascending=True
-            )
-        return Widgets.curves(
-            x_values=sorted_corr.dates,
-            y_values=sorted_corr,
-            title=f"Rolling Average Correlation"
-        )
+        
     @staticmethod
     def plot_overall_returns(returns_df: DataFrameFloat) -> go.Figure:
         total_returns_series = SeriesFloat(
@@ -236,16 +221,16 @@ class DashboardsCollection:
             series=sorted_drawdowns, 
             title="Average Drawdowns %")
     @staticmethod
-    def plot_overall_average_inverted_correlation(returns_df: DataFrameFloat) -> go.Figure:
-        overall_average_corr: SeriesFloat = Computations.calculate_overall_average_correlation(returns_df=returns_df)
-        sorted_overall_average_corr: SeriesFloat = sort_series(series=overall_average_corr, ascending=True)
-        sorted_overall_average_corr_flattened=SeriesFloat(
-            data=sorted_overall_average_corr.nparray,
+    def plot_overall_average_correlation(returns_df: DataFrameFloat) -> go.Figure:
+        overall_average_corr = SeriesFloat(
+            data=Computations.calculate_overall_average_correlation(returns_array=returns_df.nparray),
             index=convert_multiindex_to_labels(df=returns_df)
             )
+        sorted_overall_average_corr: SeriesFloat = sort_series(series=overall_average_corr, ascending=True)
         return Widgets.bars(
-            series=sorted_overall_average_corr_flattened, 
+            series=sorted_overall_average_corr, 
             title="Overall Average Correlation")
+
     @staticmethod
     def plot_overall_monthly_skew(returns_df: DataFrameFloat) -> go.Figure:
 
@@ -283,9 +268,9 @@ class DashboardsCollection:
             title="Histogram of % Returns Distribution")
     @staticmethod
     def plot_correlation_heatmap(returns_df: DataFrameFloat) -> go.Figure:
-        correlation_matrix: DataFrameFloat = Computations.calculate_correlation_matrix(returns_df=returns_df)
-        filled_correlation_matrix: ArrayFloat = fill_correlation_matrix(corr_matrix=correlation_matrix.nparray)
-        labels_list: list[str] = convert_multiindex_to_labels(df=correlation_matrix)
+        correlation_matrix: ArrayFloat = Computations.calculate_correlation_matrix(returns_array=returns_df.nparray)
+        filled_correlation_matrix: ArrayFloat = fill_correlation_matrix(corr_matrix=correlation_matrix)
+        labels_list: list[str] = convert_multiindex_to_labels(df=returns_df)
 
         return Widgets.heatmap(
             z_values=filled_correlation_matrix,

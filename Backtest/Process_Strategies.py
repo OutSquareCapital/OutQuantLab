@@ -75,7 +75,7 @@ def calculate_portfolio_returns(
         grouping_levels.append("Param")
 
     if grouping_levels:
-        grouped: pd.DataFrame = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T
+        grouped: pd.DataFrame = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T # type: ignore
 
         return DataFrameFloat(data=grouped)
 

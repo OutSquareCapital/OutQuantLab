@@ -36,7 +36,7 @@ def rolling_autocorrelation(returns_array: ArrayFloat, length: int) -> ArrayFloa
 '''from Utilitary import ArrayFloat, DataFrameFloat, Float32
 import numpy as np
 from Metrics import rolling_sharpe_ratios, rolling_mean
-import numexpr as ne # type: ignore
+import numexpr as ne
 from concurrent.futures import ThreadPoolExecutor
 from collections.abc import Callable
 from typing import Any
@@ -57,7 +57,7 @@ def process_in_blocks_parallel(
     with ThreadPoolExecutor(max_workers=max_threads) as executor:
         futures = [
             executor.submit(
-                func, array[:, start_col:min(start_col + block_size, num_cols)], *args, **kwargs # type: ignore
+                func, array[:, start_col:min(start_col + block_size, num_cols)], *args, **kwargs
             )
             for start_col in range(0, num_cols, block_size)
         ]
@@ -100,7 +100,7 @@ def relative_sharpe_on_confidence_period(
 
     rolling_median_sharpe = np.nanmedian(mean_sharpe_array, axis=1)[:, np.newaxis]
 
-    normalized_sharpes: ArrayFloat = ne.evaluate( # type: ignore
+    normalized_sharpes: ArrayFloat = ne.evaluate(
         "(mean_sharpe_array - rolling_median_sharpe) * ((non_nan_counts / confidence_lookback)**0.5) + 1",
         local_dict={
             "mean_sharpe_array": mean_sharpe_array,
@@ -605,9 +605,12 @@ def extract_asset_groups(portfolio_dict):
     
     return asset_groups
 
+def calculate_rolling_correlation_matrix(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
+    return DataFrameFloat(data=returns_df.rolling(window=length).corr(pairwise=True))
+    
 def compute_group_diversification_multiplier(group_returns, weights, window):
 
-    rolling_corr = calculate_rolling_pairwise_correlation(group_returns, window)
+    rolling_corr = calculate_rolling_correlation_matrix(group_returns, window)
 
     num_assets = len(weights)
     diversification_multipliers = []
