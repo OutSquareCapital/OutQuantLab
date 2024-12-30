@@ -1,4 +1,4 @@
-from Utilitary import SeriesFloat, Float32, DataFrameFloat
+from Utilitary import SeriesFloat, DataFrameFloat
 
 def calculate_correlation_matrix(returns_df: DataFrameFloat) -> DataFrameFloat:
     return DataFrameFloat(data=returns_df.corr())
