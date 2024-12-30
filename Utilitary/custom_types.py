@@ -12,11 +12,6 @@ ProgressFunc: TypeAlias = Callable[[int, str], None]
 IndicatorFunc : TypeAlias = Callable[..., ArrayFloat]
 DictVariableDepth: TypeAlias = dict[str, Any]
 
-
-JsonData: TypeAlias = str
-ParquetData: TypeAlias = str
-WebpMedia: TypeAlias = str
-PngMedia: TypeAlias = str
 JSON_EXT: Final = ".json"
 PARQUET_EXT: Final = ".parquet"
 WEBP_EXT: Final = ".webp"
@@ -26,19 +21,20 @@ class SeriesFloat(Series): # type: ignore
     '''
     Strictly typed Series with:
     - Data of type Float32
-    - Index of type list[str] or Index[str]
+    - Index of type list[str], Index, or MultiIndex
     '''
     def __init__(
         self, 
         data: ArrayFloat|Series, # type: ignore
-        index: Index|list[str]|None = None, # type: ignore
+        index: MultiIndex|Index|list[str]|None = None, # type: ignore
         dtype: type = Float32
         ) -> None:
         if isinstance(data, Series):
-            data = data.astype(Float32) # type: ignore
+            data = data.astype(dtype=Float32) # type: ignore
         else:
-            if not isinstance(index, (Index, list)):
-                raise TypeError("index must be a {list} of strings or a pandas {Index}")
+            if not isinstance(index, (Index, MultiIndex, list)):
+                raise TypeError("index must be a a pandas {Index}, {MultiIndex}, or a {list} of strings")
+
         super().__init__(data=data, index=index, dtype=dtype) # type: ignore
 
     @property
@@ -61,7 +57,7 @@ class DataFrameFloat(DataFrame):
     Strictly typed Dataframe with:
     - Data of type Float32
     - Index of type DatetimeIndex
-    - Columns of type list[str] or MultiIndex
+    - Columns of type list[str], Index or MultiIndex
     '''
     def __init__(
         self, 

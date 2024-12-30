@@ -1,23 +1,29 @@
 from pandas import MultiIndex
 from ConfigClasses.Indicators import Indicator
-from Utilitary import ProgressFunc
-from Database import CONFIG, load_prices, get_yahoo_finance_data
+from Utilitary import ProgressFunc, DataFrameFloat
+from Database import CONFIG, load_asset_names, load_prices, get_yahoo_finance_data, load_config_file, save_config_file
 from Backtest import calculate_strategy_returns, aggregate_raw_returns
 from Indicators import IndicatorsMethods
 from ConfigClasses import AssetsCollection, IndicatorsCollection, ClustersTree, generate_multi_index_process
 from Dashboard import DashboardsCollection
-from Utilitary import DataFrameFloat
+
+asset_to_test = load_config_file(file_path=CONFIG.assets_to_test)
+asset_names = load_asset_names(file_path=CONFIG.price_data)
+indicators_to_test=load_config_file(file_path=CONFIG.indics_to_test)
+params_config  = load_config_file(file_path=CONFIG.indics_params)
+assets_clusters = load_config_file(file_path=CONFIG.assets_clusters)
+indicators_clusters = load_config_file(file_path=CONFIG.indics_clusters)
 
 def handle_progress(progress: int, message: str) -> None:
     print(f"[{progress}%] {message}")
 
 class OutQuantLab:
     def __init__(self, progress_callback: ProgressFunc) -> None:
-        self.assets_collection = AssetsCollection(assets_to_test=CONFIG.assets_to_test, assets_data=CONFIG.price_data)
-        self.indicators_collection = IndicatorsCollection(indicators_to_test=CONFIG.indics_to_test, indicators_params=CONFIG.indics_params)
-        self.assets_clusters = ClustersTree(clusters_file=CONFIG.assets_clusters)
-        self.indicators_clusters = ClustersTree(clusters_file=CONFIG.indics_clusters)
-        self.dashboards = DashboardsCollection(length=1250)
+        self.assets_collection = AssetsCollection(assets_to_test=asset_to_test, assets_data=asset_names)
+        self.indicators_collection = IndicatorsCollection(indicators_to_test=indicators_to_test, params_config=params_config)
+        self.assets_clusters = ClustersTree(clusters=assets_clusters)
+        self.indicators_clusters = ClustersTree(clusters=indicators_clusters)
+        self.dashboards = DashboardsCollection(length=250)
         self.progress_callback = progress_callback
     def run_backtest(self) -> None:
         indics_methods = IndicatorsMethods()
@@ -48,11 +54,16 @@ class OutQuantLab:
         get_yahoo_finance_data(assets=self.assets_collection.all_entities_names, file_path=CONFIG.price_data)
 
     def close(self) -> None:
-        self.assets_collection.save()
-        self.indicators_collection.save()
-
+        save_config_file(file_path=CONFIG.assets_to_test, dict_to_save=self.assets_collection.all_active_entities_dict, indent=3)
+        save_config_file(file_path=CONFIG.indics_to_test, dict_to_save=self.indicators_collection.all_active_entities_dict, indent=3)
+        save_config_file(file_path=CONFIG.indics_params, dict_to_save=self.indicators_collection.all_params_config, indent=3)
+        save_config_file(file_path=CONFIG.indics_clusters, dict_to_save=self.indicators_clusters.clusters, indent=3)
+        save_config_file(file_path=CONFIG.assets_clusters, dict_to_save=self.assets_clusters.clusters, indent=3)
+        
 if __name__ == "__main__":
 
         outquantlab = OutQuantLab(progress_callback=handle_progress)
         outquantlab.run_backtest()
-        print(outquantlab.dashboards.metrics)
+        #print(outquantlab.dashboards.metrics)
+        #outquantlab.dashboards.plot(dashboard_name='Rolling Average Correlation').show()
+        #outquantlab.dashboards.plot(dashboard_name='Clusters Icicle').show()
