@@ -7,7 +7,7 @@ from collections.abc import Callable
 import plotly.graph_objects as go # type: ignore
 from dataclasses import dataclass
 from Indicators.Indics_Raw import smoothed_skewness
-from Database import process_html_temp_file
+from DataBase import process_html_temp_file
 
 @dataclass
 class DashboardPlot:
@@ -201,7 +201,6 @@ class DashboardsCollection:
             index=convert_multiindex_to_labels(df=returns_df)
             )
         sorted_sharpes_series: SeriesFloat = sort_series(series=sharpes_series, ascending=True)
-        print(f'sorted_sharpes_series: {sorted_sharpes_series}')
         return Widgets.bars(
             series=sorted_sharpes_series, 
             title="Sharpe Ratio")

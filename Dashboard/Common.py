@@ -1,7 +1,7 @@
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 import plotly.graph_objects as go # type: ignore
-from Utilitary import FONT_FAMILY, FONT_SIZE, FONT_TYPE, COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK
+from Utilitary import COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK, FIG_FONT, FIG_LEGEND_FONT, FIG_TITLE_FONT
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
     cmap_name = "custom_colormap"
@@ -15,7 +15,7 @@ def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
 def map_colors_to_columns(n_colors: int) -> list[str]:
     if n_colors == 1:
         return [mcolors.to_hex(COLOR_PLOT_UNIQUE)]
-    cmap = generate_colormap(n_colors)
+    cmap: LinearSegmentedColormap = generate_colormap(n_colors)
     return [mcolors.to_hex(cmap(i / (n_colors - 1))) for i in range(n_colors)]
 
 def get_color_map(assets: list[str]) -> dict[str, str]:
@@ -35,31 +35,16 @@ def setup_figure_layout(
     hover_data: str ='y') -> None:
     
     fig.update_layout( # type: ignore
-        font={
-            'family': FONT_FAMILY,
-            'color': COLOR_ADJUSTMENT,
-            'size': FONT_SIZE,
-            'weight': FONT_TYPE
-        },
+        font=FIG_FONT,
         title={
             'text': figtitle,
-            'font': {
-                'size': FONT_SIZE*1.4, 
-                'family': FONT_FAMILY,
-                'weight': FONT_TYPE
-                }
+            'font': FIG_TITLE_FONT
         },
         autosize=True,
         margin=dict(l=30, r=30, t=40, b=30),
         paper_bgcolor=BACKGROUND_APP_DARK,
         plot_bgcolor=BACKGROUND_APP_DARK,
-        legend={
-            'title_font': {
-                'size': FONT_SIZE*1.2,
-                'family': FONT_FAMILY,
-                'weight': FONT_TYPE
-                }
-        }
+        legend=FIG_LEGEND_FONT
     )
 
     fig.update_yaxes( # type: ignore

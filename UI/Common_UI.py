@@ -192,7 +192,7 @@ def find_element_in_tree(tree: QTreeWidget, element: str) -> bool:
 def populate_tree_from_dict(
     tree: QTreeWidget, 
     data: dict[str, str|dict[str, str|list[str]]], 
-    data_set: set[str], 
+    data_set: list[str], 
     parent_item: QTreeWidget|None=None
     ) -> None:
     if parent_item is None:
@@ -209,7 +209,7 @@ def populate_tree_from_dict(
         else:
             parent_item.addChild(category_item)
 
-        if isinstance(value, DictVariableDepth):
+        if isinstance(value, dict):
             populate_tree_from_dict(tree, value, data_set, category_item)
         elif isinstance(value, list):
             for element in value:
@@ -397,8 +397,8 @@ def plot_graph_in_webview(temp_file_path:str) -> QWebEngineView:
     plot_widget = QWebEngineView()
     page: QWebEnginePage = plot_widget.page()
     page.settings().setAttribute(QWebEngineSettings.WebAttribute.ShowScrollBars, False)
-    page.setBackgroundColor(color=BACKGROUND_APP_DARK)
-    plot_widget.load(url=QUrl.fromLocalFile(localfile=temp_file_path))
+    page.setBackgroundColor(BACKGROUND_APP_DARK)
+    plot_widget.load(QUrl.fromLocalFile(temp_file_path))
 
     return plot_widget
 
