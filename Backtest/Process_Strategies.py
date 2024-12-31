@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from Database import N_THREADS
+from DataBase import N_THREADS
 from Utilitary import ArrayFloat, ProgressFunc, DataFrameFloat, Float32
 from concurrent.futures import ThreadPoolExecutor
 from ConfigClasses import Indicator

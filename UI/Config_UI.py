@@ -23,38 +23,34 @@ QPushButton,
 QApplication
 )
 from PySide6.QtCore import Qt
-from ConfigClasses import AssetsCollection, ClustersTree, IndicatorsCollection, Asset, Indicator
+from ConfigClasses import AssetsCollection, ClustersTree, IndicatorsCollection
 
 class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection) -> None:
         super().__init__()
-        self.assets_collection = assets_collection
-        self.entities: list[Asset] = self.assets_collection.all_entities
+        self.assets_collection: AssetsCollection = assets_collection
         self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
 
     def init_ui(self) -> None:
         layout = QVBoxLayout()
     
-        scroll_layout = create_scroll_with_buttons(
-        layout, 
-        self.select_all_assets, 
-        self.unselect_all_assets
+        scroll_layout: QVBoxLayout = create_scroll_with_buttons(
+        parent_layout=layout, 
+        select_callback=self.select_all_assets, 
+        unselect_callback=self.unselect_all_assets
         )
         
-        for asset in self.entities:
-            checkbox = create_checkbox_item(
+        for asset in self.assets_collection.all_entities:
+            checkbox: QCheckBox = create_checkbox_item(
             item=asset.name,
             is_checked=asset.active,
-            callback=lambda checked, name=asset.name: self.update_asset_state(name, checked)
+            callback=lambda checked, name=asset.name: self.assets_collection.set_active(name=name, active=checked)
             )
             scroll_layout.addWidget(checkbox)
             self.checkboxes[asset.name] = checkbox
 
         self.setLayout(layout)
-        
-    def update_asset_state(self, asset_name: str, is_checked: bool) -> None:
-        self.assets_collection.set_active(asset_name, is_checked)
 
     def select_all_assets(self) -> None:
         for checkbox in self.checkboxes.values():
@@ -68,22 +64,26 @@ class IndicatorsConfigWidget(QWidget):
 
     def __init__(self, indicators_collection: IndicatorsCollection) -> None:
         super().__init__()
-        self.indicators_collection = indicators_collection
-        self.entities:list[Indicator] = self.indicators_collection.all_entities
+        self.indicators_collection: IndicatorsCollection = indicators_collection
         self.param_widgets: dict[str, dict[str, dict[str, QSlider | QLabel]]] = {}
         self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
 
     def init_ui(self) -> None:
         layout = QVBoxLayout()
-        scroll_layout = create_scroll_with_buttons(
-        layout, 
-        self.select_all_indicators, 
-        self.unselect_all_indicators
+        scroll_layout: QVBoxLayout = create_scroll_with_buttons(
+        parent_layout=layout, 
+        select_callback=self.select_all_indicators, 
+        unselect_callback=self.unselect_all_indicators
         )
 
-        for indicator in self.entities:
-            self.add_indicator_section(indicator.name, indicator.active, indicator.params_values, scroll_layout)
+        for indicator in self.indicators_collection.all_entities:
+            self.add_indicator_section(
+                indicator_name=indicator.name, 
+                is_active=indicator.active, 
+                params=indicator.params_values, 
+                layout=scroll_layout
+                )
             
         self.setLayout(layout)
 
@@ -94,18 +94,18 @@ class IndicatorsConfigWidget(QWidget):
         params: dict[str, list[int]], 
         layout: QVBoxLayout) -> None:
 
-        indicator_box, content_layout = create_expandable_section(indicator_name)
+        indicator_box, content_layout = create_expandable_section(category_name=indicator_name)
 
-        checkbox = create_checkbox_item(
+        checkbox: QCheckBox = create_checkbox_item(
         item=indicator_name,
         is_checked=is_active,
-        callback=lambda checked, name=indicator_name: self.update_indicator_state(name, checked)
+        callback=lambda checked, name=indicator_name: self.indicators_collection.set_active(name=indicator_name, active=checked)
         )
         content_layout.addWidget(checkbox)
         self.checkboxes[indicator_name] = checkbox
 
         for param_name, values in params.items():
-            self.add_param_widget(indicator_name, param_name, values, content_layout)
+            self.add_param_widget(indicator_name=indicator_name, param_name=param_name, values=values, layout=content_layout)
 
         layout.addWidget(indicator_box)
 
@@ -130,10 +130,10 @@ class IndicatorsConfigWidget(QWidget):
         start_slider, 
         end_slider, 
         num_values_slider
-        ) = create_param_widget(param_box, param_layout, values)
+        ) = create_param_widget(param_box=param_box, param_layout=param_layout, values=values)
 
         def update_param_values(unique_values: list[int]) -> None:
-            self.indicators_collection.update_param_values(indicator_name, param_name, unique_values)
+            self.indicators_collection.update_param_values(name=indicator_name, param_key=param_name, values=unique_values)
 
         connect_sliders_to_update(
         start_slider=start_slider, 
@@ -153,9 +153,6 @@ class IndicatorsConfigWidget(QWidget):
             "num_values_info_label": num_values_info_label,
         }
 
-    def update_indicator_state(self, indicator_name: str, is_checked: bool) -> None:
-        self.indicators_collection.set_active(indicator_name, is_checked)
-
     def select_all_indicators(self) -> None:
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(True)
@@ -169,28 +166,24 @@ class TreeStructureWidget(QWidget):
         super().__init__()
         self.collection: AssetsCollection | IndicatorsCollection = collection
         self.clusters_tree: ClustersTree = clusters
-        self.tree_structure = self.clusters_tree.clusters
-        self.data = set(self.collection.all_entities_names)
-
         self.tree = QTreeWidget()
+        self.init_ui()
+
+    def init_ui(self) -> None:
         self.tree.setHeaderHidden(True)
         self.tree.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
         self.tree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.tree.itemClicked.connect(slot=self.handle_item_click)
-
-        self.init_ui()
-
-    def init_ui(self) -> None:
         layout = QVBoxLayout()
-        populate_tree_from_dict(tree=self.tree, data=self.tree_structure, data_set=self.data)
-        layout.addWidget(arg__1=self.tree)
+        populate_tree_from_dict(tree=self.tree, data=self.clusters_tree.clusters, data_set=self.collection.all_entities_names)
+        layout.addWidget(self.tree)
 
         buttons_layout = QHBoxLayout()
         add_button = QPushButton(text="Add Cluster")
         delete_button = QPushButton(text="Delete Cluster")
 
-        add_button.clicked.connect(slot=lambda: add_cluster(tree=self.tree, tree_structure=self.tree_structure))
-        delete_button.clicked.connect(slot=lambda: delete_cluster(tree=self.tree, tree_structure=self.tree_structure))
+        add_button.clicked.connect(slot=lambda: add_cluster(tree=self.tree, tree_structure=self.clusters_tree.clusters))
+        delete_button.clicked.connect(slot=lambda: delete_cluster(tree=self.tree, tree_structure=self.clusters_tree.clusters))
 
 
         buttons_layout.addWidget(add_button)
