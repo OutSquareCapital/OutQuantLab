@@ -11,7 +11,7 @@ create_param_widget
 from PySide6.QtWidgets import (
 QAbstractItemView, 
 QWidget, 
-QVBoxLayout, 
+QVBoxLayout,
 QCheckBox,  
 QLabel, 
 QGroupBox, 
@@ -175,7 +175,7 @@ class TreeStructureWidget(QWidget):
         self.tree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.tree.itemClicked.connect(slot=self.handle_item_click)
         layout = QVBoxLayout()
-        populate_tree_from_dict(tree=self.tree, data=self.clusters_tree.clusters, data_set=self.collection.all_entities_names)
+        populate_tree_from_dict(tree=self.tree, clusters=self.clusters_tree.clusters, names=self.collection.all_entities_names)
         layout.addWidget(self.tree)
 
         buttons_layout = QHBoxLayout()

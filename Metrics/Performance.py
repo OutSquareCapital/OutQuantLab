@@ -83,7 +83,7 @@ def rolling_sharpe_ratios(returns_array: ArrayFloat, length:int, min_length:int)
 
 def overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     mean: ArrayFloat = calculate_overall_mean(array=returns_array)
-    volatility: ArrayFloat = overall_volatility(array=returns_array)
+    volatility: ArrayFloat = overall_volatility(returns_array=returns_array)
     return mean / volatility * ANNUALIZATION_FACTOR
 
 def calculate_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:

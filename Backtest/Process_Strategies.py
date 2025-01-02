@@ -76,7 +76,6 @@ def calculate_portfolio_returns(
 
     if grouping_levels:
         grouped: pd.DataFrame = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T # type: ignore
-
         return DataFrameFloat(data=grouped)
 
     global_portfolio: ArrayFloat = calculate_overall_mean(returns_df.nparray, axis=1)

@@ -8,6 +8,7 @@ from PySide6.QtGui import QIcon
 from Utilitary import GLOBAL_STYLE
 
 class MainApp(QMainWindow):
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -15,7 +16,7 @@ class MainApp(QMainWindow):
         self.progress_bar:QProgressBar
         self.log_output:QTextEdit
         self.ql = OutQuantLab(progress_callback=self.update_progress)
-        self.apply_global_styles(background=self.ql.db.select['home_page'].full_path)
+        self.apply_global_styles(background=self.ql.db.select['app_logo'].full_path)
         self.show_home_page()
         self.showMaximized()
 
@@ -35,7 +36,9 @@ class MainApp(QMainWindow):
         )
 
     def update_progress(self, value: int, message: str) -> None:
-        UI.update_progress_with_events(progress_bar=self.progress_bar, log_output=self.log_output, value=value, message=message)
+        UI.update_progress_with_events(
+            progress_bar=self.progress_bar, 
+            log_output=self.log_output, value=value, message=message)
 
     def run_backtest(self) -> None:
         self.progress_bar, self.log_output = UI.setup_backtest_page(parent=self, background=self.ql.db.select['loading_page'].full_path)
@@ -43,12 +46,13 @@ class MainApp(QMainWindow):
         self.show_results_page()
 
     def show_results_page(self) -> None:
-
         UI.setup_results_page(
         parent=self,
-        dashboards=self.ql.dashboards,
+        global_returns_df=self.ql.global_portfolio,
+        sub_returns_df=self.ql.sub_portfolios,
+        graphs=self.ql.grph,
         back_to_home_callback=self.show_home_page,
-        metrics=self.ql.dashboards.metrics,
+        metrics=self.ql.grph.get_metrics(returns_df=self.ql.global_portfolio),
         background=self.ql.db.select['dashboard_page'].full_path
         )
 

@@ -40,7 +40,6 @@ def cleanup_temp_files(temp_dir:str = TEMPFILES_DIR, suffix:str = FIG_TEMP_FILES
 
 @dataclass(frozen=True)
 class DataFile:
-    file_name: str
     ext: str
     full_path: str
 
@@ -79,22 +78,22 @@ class DataFile:
 class DataBaseQueries:
     def __init__(self, base_dir: str = BASE_DIR) -> None:
         self.select: dict[str, DataFile] = {}
-        self.generate_datafiles(base_dir)
-    def generate_datafiles(self, base_dir: str = BASE_DIR) -> None:
+        self.__generate_datafiles(base_dir)
+
+    def __generate_datafiles(self, base_dir: str = BASE_DIR) -> None:
         for root, _, files in os.walk(base_dir):
             for file_name in files:
                 file_path: str = os.path.join(root, file_name)
                 if os.path.isfile(file_path):
                     file_base, file_ext = os.path.splitext(file_name)
                     datafile = DataFile(
-                        file_name=file_base,
                         ext=file_ext,
                         full_path=file_path
                     )
 
                     self.select[file_base] = datafile
 
-    def get_yahoo_finance_data(self, f: DataFile, assets: list[str]) -> None:
+    def get_yahoo_finance_data(self, f: DataFile, assets: list[str]) -> pd.DataFrame:
         data: pd.DataFrame|None = yf.download(  # type: ignore
             tickers=assets,
             interval="1d",
@@ -103,9 +102,5 @@ class DataBaseQueries:
             )
         if data is None:
             raise ValueError("Yahoo Finance Data Not Available")
-        close_prices: pd.DataFrame = data["Close"] # type: ignore
-        close_prices.to_parquet(
-            path=f.full_path,
-            index=True,
-            engine="pyarrow"
-        )
+        else:
+            return DataFrameFloat(data=data["Close"]) # type: ignore

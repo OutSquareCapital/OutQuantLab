@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import (
+QFrame,
 QWidget,
 QHBoxLayout,
 QVBoxLayout,
@@ -16,11 +17,12 @@ from UI.Common_UI import (
 generate_backtest_params_sliders, 
 set_background_image, 
 set_frame_design, 
-generate_graphs_buttons,
 create_button,
 generate_stats_display,
 generate_home_button,
-setup_results_graphs
+setup_results_graphs,
+generate_clusters_button_layout,
+generate_graphs_buttons
 )
 from UI.Config_UI import (
 AssetSelectionWidget, 
@@ -30,7 +32,8 @@ ClustersTree,
 AssetsCollection, 
 IndicatorsCollection
 )
-from Dashboard import DashboardsCollection
+from Graphs import GraphsCollection
+from Utilitary import DataFrameFloat
 
 def setup_home_page(
     parent: QMainWindow, 
@@ -48,18 +51,18 @@ def setup_home_page(
     right_layout = QVBoxLayout()
     left_layout = QVBoxLayout()
     buttons_layout = QVBoxLayout()
-    top_frame = set_frame_design(FRAME_STYLE)
-    bottom_frame = set_frame_design(FRAME_STYLE)
+    top_frame: QFrame = set_frame_design(frame_style=FRAME_STYLE)
+    bottom_frame: QFrame = set_frame_design(frame_style=FRAME_STYLE)
     right_upper_layout = QHBoxLayout(top_frame)
     right_lower_layout = QHBoxLayout(bottom_frame)
     set_background_image(widget=main_widget, image_path=background)
     
-    asset_widget = AssetSelectionWidget(assets_collection)
-    indicator_widget = IndicatorsConfigWidget(indicators_collection)
-    asset_tree_widget = TreeStructureWidget(assets_collection, assets_clusters)
-    method_tree_widget = TreeStructureWidget(indicators_collection, indicators_clusters)
+    asset_widget = AssetSelectionWidget(assets_collection=assets_collection)
+    indicator_widget = IndicatorsConfigWidget(indicators_collection=indicators_collection)
+    asset_tree_widget = TreeStructureWidget(collection=assets_collection, clusters=assets_clusters)
+    method_tree_widget = TreeStructureWidget(collection=indicators_collection, clusters=indicators_clusters)
     
-    create_button("Run Backtest", run_backtest_callback, buttons_layout)
+    create_button(text="Run Backtest", callback=run_backtest_callback, parent_layout=buttons_layout)
     
     left_layout.addLayout(buttons_layout)
     right_upper_layout.addWidget(asset_widget, stretch=1)
@@ -85,7 +88,7 @@ def setup_backtest_page(parent: QMainWindow, background: str) -> tuple[QProgress
     center_layout = QVBoxLayout()
     right_layout =  QVBoxLayout()
 
-    center_frame = set_frame_design(FRAME_STYLE)
+    center_frame: QFrame = set_frame_design(frame_style=FRAME_STYLE)
     center_frame_layout = QVBoxLayout(center_frame)
 
     progress_bar_layout = QVBoxLayout()
@@ -113,29 +116,35 @@ def setup_backtest_page(parent: QMainWindow, background: str) -> tuple[QProgress
 
 def setup_results_page(
     parent: QMainWindow,
-    dashboards: DashboardsCollection,
+    global_returns_df: DataFrameFloat,
+    sub_returns_df: DataFrameFloat,
+    graphs: GraphsCollection,
     back_to_home_callback:Callable[..., None], 
     metrics: dict[str, float],
     background: str) -> None:
 
     results_widget = QWidget()
     results_layout = QVBoxLayout(results_widget)
-    set_background_image(results_widget, background)
-    top_frame = set_frame_design(FRAME_STYLE)
-    bottom_frame = set_frame_design(FRAME_STYLE)
+    set_background_image(widget=results_widget, image_path=background)
+    top_frame: QFrame = set_frame_design(frame_style=FRAME_STYLE)
+    bottom_frame: QFrame = set_frame_design(frame_style=FRAME_STYLE)
     top_layout = QHBoxLayout(top_frame)
-    setup_results_graphs(parent=bottom_frame, dashboards=dashboards)
+    setup_results_graphs(parent=bottom_frame, returns_df=global_returns_df, graphs=graphs)
+    (    
+    overall_plots, 
+    rolling_plots, 
+    other_plots
+    ) = generate_graphs_buttons(parent=parent,returns_df=sub_returns_df, graphs=graphs)
 
-    overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout = generate_graphs_buttons(dashboards, parent)
-
-    stats_layout = generate_stats_display( metrics)
-    backtest_parameters_layout, clusters_buttons_layout = generate_backtest_params_sliders(CLUSTERS_PARAMETERS)
-    home_layout = generate_home_button(back_to_home_callback)
-
+    stats_layout: QVBoxLayout = generate_stats_display( metrics=metrics)
+    backtest_parameters_layout: QVBoxLayout = generate_backtest_params_sliders()
+    clusters_buttons_layout: QVBoxLayout = generate_clusters_button_layout(clusters_params=CLUSTERS_PARAMETERS)
+    home_layout: QVBoxLayout = generate_home_button(back_to_home_callback=back_to_home_callback)
+    
     top_layout.addLayout(stats_layout, stretch=2)
-    top_layout.addLayout(overall_metrics_layout, stretch=2)
-    top_layout.addLayout(rolling_metrics_layout, stretch=2)
-    top_layout.addLayout(advanced_metrics_layout, stretch=2)
+    top_layout.addLayout(overall_plots, stretch=2)
+    top_layout.addLayout(rolling_plots, stretch=2)
+    top_layout.addLayout(other_plots, stretch=2)
     top_layout.addLayout(backtest_parameters_layout, stretch=2)
     top_layout.addLayout(clusters_buttons_layout, stretch=2)
     top_layout.addLayout(home_layout, stretch=1)

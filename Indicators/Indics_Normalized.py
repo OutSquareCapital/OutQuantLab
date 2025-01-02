@@ -14,7 +14,7 @@ class IndicatorMetadata:
 def indic(registry: dict[str, IndicatorMetadata] = {}) -> Callable[[IndicatorFunc], IndicatorFunc]:
     def decorator(func: IndicatorFunc) -> IndicatorFunc:
         params: list[str] = list(signature(func).parameters.keys())[1:]
-        registry[func.__name__] = IndicatorMetadata(func, params)
+        registry[func.__name__] = IndicatorMetadata(func=func, params=params)
         return func
 
     return decorator
@@ -72,47 +72,47 @@ class IndicatorsMethods:
     def indicators_nb(self) -> int:
         return len(self._indicators_registry)
 
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def mean_price_ratio(self, LenST: int, LenLT: int) -> ArrayFloat:
-        mean_price_ratio_raw = calculate_mean_price_ratio_raw(self.prices_array, LenST, LenLT)
+        mean_price_ratio_raw = calculate_mean_price_ratio_raw(prices_array=self.prices_array, LenST=LenST, LenLT=LenLT)
         return sign_normalization(mean_price_ratio_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def median_price_ratio(self, LenST: int, LenLT: int) -> ArrayFloat:
         median_price_ratio_raw = calculate_median_price_ratio_raw(self.prices_array, LenST, LenLT)
         return sign_normalization(median_price_ratio_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def central_price_ratio(self, LenST: int, LenLT: int) -> ArrayFloat:
         central_price_ratio_raw = calculate_central_price_ratio_raw(self.prices_array, LenST, LenLT)
         return sign_normalization(central_price_ratio_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def mean_rate_of_change(self, LenST: int, LenLT: int) -> ArrayFloat:
         mean_roc_raw = calculate_mean_rate_of_change_raw(self.log_returns_array, LenST, LenLT)
         return sign_normalization(mean_roc_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def median_rate_of_change(self, LenST: int, LenLT: int) -> ArrayFloat:
         median_roc_raw = calculate_median_rate_of_change_raw(self.log_returns_array, LenST, LenLT)
         return sign_normalization(median_roc_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def central_rate_of_change(self, LenST: int, LenLT: int) -> ArrayFloat:
         central_roc_raw = calculate_central_rate_of_change_raw(self.log_returns_array, LenST, LenLT)
         return sign_normalization(central_roc_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def mean_price_macd(self, LenST: int, LenLT: int, MacdLength: int) -> ArrayFloat:
         mean_price_ratio_macd_raw = calculate_mean_price_macd_raw(self.prices_array, LenST, LenLT, MacdLength)
         return sign_normalization(mean_price_ratio_macd_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def median_price_macd(self, LenST: int, LenLT: int, MacdLength: int) -> ArrayFloat:
         median_price_ratio_macd_raw = calculate_median_price_macd_raw(self.prices_array, LenST, LenLT, MacdLength)
         return sign_normalization(median_price_ratio_macd_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def central_price_macd(self, LenST: int, LenLT: int, MacdLength: int) -> ArrayFloat:
         central_price_ratio_macd_raw = calculate_central_price_macd_raw(self.prices_array, LenST, LenLT, MacdLength)
         return sign_normalization(central_price_ratio_macd_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def mean_rate_of_change_macd(self, LenST: int, LenLT: int, MacdLength: int) -> ArrayFloat:
         mean_roc_macd_raw = calculate_mean_rate_of_change_macd_raw(self.log_returns_array, LenST, LenLT, MacdLength)
         return sign_normalization(mean_roc_macd_raw)
-    @indic(_indicators_registry)
+    @indic(registry=_indicators_registry)
     def median_rate_of_change_macd(self, LenST: int, LenLT: int, MacdLength: int) -> ArrayFloat:
         median_roc_macd_raw = calculate_median_rate_of_change_macd_raw(self.log_returns_array, LenST, LenLT, MacdLength)
         return sign_normalization(median_roc_macd_raw)

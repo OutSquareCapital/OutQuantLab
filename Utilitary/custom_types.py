@@ -1,8 +1,9 @@
 from numpy.typing import DTypeLike, NDArray
 import numpy as np
 from collections.abc import Callable
-from typing import Any, TypeAlias
+from typing import TypeAlias
 from pandas import DataFrame, DatetimeIndex, MultiIndex, Index, Series
+from plotly.graph_objects import Figure # type: ignore
 
 Float32: TypeAlias = np.float32
 Int32: TypeAlias = np.int32
@@ -10,7 +11,8 @@ ArrayFloat: TypeAlias = NDArray[Float32]
 ArrayInt: TypeAlias = NDArray[Int32]
 ProgressFunc: TypeAlias = Callable[[int, str], None]
 IndicatorFunc : TypeAlias = Callable[..., ArrayFloat]
-DictVariableDepth: TypeAlias = dict[str, Any]
+ClustersHierarchy: TypeAlias = dict[str, dict[str, list[str]]]
+GraphFunc: TypeAlias =  Callable[..., str|Figure]
 
 class SeriesFloat(Series): # type: ignore
     '''

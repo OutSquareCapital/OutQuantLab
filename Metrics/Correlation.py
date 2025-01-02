@@ -4,6 +4,11 @@ import numpy as np
 def calculate_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:
     return np.corrcoef(returns_array, rowvar=False, dtype=Float32)
 
+def calculate_distance_matrix(returns_array: ArrayFloat) -> ArrayFloat:
+    corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)
+    distances: ArrayFloat = np.sqrt(2 * (1 - corr_matrix))
+    return distances
+
 def calculate_overall_average_correlation(returns_array: ArrayFloat) -> ArrayFloat:
     corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)
     sum_correlations: ArrayFloat = np.sum(corr_matrix, axis=1)

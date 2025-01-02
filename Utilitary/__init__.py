@@ -32,7 +32,8 @@ from Utilitary.custom_types import (
     ArrayInt,
     ProgressFunc,
     IndicatorFunc,
-    DictVariableDepth,
+    ClustersHierarchy,
+    GraphFunc,
     SeriesFloat,
     DataFrameFloat
 )
@@ -66,7 +67,8 @@ __all__ = [
     'ArrayInt',
     'ProgressFunc',
     'IndicatorFunc',
-    'DictVariableDepth',
     'SeriesFloat',
-    'DataFrameFloat'
+    'DataFrameFloat',
+    'ClustersHierarchy',
+    'GraphFunc'
 ]

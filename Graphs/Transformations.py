@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from Metrics import calculate_overall_mean
-from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, DictVariableDepth, PERCENTAGE_FACTOR, Float32, ArrayInt
+from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, PERCENTAGE_FACTOR, Float32, ArrayInt
 
 def fill_correlation_matrix(corr_matrix: ArrayFloat) -> ArrayFloat:
     np.fill_diagonal(a=corr_matrix, val=np.nan)
@@ -25,7 +25,7 @@ def convert_multiindex_to_labels(df: DataFrameFloat) -> list[str]:
     return labels
 
 def prepare_sunburst_data(
-    cluster_dict:DictVariableDepth, 
+    cluster_dict:dict[str, list[str]], 
     parent_label:str="", 
     labels: list[str]|None = None, 
     parents: list[str]|None = None

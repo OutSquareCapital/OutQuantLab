@@ -3,11 +3,11 @@ from Utilitary import ANNUALIZED_PERCENTAGE_FACTOR, ArrayFloat
 import bottleneck as bn # type: ignore
 from Metrics.Aggregation import rolling_mean, rolling_median
 
-def overall_volatility(array: ArrayFloat) -> ArrayFloat:
-    return bn.nanstd(array, axis=0, ddof=1) # type: ignore
+def overall_volatility(returns_array: ArrayFloat) -> ArrayFloat:
+    return bn.nanstd(returns_array, axis=0, ddof=1) # type: ignore
 
-def overall_volatility_annualized(array: ArrayFloat) -> ArrayFloat:
-    return overall_volatility(array) * ANNUALIZED_PERCENTAGE_FACTOR
+def overall_volatility_annualized(returns_array: ArrayFloat) -> ArrayFloat:
+    return overall_volatility(returns_array=returns_array) * ANNUALIZED_PERCENTAGE_FACTOR
 
 def rolling_volatility(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof = 1) # type: ignore
