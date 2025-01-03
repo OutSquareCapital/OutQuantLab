@@ -13,25 +13,26 @@ from Utilitary import (
 CLUSTERS_PARAMETERS,
 FRAME_STYLE
 )
-from UI.Common_UI import (
-generate_backtest_params_sliders, 
-set_background_image, 
-set_frame_design, 
-create_button,
+from UI.Results_UI import (
 generate_stats_display,
 generate_home_button,
 setup_results_graphs,
 generate_clusters_button_layout,
-generate_graphs_buttons
+generate_graphs_buttons,
+generate_backtest_params_sliders
+)
+from UI.Common_UI import (
+set_background_image, 
+set_frame_design, 
+create_button,
 )
 from UI.Config_UI import (
 AssetSelectionWidget, 
-IndicatorsConfigWidget, 
-TreeStructureWidget,
-ClustersTree,
+IndicatorsConfigWidget,
 AssetsCollection, 
 IndicatorsCollection
 )
+from UI.Clusters_UI import TreeStructureWidget, ClustersTree
 from Graphs import GraphsCollection
 from Utilitary import DataFrameFloat
 
@@ -59,8 +60,8 @@ def setup_home_page(
     
     asset_widget = AssetSelectionWidget(assets_collection=assets_collection)
     indicator_widget = IndicatorsConfigWidget(indicators_collection=indicators_collection)
-    asset_tree_widget = TreeStructureWidget(collection=assets_collection, clusters=assets_clusters)
-    method_tree_widget = TreeStructureWidget(collection=indicators_collection, clusters=indicators_clusters)
+    asset_tree_widget = TreeStructureWidget(entities_names=assets_collection.all_entities_names, clusters=assets_clusters)
+    method_tree_widget = TreeStructureWidget(entities_names=indicators_collection.all_entities_names, clusters=indicators_clusters)
     
     create_button(text="Run Backtest", callback=run_backtest_callback, parent_layout=buttons_layout)
     

@@ -2,28 +2,18 @@ from UI.Common_UI import (
 create_checkbox_item, 
 create_expandable_section,
 connect_sliders_to_update, 
-populate_tree_from_dict, 
-add_cluster, 
-delete_cluster,
 create_scroll_with_buttons,
 create_param_widget
 )
 from PySide6.QtWidgets import (
-QAbstractItemView, 
 QWidget, 
 QVBoxLayout,
 QCheckBox,  
 QLabel, 
 QGroupBox, 
-QHBoxLayout, 
-QSlider, 
-QTreeWidget, 
-QTreeWidgetItem,
-QPushButton, 
-QApplication
+QSlider
 )
-from PySide6.QtCore import Qt
-from ConfigClasses import AssetsCollection, ClustersTree, IndicatorsCollection
+from ConfigClasses import AssetsCollection, IndicatorsCollection
 
 class AssetSelectionWidget(QWidget):
     def __init__(self, assets_collection: AssetsCollection) -> None:
@@ -160,46 +150,3 @@ class IndicatorsConfigWidget(QWidget):
     def unselect_all_indicators(self) -> None:
         for checkbox in self.checkboxes.values():
             checkbox.setChecked(False)
-
-class TreeStructureWidget(QWidget):
-    def __init__(self, collection: AssetsCollection|IndicatorsCollection, clusters: ClustersTree) -> None:
-        super().__init__()
-        self.collection: AssetsCollection | IndicatorsCollection = collection
-        self.clusters_tree: ClustersTree = clusters
-        self.tree = QTreeWidget()
-        self.init_ui()
-
-    def init_ui(self) -> None:
-        self.tree.setHeaderHidden(True)
-        self.tree.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
-        self.tree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
-        self.tree.itemClicked.connect(slot=self.handle_item_click)
-        layout = QVBoxLayout()
-        populate_tree_from_dict(tree=self.tree, clusters=self.clusters_tree.clusters, names=self.collection.all_entities_names)
-        layout.addWidget(self.tree)
-
-        buttons_layout = QHBoxLayout()
-        add_button = QPushButton(text="Add Cluster")
-        delete_button = QPushButton(text="Delete Cluster")
-
-        add_button.clicked.connect(slot=lambda: add_cluster(tree=self.tree, tree_structure=self.clusters_tree.clusters))
-        delete_button.clicked.connect(slot=lambda: delete_cluster(tree=self.tree, tree_structure=self.clusters_tree.clusters))
-
-
-        buttons_layout.addWidget(add_button)
-        buttons_layout.addWidget(delete_button)
-
-        layout.addLayout(buttons_layout)
-        self.setLayout(layout)
-
-    def handle_item_click(self, item: QTreeWidgetItem) -> None:
-        if Qt.KeyboardModifier.ControlModifier & QApplication.keyboardModifiers():
-            item.setSelected(not item.isSelected())
-        elif Qt.KeyboardModifier.ShiftModifier & QApplication.keyboardModifiers():
-            current_items: list[QTreeWidgetItem] = self.tree.selectedItems()
-            if current_items:
-                start = self.tree.indexOfTopLevelItem(current_items[0])
-                end = self.tree.indexOfTopLevelItem(item)
-                if start != -1 and end != -1:
-                    for i in range(min(start, end), max(start, end) + 1):
-                        self.tree.topLevelItem(i).setSelected(True)
