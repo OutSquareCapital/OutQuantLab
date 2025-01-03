@@ -9,10 +9,10 @@ from Indicators.Indics_Raw import smoothed_skewness
 from DataBase import process_html_temp_file
 
 def format_metric_name(name: str) -> str:
-    return name.replace("calculate", "").replace("overall", "").replace("_", " ").title()
+    return name.replace("calculate_", "").replace("overall_", "").replace("_", " ").title()
 
 def format_plot_name(name: str) -> str:
-    return name.replace("plot_", "").replace("_", " ").title()
+    return name.replace("plot", "").replace("_", " ").title()
 
 def generate_html_or_show(fig: go.Figure, as_html: bool) -> str|go.Figure:
     if as_html:

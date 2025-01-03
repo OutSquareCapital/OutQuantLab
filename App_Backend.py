@@ -58,7 +58,11 @@ class OutQuantLab:
         self.db.select['assets_clusters'].save_json(data=self.assets_clusters.clusters)
 
 if __name__ == "__main__":
+        import time
+        start = time.perf_counter()
         oql = OutQuantLab(progress_callback=handle_progress)
         oql.run_backtest()
-        print(oql.grph.get_metrics(returns_df=oql.global_portfolio))
-        oql.grph.plot_clusters_icicle(returns_df=oql.sub_portfolios, show_legend=False, as_html=False)
+        for metric, value in oql.grph.get_metrics(returns_df=oql.global_portfolio).items():
+            print(f"{metric}: {value}")
+        end = time.perf_counter()
+        print(f"Finished in {end-start:.2f} seconds")

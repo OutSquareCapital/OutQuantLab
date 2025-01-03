@@ -22,8 +22,6 @@ def calculate_strategy_returns(
     total_returns_streams: int = total_assets_count * sum([indic.strategies_nb for indic in indicators_params])
     signals_array: ArrayFloat = np.empty(shape=(pct_returns_array.shape[0], total_returns_streams), dtype=Float32)
 
-    import time
-    start: float = time.perf_counter()
     for indic in indicators_params:
         results: list[ArrayFloat] = indics_methods.process_indicator_parallel(
             func=indic.func, 
@@ -39,8 +37,7 @@ def calculate_strategy_returns(
             int(100 * signal_col_index / total_returns_streams),
             f"Backtesting Strategies: {signal_col_index}/{total_returns_streams}..."
         )
-    end: float = time.perf_counter() - start
-    print(f"Time taken: {end:.2f} seconds")
+
     return DataFrameFloat(
         data=signals_array,
         index=dates_index,
