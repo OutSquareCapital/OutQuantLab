@@ -121,7 +121,6 @@ def setup_results_page(
     sub_returns_df: DataFrameFloat,
     graphs: GraphsCollection,
     back_to_home_callback:Callable[..., None], 
-    metrics: dict[str, float],
     background: str) -> None:
 
     results_widget = QWidget()
@@ -137,7 +136,7 @@ def setup_results_page(
     other_plots
     ) = generate_graphs_buttons(parent=parent,returns_df=sub_returns_df, graphs=graphs)
 
-    stats_layout: QVBoxLayout = generate_stats_display( metrics=metrics)
+    stats_layout: QVBoxLayout = generate_stats_display( metrics=graphs.get_metrics(returns_df=global_returns_df))
     backtest_parameters_layout: QVBoxLayout = generate_backtest_params_sliders()
     clusters_buttons_layout: QVBoxLayout = generate_clusters_button_layout(clusters_params=CLUSTERS_PARAMETERS)
     home_layout: QVBoxLayout = generate_home_button(back_to_home_callback=back_to_home_callback)

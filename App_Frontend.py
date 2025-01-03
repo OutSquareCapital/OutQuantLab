@@ -52,7 +52,6 @@ class MainApp(QMainWindow):
         sub_returns_df=self.ql.sub_portfolios,
         graphs=self.ql.grph,
         back_to_home_callback=self.show_home_page,
-        metrics=self.ql.grph.get_metrics(returns_df=self.ql.global_portfolio),
         background=self.ql.db.select['dashboard_page'].full_path
         )
 
