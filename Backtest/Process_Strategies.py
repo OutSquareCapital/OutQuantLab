@@ -46,94 +46,45 @@ def calculate_strategy_returns(
 
 def calculate_portfolio_returns(
     returns_df: DataFrameFloat,
-    by_asset_cluster: bool = False,
-    by_asset_cluster_sub: bool = False,
-    by_asset: bool = False,
-    by_indic_cluster: bool = False,
-    by_indic_cluster_sub: bool = False,
-    by_indic: bool = False,
-    by_param: bool = False
+    grouping_levels: list[str]
     ) -> DataFrameFloat:
 
-    grouping_levels:list[str] = []
-    if by_asset_cluster:
-        grouping_levels.append("AssetCluster")
-    if by_asset_cluster_sub:
-        grouping_levels.append("AssetSubCluster")
-    if by_asset:
-        grouping_levels.append("Asset")
-    if by_indic_cluster:
-        grouping_levels.append("IndicCluster")
-    if by_indic_cluster_sub:
-        grouping_levels.append("IndicSubCluster")
-    if by_indic:
-        grouping_levels.append("Indicator")
-    if by_param:
-        grouping_levels.append("Param")
-
     if grouping_levels:
-        grouped: pd.DataFrame = returns_df.T.groupby(level=grouping_levels, observed=True).mean().T # type: ignore
-        return DataFrameFloat(data=grouped)
+        return DataFrameFloat(
+            data=returns_df
+            .T
+            .groupby(level=grouping_levels, observed=True) # type: ignore
+            .mean()
+            .T
+            )
 
-    global_portfolio: ArrayFloat = calculate_overall_mean(returns_df.nparray, axis=1)
     return DataFrameFloat(
-        data=global_portfolio,
+        data=calculate_overall_mean(array=returns_df.nparray, axis=1),
         index=returns_df.dates,
         columns=['Portfolio']
         )
 
-def aggregate_raw_returns(raw_adjusted_returns_df: DataFrameFloat, all_history: bool = False) -> tuple[DataFrameFloat, DataFrameFloat]:
-    
+def aggregate_raw_returns(
+    raw_adjusted_returns_df: DataFrameFloat,
+    clusters_structure: list[str],
+    all_history: bool = False
+) -> tuple[DataFrameFloat, DataFrameFloat]:
     if not all_history:
-        raw_adjusted_returns_df= raw_adjusted_returns_df.dropna(axis=0) # type: ignore
-    
-    df_indic: DataFrameFloat = calculate_portfolio_returns(
+        raw_adjusted_returns_df.dropna(axis=0, inplace=True)  # type: ignore
+    clusters_nb: int = len(clusters_structure) - 1
+    for i in range(clusters_nb, 0, -1):
+        grouping_levels: list[str] = clusters_structure[:i]
+        raw_adjusted_returns_df = calculate_portfolio_returns(
+            returns_df=raw_adjusted_returns_df,
+            grouping_levels=grouping_levels
+        )
+
+        if len(grouping_levels) == 2:
+            df_asset = DataFrameFloat(data=raw_adjusted_returns_df)
+
+    raw_adjusted_returns_df = calculate_portfolio_returns(
         returns_df=raw_adjusted_returns_df,
-        by_asset_cluster=True,
-        by_asset_cluster_sub=True,
-        by_asset=True,
-        by_indic_cluster=True,
-        by_indic_cluster_sub=True,
-        by_indic=True
+        grouping_levels=[]
     )
 
-    df_indic_subcluster: DataFrameFloat = calculate_portfolio_returns(
-        returns_df=df_indic,
-        by_asset_cluster=True,
-        by_asset_cluster_sub=True,
-        by_asset=True,
-        by_indic_cluster=True,
-        by_indic_cluster_sub=True
-    )
-
-    df_indic_cluster: DataFrameFloat = calculate_portfolio_returns(
-        returns_df=df_indic_subcluster,
-        by_asset_cluster=True,
-        by_asset_cluster_sub=True,
-        by_asset=True,
-        by_indic_cluster=True
-    )
-
-    df_asset: DataFrameFloat = calculate_portfolio_returns(
-        returns_df=df_indic_cluster,
-        by_asset_cluster=True,
-        by_asset_cluster_sub=True,
-        by_asset=True
-    )
-
-    df_asset_subcluster: DataFrameFloat = calculate_portfolio_returns(
-        returns_df=df_asset,
-        by_asset_cluster=True,
-        by_asset_cluster_sub=True
-    )
-
-    df_asset_cluster: DataFrameFloat = calculate_portfolio_returns(
-        returns_df=df_asset_subcluster,
-        by_asset_cluster=True
-    )
-
-    df_global: DataFrameFloat = calculate_portfolio_returns(
-        returns_df=df_asset_cluster
-    )
-
-    return df_global, df_asset
+    return raw_adjusted_returns_df, df_asset # type: ignore

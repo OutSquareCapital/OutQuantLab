@@ -1,4 +1,3 @@
-from pandas import MultiIndex
 from Utilitary import ProgressFunc, DataFrameFloat
 from Backtest import calculate_strategy_returns, aggregate_raw_returns
 from Indicators import IndicatorsMethods
@@ -26,7 +25,7 @@ class OutQuantLab:
         self.progress_callback = progress_callback
     def run_backtest(self) -> None:
         indics_methods = IndicatorsMethods()
-        multi_index: MultiIndex = generate_multi_index_process(
+        multi_index, clusters_structure = generate_multi_index_process(
             indicators_params=self.indicators_collection.indicators_params, 
             asset_names=self.assets_collection.all_active_entities_names, 
             assets_clusters=self.assets_clusters, 
@@ -47,9 +46,9 @@ class OutQuantLab:
 
         self.global_portfolio, self.sub_portfolios = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df, 
-            all_history=False
+            all_history=False,
+            clusters_structure=clusters_structure
             )
-
     def save_all(self) -> None:
         self.db.select['assets_to_test'].save_json(data=self.assets_collection.all_active_entities_dict)
         self.db.select['indics_to_test'].save_json(data=self.indicators_collection.all_active_entities_dict)
