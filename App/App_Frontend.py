@@ -1,38 +1,14 @@
-from PySide6.QtWidgets import QMainWindow,  QApplication, QProgressBar, QTextEdit
+from PySide6.QtWidgets import QMainWindow
 from PySide6.QtGui import QCloseEvent
 from UI import setup_home_page, setup_backtest_page, setup_results_page
 from App.App_Backend import OutQuantLab
-from DataBase import cleanup_temp_files, DataBaseQueries
-from PySide6.QtGui import QIcon
-from Utilitary import GLOBAL_STYLE
-
-
-class OutQuantLabGUI(QApplication):
-    def __init__(self, argv: list[str], database: DataBaseQueries) -> None:
-        super().__init__(argv)
-        self.setWindowIcon(QIcon(database.select['app_logo'].full_path))
-        self.setStyleSheet(GLOBAL_STYLE)
-        self.main_window = MainWindow(database=database)
 
 class MainWindow(QMainWindow):
-    def __init__(self, database: DataBaseQueries) -> None:
+    def __init__(self, outquantlab: OutQuantLab) -> None:
         super().__init__()
-        self.progress_bar:QProgressBar
-        self.log_output:QTextEdit
-        self.oql = OutQuantLab(progress_callback=self.update_progress, database=database)
+        self.oql: OutQuantLab = outquantlab
         self.show_home_page()
         self.showMaximized()
-
-    def update_progress(
-        self,
-        value: int, 
-        message: str) -> None:
-        
-        self.progress_bar.setValue(value)
-        if message:
-            self.log_output.clear()
-            self.log_output.append(message)
-        QApplication.processEvents()
 
     def show_home_page(self) -> None:
         setup_home_page(
@@ -64,5 +40,5 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event: QCloseEvent) -> None:
         self.oql.save_all()
-        cleanup_temp_files()
+        self.oql.db.cleanup_temp_files()
         super().closeEvent(event)

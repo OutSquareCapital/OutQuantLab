@@ -1,20 +1,15 @@
-import sys
-from App import OutQuantLabGUI, OutQuantLab
-from DataBase import DataBaseQueries
-
-def handle_progress(progress: int, message: str) -> None:
-    print(f"[{progress}%] {message}")
-
-def run(gui: bool = False) -> None:
-    database = DataBaseQueries()
-    if gui:
-        app = OutQuantLabGUI(argv=sys.argv, database=database)
-        sys.exit(app.exec())
+if __name__ == "__main__":
+    print(f'initializing OutQuantLab...')
+    from sys import exit
+    from App import OutQuantLabCLI, OutQuantLabGUI
+    choice = '1'
+    #choice = input("Enter 1 to run CLI, 2 to run GUI: ")
+    if choice == '1':
+        OutQuantLabCLI()
+        exit(0)
+    elif choice == '2':
+        app = OutQuantLabGUI()
+        exit(app.exec())
     else:
-        oql = OutQuantLab(progress_callback=handle_progress, database=database)
-        oql.run_backtest()
-        metrics: dict[str, float] = oql.grph.get_metrics(returns_df=oql.global_portfolio)
-        for metric, value in metrics.items():
-            print(f"{metric}: {value}")
-
-run(gui=False)
+        print("Exiting...")
+        exit(0)

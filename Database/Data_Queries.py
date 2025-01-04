@@ -29,15 +29,6 @@ def save_html(file_path: str, data: Any) -> None:
     with open(file=file_path, mode='w', encoding=HTML_ENCODING) as f:
         f.write(data)
 
-def cleanup_temp_files(temp_dir:str = TEMPFILES_DIR, suffix:str = FIG_TEMP_FILES) -> None:
-    for file_name in os.listdir(path=temp_dir):
-        if file_name.endswith(suffix):
-            file_path: str = os.path.join(temp_dir, file_name)
-            try:
-                os.remove(path=file_path)
-            except Exception as e:
-                raise Exception(f"Erreur lors de la suppression du fichier temporaire {file_path} : {e}")
-
 @dataclass(frozen=True)
 class DataFile:
     ext: str
@@ -92,8 +83,8 @@ class DataBaseQueries:
                     )
 
                     self.select[file_base] = datafile
-
-    def get_yahoo_finance_data(self, f: DataFile, assets: list[str]) -> pd.DataFrame:
+    @staticmethod
+    def get_yahoo_finance_data(assets: list[str]) -> pd.DataFrame:
         data: pd.DataFrame|None = yf.download(  # type: ignore
             tickers=assets,
             interval="1d",
@@ -104,3 +95,13 @@ class DataBaseQueries:
             raise ValueError("Yahoo Finance Data Not Available")
         else:
             return DataFrameFloat(data=data["Close"]) # type: ignore
+
+    @staticmethod
+    def cleanup_temp_files(temp_dir:str = TEMPFILES_DIR, suffix:str = FIG_TEMP_FILES) -> None:
+        for file_name in os.listdir(path=temp_dir):
+            if file_name.endswith(suffix):
+                file_path: str = os.path.join(temp_dir, file_name)
+                try:
+                    os.remove(path=file_path)
+                except Exception as e:
+                    raise Exception(f"Erreur lors de la suppression du fichier temporaire {file_path} : {e}")
