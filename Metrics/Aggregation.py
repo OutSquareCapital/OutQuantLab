@@ -24,18 +24,18 @@ def rolling_min(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFlo
     return bn.move_min(array, window=length, min_count=min_length, axis=0) # type: ignore
 
 def rolling_central(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
-    upper = rolling_max(array=array, length=length, min_length=min_length)
-    lower = rolling_min(array=array, length=length, min_length=min_length)
+    upper: ArrayFloat = rolling_max(array=array, length=length, min_length=min_length)
+    lower: ArrayFloat = rolling_min(array=array, length=length, min_length=min_length)
     return (upper + lower) / 2
 
 def rolling_sum(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_sum(array, window=length, min_count=min_length, axis=0) # type: ignore
 
 def rolling_quantile_ratio(returns_array: ArrayFloat, window: int, quantile_spread: float) -> ArrayFloat:
-    quantile_low = 0.5 - quantile_spread
-    quantile_high = 0.5 + quantile_spread
-    df = pl.DataFrame(returns_array).with_columns([
-        pl.all().fill_nan(None)
+    quantile_low: float = 0.5 - quantile_spread
+    quantile_high: float = 0.5 + quantile_spread
+    df: pl.DataFrame = pl.DataFrame(data=returns_array).with_columns([
+        pl.all().fill_nan(value=None)
     ])
     quantile_low_values = df.select(
         pl.all().rolling_quantile(quantile=quantile_low, window_size=window, min_periods=window)

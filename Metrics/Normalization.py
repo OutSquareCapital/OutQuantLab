@@ -14,8 +14,7 @@ def sign_normalization(signal_array: ArrayFloat) -> ArrayFloat:
     return np.sign(signal_array, out=signal_array)
 
 def relative_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
-    average_signal: ArrayFloat = rolling_mean(array=signal_array, length=length, min_length=1)
-    return signal_array - average_signal
+    return signal_array - rolling_mean(array=signal_array, length=length, min_length=1)
 
 def z_score_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
     relative_data: ArrayFloat = relative_normalization(signal_array=signal_array, length=length)

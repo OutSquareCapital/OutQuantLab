@@ -1,7 +1,8 @@
 import numpy as np
-from Utilitary import ANNUALIZED_PERCENTAGE_FACTOR, ArrayFloat
+from Utilitary import ArrayFloat
 import bottleneck as bn # type: ignore
 from Metrics.Aggregation import rolling_mean, rolling_median
+from Metrics.Maths_Constants import ANNUALIZED_PERCENTAGE_FACTOR
 
 def overall_volatility(returns_array: ArrayFloat) -> ArrayFloat:
     return bn.nanstd(returns_array, axis=0, ddof=1) # type: ignore

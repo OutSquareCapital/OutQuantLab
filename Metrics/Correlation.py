@@ -6,12 +6,10 @@ def calculate_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:
 
 def calculate_distance_matrix(returns_array: ArrayFloat) -> ArrayFloat:
     corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)
-    distances: ArrayFloat = np.sqrt(2 * (1 - corr_matrix))
-    return distances
+    return np.sqrt(2 * (1 - corr_matrix))
 
 def calculate_overall_average_correlation(returns_array: ArrayFloat) -> ArrayFloat:
     corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)
     sum_correlations: ArrayFloat = np.sum(corr_matrix, axis=1)
     sum_without_diagonal: ArrayFloat = sum_correlations - 1
-    mean_correlations: ArrayFloat = sum_without_diagonal / (corr_matrix.shape[1] - 1)
-    return mean_correlations
+    return sum_without_diagonal / (corr_matrix.shape[1] - 1)

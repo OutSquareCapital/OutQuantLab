@@ -54,6 +54,8 @@ from Metrics.Normalization import (
     relative_normalization,
     calculate_indicator_on_trend_signal
 )
+from Metrics.Maths_Constants import PERCENTAGE_FACTOR
+
 __all__: list[str] = [
     
     'calculate_overall_monthly_skewness',
@@ -95,5 +97,6 @@ __all__: list[str] = [
     'ratio_normalization',
     'sign_normalization',
     'relative_normalization',
-    'calculate_indicator_on_trend_signal'
+    'calculate_indicator_on_trend_signal',
+    'PERCENTAGE_FACTOR'
 ]
