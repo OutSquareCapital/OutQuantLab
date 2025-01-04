@@ -4,14 +4,12 @@ from Indicators import IndicatorsMethods
 from ConfigClasses import AssetsCollection, IndicatorsCollection, ClustersTree, generate_multi_index_process
 from Graphs import GraphsCollection
 from DataBase import DataBaseQueries
-def handle_progress(progress: int, message: str) -> None:
-    print(f"[{progress}%] {message}")
 
 class OutQuantLab:
-    def __init__(self, progress_callback: ProgressFunc) -> None:
+    def __init__(self, progress_callback: ProgressFunc, database: DataBaseQueries) -> None:
         self.global_portfolio: DataFrameFloat
         self.sub_portfolios: DataFrameFloat
-        self.db: DataBaseQueries = DataBaseQueries()
+        self.db: DataBaseQueries = database
         self.assets_collection = AssetsCollection(
             assets_to_test=self.db.select['assets_to_test'].load_json(), 
             asset_names=self.db.select['price_data'].load_asset_names())
@@ -23,6 +21,7 @@ class OutQuantLab:
         self.indicators_clusters = ClustersTree(clusters=self.db.select['indics_clusters'].load_json())
         self.grph = GraphsCollection(length=250, max_clusters=5, returns_limit=0.05)
         self.progress_callback = progress_callback
+
     def run_backtest(self) -> None:
         indics_methods = IndicatorsMethods()
         multi_index, clusters_structure = generate_multi_index_process(
@@ -49,19 +48,10 @@ class OutQuantLab:
             all_history=False,
             clusters_structure=clusters_structure
             )
+
     def save_all(self) -> None:
         self.db.select['assets_to_test'].save_json(data=self.assets_collection.all_active_entities_dict)
         self.db.select['indics_to_test'].save_json(data=self.indicators_collection.all_active_entities_dict)
         self.db.select['indics_params'].save_json(data=self.indicators_collection.all_params_config)
         self.db.select['indics_clusters'].save_json(data=self.indicators_clusters.clusters)
         self.db.select['assets_clusters'].save_json(data=self.assets_clusters.clusters)
-
-if __name__ == "__main__":
-        import time
-        start = time.perf_counter()
-        oql = OutQuantLab(progress_callback=handle_progress)
-        oql.run_backtest()
-        for metric, value in oql.grph.get_metrics(returns_df=oql.global_portfolio).items():
-            print(f"{metric}: {value}")
-        end = time.perf_counter()
-        print(f"Finished in {end-start:.2f} seconds")

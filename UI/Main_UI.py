@@ -5,13 +5,13 @@ QHBoxLayout,
 QVBoxLayout,
 QProgressBar, 
 QTextEdit,
-QMainWindow,
-QApplication
+QMainWindow
 )
 from collections.abc import Callable
 from Utilitary import (
 CLUSTERS_PARAMETERS,
-FRAME_STYLE
+FRAME_STYLE,
+APP_NAME
 )
 from UI.Results_UI import (
 generate_stats_display,
@@ -46,7 +46,7 @@ def setup_home_page(
     background:str
     ) -> None:
 
-    parent.setWindowTitle("OutQuantLab")
+    parent.setWindowTitle(APP_NAME)
     main_widget = QWidget()
     main_layout = QHBoxLayout(main_widget)
     right_layout = QVBoxLayout()
@@ -152,15 +152,3 @@ def setup_results_page(
     results_layout.addWidget(bottom_frame, stretch=29)
 
     parent.setCentralWidget(results_widget)
-
-def update_progress_with_events(
-    progress_bar: QProgressBar, 
-    log_output: QTextEdit, 
-    value: int, 
-    message: str) -> None:
-    
-    progress_bar.setValue(value)
-    if message:
-        log_output.clear()
-        log_output.append(message)
-    QApplication.processEvents()
