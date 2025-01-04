@@ -67,24 +67,24 @@ def calculate_portfolio_returns(
 def aggregate_raw_returns(
     raw_adjusted_returns_df: DataFrameFloat,
     clusters_structure: list[str],
-    all_history: bool = False
+    all_history: bool,
+    progress_callback: ProgressFunc
 ) -> tuple[DataFrameFloat, DataFrameFloat]:
     if not all_history:
         raw_adjusted_returns_df.dropna(axis=0, inplace=True)  # type: ignore
     clusters_nb: int = len(clusters_structure) - 1
-    for i in range(clusters_nb, 0, -1):
+    for i in range(clusters_nb, -1, -1):
         grouping_levels: list[str] = clusters_structure[:i]
         raw_adjusted_returns_df = calculate_portfolio_returns(
             returns_df=raw_adjusted_returns_df,
             grouping_levels=grouping_levels
         )
-
         if len(grouping_levels) == 2:
             df_asset = DataFrameFloat(data=raw_adjusted_returns_df)
 
-    raw_adjusted_returns_df = calculate_portfolio_returns(
-        returns_df=raw_adjusted_returns_df,
-        grouping_levels=[]
-    )
+        progress_callback(
+            int(100 * (clusters_nb - i) / clusters_nb),
+            f"Aggregating Strategies: {len(raw_adjusted_returns_df.columns)} to 1 Strategies..."
+        )
 
     return raw_adjusted_returns_df, df_asset # type: ignore
