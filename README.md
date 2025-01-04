@@ -1,30 +1,124 @@
-
 # OutQuantLab
 
-**OutQuantLab** is a comprehensive Python framework for financial research and systematic trading strategy development.  
-Designed with modularity, performance, and scalability in mind, it provides tools for data processing, signal generation, backtesting, portfolio management, and visualization, empowering researchers and traders to build and test complex strategies efficiently.
+OutQuantLab is a comprehensive Python-based quantitative analysis platform for backtesting systematic trading strategies, with emphasis on technical indicators and clustering analysis.
 
-List of available dashboards so far:  
-- Equity
-- Rolling Volatility
-- Rolling Drawdown
-- Rolling Sharpe Ratio
-- Rolling Smoothed Skewness
-- Rolling Average Correlation
-- Overall Returns
-- Overall Sharpe Ratio
-- Overall Volatility
-- Overall Average Drawdown
-- Overall Average Inverted Correlation
-- Overall Monthly Skew
-- Returns Distribution Violin
-- Returns Distribution Histogram
-- Correlation Heatmap
-- Clusters Icicle
+## Key Features
 
-Use:  
-```python
-outquantlab = OutQuantLab(progress_callback=handle_progress)
-outquantlab.run_backtest()
-outquantlab.dashboards.plot("Equity").show()
+### Trading Strategy Analysis
+- Multi-threaded backtesting engine
+- Extensive library of technical indicators:
+  - Moving averages (mean, median, central)
+  - MACD variations
+  - Momentum indicators
+  - Volatility-based indicators
+  - Advanced statistics (skewness, kurtosis)
+- Strategy parameter optimization
+- Performance metrics and risk analysis
+
+### Data Management
+- Integration with Yahoo Finance
+- Custom DataFrame types optimized for financial data
+- Local data storage in Parquet format
+- Efficient data processing with NumPy/Pandas
+
+### Advanced Analytics
+- Dynamic asset clustering
+- Correlation analysis
+- Distribution analysis
+- Volatility normalization
+- Multi-level hierarchical organization
+
+### Visualization
+- Interactive equity curves
+- Performance metrics dashboards
+- Distribution plots (violin, histogram)
+- Correlation heatmaps
+- Hierarchical clustering visualization
+- Custom color schemes
+
+### User Interface
+- Full-featured GUI built with PySide6
+- Command-line interface
+- Interactive parameter configuration
+- Real-time progress tracking
+- Expandable/collapsible panels
+
+## Requirements
+
+### Core Dependencies
+- Python 3.10+
+- NumPy
+- Pandas
+- Plotly
+- PySide6
+- SciPy
+- yfinance
+- bottleneck
+- polars
+- pyarrow
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/OutSquareCapital/OutQuantLab.git
+cd OutQuantLab
 ```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+Launch the application:
+```bash
+python Run.py
+```
+
+Choose your interface:
+- Enter `1` for CLI mode
+- Enter `2` for GUI mode
+
+## Project Structure
+
+```
+OutQuantLab/
+├── App/                 # Application core
+├── Backtest/           # Backtesting engine
+├── ConfigClasses/      # Configuration management
+├── DataBase/          # Data handling
+├── Graphs/            # Visualization tools
+├── Indicators/        # Technical indicators
+├── Metrics/          # Performance metrics
+├── UI/               # User interface
+├── Utilitary/        # Utility functions
+└── Run.py           # Entry point
+```
+
+## Development
+
+### Adding New Indicators
+
+1. Define raw calculations in `Indicators/Indics_Raw.py`
+2. Add normalized version in `Indicators/Indics_Normalized.py`
+3. Use the `@indic` decorator to register the indicator
+
+### Creating Visualization Widgets
+
+1. Define widget in `Graphs/Widgets.py`
+2. Add color scheme in `Graphs/Design.py`
+3. Implement data transformations in `Graphs/Transformations.py`
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+[MIT License](LICENSE)
