@@ -27,7 +27,8 @@ class OutQuantLabCLI:
 class OutQuantLab:
     def __init__(self, progress_callback: ProgressFunc, database: DataBaseQueries) -> None:
         self.global_portfolio: DataFrameFloat
-        self.sub_portfolios: DataFrameFloat
+        self.sub_portfolios_roll: DataFrameFloat
+        self.sub_portfolios_ovrll: DataFrameFloat
         self.db: DataBaseQueries = database
         self.assets_collection = AssetsCollection(
             assets_to_test=self.db.select['assets_to_test'].load_json(), 
@@ -63,7 +64,7 @@ class OutQuantLab:
         multi_index=multi_index, 
         progress_callback=self.progress_callback)
 
-        self.global_portfolio, self.sub_portfolios = aggregate_raw_returns(
+        self.global_portfolio, self.sub_portfolios_roll, self.sub_portfolios_ovrll = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,
             all_history=True,

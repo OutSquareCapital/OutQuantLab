@@ -3,14 +3,6 @@ import matplotlib.colors as mcolors
 import plotly.graph_objects as go # type: ignore
 from Utilitary import COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK, FIG_FONT, FIG_LEGEND_FONT, FIG_TITLE_FONT
 
-def determine_category(name: str) -> str:
-    if "overall" in name:
-        return "overall"
-    elif "rolling" in name:
-        return "rolling"
-    else:
-        return "other"
-
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
     cmap_name = "custom_colormap"
     if n_colors == 1:

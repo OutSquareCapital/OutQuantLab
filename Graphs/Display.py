@@ -1,4 +1,4 @@
-from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat
+from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, GraphFunc
 from Graphs.Transformations import sort_dataframe, sort_series, convert_multiindex_to_labels, format_returns, fill_correlation_matrix, prepare_sunburst_data
 import Graphs.Widgets as Widgets 
 import Metrics as Computations
@@ -25,15 +25,21 @@ class GraphsCollection:
         self.length: int = length
         self.max_clusters: int = max_clusters
         self.returns_limit: float = returns_limit
+        self.all_plots_dict: dict[str, dict[str, GraphFunc]] = self.get_all_plots_dict()
 
-    def get_all_plots_dict(self) -> dict[str, Callable[..., str|go.Figure]]:
-        all_plots_dict: dict[str, Callable[..., str|go.Figure]] = {}
+    def get_all_plots_dict(self) -> dict[str, dict[str, GraphFunc]]:
+        all_plots_dict: dict[str, dict[str, GraphFunc]] = {
+            "Overall": {},
+            "Rolling": {},
+            "Stats": {}
+        }
         
         for method in dir(self):
             if method.startswith("plot_"):
+                category_name: str = method.split("_")[1].title()
                 name: str = format_plot_name(name=method)
-                func: Callable[..., str|go.Figure] = getattr(self, method)
-                all_plots_dict[name] = func
+                func: GraphFunc = getattr(self, method)
+                all_plots_dict[category_name][name] = func
         return all_plots_dict
 
     def get_metrics(self, returns_df: DataFrameFloat) -> dict[str, float]:
@@ -54,7 +60,7 @@ class GraphsCollection:
             for name, result in zip(metric_names, results)
         }
 
-    def plot_equity(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_equity(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         equity_curves_df = DataFrameFloat(
             data=Computations.calculate_equity_curves(returns_array=returns_df.nparray),
             index=returns_df.dates,
@@ -69,7 +75,7 @@ class GraphsCollection:
 
         fig: go.Figure = Widgets.curves(
             returns_df=sorted_equity_curves,
-            title=format_plot_name(name=self.plot_equity.__name__),
+            title=format_plot_name(name=self.plot_stats_equity.__name__),
             log_scale=True,
             show_legend=show_legend
         )
@@ -224,7 +230,6 @@ class GraphsCollection:
             index=convert_multiindex_to_labels(df=returns_df)
         )
         sorted_overall_average_corr: SeriesFloat = sort_series(series=overall_average_corr, ascending=True)
-
         fig: go.Figure = Widgets.bars(
             series=sorted_overall_average_corr,
             title=format_plot_name(name=self.plot_overall_average_correlation.__name__),
@@ -248,7 +253,7 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_returns_distribution_violin(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_distribution_violin(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         formatted_pct_returns_df = DataFrameFloat(
             data=format_returns(returns_array=returns_df.nparray, limit=self.returns_limit),
             index=returns_df.dates,
@@ -257,13 +262,13 @@ class GraphsCollection:
 
         fig: go.Figure = Widgets.violin(
             data=formatted_pct_returns_df,
-            title=format_plot_name(name=self.plot_returns_distribution_violin.__name__),
+            title=format_plot_name(name=self.plot_stats_distribution_violin.__name__),
             show_legend=show_legend
         )
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_returns_distribution_histogram(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_distribution_histogram(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         formatted_pct_returns_df = DataFrameFloat(
             data=format_returns(returns_array=returns_df.nparray, limit=self.returns_limit),
             index=returns_df.dates,
@@ -272,28 +277,27 @@ class GraphsCollection:
 
         fig: go.Figure = Widgets.histogram(
             data=formatted_pct_returns_df,
-            title=format_plot_name(name=self.plot_returns_distribution_histogram.__name__),
+            title=format_plot_name(name=self.plot_stats_distribution_histogram.__name__),
             show_legend=show_legend
         )
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_correlation_heatmap(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_correlation_heatmap(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         correlation_matrix: ArrayFloat = Computations.calculate_correlation_matrix(returns_array=returns_df.nparray)
         filled_correlation_matrix: ArrayFloat = fill_correlation_matrix(corr_matrix=correlation_matrix)
         labels_list: list[str] = convert_multiindex_to_labels(df=returns_df)
-
         fig: go.Figure = Widgets.heatmap(
             z_values=filled_correlation_matrix,
             x_labels=labels_list,
             y_labels=labels_list,
-            title=format_plot_name(name=self.plot_correlation_heatmap.__name__),
+            title=format_plot_name(name=self.plot_stats_correlation_heatmap.__name__),
             show_legend=show_legend
         )
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_clusters_icicle(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_clusters_icicle(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         renamed_returns_df = DataFrameFloat(
             data=returns_df.nparray,
             index=returns_df.dates,
@@ -308,7 +312,7 @@ class GraphsCollection:
         fig: go.Figure = Widgets.icicle(
             labels=labels,
             parents=parents,
-            title=format_plot_name(name=self.plot_clusters_icicle.__name__),
+            title=format_plot_name(name=self.plot_stats_clusters_icicle.__name__),
             show_legend=show_legend
         )
 

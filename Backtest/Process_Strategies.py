@@ -64,7 +64,7 @@ def aggregate_raw_returns(
     clusters_structure: list[str],
     all_history: bool,
     progress_callback: ProgressFunc
-) -> tuple[DataFrameFloat, DataFrameFloat]:
+) -> tuple[DataFrameFloat, DataFrameFloat, DataFrameFloat]:
 
     if not all_history:
         raw_adjusted_returns_df.dropna(axis=0, how='any', inplace=True)  # type: ignore
@@ -88,13 +88,14 @@ def aggregate_raw_returns(
 
         if i == 3:
             raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
-            df_asset = DataFrameFloat(data=raw_adjusted_returns_df)
+            sub_portfolio_rolling = DataFrameFloat(data=raw_adjusted_returns_df)
+            raw_adjusted_returns_df.dropna(axis=0, how='any', inplace=True)  # type: ignore
+            sub_portfolio_overall = DataFrameFloat(data=raw_adjusted_returns_df)
 
         progress_callback(
             int(100 * (clusters_nb - i) / clusters_nb),
             f"Aggregating {' > '.join(grouping_levels)}: {len(raw_adjusted_returns_df.columns)} columns left..."
         )
-        print(f'raw_adjusted_returns_df: {raw_adjusted_returns_df}')
     progress_callback(100, "Backtest Completed!")
 
     raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
@@ -103,4 +104,4 @@ def aggregate_raw_returns(
         data=calculate_overall_mean(array=raw_adjusted_returns_df.nparray, axis=1),
         index=raw_adjusted_returns_df.dates,
         columns=['Portfolio']
-        ), df_asset # type: ignore
+        ), sub_portfolio_rolling, sub_portfolio_overall # type: ignore

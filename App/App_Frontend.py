@@ -46,7 +46,8 @@ class OutQuantLabGUI(QApplication):
         setup_results_page(
             parent=self.main_window,
             global_returns_df=self.outquantlab.global_portfolio,
-            sub_returns_df=self.outquantlab.sub_portfolios,
+            sub_portfolio_roll=self.outquantlab.sub_portfolios_roll,
+            sub_portfolio_ovrll=self.outquantlab.sub_portfolios_ovrll,
             graphs=self.outquantlab.grph,
             back_to_home_callback=self.show_home_page,
             background=self.database.select['dashboard_page'].full_path

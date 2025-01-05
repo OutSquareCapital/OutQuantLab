@@ -18,7 +18,7 @@ generate_stats_display,
 generate_home_button,
 setup_results_graphs,
 generate_clusters_button_layout,
-generate_graphs_buttons,
+generate_graph_buttons_for_category,
 generate_backtest_params_sliders
 )
 from UI.Common_UI import (
@@ -118,7 +118,8 @@ def setup_backtest_page(parent: QMainWindow, background: str) -> tuple[QProgress
 def setup_results_page(
     parent: QMainWindow,
     global_returns_df: DataFrameFloat,
-    sub_returns_df: DataFrameFloat,
+    sub_portfolio_ovrll: DataFrameFloat,
+    sub_portfolio_roll: DataFrameFloat,
     graphs: GraphsCollection,
     back_to_home_callback:Callable[..., None], 
     background: str) -> None:
@@ -130,12 +131,25 @@ def setup_results_page(
     bottom_frame: QFrame = set_frame_design(frame_style=FRAME_STYLE)
     top_layout = QHBoxLayout(top_frame)
     setup_results_graphs(parent=bottom_frame, returns_df=global_returns_df, graphs=graphs)
-    (    
-    overall_plots, 
-    rolling_plots, 
-    other_plots
-    ) = generate_graphs_buttons(parent=parent,returns_df=sub_returns_df, graphs=graphs)
-
+    overall_plots: QVBoxLayout = generate_graph_buttons_for_category(
+        parent=parent,
+        returns_df=sub_portfolio_ovrll, 
+        graph_plots=graphs.all_plots_dict['Overall'],
+        category='Overall',
+        open_on_launch=True
+        )
+    rolling_plots: QVBoxLayout = generate_graph_buttons_for_category(
+        parent=parent,
+        returns_df=sub_portfolio_roll, 
+        graph_plots=graphs.all_plots_dict['Rolling'], 
+        category='Rolling'
+        )
+    other_plots: QVBoxLayout = generate_graph_buttons_for_category(
+        parent=parent,
+        returns_df=sub_portfolio_ovrll, 
+        graph_plots=graphs.all_plots_dict['Stats'], 
+        category='Stats'
+        )
     stats_layout: QVBoxLayout = generate_stats_display( metrics=graphs.get_metrics(returns_df=global_returns_df))
     backtest_parameters_layout: QVBoxLayout = generate_backtest_params_sliders()
     clusters_buttons_layout: QVBoxLayout = generate_clusters_button_layout(clusters_params=CLUSTERS_PARAMETERS)

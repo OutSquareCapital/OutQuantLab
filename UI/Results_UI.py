@@ -81,12 +81,12 @@ def generate_stats_display(metrics: dict[str, float]) -> QVBoxLayout:
 
 def setup_results_graphs(parent:QFrame, returns_df: DataFrameFloat, graphs:GraphsCollection) -> None:
     bottom_layout = QGridLayout(parent=parent)
-    equity_plot: Any = graphs.plot_equity(returns_df=returns_df, show_legend=False, as_html=True)
+    equity_plot: Any = graphs.plot_stats_equity(returns_df=returns_df, show_legend=False, as_html=True)
     sharpe_plot: Any = graphs.plot_rolling_sharpe_ratio(returns_df=returns_df, show_legend=False, as_html=True)
     drawdown_plot: Any = graphs.plot_rolling_drawdown(returns_df=returns_df, show_legend=False, as_html=True)
     vol_plot: Any = graphs.plot_rolling_volatility(returns_df=returns_df, show_legend=False, as_html=True)
-    distribution_plot: Any = graphs.plot_returns_distribution_histogram(returns_df=returns_df, show_legend=False, as_html=True)
-    violin_plot: Any = graphs.plot_returns_distribution_violin(returns_df=returns_df, show_legend=False, as_html=True)
+    distribution_plot: Any = graphs.plot_stats_distribution_histogram(returns_df=returns_df, show_legend=False, as_html=True)
+    violin_plot: Any = graphs.plot_stats_distribution_violin(returns_df=returns_df, show_legend=False, as_html=True)
     
     equity_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=equity_plot)
     sharpe_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=sharpe_plot)
@@ -126,64 +126,23 @@ def generate_home_button(back_to_home_callback: Callable[..., None]) -> QVBoxLay
     
     return home_layout
 
-
-def organize_buttons_by_category(graphs:GraphsCollection) -> dict[str, dict[str, GraphFunc]]:
-    overall = "Overall"
-    rolling = "Rolling"
-    other = "Other"
-    categorized_buttons: dict[str, dict[str, GraphFunc]] = {
-        f'{overall}': {}, 
-        f'{rolling}': {}, 
-        f'{other}': {}
-        }
-
-    for plot_name, func in graphs.get_all_plots_dict().items():
-        if overall in plot_name:
-            category = overall
-        elif rolling in plot_name:
-            category = rolling
-        else:
-            category = other
-        
-        categorized_buttons[category][plot_name] = func
-    return categorized_buttons
-    
-def generate_graphs_buttons(
+def generate_graph_buttons_for_category(
     parent: QMainWindow,
     returns_df: DataFrameFloat,
-    graphs:GraphsCollection
-    ) -> tuple[QVBoxLayout, QVBoxLayout, QVBoxLayout]:
-    categorized_buttons: dict[str, dict[str, GraphFunc]] = organize_buttons_by_category(graphs=graphs)
-    overall = "Overall"
-    rolling = "Rolling"
-    other = "Other"
-    metrics = "Metrics"
+    graph_plots: dict[str, GraphFunc],
+    category: str,
+    open_on_launch: bool = False
+) -> QVBoxLayout:
 
-    overall_metrics_actions: dict[str, GraphFunc] = categorized_buttons[overall]
-    rolling_metrics_actions: dict[str, GraphFunc] = categorized_buttons[rolling]
-    other_metrics_actions: dict[str, GraphFunc] = categorized_buttons[other]
+    toggle_button_name: str = f"{category} Plots"
 
-    overall_metrics_layout: QVBoxLayout = create_expandable_buttons_list(
+    return create_expandable_buttons_list(
         parent=parent,
         returns_df=returns_df,
-        toggle_button_name=f'{overall} {metrics}', 
-        buttons_actions=overall_metrics_actions, 
-        open_on_launch=True
+        toggle_button_name=toggle_button_name,
+        buttons_actions=graph_plots,
+        open_on_launch=open_on_launch
     )
-    rolling_metrics_layout: QVBoxLayout = create_expandable_buttons_list(
-        parent=parent,
-        returns_df=returns_df,
-        toggle_button_name=f'{rolling} {metrics}', 
-        buttons_actions=rolling_metrics_actions
-    )
-    advanced_metrics_layout: QVBoxLayout = create_expandable_buttons_list(
-        parent=parent,
-        returns_df=returns_df,
-        toggle_button_name=f'{other} {metrics}',
-        buttons_actions=other_metrics_actions
-    )
-
-    return overall_metrics_layout, rolling_metrics_layout, advanced_metrics_layout
 
 def create_expandable_buttons_list(
     parent: QMainWindow,
