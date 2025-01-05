@@ -11,7 +11,10 @@ from collections.abc import Callable
 from Utilitary import (
 CLUSTERS_PARAMETERS,
 FRAME_STYLE,
-APP_NAME
+APP_NAME,
+STATS_GRAPHS,
+ROLLING_GRAPHS,
+OVERALL_GRAPHS
 )
 from UI.Results_UI import (
 generate_stats_display,
@@ -134,21 +137,21 @@ def setup_results_page(
     overall_plots: QVBoxLayout = generate_graph_buttons_for_category(
         parent=parent,
         returns_df=sub_portfolio_ovrll, 
-        graph_plots=graphs.all_plots_dict['Overall'],
-        category='Overall',
+        graph_plots=graphs.all_plots_dict[OVERALL_GRAPHS],
+        category=OVERALL_GRAPHS,
         open_on_launch=True
         )
     rolling_plots: QVBoxLayout = generate_graph_buttons_for_category(
         parent=parent,
         returns_df=sub_portfolio_roll, 
-        graph_plots=graphs.all_plots_dict['Rolling'], 
-        category='Rolling'
+        graph_plots=graphs.all_plots_dict[ROLLING_GRAPHS], 
+        category=ROLLING_GRAPHS
         )
     other_plots: QVBoxLayout = generate_graph_buttons_for_category(
         parent=parent,
         returns_df=sub_portfolio_ovrll, 
-        graph_plots=graphs.all_plots_dict['Stats'], 
-        category='Stats'
+        graph_plots=graphs.all_plots_dict[STATS_GRAPHS], 
+        category=STATS_GRAPHS
         )
     stats_layout: QVBoxLayout = generate_stats_display( metrics=graphs.get_metrics(returns_df=global_returns_df))
     backtest_parameters_layout: QVBoxLayout = generate_backtest_params_sliders()

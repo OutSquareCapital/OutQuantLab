@@ -10,7 +10,10 @@ from Utilitary.UI_Constants import (
     GLOBAL_STYLE,
     FIG_FONT,
     FIG_TITLE_FONT,
-    FIG_LEGEND_FONT
+    FIG_LEGEND_FONT,
+    OVERALL_GRAPHS,
+    ROLLING_GRAPHS,
+    STATS_GRAPHS
 )
 
 # Import custom types
@@ -40,6 +43,9 @@ __all__: list[str] = [
     'FIG_FONT',
     'FIG_TITLE_FONT',
     'FIG_LEGEND_FONT',
+    'OVERALL_GRAPHS',
+    'ROLLING_GRAPHS',
+    'STATS_GRAPHS',
     # Types
     'Float32',
     'Int32',

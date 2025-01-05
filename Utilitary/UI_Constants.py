@@ -4,6 +4,10 @@ COLOR_ADJUSTMENT: Final = 'white'
 COLOR_PLOT_UNIQUE: Final = '#ff6600'
 BACKGROUND_APP_DARK: Final = '#2A2A2A'
 
+OVERALL_GRAPHS: Final = 'Overall'
+ROLLING_GRAPHS: Final = 'Rolling'
+STATS_GRAPHS: Final = 'Stats'
+
 FONT_FAMILY: Final = 'Arial'
 FONT_SIZE: Final = 12
 FONT_TYPE: Final = 'bold'

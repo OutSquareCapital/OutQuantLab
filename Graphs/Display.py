@@ -1,4 +1,4 @@
-from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, GraphFunc
+from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, GraphFunc, STATS_GRAPHS, ROLLING_GRAPHS, OVERALL_GRAPHS
 from Graphs.Transformations import sort_dataframe, sort_series, convert_multiindex_to_labels, format_returns, fill_correlation_matrix, prepare_sunburst_data
 import Graphs.Widgets as Widgets 
 import Metrics as Computations
@@ -29,9 +29,9 @@ class GraphsCollection:
 
     def get_all_plots_dict(self) -> dict[str, dict[str, GraphFunc]]:
         all_plots_dict: dict[str, dict[str, GraphFunc]] = {
-            "Overall": {},
-            "Rolling": {},
-            "Stats": {}
+            OVERALL_GRAPHS: {},
+            ROLLING_GRAPHS: {},
+            STATS_GRAPHS : {}
         }
         
         for method in dir(self):
