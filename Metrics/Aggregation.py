@@ -5,10 +5,10 @@ from Utilitary import ArrayFloat
 def calculate_overall_mean(array: ArrayFloat, axis: None|int = 0) -> ArrayFloat:
     return bn.nanmean(array, axis) # type: ignore
 
-def rolling_mean(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
+def rolling_mean(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
     return bn.move_mean(array, window=length, min_count=min_length, axis=0) # type: ignore
 
-def rolling_median(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
+def rolling_median(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
     return bn.move_median(array, window=length, min_count=min_length, axis=0) # type: ignore
 
 def calculate_overall_max(array: ArrayFloat, axis: int = 0) -> ArrayFloat:

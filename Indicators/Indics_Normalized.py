@@ -44,8 +44,7 @@ class IndicatorsMethods:
         def process_single_param(param: dict[str, int]) -> ArrayFloat:
             return self.process_param(func=func, param=param)
 
-        results = list(global_executor.map(process_single_param, params))
-        return results
+        return list(global_executor.map(process_single_param, params))
 
     def process_data(self, pct_returns_array: ArrayFloat) -> None:
         self.prices_array = shift_array(returns_array=calculate_equity_curves(returns_array=pct_returns_array))

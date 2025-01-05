@@ -20,8 +20,8 @@ TEMPFILES_DIR: Final[str] = tempfile.gettempdir()
 FIG_TEMP_FILES: Final[str] = f"outquant{HTML_EXT}"
 HTML_ENCODING: Final[str] = "utf-8"
 
-def process_html_temp_file(html_content: Any, suffix: str = FIG_TEMP_FILES) -> str:
-    temp_file= tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+def process_html_temp_file(html_content: Any) -> str:
+    temp_file= tempfile.NamedTemporaryFile(delete=False, suffix=FIG_TEMP_FILES)
     save_html(file_path=temp_file.name, data=html_content)
     return temp_file.name
 

@@ -35,7 +35,7 @@ def generate_multi_index_process(
     clusters_structure: list[str] = ["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
     for indic in indicators_params:
         for param in indic.param_combos:
-            param_str = ''.join([f"{k}{v}" for k, v in param.items()])
+            param_str: str = ''.join([f"{k}{v}" for k, v in param.items()])
             for asset in asset_names:
                 asset_cluster1, asset_cluster2 = asset_to_clusters[asset]
                 indic_cluster1, indic_cluster2 = indic_to_clusters[indic.name]
