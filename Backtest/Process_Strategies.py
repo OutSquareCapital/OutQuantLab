@@ -1,3 +1,4 @@
+
 import numpy as np
 import pandas as pd
 from DataBase import N_THREADS
@@ -64,8 +65,9 @@ def aggregate_raw_returns(
     all_history: bool,
     progress_callback: ProgressFunc
 ) -> tuple[DataFrameFloat, DataFrameFloat]:
+
     if not all_history:
-        raw_adjusted_returns_df.dropna(axis=0, inplace=True)  # type: ignore
+        raw_adjusted_returns_df.dropna(axis=0, how='any', inplace=True)  # type: ignore
     clusters_nb: int = len(clusters_structure) - 1
     for i in range(clusters_nb, 0, -1):
         grouping_levels: list[str] = clusters_structure[:i]
@@ -74,7 +76,7 @@ def aggregate_raw_returns(
             returns_df=raw_adjusted_returns_df,
             grouping_levels=grouping_levels
         )
-        if i > 3:
+        if i > 30:
             optimized_returns: ArrayFloat = relative_sharpe_on_confidence_period(
                 returns_array=raw_adjusted_returns_df.nparray
             )
@@ -83,6 +85,7 @@ def aggregate_raw_returns(
                 index=raw_adjusted_returns_df.dates, 
                 columns=raw_adjusted_returns_df.columns
                 )
+            raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
 
         if i == 2:
             df_asset = DataFrameFloat(data=raw_adjusted_returns_df)

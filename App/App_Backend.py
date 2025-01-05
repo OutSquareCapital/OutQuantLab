@@ -46,7 +46,7 @@ class OutQuantLab:
         self.global_portfolio, self.sub_portfolios = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,
-            all_history=False,
+            all_history=True,
             progress_callback=self.progress_callback
             )
 

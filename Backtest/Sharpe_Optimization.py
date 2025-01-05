@@ -6,20 +6,20 @@ def broadcast_median(array: ArrayFloat) -> ArrayFloat:
     medians = np.nanmedian(array, axis=1)
     return np.tile(medians[:, np.newaxis], (1, array.shape[1]))
 
+def count_non_nan(returns_array: ArrayFloat) -> ArrayFloat:
+    return np.cumsum(~np.isnan(returns_array), axis=0, dtype=Float32)
+
 def relative_sharpe_on_confidence_period(
     returns_array: ArrayFloat,
     confidence_lookback: int = 2500
     ) -> ArrayFloat:
 
-    def count_non_nan(x: ArrayFloat) -> ArrayFloat:
-        return np.cumsum(~np.isnan(x), axis=0, dtype=Float32)
-
     sharpe_array: ArrayFloat = rolling_sharpe_ratios(
         returns_array=returns_array, 
         length = returns_array.shape[0], 
-        min_length = 20
+        min_length = 125
         )
-    non_nan_counts: ArrayFloat = count_non_nan(sharpe_array)
+    non_nan_counts: ArrayFloat = count_non_nan(returns_array=sharpe_array)
     rolling_median_sharpe: ArrayFloat = broadcast_median(array=sharpe_array)
     normalized_sharpes: ArrayFloat = (
         sharpe_array - rolling_median_sharpe

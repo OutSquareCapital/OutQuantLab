@@ -23,7 +23,6 @@ class OutQuantLabCLI:
         metrics: dict[str, float] = self.oql.grph.get_metrics(returns_df=self.oql.global_portfolio)
         for metric, value in metrics.items():
             print(f"{metric}: {value}")
-        self.oql.grph.plot_equity(returns_df=self.oql.global_portfolio)
 
 class OutQuantLabGUI(QApplication):
     def __init__(self) -> None:
