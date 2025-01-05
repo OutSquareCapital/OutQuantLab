@@ -1,6 +1,6 @@
 from Utilitary import ArrayFloat, ArrayInt
 from Metrics.Maths_Constants import ANNUALIZATION_FACTOR, PERCENTAGE_FACTOR
-from Metrics.Aggregation import rolling_mean, calculate_overall_mean, rolling_max, calculate_overall_max, calculate_overall_min
+from Metrics.Aggregation import rolling_mean, calculate_overall_mean, rolling_max, calculate_overall_min
 from Metrics.Volatility import rolling_volatility, overall_volatility
 from Metrics.Distribution import rolling_skewness
 import numpy as np
@@ -61,13 +61,8 @@ def calculate_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayF
     period_max: ArrayFloat = rolling_max(array=equity_curves, length=length, min_length=1)
     return (equity_curves - period_max) / period_max * PERCENTAGE_FACTOR
 
-def calculate_ath_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
-    equity_curves: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
-    equity_max: ArrayFloat = calculate_overall_max(array=equity_curves)
-    return (equity_curves - equity_max) / equity_max * PERCENTAGE_FACTOR
-
 def calculate_max_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
-    drawdown: ArrayFloat = calculate_ath_drawdown(returns_array=returns_array)
+    drawdown: ArrayFloat = calculate_rolling_drawdown(returns_array=returns_array, length=returns_array.shape[0])
     return calculate_overall_min(array=drawdown)
 
 def expanding_sharpe_ratios(returns_array: ArrayFloat) -> ArrayFloat:

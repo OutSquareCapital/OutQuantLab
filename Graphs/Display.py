@@ -42,7 +42,7 @@ class GraphsCollection:
             Computations.overall_sharpe_ratio,
             Computations.calculate_max_drawdown,
             Computations.overall_volatility_annualized,
-            Computations.calculate_overall_monthly_skewness,
+            #Computations.calculate_overall_monthly_skewness,
         ]
 
         metric_names: list[str] = [format_metric_name(name=func.__name__)

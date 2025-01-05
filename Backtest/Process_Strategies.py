@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from ConfigClasses import Indicator
 from Indicators import IndicatorsMethods
 from Metrics import calculate_overall_mean
+from Backtest.Sharpe_Optimization import relative_sharpe_on_confidence_period
 
 def calculate_strategy_returns(
     pct_returns_array: ArrayFloat, 
@@ -49,19 +50,12 @@ def calculate_portfolio_returns(
     grouping_levels: list[str]
     ) -> DataFrameFloat:
 
-    if grouping_levels:
-        return DataFrameFloat(
-            data=returns_df
-            .T
-            .groupby(level=grouping_levels, observed=True) # type: ignore
-            .mean()
-            .T
-            )
-
     return DataFrameFloat(
-        data=calculate_overall_mean(array=returns_df.nparray, axis=1),
-        index=returns_df.dates,
-        columns=['Portfolio']
+        data=returns_df
+        .T
+        .groupby(level=grouping_levels, observed=True) # type: ignore
+        .mean()
+        .T
         )
 
 def aggregate_raw_returns(
@@ -73,18 +67,35 @@ def aggregate_raw_returns(
     if not all_history:
         raw_adjusted_returns_df.dropna(axis=0, inplace=True)  # type: ignore
     clusters_nb: int = len(clusters_structure) - 1
-    for i in range(clusters_nb, -1, -1):
+    for i in range(clusters_nb, 0, -1):
         grouping_levels: list[str] = clusters_structure[:i]
+
         raw_adjusted_returns_df = calculate_portfolio_returns(
             returns_df=raw_adjusted_returns_df,
             grouping_levels=grouping_levels
         )
-        if len(grouping_levels) == 2:
+        if i > 3:
+            optimized_returns: ArrayFloat = relative_sharpe_on_confidence_period(
+                returns_array=raw_adjusted_returns_df.nparray
+            )
+            raw_adjusted_returns_df = DataFrameFloat(
+                data=optimized_returns, 
+                index=raw_adjusted_returns_df.dates, 
+                columns=raw_adjusted_returns_df.columns
+                )
+
+        if i == 2:
             df_asset = DataFrameFloat(data=raw_adjusted_returns_df)
 
         progress_callback(
             int(100 * (clusters_nb - i) / clusters_nb),
-            f"Aggregating Strategies: {len(raw_adjusted_returns_df.columns)} to 1 Strategies..."
+            f"Aggregating {' > '.join(grouping_levels)}: {len(raw_adjusted_returns_df.columns)} columns left..."
         )
 
-    return raw_adjusted_returns_df, df_asset # type: ignore
+    progress_callback(100, "Backtest Completed!")
+
+    return DataFrameFloat(
+        data=calculate_overall_mean(array=raw_adjusted_returns_df.nparray, axis=1),
+        index=raw_adjusted_returns_df.dates,
+        columns=['Portfolio']
+        ), df_asset # type: ignore
