@@ -52,9 +52,9 @@ class AssetSelectionWidget(QWidget):
 
 class IndicatorsConfigWidget(QWidget):
 
-    def __init__(self, indicators_collection: IndicatorsCollection) -> None:
+    def __init__(self, indics_collection: IndicatorsCollection) -> None:
         super().__init__()
-        self.indicators_collection: IndicatorsCollection = indicators_collection
+        self.indics_collection: IndicatorsCollection = indics_collection
         self.param_widgets: dict[str, dict[str, dict[str, QSlider | QLabel]]] = {}
         self.checkboxes: dict[str, QCheckBox] = {}
         self.init_ui()
@@ -67,7 +67,7 @@ class IndicatorsConfigWidget(QWidget):
         unselect_callback=self.unselect_all_indicators
         )
 
-        for indicator in self.indicators_collection.all_entities:
+        for indicator in self.indics_collection.all_entities:
             self.add_indicator_section(
                 indicator_name=indicator.name, 
                 is_active=indicator.active, 
@@ -89,7 +89,7 @@ class IndicatorsConfigWidget(QWidget):
         checkbox: QCheckBox = create_checkbox_item(
         item=indicator_name,
         is_checked=is_active,
-        callback=lambda checked, name=indicator_name: self.indicators_collection.set_active(name=indicator_name, active=checked)
+        callback=lambda checked, name=indicator_name: self.indics_collection.set_active(name=indicator_name, active=checked)
         )
         content_layout.addWidget(checkbox)
         self.checkboxes[indicator_name] = checkbox
@@ -123,7 +123,7 @@ class IndicatorsConfigWidget(QWidget):
         ) = create_param_widget(param_box=param_box, param_layout=param_layout, values=values)
 
         def update_param_values(unique_values: list[int]) -> None:
-            self.indicators_collection.update_param_values(name=indicator_name, param_key=param_name, values=unique_values)
+            self.indics_collection.update_param_values(name=indicator_name, param_key=param_name, values=unique_values)
 
         connect_sliders_to_update(
         start_slider=start_slider, 

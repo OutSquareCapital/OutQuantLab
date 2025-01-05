@@ -42,7 +42,7 @@ def setup_home_page(
     assets_clusters: ClustersTree,
     indicators_clusters: ClustersTree,
     assets_collection: AssetsCollection,
-    indicators_collection: IndicatorsCollection,
+    indics_collection: IndicatorsCollection,
     background:str
     ) -> None:
 
@@ -59,9 +59,9 @@ def setup_home_page(
     set_background_image(widget=main_widget, image_path=background)
     
     asset_widget = AssetSelectionWidget(assets_collection=assets_collection)
-    indicator_widget = IndicatorsConfigWidget(indicators_collection=indicators_collection)
+    indicator_widget = IndicatorsConfigWidget(indics_collection=indics_collection)
     asset_tree_widget = TreeStructureWidget(entities_names=assets_collection.all_entities_names, clusters=assets_clusters)
-    method_tree_widget = TreeStructureWidget(entities_names=indicators_collection.all_entities_names, clusters=indicators_clusters)
+    method_tree_widget = TreeStructureWidget(entities_names=indics_collection.all_entities_names, clusters=indicators_clusters)
     
     create_button(text="Run Backtest", callback=run_backtest_callback, parent_layout=buttons_layout)
     

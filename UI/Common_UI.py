@@ -21,8 +21,17 @@ def create_param_widget(
     values: list[int]
     ) -> tuple[QLabel, QLabel, QLabel, QSlider, QSlider, QSlider]:
     
-        param_labels_layout, range_info_label, num_values_info_label, generated_values_label = create_param_labels(values)
-        sliders_layout, num_values_layout, start_slider, end_slider, num_values_slider = create_param_sliders(values)
+        (
+        param_labels_layout, 
+        range_info_label, 
+        num_values_info_label, 
+        generated_values_label) = create_param_labels(values)
+        (
+        sliders_layout, 
+        num_values_layout, 
+        start_slider, 
+        end_slider, 
+        num_values_slider) = create_param_sliders(values)
         
         param_layout.addLayout(param_labels_layout)
         param_layout.addLayout(sliders_layout)

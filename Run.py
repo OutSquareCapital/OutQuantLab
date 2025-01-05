@@ -10,4 +10,4 @@ if __name__ == "__main__":
             app = OutQuantLabGUI()
             exit(app.exec())
     
-    launch_choice(choice=1)
+    launch_choice(choice=2)
