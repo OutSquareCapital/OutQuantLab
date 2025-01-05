@@ -85,17 +85,19 @@ def aggregate_raw_returns(
                 index=raw_adjusted_returns_df.dates, 
                 columns=raw_adjusted_returns_df.columns
                 )
-            raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
 
-        if i == 2:
+        if i == 3:
+            raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
             df_asset = DataFrameFloat(data=raw_adjusted_returns_df)
 
         progress_callback(
             int(100 * (clusters_nb - i) / clusters_nb),
             f"Aggregating {' > '.join(grouping_levels)}: {len(raw_adjusted_returns_df.columns)} columns left..."
         )
-
+        print(f'raw_adjusted_returns_df: {raw_adjusted_returns_df}')
     progress_callback(100, "Backtest Completed!")
+
+    raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
 
     return DataFrameFloat(
         data=calculate_overall_mean(array=raw_adjusted_returns_df.nparray, axis=1),
