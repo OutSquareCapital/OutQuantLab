@@ -20,15 +20,12 @@ class OutQuantLabCLI:
 
     def run(self) -> None:
         self.oql.run_backtest()
-        metrics: dict[str, float] = self.oql.grph.get_metrics(returns_df=self.oql.global_portfolio)
+        metrics: dict[str, float] = self.oql.grph.get_metrics()
         for metric, value in metrics.items():
             print(f"{metric}: {value}")
 
 class OutQuantLab:
     def __init__(self, progress_callback: ProgressFunc, database: DataBaseQueries) -> None:
-        self.global_portfolio: DataFrameFloat
-        self.sub_portfolios_roll: DataFrameFloat
-        self.sub_portfolios_ovrll: DataFrameFloat
         self.db: DataBaseQueries = database
         self.assets_collection = AssetsCollection(
             assets_to_test=self.db.select['assets_to_test'].load_json(), 
@@ -64,7 +61,7 @@ class OutQuantLab:
         multi_index=multi_index, 
         progress_callback=self.progress_callback)
 
-        self.global_portfolio, self.sub_portfolios_roll, self.sub_portfolios_ovrll = aggregate_raw_returns(
+        self.grph.global_returns, self.grph.sub_portfolio_roll, self.grph.sub_portfolio_ovrll = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,
             all_history=True,

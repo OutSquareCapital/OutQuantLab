@@ -26,6 +26,9 @@ class GraphsCollection:
         self.max_clusters: int = max_clusters
         self.returns_limit: float = returns_limit
         self.all_plots_dict: dict[str, dict[str, GraphFunc]] = self.get_all_plots_dict()
+        self.global_returns: DataFrameFloat
+        self.sub_portfolio_roll: DataFrameFloat
+        self.sub_portfolio_ovrll: DataFrameFloat
 
     def get_all_plots_dict(self) -> dict[str, dict[str, GraphFunc]]:
         all_plots_dict: dict[str, dict[str, GraphFunc]] = {
@@ -42,7 +45,7 @@ class GraphsCollection:
                 all_plots_dict[category_name][name] = func
         return all_plots_dict
 
-    def get_metrics(self, returns_df: DataFrameFloat) -> dict[str, float]:
+    def get_metrics(self) -> dict[str, float]:
         metric_functions: list[Callable[..., ArrayFloat]] = [
             Computations.calculate_total_returns,
             Computations.overall_sharpe_ratio,
@@ -53,18 +56,18 @@ class GraphsCollection:
 
         metric_names: list[str] = [format_metric_name(name=func.__name__)
                     for func in metric_functions]
-        results: list[ArrayFloat] = [func(returns_df.nparray) for func in metric_functions]
+        results: list[ArrayFloat] = [func(self.global_returns.nparray) for func in metric_functions]
 
         return {
             name: round(number=result.item(), ndigits=2)
             for name, result in zip(metric_names, results)
         }
 
-    def plot_stats_equity(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_equity(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         equity_curves_df = DataFrameFloat(
-            data=Computations.calculate_equity_curves(returns_array=returns_df.nparray),
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.calculate_equity_curves(returns_array=self.sub_portfolio_roll.nparray),
+            index=self.sub_portfolio_roll.dates,
+            columns=convert_multiindex_to_labels(df=self.sub_portfolio_roll)
         )
 
         sorted_equity_curves: DataFrameFloat = sort_dataframe(
@@ -82,11 +85,11 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_rolling_volatility(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_rolling_volatility(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         rolling_volatility_df = DataFrameFloat(
-            data=Computations.hv_composite(returns_array=returns_df.nparray),
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.hv_composite(returns_array=self.sub_portfolio_roll.nparray),
+            index=self.sub_portfolio_roll.dates,
+            columns=convert_multiindex_to_labels(df=self.sub_portfolio_roll)
         )
 
         sorted_rolling_volatility_df: DataFrameFloat = sort_dataframe(
@@ -102,11 +105,11 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_rolling_drawdown(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_rolling_drawdown(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         drawdowns_df = DataFrameFloat(
-            data=Computations.calculate_rolling_drawdown(returns_array=returns_df.nparray, length=self.length),
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.calculate_rolling_drawdown(returns_array=self.sub_portfolio_roll.nparray, length=self.length),
+            index=self.sub_portfolio_roll.dates,
+            columns=convert_multiindex_to_labels(df=self.sub_portfolio_roll)
         )
 
         sorted_drawdowns_df: DataFrameFloat = sort_dataframe(
@@ -122,11 +125,15 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_rolling_sharpe_ratio(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_rolling_sharpe_ratio(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         rolling_sharpe_ratio_df = DataFrameFloat(
-            data=Computations.rolling_sharpe_ratios(returns_array=returns_df.nparray, length=self.length, min_length=self.length),
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.rolling_sharpe_ratios(
+                returns_array=self.sub_portfolio_roll.nparray, 
+                length=self.length, 
+                min_length=self.length
+                ),
+            index=self.sub_portfolio_roll.dates,
+            columns=convert_multiindex_to_labels(df=self.sub_portfolio_roll)
         )
 
         sorted_rolling_sharpe_ratio_df: DataFrameFloat = sort_dataframe(
@@ -142,11 +149,11 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_rolling_smoothed_skewness(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_rolling_smoothed_skewness(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         rolling_skewness_df = DataFrameFloat(
-            data=smoothed_skewness(returns_array=returns_df.nparray, LenSmooth=20, LenSkew=self.length),
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
+            data=smoothed_skewness(returns_array=self.sub_portfolio_roll.nparray, LenSmooth=20, LenSkew=self.length),
+            index=self.sub_portfolio_roll.dates,
+            columns=convert_multiindex_to_labels(df=self.sub_portfolio_roll)
         )
 
         sorted_rolling_skewness_df: DataFrameFloat = sort_dataframe(
@@ -162,10 +169,10 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_overall_returns(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_overall_returns(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         total_returns_series = SeriesFloat(
-            data=Computations.calculate_total_returns(returns_array=returns_df.nparray),
-            index=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.calculate_total_returns(returns_array=self.sub_portfolio_ovrll.nparray),
+            index=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
         sorted_total_returns: SeriesFloat = sort_series(series=total_returns_series, ascending=True)
 
@@ -177,10 +184,10 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_overall_sharpe_ratio(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_overall_sharpe_ratio(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         sharpes_series = SeriesFloat(
-            data=Computations.overall_sharpe_ratio(returns_array=returns_df.nparray),
-            index=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.overall_sharpe_ratio(returns_array=self.sub_portfolio_ovrll.nparray),
+            index=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
         sorted_sharpes_series: SeriesFloat = sort_series(series=sharpes_series, ascending=True)
 
@@ -192,10 +199,10 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_overall_volatility(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_overall_volatility(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         overall_vol_series = SeriesFloat(
-            data=Computations.overall_volatility_annualized(returns_array=returns_df.nparray),
-            index=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.overall_volatility_annualized(returns_array=self.sub_portfolio_ovrll.nparray),
+            index=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
         sorted_volatility: SeriesFloat = sort_series(series=overall_vol_series, ascending=True)
 
@@ -207,12 +214,12 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_overall_average_drawdown(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
-        rolling_dd: ArrayFloat = Computations.calculate_rolling_drawdown(returns_array=returns_df.nparray, length=returns_df.shape[0])
+    def plot_overall_average_drawdown(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+        rolling_dd: ArrayFloat = Computations.calculate_rolling_drawdown(returns_array=self.sub_portfolio_ovrll.nparray, length=self.sub_portfolio_ovrll.shape[0])
         
         drawdowns_series = SeriesFloat(
             data=Computations.calculate_overall_mean(array=rolling_dd),
-            index=convert_multiindex_to_labels(df=returns_df)
+            index=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
         sorted_drawdowns: SeriesFloat = sort_series(series=drawdowns_series, ascending=True)
 
@@ -224,10 +231,10 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_overall_average_correlation(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_overall_average_correlation(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         overall_average_corr = SeriesFloat(
-            data=Computations.calculate_overall_average_correlation(returns_array=returns_df.nparray),
-            index=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.calculate_overall_average_correlation(returns_array=self.sub_portfolio_ovrll.nparray),
+            index=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
         sorted_overall_average_corr: SeriesFloat = sort_series(series=overall_average_corr, ascending=True)
         fig: go.Figure = Widgets.bars(
@@ -238,10 +245,10 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_overall_monthly_skew(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_overall_monthly_skew(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         skew_series: SeriesFloat = SeriesFloat(
-            data=Computations.calculate_overall_monthly_skewness(returns_array=returns_df.nparray),
-            index=convert_multiindex_to_labels(df=returns_df)
+            data=Computations.calculate_overall_monthly_skewness(returns_array=self.sub_portfolio_ovrll.nparray),
+            index=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
         sorted_skew_series: SeriesFloat = sort_series(series=skew_series, ascending=True)
 
@@ -253,11 +260,11 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_stats_distribution_violin(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_distribution_violin(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         formatted_pct_returns_df = DataFrameFloat(
-            data=format_returns(returns_array=returns_df.nparray, limit=self.returns_limit),
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
+            data=format_returns(returns_array=self.sub_portfolio_ovrll.nparray, limit=self.returns_limit),
+            index=self.sub_portfolio_ovrll.dates,
+            columns=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
 
         fig: go.Figure = Widgets.violin(
@@ -268,11 +275,11 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_stats_distribution_histogram(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_distribution_histogram(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         formatted_pct_returns_df = DataFrameFloat(
-            data=format_returns(returns_array=returns_df.nparray, limit=self.returns_limit),
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
+            data=format_returns(returns_array=self.sub_portfolio_ovrll.nparray, limit=self.returns_limit),
+            index=self.sub_portfolio_ovrll.dates,
+            columns=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
 
         fig: go.Figure = Widgets.histogram(
@@ -283,10 +290,10 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_stats_correlation_heatmap(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
-        correlation_matrix: ArrayFloat = Computations.calculate_correlation_matrix(returns_array=returns_df.nparray)
+    def plot_stats_correlation_heatmap(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+        correlation_matrix: ArrayFloat = Computations.calculate_correlation_matrix(returns_array=self.sub_portfolio_ovrll.nparray)
         filled_correlation_matrix: ArrayFloat = fill_correlation_matrix(corr_matrix=correlation_matrix)
-        labels_list: list[str] = convert_multiindex_to_labels(df=returns_df)
+        labels_list: list[str] = convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         fig: go.Figure = Widgets.heatmap(
             z_values=filled_correlation_matrix,
             x_labels=labels_list,
@@ -297,11 +304,11 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_stats_clusters_icicle(self, returns_df: DataFrameFloat, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_stats_clusters_icicle(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         renamed_returns_df = DataFrameFloat(
-            data=returns_df.nparray,
-            index=returns_df.dates,
-            columns=convert_multiindex_to_labels(df=returns_df)
+            data=self.sub_portfolio_ovrll.nparray,
+            index=self.sub_portfolio_ovrll.dates,
+            columns=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
         )
         clusters_dict: dict[str, list[str]] = generate_dynamic_clusters(
             returns_df=renamed_returns_df,
