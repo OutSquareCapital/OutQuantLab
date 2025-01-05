@@ -11,7 +11,6 @@ import tempfile
 
 JSON_EXT: Final = ".json"
 PARQUET_EXT: Final = ".parquet"
-WEBP_EXT: Final = ".webp"
 PNG_EXT: Final = ".png"
 HTML_EXT: Final = ".html"
 N_THREADS: Final = os.cpu_count() or 8
