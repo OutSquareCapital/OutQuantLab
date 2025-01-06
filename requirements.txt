@@ -11,3 +11,4 @@ plotly
 numexpr
 PySide6
 pyarrow
+Cython
