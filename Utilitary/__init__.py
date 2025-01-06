@@ -16,8 +16,11 @@ from Utilitary.UI_Constants import (
     CORRELATION_GRAPH,
     TITLE_STYLE
 )
+from Utilitary.custom_classes import (
+    SeriesFloat,
+    DataFrameFloat
+)
 
-# Import custom types
 from Utilitary.custom_types import (
     Float32,
     Int32,
@@ -26,9 +29,7 @@ from Utilitary.custom_types import (
     ProgressFunc,
     IndicatorFunc,
     ClustersHierarchy,
-    GraphFunc,
-    SeriesFloat,
-    DataFrameFloat
+    GraphFunc
 )
 
 __all__: list[str] = [

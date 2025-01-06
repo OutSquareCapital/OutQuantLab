@@ -18,7 +18,7 @@ def hv_short_term(
     lengths_list: list[int]
     ) -> ArrayFloat:
 
-    hv_arrays = np.array([
+    hv_arrays: ArrayFloat = np.array([
         rolling_volatility(
         returns_array, 
         length=length, 

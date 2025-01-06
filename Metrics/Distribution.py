@@ -13,9 +13,9 @@ def calculate_skewness(
 ) -> float:
     if observation_count >= min_length:
         total_observations = float(observation_count)
-        mean = sum_values / total_observations
-        variance = sum_values_squared / total_observations - mean * mean
-        skewness_numerator = (
+        mean: float = sum_values / total_observations
+        variance: float = sum_values_squared / total_observations - mean * mean
+        skewness_numerator: float = (
             sum_values_cubed / total_observations
             - mean * mean * mean
             - 3 * mean * variance
@@ -56,8 +56,8 @@ def add_skewness_contribution(
         observation_count += 1
 
         # Mise à jour pour la somme des valeurs
-        temp = value - compensation_values
-        total = sum_values + temp
+        temp: float = value - compensation_values
+        total: float = sum_values + temp
         compensation_values = total - sum_values - temp
         sum_values = total
 
@@ -107,8 +107,8 @@ def remove_skewness_contribution(
     if value == value:
         observation_count -= 1
 
-        temp = -value - compensation_values
-        total = sum_values + temp
+        temp: float = -value - compensation_values
+        total: float = sum_values + temp
         compensation_values = total - sum_values - temp
         sum_values = total
 
@@ -149,8 +149,8 @@ def rolling_skewness(
         consecutive_equal_count = 0
 
         for row in range(num_rows):
-            start_idx = max(0, row - length + 1)
-            end_idx = row + 1
+            start_idx: int = max(0, row - length + 1)
+            end_idx: int = row + 1
 
             if row == 0 or start_idx >= row - 1:
                 observation_count, sum_values, sum_values_squared, sum_values_cubed = 0, 0.0, 0.0, 0.0
@@ -227,9 +227,9 @@ def calculate_kurtosis(
             return -3.0
         else:
             total_observations = float(observation_count)
-            mean = sum_values / total_observations
-            variance = sum_values_squared / total_observations - mean * mean
-            skewness_term = (
+            mean: float = sum_values / total_observations
+            variance: float = sum_values_squared / total_observations - mean * mean
+            skewness_term: float = (
                 sum_values_cubed / total_observations
                 - mean * mean * mean
                 - 3 * mean * variance
@@ -272,8 +272,8 @@ def add_kurtosis_contribution(
     if value == value:
         observation_count += 1
 
-        temp = value - compensation_values
-        total = sum_values + temp
+        temp: float = value - compensation_values
+        total: float = sum_values + temp
         compensation_values = total - sum_values - temp
         sum_values = total
 
@@ -330,8 +330,8 @@ def remove_kurtosis_contribution(
     if value == value:
         observation_count -= 1
 
-        temp = -value - compensation_values
-        total = sum_values + temp
+        temp: float = -value - compensation_values
+        total: float = sum_values + temp
         compensation_values = total - sum_values - temp
         sum_values = total
 
@@ -379,8 +379,8 @@ def rolling_kurtosis(
         consecutive_equal_count = 0
 
         for row in range(num_rows):
-            start_idx = max(0, row - length + 1)
-            end_idx = row + 1
+            start_idx: int = max(0, row - length + 1)
+            end_idx: int = row + 1
 
             if row == 0 or start_idx >= row - 1:
                 observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth = 0, 0.0, 0.0, 0.0, 0.0
