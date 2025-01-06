@@ -8,9 +8,9 @@ class Indicator:
     name: str
     active: bool
     func: IndicatorFunc
+    params_values: dict[str, list[int]]
+    param_combos: list[tuple[int, ...]] = field(default_factory=list)
     strategies_nb: int = 0
-    param_combos: list[dict[str, int]] = field(default_factory=list)
-    params_values: dict[str, list[int]] = field(default_factory=dict)
 
 class IndicatorsCollection:
 
@@ -27,12 +27,13 @@ class IndicatorsCollection:
             active: bool = self.indicators_to_test.get(name, False)
             params: dict[str, list[int]] = IndicatorsMethods.determine_params(name=name, params_config=self.params_config)
             func = indicator_meta_data.func
+
             self.entities[name] = Indicator(
                 name=name,
                 active=active,
                 func=func,
                 params_values=params
-            )
+                )
 
     def is_valid_combination(self, parameters_dict: dict[str, int]) -> bool:
         short_term_param = next((k for k in parameters_dict if 'ST' in k), None)
@@ -52,17 +53,18 @@ class IndicatorsCollection:
 
         return True
 
-    def filter_valid_pairs(self, params: dict[str, list[int]]) -> list[dict[str, int]]:
+    def filter_valid_pairs(self, params: dict[str, list[int]]) -> list[tuple[int, ...]]:
         parameter_names = list(params.keys())
         parameter_values_combinations = product(*params.values())
-        valid_pairs: list[dict[str, int]] = []
+        valid_pairs: list[tuple[int, ...]] = []
 
         for combination in parameter_values_combinations:
             combination_dict = dict(zip(parameter_names, combination))
             if self.is_valid_combination(parameters_dict=combination_dict):
-                valid_pairs.append(combination_dict)
+                valid_pairs.append(combination)
 
         return valid_pairs
+
 
     @property
     def indicators_params(self) -> list[Indicator]:

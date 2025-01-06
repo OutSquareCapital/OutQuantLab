@@ -31,24 +31,26 @@ class IndicatorsMethods:
     def process_param(
         self,  
         func: IndicatorFunc, 
-        param: dict[str, int]
-        ) -> ArrayFloat:
-        return func(self, **param) * self.adjusted_returns_array
+        param: tuple[int, ...]
+    ) -> ArrayFloat:
+        return func(self, *param) * self.adjusted_returns_array
 
     def process_indicator_parallel(
         self,
         func: IndicatorFunc, 
-        params: list[dict[str, int]],
+        params: list[tuple[int, ...]],
         global_executor: ThreadPoolExecutor
         ) -> list[ArrayFloat]:
-        def process_single_param(param: dict[str, int]) -> ArrayFloat:
-            return self.process_param(func=func, param=param)
+
+        def process_single_param(param_tuple: tuple[int, ...]) -> ArrayFloat:
+            return self.process_param(func=func, param=param_tuple)
 
         return list(global_executor.map(process_single_param, params))
 
     def process_data(self, pct_returns_array: ArrayFloat) -> None:
-        self.prices_array = shift_array(returns_array=calculate_equity_curves(returns_array=pct_returns_array))
-        self.log_returns_array = shift_array(returns_array=log_returns_np(prices_array=self.prices_array))
+        prices_array: ArrayFloat = calculate_equity_curves(returns_array=pct_returns_array)
+        self.log_returns_array = shift_array(returns_array=log_returns_np(prices_array=prices_array))
+        self.prices_array = shift_array(returns_array=prices_array)
         hv_array: ArrayFloat = hv_composite(returns_array=pct_returns_array)
         self.adjusted_returns_array = calculate_volatility_adjusted_returns(
             pct_returns_array=pct_returns_array, 

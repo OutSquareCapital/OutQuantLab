@@ -21,17 +21,17 @@ class ClustersTree:
         }
 
 def generate_multi_index_process(
+    clusters_structure: list[str],
     indicators_params: list[Indicator], 
     asset_names: list[str], 
     assets_to_clusters: dict[str, tuple[str, str]], 
     indics_to_clusters: dict[str, tuple[str, str]]
-    ) -> tuple[pd.MultiIndex, list[str]]:
+    ) -> pd.MultiIndex:
 
     multi_index_tuples: list[tuple[str, str, str, str, str, str, str]] = []
-    clusters_structure: list[str] = ["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
     for indic in indicators_params:
         for param in indic.param_combos:
-            param_str: str = ''.join([f"{k}{v}" for k, v in param.items()])
+            param_str: str = '_'.join(map(str, param))
             for asset in asset_names:
                 asset_cluster1, asset_cluster2 = assets_to_clusters[asset]
                 indic_cluster1, indic_cluster2 = indics_to_clusters[indic.name]
@@ -40,10 +40,9 @@ def generate_multi_index_process(
                     indic_cluster1, indic_cluster2, 
                     indic.name, param_str
                 ))
-    multi_index: pd.MultiIndex = pd.MultiIndex.from_tuples( # type: ignore
+    return pd.MultiIndex.from_tuples( # type: ignore
         tuples=multi_index_tuples, 
         names=clusters_structure)
-    return multi_index, clusters_structure
 
 def get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
     distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)

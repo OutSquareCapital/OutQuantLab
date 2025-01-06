@@ -1,9 +1,11 @@
+from ConfigClasses.Indicators import Indicator
 from Utilitary import ProgressFunc, DataFrameFloat, APP_NAME
 from Backtest import calculate_strategy_returns, aggregate_raw_returns
 from Indicators import IndicatorsMethods
 from ConfigClasses import AssetsCollection, IndicatorsCollection, ClustersTree, generate_multi_index_process
 from Graphs import GraphsCollection
 from DataBase import DataBaseQueries
+from pandas import MultiIndex
 
 class OutQuantLabCLI:
     def __init__(self) -> None:
@@ -15,14 +17,21 @@ class OutQuantLabCLI:
         self.run()
 
     def handle_progress(self, progress: int, message: str) -> None:
-        print(f"[{progress}%] {message}")
+        pass
+        #print(f"[{progress}%] {message}")
 
     def run(self) -> None:
-        self.oql.run_backtest()
+        import time
+        start = time.perf_counter()
+        for _ in range(10):
+            self.oql.run_backtest()
+            print(f'{_} on {10}')
+        end: float = time.perf_counter() - start
+        print(f'time: {end:.2f}')
         metrics: dict[str, float] = self.oql.grphs.get_metrics()
         for metric, value in metrics.items():
             print(f"{metric}: {value}")
-
+        
 class OutQuantLab:
     def __init__(self, progress_callback: ProgressFunc, database: DataBaseQueries) -> None:
         self.db: DataBaseQueries = database
@@ -47,23 +56,25 @@ class OutQuantLab:
     def run_backtest(self) -> None:
         indics_methods = IndicatorsMethods()
         asset_names: list[str] = self.assets_collection.all_active_entities_names
+        clusters_structure: list[str] = ["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
+        indics_params: list[Indicator] = self.indics_collection.indicators_params
 
-        multi_index, clusters_structure = generate_multi_index_process(
-            indicators_params=self.indics_collection.indicators_params, 
+        multi_index: MultiIndex = generate_multi_index_process(
+            clusters_structure=clusters_structure,
+            indicators_params=indics_params, 
             asset_names=asset_names, 
             assets_to_clusters=self.assets_clusters.map_nested_clusters_to_entities(), 
             indics_to_clusters=self.indics_clusters.map_nested_clusters_to_entities()
             )
-        import time
-        start = time.perf_counter()
+
         raw_adjusted_returns_df: DataFrameFloat = calculate_strategy_returns(
         pct_returns_array=self.db.select['price_data'].load_returns(asset_names=asset_names),
-        indicators_params=self.indics_collection.indicators_params,
+        indicators_params=indics_params,
         indics_methods=indics_methods,
         dates_index=self.initial_df.dates, 
         multi_index=multi_index, 
         progress_callback=self.progress_callback)
-        print(f"Time elapsed: {time.perf_counter() - start}")
+
         self.grphs.global_returns, self.grphs.sub_portfolio_roll, self.grphs.sub_portfolio_ovrll = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,
