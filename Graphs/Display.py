@@ -1,4 +1,4 @@
-from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, GraphFunc, STATS_GRAPHS, ROLLING_GRAPHS, OVERALL_GRAPHS
+from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, GraphFunc, STATS_GRAPHS, ROLLING_GRAPHS, OVERALL_GRAPHS, CORRELATION_GRAPH
 from Graphs.Transformations import sort_dataframe, sort_series, convert_multiindex_to_labels, format_returns, fill_correlation_matrix, prepare_sunburst_data
 import Graphs.Widgets as Widgets 
 import Metrics as Computations
@@ -21,19 +21,20 @@ def generate_html_or_show(fig: go.Figure, as_html: bool) -> str|go.Figure:
     return fig.show() # type: ignore
 
 class GraphsCollection:
-    def __init__(self, length: int, max_clusters: int, returns_limit: float) -> None:
+    def __init__(self, length: int, max_clusters: int, returns_limit: float, initial_data: DataFrameFloat) -> None:
         self.length: int = length
         self.max_clusters: int = max_clusters
         self.returns_limit: float = returns_limit
         self.all_plots_dict: dict[str, dict[str, GraphFunc]] = self.get_all_plots_dict()
-        self.global_returns: DataFrameFloat
-        self.sub_portfolio_roll: DataFrameFloat
-        self.sub_portfolio_ovrll: DataFrameFloat
+        self.global_returns: DataFrameFloat = initial_data
+        self.sub_portfolio_roll: DataFrameFloat = initial_data
+        self.sub_portfolio_ovrll: DataFrameFloat = initial_data
 
     def get_all_plots_dict(self) -> dict[str, dict[str, GraphFunc]]:
         all_plots_dict: dict[str, dict[str, GraphFunc]] = {
             OVERALL_GRAPHS: {},
             ROLLING_GRAPHS: {},
+            CORRELATION_GRAPH: {},
             STATS_GRAPHS : {}
         }
         
@@ -290,7 +291,7 @@ class GraphsCollection:
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_stats_correlation_heatmap(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_correlation_heatmap(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         correlation_matrix: ArrayFloat = Computations.calculate_correlation_matrix(returns_array=self.sub_portfolio_ovrll.nparray)
         filled_correlation_matrix: ArrayFloat = fill_correlation_matrix(corr_matrix=correlation_matrix)
         labels_list: list[str] = convert_multiindex_to_labels(df=self.sub_portfolio_ovrll)
@@ -298,13 +299,13 @@ class GraphsCollection:
             z_values=filled_correlation_matrix,
             x_labels=labels_list,
             y_labels=labels_list,
-            title=format_plot_name(name=self.plot_stats_correlation_heatmap.__name__),
+            title=format_plot_name(name=self.plot_correlation_heatmap.__name__),
             show_legend=show_legend
         )
 
         return generate_html_or_show(fig=fig, as_html=as_html)
 
-    def plot_stats_clusters_icicle(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
+    def plot_correlation_clusters_icicle(self, show_legend: bool = True, as_html: bool = False) -> str|go.Figure:
         renamed_returns_df = DataFrameFloat(
             data=self.sub_portfolio_ovrll.nparray,
             index=self.sub_portfolio_ovrll.dates,
@@ -319,7 +320,7 @@ class GraphsCollection:
         fig: go.Figure = Widgets.icicle(
             labels=labels,
             parents=parents,
-            title=format_plot_name(name=self.plot_stats_clusters_icicle.__name__),
+            title=format_plot_name(name=self.plot_correlation_clusters_icicle.__name__),
             show_legend=show_legend
         )
 

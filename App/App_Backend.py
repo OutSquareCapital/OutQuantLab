@@ -7,10 +7,9 @@ from DataBase import DataBaseQueries
 
 class OutQuantLabCLI:
     def __init__(self) -> None:
-        database = DataBaseQueries()
         self.oql: OutQuantLab = OutQuantLab(
             progress_callback=self.handle_progress,
-            database=database
+            database=DataBaseQueries()
         )
         print(f"{APP_NAME} initialized")
         self.run()
@@ -20,7 +19,7 @@ class OutQuantLabCLI:
 
     def run(self) -> None:
         self.oql.run_backtest()
-        metrics: dict[str, float] = self.oql.grph.get_metrics()
+        metrics: dict[str, float] = self.oql.grphs.get_metrics()
         for metric, value in metrics.items():
             print(f"{metric}: {value}")
 
@@ -36,32 +35,35 @@ class OutQuantLab:
             )
         self.assets_clusters = ClustersTree(clusters=self.db.select['assets_clusters'].load_json())
         self.indics_clusters = ClustersTree(clusters=self.db.select['indics_clusters'].load_json())
-        self.grph = GraphsCollection(length=250, max_clusters=5, returns_limit=0.05)
+        self.initial_df: DataFrameFloat = self.db.select['price_data'].load_initial_data()
+        self.grphs = GraphsCollection(
+            length=250, 
+            max_clusters=5, 
+            returns_limit=0.05, 
+            initial_data=self.initial_df
+            )
         self.progress_callback = progress_callback
 
     def run_backtest(self) -> None:
         indics_methods = IndicatorsMethods()
+        asset_names: list[str] = self.assets_collection.all_active_entities_names
+
         multi_index, clusters_structure = generate_multi_index_process(
             indicators_params=self.indics_collection.indicators_params, 
-            asset_names=self.assets_collection.all_active_entities_names, 
+            asset_names=asset_names, 
             assets_to_clusters=self.assets_clusters.map_nested_clusters_to_entities(), 
             indics_to_clusters=self.indics_clusters.map_nested_clusters_to_entities()
             )
 
-        (
-        pct_returns_array, 
-        dates_index
-        ) = self.db.select['price_data'].load_prices(asset_names=self.assets_collection.all_active_entities_names)
-
         raw_adjusted_returns_df: DataFrameFloat = calculate_strategy_returns(
-        pct_returns_array=pct_returns_array,
+        pct_returns_array=self.db.select['price_data'].load_returns(asset_names=asset_names),
         indicators_params=self.indics_collection.indicators_params,
         indics_methods=indics_methods,
-        dates_index=dates_index, 
+        dates_index=self.initial_df.dates, 
         multi_index=multi_index, 
         progress_callback=self.progress_callback)
 
-        self.grph.global_returns, self.grph.sub_portfolio_roll, self.grph.sub_portfolio_ovrll = aggregate_raw_returns(
+        self.grphs.global_returns, self.grphs.sub_portfolio_roll, self.grphs.sub_portfolio_ovrll = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,
             all_history=True,

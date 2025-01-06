@@ -1,59 +1,87 @@
 from typing import Any
+from collections.abc import Callable
 from PySide6.QtWidgets import (
 QVBoxLayout, 
 QPushButton, 
 QWidget,
-QFrame, 
 QHBoxLayout, 
-QSlider, 
 QLabel, 
 QDialog,
-QMainWindow,
-QGridLayout
+QGridLayout,
+QFrame
 )
 from PySide6.QtWebEngineWidgets import QWebEngineView
-from PySide6.QtWebEngineCore import QWebEnginePage, QWebEngineSettings
-from PySide6.QtCore import Qt, QDate, QUrl
+from PySide6.QtWebEngineCore import QWebEngineSettings
+from PySide6.QtCore import Qt, QUrl
 from Graphs import GraphsCollection
-from Utilitary import BACKGROUND_APP_DARK, DataFrameFloat, GraphFunc
-from UI.Common_UI import setup_expandable_animation
-from collections.abc import Callable
+from Utilitary import (
+BACKGROUND_APP_DARK,
+FRAME_STYLE, 
+GraphFunc, 
+STATS_GRAPHS,
+ROLLING_GRAPHS,
+OVERALL_GRAPHS,
+CORRELATION_GRAPH,
+TITLE_STYLE
+)
+from UI.Common_UI import setup_expandable_animation, set_frame_design, create_button
+from Graphs import GraphsCollection
 
-def plot_graph_in_webview(temp_file_path:str) -> QWebEngineView:
-    plot_widget = QWebEngineView()
-    page: QWebEnginePage = plot_widget.page()
-    page.settings().setAttribute(QWebEngineSettings.WebAttribute.ShowScrollBars, False)
-    page.setBackgroundColor(BACKGROUND_APP_DARK)
-    plot_widget.load(QUrl.fromLocalFile(temp_file_path))
 
-    return plot_widget
+def generate_graph_buttons_for_category(
+    parent: QWidget,
+    graph_plots: dict[str, GraphFunc],
+    category: str,
+    open_on_launch: bool = False
+) -> QVBoxLayout:
 
-def display_dashboard_plot(
-    parent: QMainWindow,
-    returns_df: DataFrameFloat,
-    dashboard_name: str,
-    dashboard_func: GraphFunc
-) -> None:
-    dialog: QDialog = QDialog(parent)
-    dialog.setWindowTitle(f"{dashboard_name} Plot")
-    dialog.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint)
+    toggle_button_name: str = f"{category} Plots"
 
-    graph_path: Any = dashboard_func(
-        returns_df = returns_df,
-        show_legend=True, 
-        as_html=True
-        )
-    plot_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=graph_path)
+    return create_expandable_buttons_list(
+        parent=parent,
+        toggle_button_name=toggle_button_name,
+        buttons_actions=graph_plots,
+        open_on_launch=open_on_launch
+    )
 
-    layout: QVBoxLayout = QVBoxLayout(dialog)
-    layout.addWidget(plot_widget)
-    dialog.setLayout(layout)
-    dialog.resize(1200, 800)
-    dialog.exec()
-
+def create_expandable_buttons_list(
+    parent: QWidget,
+    toggle_button_name: str, 
+    buttons_actions: dict[str, GraphFunc], 
+    open_on_launch: bool = False
+    ) -> QVBoxLayout:
+    
+    toggle_button = QPushButton(toggle_button_name)
+    outer_layout = QVBoxLayout()
+    outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+    buttons_widget = QWidget()
+    inner_layout = QVBoxLayout(buttons_widget)
+    
+    for name, func in buttons_actions.items():
+        button = QPushButton(name)
+        
+        def action_closure(func: GraphFunc=func, name: str=name):
+            return lambda: display_dashboard_plot(
+                parent=parent,
+                dashboard_name=name, 
+                dashboard_func=func
+            )
+        
+        button.clicked.connect(action_closure())
+        inner_layout.addWidget(button)
+        
+    outer_layout.addWidget(toggle_button)
+    outer_layout.addWidget(buttons_widget)
+    setup_expandable_animation(toggle_button=toggle_button, content_widget=buttons_widget)
+    
+    if open_on_launch:
+        toggle_button.setChecked(True)
+    
+    return outer_layout
 
 def generate_stats_display(metrics: dict[str, float]) -> QVBoxLayout:
-    stats_button = QPushButton("Portfolio Statistics")
+    stats_title = QLabel("Portfolio Statistics")
+    stats_title.setStyleSheet(TITLE_STYLE)
     stats_layout = QVBoxLayout()
     stats_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
     stats_widget = QWidget()
@@ -72,171 +100,142 @@ def generate_stats_display(metrics: dict[str, float]) -> QVBoxLayout:
         row_layout.addWidget(right_label)
         
         stats_inner_layout.addLayout(row_layout)
-    stats_layout.addWidget(stats_button)
+    stats_layout.addWidget(stats_title)
     stats_layout.addWidget(stats_widget)
-    setup_expandable_animation(stats_button, stats_widget)
-    stats_button.setChecked(True)
     
     return stats_layout
 
-def setup_results_graphs(parent:QFrame, returns_df: DataFrameFloat, graphs:GraphsCollection) -> None:
-    bottom_layout = QGridLayout(parent=parent)
-    equity_plot: Any = graphs.plot_stats_equity(returns_df=returns_df, show_legend=False, as_html=True)
-    sharpe_plot: Any = graphs.plot_rolling_sharpe_ratio(returns_df=returns_df, show_legend=False, as_html=True)
-    drawdown_plot: Any = graphs.plot_rolling_drawdown(returns_df=returns_df, show_legend=False, as_html=True)
-    vol_plot: Any = graphs.plot_rolling_volatility(returns_df=returns_df, show_legend=False, as_html=True)
-    distribution_plot: Any = graphs.plot_stats_distribution_histogram(returns_df=returns_df, show_legend=False, as_html=True)
-    violin_plot: Any = graphs.plot_stats_distribution_violin(returns_df=returns_df, show_legend=False, as_html=True)
-    
-    equity_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=equity_plot)
-    sharpe_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=sharpe_plot)
-    drawdown_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=drawdown_plot)
-    vol_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=vol_plot)
-    distribution_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=distribution_plot)
-    violin_widget: QWebEngineView = plot_graph_in_webview(temp_file_path=violin_plot)
-    
-    bottom_layout.addWidget(equity_widget, 0, 0)
-    bottom_layout.addWidget(sharpe_widget, 1, 0)
-    bottom_layout.addWidget(drawdown_widget, 0, 1)
-    bottom_layout.addWidget(vol_widget, 1, 1)
-    bottom_layout.addWidget(distribution_widget, 0, 2)
-    bottom_layout.addWidget(violin_widget, 1, 2)
+def plot_graph_in_webview(temp_file_path: str) -> QFrame:
+    frame: QFrame = set_frame_design(FRAME_STYLE)
+    layout = QVBoxLayout(frame)
+    plot_widget = QWebEngineView()
+    plot_widget.page().settings().setAttribute(QWebEngineSettings.WebAttribute.ShowScrollBars, False)
+    plot_widget.page().setBackgroundColor(BACKGROUND_APP_DARK)
+    plot_widget.load(QUrl.fromLocalFile(temp_file_path))
+    layout.addWidget(plot_widget)
+    return frame
 
-def create_slider_with_label(
-    layout: QVBoxLayout, 
-    slider_range: tuple[int, int], 
-    initial_value: int, 
-    value_transform: Callable[[int], str], 
+def display_dashboard_plot(
+    parent: QWidget, 
+    dashboard_name: str, 
+    dashboard_func: GraphFunc
 ) -> None:
-    slider = QSlider(Qt.Orientation.Horizontal)
-    slider.setRange(*slider_range)
-    slider.setValue(initial_value)
-    label = QLabel(value_transform(slider.value()))
-    on_slider_value_change(slider=slider, label=label, value_transform=value_transform)
-    layout.addWidget(label)
-    layout.addWidget(slider)
+    dialog = QDialog(parent)
+    dialog.setWindowTitle(f"{dashboard_name} Plot")
+    dialog.setWindowFlag(Qt.WindowType.WindowMaximizeButtonHint)
+    graph_path: Any = dashboard_func(show_legend=True, as_html=True)
+    plot_widget: QFrame = plot_graph_in_webview(temp_file_path=graph_path)
+    layout = QVBoxLayout(dialog)
+    layout.addWidget(plot_widget)
+    dialog.setLayout(layout)
+    dialog.resize(1200, 800)
+    dialog.exec()
 
-def generate_home_button(back_to_home_callback: Callable[..., None]) -> QVBoxLayout:
-    home_layout = QVBoxLayout()
-    home_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+def add_graph_to_layout(layout: QGridLayout, temp_file_path: str, row: int, col: int) -> None:
+    widget: QFrame = plot_graph_in_webview(temp_file_path=temp_file_path)  # Retourne un QFrame
+    layout.addWidget(widget, row, col)
 
-    back_to_home_button = QPushButton("Home")
-    back_to_home_button.clicked.connect(back_to_home_callback)
-    home_layout.addWidget(back_to_home_button)
-    
-    return home_layout
+def create_placeholder_webview() -> QFrame:
+    frame: QFrame = set_frame_design(FRAME_STYLE)
+    layout = QVBoxLayout(frame)
+    placeholder_view = QWebEngineView()
+    placeholder_view.hide()
+    placeholder_view.page().setBackgroundColor(BACKGROUND_APP_DARK)
+    placeholder_view.setHtml("<html><body style='background-color: black;'></body></html>")
+    layout.addWidget(placeholder_view)
+    return frame
 
-def generate_graph_buttons_for_category(
-    parent: QMainWindow,
-    returns_df: DataFrameFloat,
-    graph_plots: dict[str, GraphFunc],
-    category: str,
-    open_on_launch: bool = False
-) -> QVBoxLayout:
 
-    toggle_button_name: str = f"{category} Plots"
+class GraphsWidget(QFrame):
+    def __init__(self, graphs: GraphsCollection, back_to_home_callback: Callable[..., None]) -> None:
+        super().__init__()
+        self.graphs: GraphsCollection = graphs
+        self.stats_widget_placeholder: QWidget = QWidget()
+        self.graph_widgets_placeholders: list[QFrame] = []
+        self.setStyleSheet(FRAME_STYLE)
+        self.home_button: QPushButton = create_button(text="Home", callback=back_to_home_callback)
+        self.init_ui()
 
-    return create_expandable_buttons_list(
-        parent=parent,
-        returns_df=returns_df,
-        toggle_button_name=toggle_button_name,
-        buttons_actions=graph_plots,
-        open_on_launch=open_on_launch
-    )
-
-def create_expandable_buttons_list(
-    parent: QMainWindow,
-    returns_df: DataFrameFloat,
-    toggle_button_name: str, 
-    buttons_actions: dict[str, GraphFunc], 
-    open_on_launch: bool = False
-    ) -> QVBoxLayout:
-    
-    toggle_button = QPushButton(toggle_button_name)
-    outer_layout = QVBoxLayout()
-    outer_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-    buttons_widget = QWidget()
-    inner_layout = QVBoxLayout(buttons_widget)
-    
-    for name, func in buttons_actions.items():
-        button = QPushButton(name)
+    def init_ui(self) -> None:
+        layout = QVBoxLayout(self)
+        home_layout = QVBoxLayout()
+        home_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        home_layout.addWidget(self.home_button)
+        self.top_left_layout = QHBoxLayout()
+        self.top_right_layout = QVBoxLayout()
+        self.top_frame: QFrame = set_frame_design(frame_style=FRAME_STYLE)
+        self.top_layout = QHBoxLayout(self.top_frame)
+        self.top_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.bottom_frame: QFrame = set_frame_design(frame_style=FRAME_STYLE)
+        self.bottom_layout = QGridLayout(self.bottom_frame)
         
-        def action_closure(func: GraphFunc=func, name: str=name):
-            return lambda: display_dashboard_plot(
-                parent=parent, 
-                returns_df=returns_df, 
-                dashboard_name=name, 
-                dashboard_func=func
-            )
-        
-        button.clicked.connect(action_closure())
-        inner_layout.addWidget(button)
-        
-    outer_layout.addWidget(toggle_button)
-    outer_layout.addWidget(buttons_widget)
-    setup_expandable_animation(toggle_button=toggle_button, content_widget=buttons_widget)
-    
-    if open_on_launch:
-        toggle_button.setChecked(True)
-    
-    return outer_layout
+        overall_plots: QVBoxLayout = generate_graph_buttons_for_category(
+            parent=self,
+            graph_plots=self.graphs.all_plots_dict[OVERALL_GRAPHS],
+            category=OVERALL_GRAPHS,
+            open_on_launch=True
+        )
+        rolling_plots: QVBoxLayout = generate_graph_buttons_for_category(
+            parent=self,
+            graph_plots=self.graphs.all_plots_dict[ROLLING_GRAPHS],
+            category=ROLLING_GRAPHS
+        )
+        other_plots: QVBoxLayout = generate_graph_buttons_for_category(
+            parent=self,
+            graph_plots=self.graphs.all_plots_dict[STATS_GRAPHS],
+            category=STATS_GRAPHS
+        )
+        corr_plots: QVBoxLayout = generate_graph_buttons_for_category(
+            parent=self,
+            graph_plots=self.graphs.all_plots_dict[CORRELATION_GRAPH],
+            category=CORRELATION_GRAPH
+        )
 
-def on_slider_value_change(slider: QSlider, label: QLabel, value_transform: Callable[[int], str]) -> None:
-    def update_label(value: int) -> None:
-        label.setText(value_transform(value))
-    slider.valueChanged.connect(update_label)
+        self.top_left_layout.addLayout(overall_plots, stretch=2)
+        self.top_left_layout.addLayout(rolling_plots, stretch=2)
+        self.top_left_layout.addLayout(other_plots, stretch=2)
+        self.top_left_layout.addLayout(corr_plots, stretch=2)
+        self.top_right_layout.addWidget(self.stats_widget_placeholder)
+        self.top_layout.addLayout(self.top_left_layout, stretch=12)
+        self.top_layout.addLayout(self.top_right_layout, stretch=6)
+        self.top_layout.addLayout(home_layout, stretch=1)
+        self.graph_widgets_placeholders = [
+            create_placeholder_webview() for _ in range(6)
+        ]
+        for widget, (row, col) in zip(self.graph_widgets_placeholders, [(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2)]):
+            self.bottom_layout.addWidget(widget, row, col)
 
-def generate_clusters_button_layout(clusters_params: list[str]) -> QVBoxLayout:
-    clusters_toggle_button = QPushButton("Clusters Parameters")
-    clusters_buttons_layout = QVBoxLayout()
-    clusters_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-    clusters_buttons_widget = QWidget()
-    clusters_buttons_inner_layout = QVBoxLayout(clusters_buttons_widget)
+        layout.addWidget(self.top_frame)
+        layout.addWidget(self.bottom_frame)
+        self.setLayout(layout)
 
-    for param in clusters_params:
-        slider = QSlider(Qt.Orientation.Horizontal)
-        slider.setRange(0, 10)
-        slider.setValue(5)
-        slider_label = QLabel(f"{param}: {slider.value()}")
-        def update_slider_label(value: int, label:QLabel=slider_label, txt: str = param) -> None:
-            label.setText(f"{txt}: {value}")
-        slider.valueChanged.connect(update_slider_label)
-        clusters_buttons_inner_layout.addWidget(slider_label)
-        clusters_buttons_inner_layout.addWidget(slider)
+    def create_stats_widget(self) -> QWidget:
+        stats_layout: QVBoxLayout = generate_stats_display(metrics=self.graphs.get_metrics())
+        stats_widget = QWidget()
+        stats_widget.setLayout(stats_layout)
+        return stats_widget
 
-    clusters_buttons_layout.addWidget(clusters_toggle_button)
-    clusters_buttons_layout.addWidget(clusters_buttons_widget)
-    setup_expandable_animation(clusters_toggle_button, clusters_buttons_widget)
+    def create_graph_widgets(self) -> list[QFrame]:
+        plot_paths: list[Any] = [
+            self.graphs.plot_stats_equity(show_legend=False, as_html=True),
+            self.graphs.plot_rolling_sharpe_ratio(show_legend=False, as_html=True),
+            self.graphs.plot_rolling_drawdown(show_legend=False, as_html=True),
+            self.graphs.plot_rolling_volatility(show_legend=False, as_html=True),
+            self.graphs.plot_stats_distribution_histogram(show_legend=False, as_html=True),
+            self.graphs.plot_stats_distribution_violin(show_legend=False, as_html=True),
+        ]
+        return [plot_graph_in_webview(temp_file_path=path) for path in plot_paths]
 
-    return clusters_buttons_layout
+    def update_graphs(self, new_graphs: GraphsCollection) -> None:
+        self.graphs = new_graphs
 
-def generate_backtest_params_sliders() -> QVBoxLayout:
-    backtest_parameters_button = QPushButton("Backtest Parameters")
-    backtest_parameters_layout = QVBoxLayout()
-    backtest_parameters_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-    backtest_parameters_widget = QWidget()
-    backtest_parameters_inner_layout = QVBoxLayout(backtest_parameters_widget)
+        new_stats_widget: QWidget = self.create_stats_widget()
+        self.top_right_layout.replaceWidget(self.stats_widget_placeholder, new_stats_widget)
+        self.stats_widget_placeholder.deleteLater()
+        self.stats_widget_placeholder = new_stats_widget
 
-    create_slider_with_label(
-        layout=backtest_parameters_inner_layout,
-        slider_range=(6, 12),
-        initial_value=10,
-        value_transform=lambda value: f"Rolling Length: {value ** 2}"
-    )
-    create_slider_with_label(
-        layout=backtest_parameters_inner_layout,
-        slider_range=(1, 100),
-        initial_value=10,
-        value_transform=lambda value: f"Leverage: {value / 10:.1f}"
-    )
-    create_slider_with_label(
-        layout=backtest_parameters_inner_layout,
-        slider_range=(0, (2025 - 1950) * 12),
-        initial_value=((2025 - 1950) // 2) * 12,
-        value_transform=lambda value: f"Starting Date: {QDate(1950, 1, 1).addMonths(value).toString('yyyy-MM')}"
-    )
-    backtest_parameters_layout.addWidget(backtest_parameters_button)
-    backtest_parameters_layout.addWidget(backtest_parameters_widget)
-    setup_expandable_animation(toggle_button=backtest_parameters_button, content_widget=backtest_parameters_widget)
-    
-    return backtest_parameters_layout
+        new_graph_widgets: list[QFrame] = self.create_graph_widgets()
+        for old_widget, new_widget in zip(self.graph_widgets_placeholders, new_graph_widgets):
+            self.bottom_layout.replaceWidget(old_widget, new_widget)
+            old_widget.deleteLater()
+        self.graph_widgets_placeholders = new_graph_widgets

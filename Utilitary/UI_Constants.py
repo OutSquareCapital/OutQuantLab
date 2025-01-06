@@ -7,12 +7,20 @@ BACKGROUND_APP_DARK: Final = '#2A2A2A'
 OVERALL_GRAPHS: Final = 'Overall'
 ROLLING_GRAPHS: Final = 'Rolling'
 STATS_GRAPHS: Final = 'Stats'
-
+CORRELATION_GRAPH: Final = 'Correlation'
 FONT_FAMILY: Final = 'Arial'
 FONT_SIZE: Final = 12
 FONT_TYPE: Final = 'bold'
 BASE_COLORS: Final = ["brown", "red","orange", "yellow", "green", "lime", "blue", "cyan"]
 APP_NAME = "OutQuantLab"
+TITLE_STYLE: Final = f"""
+    QLabel {{
+        font-family: '{FONT_FAMILY}';
+        font-size: {int(FONT_SIZE * 1.4)}px;
+        font: {FONT_TYPE};
+        text-align: center;
+    }}
+"""
 FRAME_STYLE: Final = f"""
         QFrame {{
             border-radius: 15px;
@@ -27,11 +35,7 @@ GLOBAL_STYLE: Final = f"""
             font: {FONT_TYPE};
         }}
     """
-CLUSTERS_PARAMETERS: Final = [
-    "Max Clusters", 
-    "Max Sub Clusters", 
-    "Max Sub-Sub Clusters"
-    ]
+
 
 FIG_FONT: Final ={
             'family': FONT_FAMILY,

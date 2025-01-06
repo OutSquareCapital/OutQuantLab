@@ -6,14 +6,15 @@ from Utilitary.UI_Constants import (
     BASE_COLORS,
     APP_NAME,
     FRAME_STYLE,
-    CLUSTERS_PARAMETERS,
     GLOBAL_STYLE,
     FIG_FONT,
     FIG_TITLE_FONT,
     FIG_LEGEND_FONT,
     OVERALL_GRAPHS,
     ROLLING_GRAPHS,
-    STATS_GRAPHS
+    STATS_GRAPHS,
+    CORRELATION_GRAPH,
+    TITLE_STYLE
 )
 
 # Import custom types
@@ -32,13 +33,13 @@ from Utilitary.custom_types import (
 
 __all__: list[str] = [
     # UI constants
+    'TITLE_STYLE',
     'GLOBAL_STYLE',
     'COLOR_ADJUSTMENT',
     'COLOR_PLOT_UNIQUE',
     'BACKGROUND_APP_DARK',
     'BASE_COLORS',
     'FRAME_STYLE',
-    'CLUSTERS_PARAMETERS',
     'APP_NAME',
     'FIG_FONT',
     'FIG_TITLE_FONT',
@@ -46,6 +47,7 @@ __all__: list[str] = [
     'OVERALL_GRAPHS',
     'ROLLING_GRAPHS',
     'STATS_GRAPHS',
+    'CORRELATION_GRAPH',
     # Types
     'Float32',
     'Int32',

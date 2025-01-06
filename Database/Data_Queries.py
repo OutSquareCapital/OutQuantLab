@@ -1,13 +1,13 @@
 from dataclasses import dataclass
-from Utilitary import ArrayFloat, DataFrameFloat
+from Utilitary import DataFrameFloat, ArrayFloat
 from typing import Any, Final
-from Metrics import pct_returns_np
 import yfinance as yf # type: ignore
 import pandas as pd
 import pyarrow.parquet as pq # type: ignore
 import json
 import os
 import tempfile
+from Metrics import pct_returns_np
 
 JSON_EXT: Final = ".json"
 PARQUET_EXT: Final = ".parquet"
@@ -55,16 +55,22 @@ class DataFile:
         else:
             raise ValueError("Schema Names Not Available")
 
-    def load_prices(self, asset_names: list[str]) -> tuple[ArrayFloat, pd.DatetimeIndex]:
-        columns_to_load: list[str] = ["Date"] + [name for name in asset_names]
+    def load_returns(self, asset_names: list[str]) -> ArrayFloat:
+        columns_to_load: list[str] = [name for name in asset_names]
         prices_df = DataFrameFloat(data=pd.read_parquet(
             path=self.full_path,
             engine="pyarrow",
             columns=columns_to_load
         ))
-        pct_returns_array: ArrayFloat = pct_returns_np(prices_array=prices_df.nparray)
-        return pct_returns_array, prices_df.dates
+        return pct_returns_np(prices_array=prices_df.nparray)
 
+    def load_initial_data(self) -> DataFrameFloat:
+
+        return DataFrameFloat(data=pd.read_parquet(
+            path=self.full_path,
+            engine="pyarrow",
+            columns=["Date", "SPY"]
+        ))
 class DataBaseQueries:
     def __init__(self, base_dir: str = BASE_DIR) -> None:
         self.select: dict[str, DataFile] = {}

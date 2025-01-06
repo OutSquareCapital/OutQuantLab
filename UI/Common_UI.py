@@ -9,9 +9,8 @@ QFrame,
 QHBoxLayout, 
 QSlider, 
 QLabel, 
-QLayout
 )
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt, QDate
+from PySide6.QtCore import QPropertyAnimation, QEasingCurve, Qt
 from PySide6.QtGui import QPalette, QBrush, QPixmap
 from collections.abc import Callable
 
@@ -238,97 +237,9 @@ def create_checkbox_item(
 
 def create_button(
     text: str, 
-    callback: Callable[..., None], 
-    parent_layout: QLayout
+    callback: Callable[..., None]
     ) -> QPushButton:
     
     button: QPushButton = QPushButton(text)
     button.clicked.connect(callback)
-    parent_layout.addWidget(button)
     return button
-
-def generate_home_button(back_to_home_callback: Callable[..., None]) -> QVBoxLayout:
-    home_layout = QVBoxLayout()
-    home_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-    back_to_home_button = QPushButton("Home")
-    back_to_home_button.clicked.connect(back_to_home_callback)
-    home_layout.addWidget(back_to_home_button)
-    
-    return home_layout
-
-def on_slider_value_change(slider: QSlider, label: QLabel, value_transform: Callable[[int], str]) -> None:
-    def update_label(value: int) -> None:
-        label.setText(value_transform(value))
-    slider.valueChanged.connect(update_label)
-
-
-def create_slider_with_label(
-    layout: QVBoxLayout, 
-    slider_range: tuple[int, int], 
-    initial_value: int, 
-    value_transform: Callable[[int], str], 
-) -> None:
-    slider = QSlider(Qt.Orientation.Horizontal)
-    slider.setRange(*slider_range)
-    slider.setValue(initial_value)
-    label = QLabel(value_transform(slider.value()))
-    on_slider_value_change(slider=slider, label=label, value_transform=value_transform)
-    layout.addWidget(label)
-    layout.addWidget(slider)
-
-def generate_backtest_params_sliders() -> QVBoxLayout:
-    backtest_parameters_button = QPushButton("Backtest Parameters")
-    backtest_parameters_layout = QVBoxLayout()
-    backtest_parameters_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-    backtest_parameters_widget = QWidget()
-    backtest_parameters_inner_layout = QVBoxLayout(backtest_parameters_widget)
-
-    create_slider_with_label(
-        layout=backtest_parameters_inner_layout,
-        slider_range=(6, 12),
-        initial_value=10,
-        value_transform=lambda value: f"Rolling Length: {value ** 2}"
-    )
-    create_slider_with_label(
-        layout=backtest_parameters_inner_layout,
-        slider_range=(1, 100),
-        initial_value=10,
-        value_transform=lambda value: f"Leverage: {value / 10:.1f}"
-    )
-    create_slider_with_label(
-        layout=backtest_parameters_inner_layout,
-        slider_range=(0, (2025 - 1950) * 12),
-        initial_value=((2025 - 1950) // 2) * 12,
-        value_transform=lambda value: f"Starting Date: {QDate(1950, 1, 1).addMonths(value).toString('yyyy-MM')}"
-    )
-    backtest_parameters_layout.addWidget(backtest_parameters_button)
-    backtest_parameters_layout.addWidget(backtest_parameters_widget)
-    setup_expandable_animation(toggle_button=backtest_parameters_button, content_widget=backtest_parameters_widget)
-    
-    return backtest_parameters_layout
-
-
-def generate_clusters_button_layout(clusters_params: list[str]) -> QVBoxLayout:
-    clusters_toggle_button = QPushButton("Clusters Parameters")
-    clusters_buttons_layout = QVBoxLayout()
-    clusters_buttons_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-    clusters_buttons_widget = QWidget()
-    clusters_buttons_inner_layout = QVBoxLayout(clusters_buttons_widget)
-
-    for param in clusters_params:
-        slider = QSlider(Qt.Orientation.Horizontal)
-        slider.setRange(0, 10)
-        slider.setValue(5)
-        slider_label = QLabel(f"{param}: {slider.value()}")
-        def update_slider_label(value: int, label:QLabel=slider_label, txt: str = param) -> None:
-            label.setText(f"{txt}: {value}")
-        slider.valueChanged.connect(update_slider_label)
-        clusters_buttons_inner_layout.addWidget(slider_label)
-        clusters_buttons_inner_layout.addWidget(slider)
-
-    clusters_buttons_layout.addWidget(clusters_toggle_button)
-    clusters_buttons_layout.addWidget(clusters_buttons_widget)
-    setup_expandable_animation(clusters_toggle_button, clusters_buttons_widget)
-
-    return clusters_buttons_layout
