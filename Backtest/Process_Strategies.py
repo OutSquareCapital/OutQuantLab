@@ -8,6 +8,7 @@ from ConfigClasses import Indicator
 from Indicators import IndicatorsMethods
 from Metrics import calculate_overall_mean
 from Backtest.Sharpe_Optimization import relative_sharpe_on_confidence_period
+from Cython_Funcs import fill_signals_array 
 
 def calculate_strategy_returns(
     pct_returns_array: ArrayFloat, 
@@ -18,27 +19,32 @@ def calculate_strategy_returns(
     progress_callback: ProgressFunc
     ) -> DataFrameFloat:
     signal_col_index = 0
-    global_executor = ThreadPoolExecutor(max_workers=N_THREADS)
     indics_methods.process_data(pct_returns_array=pct_returns_array)
     total_assets_count: int = pct_returns_array.shape[1]
     total_returns_streams: int = total_assets_count * sum([indic.strategies_nb for indic in indicators_params])
     signals_array: ArrayFloat = np.empty(shape=(pct_returns_array.shape[0], total_returns_streams), dtype=Float32)
 
-    for indic in indicators_params:
-        results: list[ArrayFloat] = indics_methods.process_indicator_parallel(
-            func=indic.func, 
-            params=indic.param_combos, 
-            global_executor=global_executor
-        )
+    with ThreadPoolExecutor(max_workers=N_THREADS) as global_executor:
+        for indic in indicators_params:
+            try:
+                results: list[ArrayFloat] = indics_methods.process_indicator_parallel(
+                    func=indic.func, 
+                    params=indic.param_combos, 
+                    global_executor=global_executor
+                )
 
-        for result in results:
-            signals_array[:, signal_col_index:signal_col_index + total_assets_count] = result
-            signal_col_index += total_assets_count
+                signal_col_index: int = fill_signals_array(
+                    signals_array=signals_array, 
+                    results=results, 
+                    total_assets_count=total_assets_count, 
+                    start_index=signal_col_index)
 
-        progress_callback(
-            int(100 * signal_col_index / total_returns_streams),
-            f"Backtesting Strategies: {signal_col_index}/{total_returns_streams}..."
-        )
+                progress_callback(
+                    int(100 * signal_col_index / total_returns_streams),
+                    f"Backtesting Strategies: {signal_col_index}/{total_returns_streams}..."
+                )
+            except Exception as e:
+                print(f"Error processing indicator {indic.name}: {e}")
 
     return DataFrameFloat(
         data=signals_array,
@@ -85,12 +91,13 @@ def aggregate_raw_returns(
                 index=raw_adjusted_returns_df.dates, 
                 columns=raw_adjusted_returns_df.columns
                 )
-
-        if i == 3:
-            raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
-            sub_portfolio_rolling = DataFrameFloat(data=raw_adjusted_returns_df)
+        if i == 5:
             raw_adjusted_returns_df.dropna(axis=0, how='any', inplace=True)  # type: ignore
             sub_portfolio_overall = DataFrameFloat(data=raw_adjusted_returns_df)
+
+        if i == 2:
+            raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
+            sub_portfolio_rolling = DataFrameFloat(data=raw_adjusted_returns_df)
 
         progress_callback(
             int(100 * (clusters_nb - i) / clusters_nb),

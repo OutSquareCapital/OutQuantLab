@@ -54,7 +54,8 @@ class OutQuantLab:
             assets_to_clusters=self.assets_clusters.map_nested_clusters_to_entities(), 
             indics_to_clusters=self.indics_clusters.map_nested_clusters_to_entities()
             )
-
+        import time
+        start = time.perf_counter()
         raw_adjusted_returns_df: DataFrameFloat = calculate_strategy_returns(
         pct_returns_array=self.db.select['price_data'].load_returns(asset_names=asset_names),
         indicators_params=self.indics_collection.indicators_params,
@@ -62,7 +63,7 @@ class OutQuantLab:
         dates_index=self.initial_df.dates, 
         multi_index=multi_index, 
         progress_callback=self.progress_callback)
-
+        print(f"Time elapsed: {time.perf_counter() - start}")
         self.grphs.global_returns, self.grphs.sub_portfolio_roll, self.grphs.sub_portfolio_ovrll = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,

@@ -12,4 +12,4 @@ if __name__ == "__main__":
     from sys import exit
     from App import OutQuantLabCLI, OutQuantLabGUI
 
-    launch_choice(choice=2)
+    launch_choice(choice=1)

@@ -48,8 +48,8 @@ def hv_composite(
     st_weight: float =0.6
     ) -> ArrayFloat:
 
-    max_length = returns_array.shape[0]
-    adjusted_lengths = [length for length in long_term_lengths if length < max_length]
+    max_length: int = returns_array.shape[0]
+    adjusted_lengths: list[int] = [length for length in long_term_lengths if length < max_length]
     
     short_term_vol_array = hv_short_term(returns_array, lengths_list=short_term_lengths)
     long_term_vol_array = hv_long_term(short_term_vol_array, long_term_lengths=adjusted_lengths)
