@@ -8,7 +8,6 @@ from ConfigClasses import Indicator
 from Indicators import IndicatorsMethods
 from Metrics import calculate_overall_mean
 from Backtest.Sharpe_Optimization import relative_sharpe_on_confidence_period
-from Cython_Funcs import fill_signals_array 
 
 def calculate_strategy_returns(
     pct_returns_array: ArrayFloat, 
@@ -23,7 +22,16 @@ def calculate_strategy_returns(
     total_assets_count: int = pct_returns_array.shape[1]
     total_returns_streams: int = total_assets_count * sum([indic.strategies_nb for indic in indicators_params])
     signals_array: ArrayFloat = np.empty(shape=(pct_returns_array.shape[0], total_returns_streams), dtype=Float32)
-
+    
+    def fill_signals_array(start_index: int) -> int: 
+        results_len: int = len(results)
+        for i in range(results_len):
+            end_index: int = start_index + total_assets_count
+            signals_array[:, start_index:end_index] = results[i]
+            start_index = end_index
+        
+        return start_index
+    
     with ThreadPoolExecutor(max_workers=N_THREADS) as global_executor:
         for indic in indicators_params:
             try:
@@ -33,11 +41,7 @@ def calculate_strategy_returns(
                     global_executor=global_executor
                 )
 
-                signal_col_index: int = fill_signals_array(
-                    signals_array=signals_array, 
-                    results=results, 
-                    total_assets_count=total_assets_count, 
-                    start_index=signal_col_index)
+                signal_col_index: int = fill_signals_array(start_index=signal_col_index)
 
                 progress_callback(
                     int(100 * signal_col_index / total_returns_streams),
