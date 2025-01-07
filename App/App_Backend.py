@@ -17,17 +17,10 @@ class OutQuantLabCLI:
         self.run()
 
     def handle_progress(self, progress: int, message: str) -> None:
-        pass
-        #print(f"[{progress}%] {message}")
+        print(f"[{progress}%] {message}")
 
     def run(self) -> None:
-        import time
-        start = time.perf_counter()
-        for _ in range(10):
-            self.oql.run_backtest()
-            print(f'{_} on {10}')
-        end: float = time.perf_counter() - start
-        print(f'time: {end:.2f}')
+        self.oql.run_backtest()
         metrics: dict[str, float] = self.oql.grphs.get_metrics()
         for metric, value in metrics.items():
             print(f"{metric}: {value}")
