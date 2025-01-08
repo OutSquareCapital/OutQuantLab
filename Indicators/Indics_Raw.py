@@ -1,4 +1,3 @@
-import numpy as np
 from Metrics import (
 rolling_mean, 
 rolling_median, 
@@ -10,31 +9,7 @@ rolling_kurtosis,
 separate_volatility,
 ratio_normalization
 )
-from Utilitary import ArrayFloat, ArrayInt, DataFrameFloat, Int32
-
-def generate_seasonal_array(returns_df: DataFrameFloat) -> ArrayInt:
-
-    def assign_week_of_month(day: int) -> int:
-        if day <= 6:
-            return 1
-        elif day <= 12:
-            return 2
-        elif day <= 18:
-            return 3
-        else:
-            return 4
-
-    seasonal_array = np.empty((returns_df.shape[0], 3), dtype=Int32)
-    
-    seasonal_array[:, 2] = returns_df.dates.quarter
-
-    day_of_month = returns_df.groupby([returns_df.dates.year, returns_df.dates.month], observed=False).cumcount() + 1 # type: ignore
-    seasonal_array[:, 1] = day_of_month.apply(assign_week_of_month).to_numpy() # type: ignore
-
-    seasonal_array[:, 0] = returns_df.dates.dayofweek + 1
-
-    return seasonal_array
-
+from Utilitary import ArrayFloat
 def calculate_mean_price_ratio_raw(prices_array: ArrayFloat, LenST: int, LenLT: int) -> ArrayFloat:
     mean_price_ST = rolling_mean(prices_array, length=LenST, min_length=LenST)
     mean_price_LT = rolling_mean(prices_array, length=LenLT, min_length=LenLT)

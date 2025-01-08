@@ -2,7 +2,7 @@ from ConfigClasses.Indicators import Indicator
 from Utilitary import ProgressFunc, DataFrameFloat, APP_NAME
 from Backtest import calculate_strategy_returns, aggregate_raw_returns
 from Indicators import IndicatorsMethods
-from ConfigClasses import AssetsCollection, IndicatorsCollection, ClustersTree, generate_multi_index_process
+from ConfigClasses import AssetsCollection, IndicatorsCollection, ClustersTree, generate_multi_index_process, generate_clusters_structure
 from Graphs import GraphsCollection
 from DataBase import DataBaseQueries
 from pandas import MultiIndex
@@ -24,7 +24,7 @@ class OutQuantLabCLI:
         metrics: dict[str, float] = self.oql.grphs.get_metrics()
         for metric, value in metrics.items():
             print(f"{metric}: {value}")
-        
+
 class OutQuantLab:
     def __init__(self, progress_callback: ProgressFunc, database: DataBaseQueries) -> None:
         self.db: DataBaseQueries = database
@@ -35,8 +35,8 @@ class OutQuantLab:
             indicators_to_test=self.db.select['indics_to_test'].load_json(), 
             params_config=self.db.select['indics_params'].load_json()
             )
-        self.assets_clusters = ClustersTree(clusters=self.db.select['assets_clusters'].load_json())
-        self.indics_clusters = ClustersTree(clusters=self.db.select['indics_clusters'].load_json())
+        self.assets_clusters = ClustersTree(clusters=self.db.select['assets_clusters'].load_json(), prefix='Asset')
+        self.indics_clusters = ClustersTree(clusters=self.db.select['indics_clusters'].load_json(), prefix='Indic')
         self.initial_df: DataFrameFloat = self.db.select['price_data'].load_initial_data()
         self.grphs = GraphsCollection(
             length=250, 
@@ -47,10 +47,13 @@ class OutQuantLab:
         self.progress_callback = progress_callback
 
     def run_backtest(self) -> None:
-        indics_methods = IndicatorsMethods()
+
         asset_names: list[str] = self.assets_collection.all_active_entities_names
-        clusters_structure: list[str] = ["AssetCluster", "AssetSubCluster", "Asset", "IndicCluster", "IndicSubCluster", "Indicator", "Param"]
         indics_params: list[Indicator] = self.indics_collection.indicators_params
+        clusters_structure: list[str] = generate_clusters_structure(
+            indic_clusters_structure=self.indics_clusters.clusters_structure,
+            asset_clusters_structure=self.assets_clusters.clusters_structure
+            )
 
         multi_index: MultiIndex = generate_multi_index_process(
             clusters_structure=clusters_structure,
@@ -63,7 +66,7 @@ class OutQuantLab:
         raw_adjusted_returns_df: DataFrameFloat = calculate_strategy_returns(
         pct_returns_array=self.db.select['price_data'].load_returns(asset_names=asset_names),
         indicators_params=indics_params,
-        indics_methods=indics_methods,
+        indics_methods=IndicatorsMethods(),
         dates_index=self.initial_df.dates, 
         multi_index=multi_index, 
         progress_callback=self.progress_callback)

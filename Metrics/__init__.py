@@ -46,9 +46,7 @@ from Metrics.Correlation import (
 )
 
 from Metrics.Normalization import (
-    rolling_scalar_normalisation,
     rolling_median_normalisation,
-    rolling_std_normalisation,
     ratio_normalization,
     sign_normalization,
     relative_normalization,
@@ -91,9 +89,7 @@ __all__: list[str] = [
     'calculate_correlation_matrix',
     'calculate_distance_matrix',
     'calculate_total_returns',
-    'rolling_scalar_normalisation',
     'rolling_median_normalisation',
-    'rolling_std_normalisation',
     'ratio_normalization',
     'sign_normalization',
     'relative_normalization',

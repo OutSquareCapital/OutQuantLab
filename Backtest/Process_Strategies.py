@@ -7,7 +7,20 @@ from concurrent.futures import ThreadPoolExecutor
 from ConfigClasses import Indicator
 from Indicators import IndicatorsMethods
 from Metrics import calculate_overall_mean
-from Backtest.Sharpe_Optimization import relative_sharpe_on_confidence_period
+
+def fill_signals_array(
+    signals_array: ArrayFloat,
+    results: list[ArrayFloat], 
+    start_index: int, 
+    total_assets_count: int
+    ) -> int: 
+    results_len: int = len(results)
+    for i in range(results_len):
+        end_index: int = start_index + total_assets_count
+        signals_array[:, start_index:end_index] = results[i]
+        start_index = end_index
+
+    return start_index
 
 def calculate_strategy_returns(
     pct_returns_array: ArrayFloat, 
@@ -23,15 +36,6 @@ def calculate_strategy_returns(
     total_returns_streams: int = total_assets_count * sum([indic.strategies_nb for indic in indicators_params])
     signals_array: ArrayFloat = np.empty(shape=(pct_returns_array.shape[0], total_returns_streams), dtype=Float32)
     
-    def fill_signals_array(start_index: int) -> int: 
-        results_len: int = len(results)
-        for i in range(results_len):
-            end_index: int = start_index + total_assets_count
-            signals_array[:, start_index:end_index] = results[i]
-            start_index = end_index
-        
-        return start_index
-    
     with ThreadPoolExecutor(max_workers=N_THREADS) as global_executor:
         for indic in indicators_params:
             try:
@@ -41,7 +45,12 @@ def calculate_strategy_returns(
                     global_executor=global_executor
                 )
 
-                signal_col_index: int = fill_signals_array(start_index=signal_col_index)
+                signal_col_index: int = fill_signals_array(
+                    signals_array=signals_array,
+                    results=results,
+                    total_assets_count=total_assets_count,
+                    start_index=signal_col_index
+                    )
 
                 progress_callback(
                     int(100 * signal_col_index / total_returns_streams),
@@ -86,15 +95,6 @@ def aggregate_raw_returns(
             returns_df=raw_adjusted_returns_df,
             grouping_levels=grouping_levels
         )
-        if i > 30:
-            optimized_returns: ArrayFloat = relative_sharpe_on_confidence_period(
-                returns_array=raw_adjusted_returns_df.nparray
-            )
-            raw_adjusted_returns_df = DataFrameFloat(
-                data=optimized_returns, 
-                index=raw_adjusted_returns_df.dates, 
-                columns=raw_adjusted_returns_df.columns
-                )
         if i == 5:
             raw_adjusted_returns_df.dropna(axis=0, how='any', inplace=True)  # type: ignore
             sub_portfolio_overall = DataFrameFloat(data=raw_adjusted_returns_df)

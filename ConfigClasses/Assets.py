@@ -4,7 +4,6 @@ from dataclasses import dataclass
 class Asset:
     name: str
     active: bool
-    category: str
 
 class AssetsCollection:
     def __init__(self, assets_to_test: dict[str, bool], asset_names: list[str]) -> None:
@@ -18,8 +17,7 @@ class AssetsCollection:
             is_active: bool = self.assets_to_test.get(name, False)
             self.assets_objects[name] = Asset(
                 name=name, 
-                active=is_active,
-                category=''
+                active=is_active
                 )
 
     @property

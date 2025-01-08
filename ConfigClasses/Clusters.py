@@ -4,10 +4,27 @@ from Utilitary import ArrayFloat, DataFrameFloat, ClustersHierarchy
 import pandas as pd
 from ConfigClasses.Indicators import Indicator
 from Metrics import calculate_distance_matrix
+from typing import Any
 
 class ClustersTree:
-    def __init__(self, clusters: ClustersHierarchy) -> None:
+    def __init__(self, clusters: ClustersHierarchy, prefix: str) -> None:
         self.clusters: ClustersHierarchy = clusters
+        self.prefix: str = prefix
+        self.clusters_structure: list[str] = self.generate_clusters_structure()
+
+    def generate_clusters_structure(self) -> list[str]:
+        def determine_depth(node: dict[str, Any] | list[str]) -> int:
+            if isinstance(node, dict):
+                return 1 + max(determine_depth(node=subnode) for subnode in node.values())
+            return 0
+
+        depth: int = determine_depth(self.clusters)
+        cluster_names: list[str] = []
+        for i in range(depth):
+            cluster_name: str = f"{self.prefix}{'Sub' * i}Cluster"
+            cluster_names.append(cluster_name)
+        cluster_names.append(self.prefix)
+        return cluster_names
 
     def update_clusters_structure(self, new_structure: ClustersHierarchy) -> None:
         self.clusters = new_structure
@@ -19,6 +36,11 @@ class ClustersTree:
             for level2, assets in subclusters.items()
             for asset in assets
         }
+def generate_clusters_structure(
+    indic_clusters_structure: list[str],
+    asset_clusters_structure: list[str]
+    ) -> list[str]:
+    return asset_clusters_structure + indic_clusters_structure + ['Param']
 
 def generate_multi_index_process(
     clusters_structure: list[str],
@@ -28,18 +50,22 @@ def generate_multi_index_process(
     indics_to_clusters: dict[str, tuple[str, str]]
     ) -> pd.MultiIndex:
 
-    multi_index_tuples: list[tuple[str, str, str, str, str, str, str]] = []
+    multi_index_tuples: list[tuple[str, ...]] = []
+
     for indic in indicators_params:
         for param in indic.param_combos:
             param_str: str = '_'.join(map(str, param))
             for asset in asset_names:
-                asset_cluster1, asset_cluster2 = assets_to_clusters[asset]
-                indic_cluster1, indic_cluster2 = indics_to_clusters[indic.name]
+                asset_clusters: tuple[str, ...] = assets_to_clusters[asset]
+                indic_clusters: tuple[str, ...] = indics_to_clusters[indic.name]
                 multi_index_tuples.append((
-                    asset_cluster1, asset_cluster2, asset, 
-                    indic_cluster1, indic_cluster2, 
-                    indic.name, param_str
+                    *asset_clusters, 
+                    asset, 
+                    *indic_clusters, 
+                    indic.name, 
+                    param_str
                 ))
+
     return pd.MultiIndex.from_tuples( # type: ignore
         tuples=multi_index_tuples, 
         names=clusters_structure)
