@@ -1,5 +1,4 @@
 bottleneck
-numbagg
 numba
 pandas
 polars
@@ -11,4 +10,3 @@ plotly
 numexpr
 PySide6
 pyarrow
-Cython
