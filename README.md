@@ -8,11 +8,9 @@ OutQuantLab is a comprehensive Python-based quantitative analysis platform for b
 - Multi-threaded backtesting engine
 - Extensive library of technical indicators:
   - Moving averages (mean, median, central)
-  - MACD variations
   - Momentum indicators
   - Volatility-based indicators
   - Advanced statistics (skewness, kurtosis)
-- Strategy parameter optimization
 - Performance metrics and risk analysis
 
 ### Data Management
@@ -70,17 +68,6 @@ cd OutQuantLab
 pip install -r requirements.txt
 ```
 
-## Usage
-
-Launch the application:
-```bash
-python Run.py
-```
-
-Choose your interface:
-- Enter `1` for CLI mode
-- Enter `2` for GUI mode
-
 ## Project Structure
 
 ```
@@ -110,15 +97,3 @@ OutQuantLab/
 1. Define widget in `Graphs/Widgets.py`
 2. Add color scheme in `Graphs/Design.py`
 3. Implement data transformations in `Graphs/Transformations.py`
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
-
-[MIT License](LICENSE)
