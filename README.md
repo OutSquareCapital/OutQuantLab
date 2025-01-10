@@ -1,7 +1,5 @@
 # OutQuantLab
 
-TEMPORARY PUBLIC STATUT FOR UNIGE PROCEDURE
-
 OutQuantLab is a comprehensive Python-based quantitative analysis platform for backtesting systematic trading strategies, with emphasis on technical indicators and clustering analysis.
 
 ## Key Features
