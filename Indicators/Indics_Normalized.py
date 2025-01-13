@@ -29,7 +29,7 @@ class IndicatorsMethods:
         self.adjusted_returns_array: ArrayFloat
 
     def process_param(
-        self,  
+        self,
         func: IndicatorFunc, 
         param: tuple[int, ...]
     ) -> ArrayFloat:

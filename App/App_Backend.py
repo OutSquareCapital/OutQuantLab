@@ -6,7 +6,7 @@ from ConfigClasses import (
     ClustersTree,
     IndicatorsCollection,
     generate_clusters_structure,
-    generate_multi_index_process,
+    generate_multi_index_process
 )
 from ConfigClasses.Indicators import Indicator
 from DataBase import DataBaseQueries
@@ -23,8 +23,10 @@ class OutQuantLabCLI:
         print(f"{APP_NAME} initialized")
         self.run()
 
+
     def handle_progress(self, progress: int, message: str) -> None:
         print(f"[{progress}%] {message}")
+
 
     def run(self) -> None:
         self.oql.run_backtest()
@@ -60,6 +62,7 @@ class OutQuantLab:
         )
         self.progress_callback = progress_callback
 
+
     def run_backtest(self) -> None:
         asset_names: list[str] = self.assets_collection.all_active_entities_names
         indics_params: list[Indicator] = self.indics_collection.indicators_params
@@ -68,6 +71,7 @@ class OutQuantLab:
             asset_clusters_structure=self.assets_clusters.clusters_structure,
         )
 
+
         multi_index: MultiIndex = generate_multi_index_process(
             clusters_structure=clusters_structure,
             indicators_params=indics_params,
@@ -75,6 +79,7 @@ class OutQuantLab:
             assets_to_clusters=self.assets_clusters.map_nested_clusters_to_entities(),
             indics_to_clusters=self.indics_clusters.map_nested_clusters_to_entities(),
         )
+
 
         raw_adjusted_returns_df: DataFrameFloat = calculate_strategy_returns(
             pct_returns_array=self.db.select["price_data"].load_returns(
@@ -87,6 +92,7 @@ class OutQuantLab:
             progress_callback=self.progress_callback,
         )
 
+
         (
             self.grphs.global_returns,
             self.grphs.sub_portfolio_roll,
@@ -97,6 +103,7 @@ class OutQuantLab:
             all_history=True,
             progress_callback=self.progress_callback,
         )
+
 
     def save_all(self) -> None:
         self.db.select["assets_to_test"].save(

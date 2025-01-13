@@ -8,7 +8,8 @@ def launch_choice(choice: int) -> None:
 
 if __name__ == "__main__":
 
-    print(f'initializing OutQuantLab...')
+    print('initializing OutQuantLab...')
+
     from sys import exit
     from App import OutQuantLabCLI, OutQuantLabGUI
 
