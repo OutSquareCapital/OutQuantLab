@@ -1,6 +1,4 @@
 import json
-import os
-import tempfile
 from dataclasses import dataclass, field
 from typing import Any, Final
 
@@ -8,44 +6,16 @@ import pandas as pd
 import pyarrow.parquet as pq  # type: ignore
 
 from Metrics import pct_returns_np
-from Utilitary import APP_NAME, ArrayFloat, DataFrameFloat, FileHandler
+from TypingConventions import ArrayFloat, DataFrameFloat, FileHandler
 
 JSON: Final[str] = ".json"
 PARQUET: Final[str] = ".parquet"
-PNG: Final[str] = ".png"
-HTML: Final[str] = ".html"
-FIG_TEMP_FILES: Final[str] = f"{APP_NAME}{HTML}"
-HTML_ENCODING: Final[str] = "utf-8"
-
-
-class HTMLHandler:
-    def __init__(self) -> None:
-        self.path_file: str = tempfile.mkstemp(suffix=HTML)[1]
-
-    def load(self) -> str:
-        with open(file=self.path_file, mode="w", encoding=HTML_ENCODING) as f:
-            return f.read()
-
-    def save(self, data: Any) -> None:
-        with open(file=self.path_file, mode="w", encoding=HTML_ENCODING) as f:
-            f.write(data)
-
-    def cleanup_temp_files(self) -> None:
-        try:
-            os.remove(self.path_file)
-        except Exception as e:
-            raise Exception(
-                f"Erreur lors de la suppression du fichier temporaire {self.path_file} : {e}"
-            )
-
 
 def create_handler(ext: str) -> FileHandler:
     if ext == JSON:
         return JSONHandler()
     elif ext == PARQUET:
         return ParquetHandler()
-    elif ext == PNG:
-        return PNGHandler()
     else:
         raise ValueError(f"Unsupported extension: {ext}")
 
@@ -66,15 +36,6 @@ class ParquetHandler(FileHandler):
 
     def save(self, path: str, data: pd.DataFrame) -> None:
         data.to_parquet(path, engine="pyarrow", index=True)
-
-
-class PNGHandler(FileHandler):
-    def load(self, path: str) -> None:
-        pass
-
-    def save(self, path: str, data: Any) -> None:
-        pass
-
 
 @dataclass(frozen=True)
 class DataFile:

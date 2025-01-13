@@ -4,7 +4,7 @@ import pandas as pd
 import yfinance as yf  # type: ignore
 
 from DataBase.Data_File import DataFile
-from Utilitary import DataFrameFloat
+from TypingConventions import DataFrameFloat
 
 BASE_DIR: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Data")
 
