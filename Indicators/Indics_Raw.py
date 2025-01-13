@@ -10,6 +10,7 @@ separate_volatility,
 ratio_normalization
 )
 from TypingConventions import ArrayFloat
+
 def calculate_mean_price_ratio_raw(prices_array: ArrayFloat, LenST: int, LenLT: int) -> ArrayFloat:
     mean_price_ST = rolling_mean(prices_array, length=LenST, min_length=LenST)
     mean_price_LT = rolling_mean(prices_array, length=LenLT, min_length=LenLT)

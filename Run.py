@@ -2,7 +2,7 @@
 def handle_progress(progress: int, message: str) -> None:
     print(f"[{progress}%] {message}")
 
-def run():
+def run() -> None:
     oql: OutQuantLab = OutQuantLab(
             progress_callback=handle_progress, 
             database=DataBaseQueries()
