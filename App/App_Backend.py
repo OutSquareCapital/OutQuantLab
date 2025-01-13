@@ -10,7 +10,7 @@ from ConfigClasses import (
 )
 from ConfigClasses.Indicators import Indicator
 from DataBase import DataBaseQueries
-from Graphs import BacktestStats
+from Stats import BacktestStats
 from Indicators import IndicatorsMethods
 from TypingConventions import DataFrameFloat, ProgressFunc
 

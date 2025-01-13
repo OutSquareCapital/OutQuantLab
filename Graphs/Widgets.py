@@ -7,7 +7,6 @@ from Graphs.Design import (
     get_marker_config,
     setup_figure_layout,
 )
-from Graphs.Transformations import normalize_data_for_colormap
 from Graphs.UI_Constants import COLOR_ADJUSTMENT
 from Metrics import calculate_overall_max, calculate_overall_min
 from TypingConventions import ArrayFloat, DataFrameFloat, SeriesFloat
@@ -93,10 +92,10 @@ def heatmap(
     z_values: ArrayFloat,
     x_labels: list[str],
     y_labels: list[str],
+    z_normalized: ArrayFloat,
     title: str,
     show_legend: bool,
 ) -> go.Figure:
-    z_normalized = normalize_data_for_colormap(data=z_values)
 
     colorscale = get_heatmap_colorscale()
 
