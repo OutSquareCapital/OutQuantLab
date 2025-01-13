@@ -14,26 +14,6 @@ from Graphs import GraphsCollection
 from Indicators import IndicatorsMethods
 from TypingConventions import DataFrameFloat, ProgressFunc
 
-
-class OutQuantLabCLI:
-    def __init__(self) -> None:
-        self.oql: OutQuantLab = OutQuantLab(
-            progress_callback=self.handle_progress, database=DataBaseQueries()
-        )
-        self.run()
-
-
-    def handle_progress(self, progress: int, message: str) -> None:
-        print(f"[{progress}%] {message}")
-
-
-    def run(self) -> None:
-        self.oql.run_backtest()
-        metrics: dict[str, float] = self.oql.grphs.get_metrics()
-        for metric, value in metrics.items():
-            print(f"{metric}: {value}")
-
-
 class OutQuantLab:
     def __init__(
         self, progress_callback: ProgressFunc, database: DataBaseQueries

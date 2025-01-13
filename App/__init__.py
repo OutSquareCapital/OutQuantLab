@@ -1,5 +1,5 @@
-from App.App_Backend import OutQuantLabCLI
+from App.App_Backend import OutQuantLab
 
 __all__: list[str] = [
-    "OutQuantLabCLI"
+    "OutQuantLab"
 ]
