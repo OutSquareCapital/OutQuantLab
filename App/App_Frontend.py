@@ -17,7 +17,7 @@ class OutQuantLabGUI(QApplication):
         print(f"{APP_NAME} initialized")
 
     def setup_pages(self) -> None:
-        self.setWindowIcon(QIcon(self.oql.db.select['app_logo'].full_path))
+        self.setWindowIcon(QIcon(self.oql.db.select['app_logo'].path))
         self.setStyleSheet(GLOBAL_STYLE)
         self.main_window = QMainWindow()
         self.main_window.setWindowTitle(APP_NAME)
@@ -40,12 +40,12 @@ class OutQuantLabGUI(QApplication):
 
         self.progress_bar, self.log_output = setup_backtest_page(
             parent=self.backtest_page,
-            background=self.oql.db.select['loading_page'].full_path
+            background=self.oql.db.select['loading_page'].path
         )
         self.graphs_widget: GraphsWidget = setup_results_page(
             parent=self.results_page,
             back_to_home_callback=self.show_home_page,
-            background=self.oql.db.select['dashboard_page'].full_path,
+            background=self.oql.db.select['dashboard_page'].path,
             graphs=self.oql.grphs
         )
         self.main_window.setCentralWidget(self.stacked_widget)
@@ -73,4 +73,3 @@ class OutQuantLabGUI(QApplication):
 
     def cleanup(self) -> None:
         self.oql.save_all()
-        self.oql.db.cleanup_temp_files()

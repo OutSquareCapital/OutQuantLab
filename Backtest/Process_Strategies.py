@@ -1,12 +1,15 @@
 
 import numpy as np
 import pandas as pd
-from DataBase import N_THREADS
+import os
+from typing import Final
 from Utilitary import ArrayFloat, ProgressFunc, DataFrameFloat, Float32
 from concurrent.futures import ThreadPoolExecutor
 from ConfigClasses import Indicator
 from Indicators import IndicatorsMethods
 from Metrics import calculate_overall_mean
+
+N_THREADS: Final = os.cpu_count() or 8
 
 def fill_signals_array(
     signals_array: ArrayFloat,

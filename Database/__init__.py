@@ -1,6 +1,7 @@
-from DataBase.Data_Queries import N_THREADS, process_html_temp_file, DataBaseQueries
+from DataBase.Data_File import HTMLHandler
+from DataBase.Data_Queries import DataBaseQueries
+
 __all__: list[str] = [
-    'N_THREADS',
-    'process_html_temp_file',
-    'DataBaseQueries'
+    'DataBaseQueries',
+    'HTMLHandler'
     ]
