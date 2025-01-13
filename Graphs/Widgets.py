@@ -8,7 +8,7 @@ from Graphs.Design import (
     setup_figure_layout,
 )
 from Graphs.Transformations import normalize_data_for_colormap
-from Graphs.UI_Constants import GraphsDesign
+from Graphs.UI_Constants import COLOR_ADJUSTMENT
 from Metrics import calculate_overall_max, calculate_overall_min
 from TypingConventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
@@ -26,8 +26,8 @@ def curves(
     color_map: dict[str, str] = get_color_map(assets=y_values.columns.tolist())
 
     for column in y_values.columns:
-        fig.add_trace(# type: ignore
-            trace=go.Scatter(  
+        fig.add_trace(  # type: ignore
+            trace=go.Scatter(
                 x=x_values,
                 y=y_values[column],
                 mode="lines",
@@ -49,8 +49,8 @@ def bars(series: SeriesFloat, title: str, show_legend: bool) -> go.Figure:
 
     fig = go.Figure()
     for label, value in zip(series.names, series.nparray):
-        fig.add_trace(# type: ignore
-            trace=go.Bar(  
+        fig.add_trace(  # type: ignore
+            trace=go.Bar(
                 x=[label],
                 y=[value],
                 name=label,
@@ -136,14 +136,14 @@ def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
     color_map: dict[str, str] = get_color_map(assets=data.columns.tolist())
 
     for column in data.columns:
-        fig.add_trace(# type: ignore
-            trace=go.Violin(  
+        fig.add_trace(  # type: ignore
+            trace=go.Violin(
                 y=data[column],
                 name=column,
                 box_visible=True,
                 points=False,
                 marker=get_marker_config(color=color_map[column]),
-                box_line_color=GraphsDesign.COLOR_ADJUSTMENT,
+                box_line_color=COLOR_ADJUSTMENT,
                 hoveron="violins",
                 hoverinfo="y",
             )
@@ -173,8 +173,8 @@ def histogram(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
     color_map: dict[str, str] = get_color_map(assets=data.columns.tolist())
 
     for column in data.columns:
-        fig.add_trace(# type: ignore
-            trace=go.Histogram(  
+        fig.add_trace(  # type: ignore
+            trace=go.Histogram(
                 x=data[column],
                 name=column,
                 marker=get_marker_config(color=color_map[column]),
@@ -192,6 +192,7 @@ def histogram(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
 def icicle(
     labels: list[str], parents: list[str], title: str, show_legend: bool
 ) -> go.Figure:
+    
     fig = go.Figure(
         data=go.Icicle(
             labels=labels,
