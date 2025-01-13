@@ -6,7 +6,7 @@ from ConfigClasses import generate_dynamic_clusters
 from collections.abc import Callable
 import plotly.graph_objects as go # type: ignore
 from Indicators.Indics_Raw import smoothed_skewness
-from DataBase import process_html_temp_file
+from DataBase import HTMLHandler
 
 def format_metric_name(name: str) -> str:
     return name.replace("calculate_", "").replace("overall_", "").replace("_", " ").title()
@@ -16,8 +16,10 @@ def format_plot_name(name: str) -> str:
 
 def generate_html_or_show(fig: go.Figure, as_html: bool) -> str|go.Figure:
     if as_html:
+        html_handler = HTMLHandler()
         html_fig = fig.to_html(full_html=True, include_plotlyjs="True", config={"responsive": True})  # type: ignore
-        return process_html_temp_file(html_content=html_fig)  # type: ignore
+        html_handler.save(data=html_fig)
+        return html_handler.path_file
     return fig.show() # type: ignore
 
 class GraphsCollection:

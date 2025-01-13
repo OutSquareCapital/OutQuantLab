@@ -1,14 +1,58 @@
-from pandas import DataFrame, DatetimeIndex, MultiIndex, Index, Series
-from numpy.typing import DTypeLike
-from Utilitary.custom_types import ArrayFloat, Float32
+from typing import Any, Protocol
+
 import numpy as np
+from numpy.typing import DTypeLike
+from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
+
+from Utilitary.custom_types import ArrayFloat, Float32
+
+
+class FileHandler(Protocol):
+    """
+    Protocol who defines the standard interface for file operations,
+    ensuring consistency across all handler implementations.
+
+    **Methods**:
+        >>> def load(self, path: str) -> Any:
+
+        *Reads data from the file at the given path.*
+
+        >>> def save(self, path: str, data: Any) -> None:
+
+        *Writes data to the file at the given path.*
+    """
+
+    def load(self, path: str) -> Any:
+        raise NotImplementedError
+
+    def save(self, path: str, data: Any) -> None:
+        raise NotImplementedError
+
 
 class SeriesFloat(Series): # type: ignore
-    '''
-    Strictly typed Series with:
-    - Data of type Float32
-    - Index of type list[str], Index, or MultiIndex
-    '''
+    """
+    Strictly typed Series for managing floating-point data.
+
+    This class enforces:
+    - Data of type Float32.
+    - Index of type list[str], Index, or MultiIndex.
+
+    **Methods**:
+        >>> @property
+        >>> def names(self) -> list[str]:
+
+        *Returns the index of the Series as a list of strings.*
+
+        >>> @property
+        >>> def nparray(
+        ...     self, 
+        ...     dtype: DTypeLike = Float32, 
+        ...     copy: bool = False, 
+        ...     na_value: float = np.nan
+        ... ) -> ArrayFloat:
+
+        *Converts the Series to a NumPy array with specified dtype, copy, and NA value.*
+    """
     def __init__(
         self, 
         data: ArrayFloat|Series, # type: ignore
@@ -34,17 +78,34 @@ class SeriesFloat(Series): # type: ignore
         copy: bool = False, 
         na_value: float = np.nan
         ) -> ArrayFloat:
-        """override to_numpy method to strictly return Float32 array"""
         array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value) # type: ignore
         return array
 
 class DataFrameFloat(DataFrame):
-    '''
-    Strictly typed Dataframe with:
-    - Data of type Float32
-    - Index of type DatetimeIndex
-    - Columns of type list[str], Index or MultiIndex
-    '''
+    """
+    Strictly typed DataFrame for managing floating-point data.
+
+    This class enforces:
+    - Data of type Float32.
+    - Index of type DatetimeIndex.
+    - Columns of type list[str], Index, or MultiIndex.
+
+    **Methods**:
+        >>> @property
+        >>> def dates(self) -> DatetimeIndex:
+
+        *Returns the index of the DataFrame as a DatetimeIndex.*
+
+        >>> @property
+        >>> def nparray(
+        ...     self,
+        ...     dtype: DTypeLike = Float32,
+        ...     copy: bool = False,
+        ...     na_value: float = np.nan,
+        ... ) -> ArrayFloat:
+
+        *Converts the DataFrame to a NumPy array with specified dtype, copy, and NA value.*
+    """
     def __init__(
         self, 
         data: ArrayFloat|DataFrame,
@@ -71,6 +132,5 @@ class DataFrameFloat(DataFrame):
         copy: bool = False, 
         na_value: float = np.nan
         ) -> ArrayFloat:
-        """override to_numpy method to strictly return Float32 array"""
         array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value) # type: ignore
         return array

@@ -18,7 +18,8 @@ from Utilitary.UI_Constants import (
 )
 from Utilitary.custom_classes import (
     SeriesFloat,
-    DataFrameFloat
+    DataFrameFloat,
+    FileHandler
 )
 
 from Utilitary.custom_types import (
@@ -59,5 +60,6 @@ __all__: list[str] = [
     'SeriesFloat',
     'DataFrameFloat',
     'ClustersHierarchy',
-    'GraphFunc'
+    'GraphFunc',
+    'FileHandler'
 ]
