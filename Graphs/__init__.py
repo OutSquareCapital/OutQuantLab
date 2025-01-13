@@ -1,3 +1,3 @@
-from Graphs.Display import GraphsCollection, BacktestStats
+from Graphs.Display import GraphsCollection
 
-__all__ = ["GraphsCollection", "BacktestStats"]
+__all__ = ["GraphsCollection"]

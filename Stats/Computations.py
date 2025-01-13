@@ -1,11 +1,12 @@
 from TypingConventions import ArrayFloat, DataFrameFloat, SeriesFloat
-from Graphs.Transformations import (
+from Stats.Transformations import (
     sort_dataframe,
     sort_series,
     convert_multiindex_to_labels,
     format_returns,
     fill_correlation_matrix,
     prepare_sunburst_data,
+    normalize_data_for_colormap
 )
 import Metrics as Computations
 from ConfigClasses import generate_dynamic_clusters
@@ -195,7 +196,7 @@ class BacktestStats:
             columns=convert_multiindex_to_labels(df=self.sub_portfolio_ovrll),
         )
 
-    def get_correlation_heatmap(self) -> tuple[ArrayFloat, list[str]]:
+    def get_correlation_heatmap(self) -> tuple[ArrayFloat, list[str], ArrayFloat]:
         correlation_matrix: ArrayFloat = Computations.calculate_correlation_matrix(
             returns_array=self.sub_portfolio_ovrll.nparray
         )
@@ -205,8 +206,9 @@ class BacktestStats:
         labels_list: list[str] = convert_multiindex_to_labels(
             df=self.sub_portfolio_ovrll
         )
+        corr_matrix_normalised = normalize_data_for_colormap(data=filled_correlation_matrix)
 
-        return filled_correlation_matrix, labels_list
+        return filled_correlation_matrix, labels_list, corr_matrix_normalised
 
     def get_correlation_clusters_icicle(self) -> tuple[list[str], list[str]]:
         renamed_returns_df = DataFrameFloat(
