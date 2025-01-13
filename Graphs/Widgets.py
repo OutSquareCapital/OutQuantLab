@@ -1,5 +1,6 @@
 import plotly.graph_objects as go # type: ignore
-from Utilitary import ArrayFloat, DataFrameFloat, SeriesFloat, COLOR_ADJUSTMENT
+from TypingConventions import ArrayFloat, DataFrameFloat, SeriesFloat
+from Graphs.UI_Constants import COLOR_ADJUSTMENT
 import pandas as pd
 from Graphs.Design import get_color_map, get_heatmap_colorscale, setup_figure_layout, get_marker_config
 from Graphs.Transformations import normalize_data_for_colormap

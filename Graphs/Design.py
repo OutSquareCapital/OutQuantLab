@@ -1,7 +1,7 @@
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 import plotly.graph_objects as go # type: ignore
-from Utilitary import COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK, FIG_FONT, FIG_LEGEND_FONT, FIG_TITLE_FONT
+from Graphs.UI_Constants import COLOR_ADJUSTMENT, BASE_COLORS, COLOR_PLOT_UNIQUE, BACKGROUND_APP_DARK, FIG_FONT, FIG_LEGEND_FONT, FIG_TITLE_FONT
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
     cmap_name = "custom_colormap"
