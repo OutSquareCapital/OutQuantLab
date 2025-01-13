@@ -1,5 +1,5 @@
 import numpy as np
-from Utilitary import ArrayFloat, Float32
+from TypingConventions import ArrayFloat, Float32
 from numba import prange, njit  # type: ignore
 
 @njit

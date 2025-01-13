@@ -1,6 +1,6 @@
 import bottleneck as bn  # type: ignore
 import polars as pl
-from Utilitary import ArrayFloat
+from TypingConventions import ArrayFloat
 
 def calculate_overall_mean(array: ArrayFloat, axis: None|int = 0) -> ArrayFloat:
     return bn.nanmean(array, axis) # type: ignore

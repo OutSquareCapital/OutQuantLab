@@ -1,6 +1,6 @@
 from Indicators import IndicatorsMethods, IndicatorMetadata
 from itertools import product
-from Utilitary import IndicatorFunc
+from TypingConventions import IndicatorFunc
 from dataclasses import dataclass, field
 
 @dataclass(slots=True)

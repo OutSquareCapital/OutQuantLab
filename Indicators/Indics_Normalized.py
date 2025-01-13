@@ -1,6 +1,6 @@
 import numpy as np
 from Indicators.Indics_Raw import *
-from Utilitary import ArrayFloat, IndicatorFunc, Float32
+from TypingConventions import ArrayFloat, IndicatorFunc, Float32
 from collections.abc import Callable
 from Metrics import hv_composite, calculate_volatility_adjusted_returns, calculate_equity_curves, log_returns_np, shift_array, sign_normalization, calculate_indicator_on_trend_signal, rolling_median_normalisation, relative_normalization
 from concurrent.futures import ThreadPoolExecutor

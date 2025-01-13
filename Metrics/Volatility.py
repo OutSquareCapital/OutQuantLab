@@ -1,5 +1,5 @@
 import numpy as np
-from Utilitary import ArrayFloat
+from TypingConventions import ArrayFloat
 import bottleneck as bn # type: ignore
 from Metrics.Aggregation import rolling_mean, rolling_median
 from Metrics.Maths_Constants import ANNUALIZED_PERCENTAGE_FACTOR

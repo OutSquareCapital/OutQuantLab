@@ -12,7 +12,7 @@ from ConfigClasses.Indicators import Indicator
 from DataBase import DataBaseQueries
 from Graphs import GraphsCollection
 from Indicators import IndicatorsMethods
-from Utilitary import APP_NAME, DataFrameFloat, ProgressFunc
+from TypingConventions import DataFrameFloat, ProgressFunc
 
 
 class OutQuantLabCLI:
@@ -20,7 +20,6 @@ class OutQuantLabCLI:
         self.oql: OutQuantLab = OutQuantLab(
             progress_callback=self.handle_progress, database=DataBaseQueries()
         )
-        print(f"{APP_NAME} initialized")
         self.run()
 
 

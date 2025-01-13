@@ -1,4 +1,4 @@
-from Utilitary import ArrayFloat, Float32
+from TypingConventions import ArrayFloat, Float32
 import numpy as np
 
 def calculate_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:

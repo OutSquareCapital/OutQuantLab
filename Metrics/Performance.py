@@ -1,4 +1,4 @@
-from Utilitary import ArrayFloat, ArrayInt
+from TypingConventions import ArrayFloat, ArrayInt
 from Metrics.Maths_Constants import ANNUALIZATION_FACTOR, PERCENTAGE_FACTOR
 from Metrics.Aggregation import rolling_mean, calculate_overall_mean, rolling_max, calculate_overall_min
 from Metrics.Volatility import rolling_volatility, overall_volatility

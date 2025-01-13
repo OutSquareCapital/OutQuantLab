@@ -1,5 +1,5 @@
 from typing import Final
-from Utilitary.custom_types import Float32
+from TypingConventions.custom_types import Float32
 
 ANNUALIZATION_FACTOR: Final = Float32(16)
 PERCENTAGE_FACTOR: Final = Float32(100)

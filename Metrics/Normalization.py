@@ -1,7 +1,7 @@
 import numpy as np
 from Metrics.Aggregation import rolling_mean, rolling_median, rolling_min, rolling_max
 from Metrics.Volatility import rolling_volatility
-from Utilitary import ArrayFloat, Float32
+from TypingConventions import ArrayFloat, Float32
 
 def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> ArrayFloat:
     return (nominator / denominator) - Float32(1.0)
