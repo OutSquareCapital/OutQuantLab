@@ -10,7 +10,7 @@ from ConfigClasses import (
 )
 from ConfigClasses.Indicators import Indicator
 from DataBase import DataBaseQueries
-from Graphs import GraphsCollection
+from Graphs import BacktestStats
 from Indicators import IndicatorsMethods
 from TypingConventions import DataFrameFloat, ProgressFunc
 
@@ -36,7 +36,7 @@ class OutQuantLab:
         self.initial_df: DataFrameFloat = self.db.select[
             "price_data"
         ].load_initial_data()
-        self.grphs = GraphsCollection(
+        self.stats = BacktestStats(
             length=250, max_clusters=5, returns_limit=0.05, initial_data=self.initial_df
         )
         self.progress_callback = progress_callback
@@ -73,9 +73,9 @@ class OutQuantLab:
 
 
         (
-            self.grphs.global_returns,
-            self.grphs.sub_portfolio_roll,
-            self.grphs.sub_portfolio_ovrll,
+            self.stats.global_returns,
+            self.stats.sub_portfolio_roll,
+            self.stats.sub_portfolio_ovrll,
         ) = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,

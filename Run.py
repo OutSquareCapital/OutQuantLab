@@ -8,8 +8,9 @@ def run() -> None:
             database=DataBaseQueries()
         )
     oql.run_backtest()
-    graph = oql.grphs.plot_stats_equity()
-    graph.show() # type: ignore
+    graphs = GraphsCollection(stats=oql.stats)
+    plot_fig = graphs.plot_overall_returns(True)
+    plot_fig.show() # type: ignore
 
 if __name__ == "__main__":
 
@@ -18,7 +19,7 @@ if __name__ == "__main__":
     from sys import exit
     from App import OutQuantLab
     from DataBase import DataBaseQueries
-    
+    from Graphs import GraphsCollection
     print('OutQuantLab initialized')
     run()
     exit(0)
