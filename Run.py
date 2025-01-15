@@ -1,16 +1,14 @@
-
 def handle_progress(progress: int, message: str) -> None:
     print(f"[{progress}%] {message}")
 
 def run() -> None:
     oql: OutQuantLab = OutQuantLab(
-            progress_callback=handle_progress, 
-            database=DataBaseQueries()
+            progress_callback=handle_progress
         )
-    oql.run_backtest()
-    graphs = GraphsCollection(stats=oql.stats)
-    plot_fig = graphs.plot_overall_returns(True)
-    plot_fig.show() # type: ignore
+    oql.execute_backtest()
+    #graphs = GraphsCollection(stats=oql.stats)
+    for metric, value in oql.stats.get_metrics():
+        print(f"{metric}: {value}")
 
 if __name__ == "__main__":
 
@@ -18,8 +16,7 @@ if __name__ == "__main__":
 
     from sys import exit
     from App import OutQuantLab
-    from DataBase import DataBaseQueries
-    from Graphs import GraphsCollection
+    #from Graphs import GraphsCollection
     print('OutQuantLab initialized')
     run()
     exit(0)

@@ -1,8 +1,7 @@
 
 from TypingConventions.custom_classes import (
     SeriesFloat,
-    DataFrameFloat,
-    FileHandler
+    DataFrameFloat
 )
 
 from TypingConventions.custom_types import (
@@ -27,6 +26,5 @@ __all__: list[str] = [
     'SeriesFloat',
     'DataFrameFloat',
     'ClustersHierarchy',
-    'GraphFunc',
-    'FileHandler'
+    'GraphFunc'
 ]
