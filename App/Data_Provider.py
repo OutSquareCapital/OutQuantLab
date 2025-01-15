@@ -5,8 +5,6 @@ from ConfigClasses import (
 )
 from DataBase import DataQueries
 from TypingConventions import ArrayFloat, DataFrameFloat
-import pyarrow.parquet as pq  # type: ignore
-from typing import Any
 import pandas as pd
 from Metrics import pct_returns_np
 import yfinance as yf  # type: ignore
@@ -15,14 +13,6 @@ import yfinance as yf  # type: ignore
 class DataBaseProvider:
     def __init__(self) -> None:
         self.dbq = DataQueries()
-
-    def get_assets_names(self) -> list[str]:
-        parquet_file = pq.ParquetFile(self.dbq.select(file="price_data").path)
-        columns: Any = parquet_file.schema.names  # type: ignore
-        if "Date" in columns:
-            columns.remove("Date")
-
-        return columns
 
     def get_assets_returns(self, asset_names: list[str]) -> ArrayFloat:
         returns_df = DataFrameFloat(
@@ -52,14 +42,17 @@ class DataBaseProvider:
                 columns=prices_data.columns,
                 index=prices_data.dates,
             )
+            
+            assets_names: list[str] = prices_data.columns.to_list()
 
             self.dbq.select(file="price_data").save(data=prices_data)
             self.dbq.select(file="returns_data").save(data=returns_data)
+            self.dbq.select(file="assets_names").save(data=assets_names)
 
     def get_assets_collection(self) -> AssetsCollection:
         return AssetsCollection(
             assets_to_test=self.dbq.select(file="assets_to_test").load(),
-            asset_names=self.get_assets_names(),
+            asset_names=self.dbq.select(file="assets_names").load(),
         )
 
     def get_indicators_collection(self) -> IndicatorsCollection:
