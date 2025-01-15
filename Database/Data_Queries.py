@@ -2,16 +2,23 @@ import os
 
 from DataBase.Data_File import DataFile
 
-BASE_DIR: str = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Data")
+DATA_DIR: str = "Data"
+
+
+def get_base_dir(data_dir: str = DATA_DIR) -> str:
+    current_file_path: str = os.path.abspath(__file__)
+    current_dir: str = os.path.dirname(current_file_path)
+    return os.path.join(current_dir, data_dir)
 
 
 class DataQueries:
-    def __init__(self, base_dir: str = BASE_DIR) -> None:
+    def __init__(self) -> None:
+        self.base_dir: str = get_base_dir()
         self.files: dict[str, DataFile] = {}
-        self.__generate_datafiles(base_dir)
+        self.__generate_datafiles()
 
-    def __generate_datafiles(self, base_dir: str = BASE_DIR) -> None:
-        for root, _, files in os.walk(base_dir):
+    def __generate_datafiles(self) -> None:
+        for root, _, files in os.walk(self.base_dir):
             for file_name in files:
                 file_path: str = os.path.join(root, file_name)
                 if os.path.isfile(file_path):
