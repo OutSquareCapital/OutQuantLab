@@ -1,10 +1,11 @@
-from scipy.cluster.hierarchy import linkage, fcluster # type: ignore
+from scipy.cluster.hierarchy import linkage, fcluster  # type: ignore
 from scipy.spatial.distance import squareform
 from TypingConventions import ArrayFloat, DataFrameFloat, ClustersHierarchy
 import pandas as pd
 from ConfigClasses.Indicators import Indicator
 from Metrics import calculate_distance_matrix
 from typing import Any
+
 
 class ClustersTree:
     def __init__(self, clusters: ClustersHierarchy, prefix: str) -> None:
@@ -15,7 +16,9 @@ class ClustersTree:
     def generate_clusters_structure(self) -> list[str]:
         def determine_depth(node: dict[str, Any] | list[str]) -> int:
             if isinstance(node, dict):
-                return 1 + max(determine_depth(node=subnode) for subnode in node.values())
+                return 1 + max(
+                    determine_depth(node=subnode) for subnode in node.values()
+                )
             return 0
 
         depth: int = determine_depth(self.clusters)
@@ -36,71 +39,74 @@ class ClustersTree:
             for level2, assets in subclusters.items()
             for asset in assets
         }
+
+
 def generate_clusters_structure(
-    indic_clusters_structure: list[str],
-    asset_clusters_structure: list[str]
-    ) -> list[str]:
-    return asset_clusters_structure + indic_clusters_structure + ['Param']
+    indic_clusters_structure: list[str], asset_clusters_structure: list[str]
+) -> list[str]:
+    return asset_clusters_structure + indic_clusters_structure + ["Param"]
+
 
 def generate_multi_index_process(
     clusters_structure: list[str],
-    indicators_params: list[Indicator], 
-    asset_names: list[str], 
-    assets_to_clusters: dict[str, tuple[str, str]], 
-    indics_to_clusters: dict[str, tuple[str, str]]
-    ) -> pd.MultiIndex:
-
+    indicators_params: list[Indicator],
+    asset_names: list[str],
+    assets_to_clusters: dict[str, tuple[str, str]],
+    indics_to_clusters: dict[str, tuple[str, str]],
+) -> pd.MultiIndex:
     multi_index_tuples: list[tuple[str, ...]] = []
 
     for indic in indicators_params:
         for param in indic.param_combos:
-            param_str: str = '_'.join(map(str, param))
+            param_str: str = "_".join(map(str, param))
             for asset in asset_names:
                 asset_clusters: tuple[str, ...] = assets_to_clusters[asset]
                 indic_clusters: tuple[str, ...] = indics_to_clusters[indic.name]
-                multi_index_tuples.append((
-                    *asset_clusters, 
-                    asset, 
-                    *indic_clusters, 
-                    indic.name, 
-                    param_str
-                ))
+                multi_index_tuples.append(
+                    (*asset_clusters, asset, *indic_clusters, indic.name, param_str)
+                )
 
-    return pd.MultiIndex.from_tuples( # type: ignore
-        tuples=multi_index_tuples, 
-        names=clusters_structure)
+    return pd.MultiIndex.from_tuples(  # type: ignore
+        tuples=multi_index_tuples, names=clusters_structure
+    )
+
 
 def get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
     distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
     distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
-    linkage_matrix: ArrayFloat = linkage(distance_condensed, method='ward')
-    return fcluster(linkage_matrix, max_clusters, criterion='maxclust')
+    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")
+    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")
+
 
 def get_assets_in_cluster(
-    cluster_id: int, 
-    asset_names: list[str], 
-    flat_clusters: list[int]
-    ) -> list[str]:
+    cluster_id: int, asset_names: list[str], flat_clusters: list[int]
+) -> list[str]:
     return [
-        asset for asset, cluster in zip(asset_names, flat_clusters) if cluster == cluster_id
+        asset
+        for asset, cluster in zip(asset_names, flat_clusters)
+        if cluster == cluster_id
     ]
 
+
 def assign_clusters(
-    max_clusters: int, 
-    asset_names: list[str], 
-    flat_clusters: list[int]
-    ) -> dict[str, list[str]]:
+    max_clusters: int, asset_names: list[str], flat_clusters: list[int]
+) -> dict[str, list[str]]:
     return {
-        str(object=cluster_id): get_assets_in_cluster(cluster_id=cluster_id, asset_names=asset_names, flat_clusters=flat_clusters)
+        str(object=cluster_id): get_assets_in_cluster(
+            cluster_id=cluster_id, asset_names=asset_names, flat_clusters=flat_clusters
+        )
         for cluster_id in range(1, max_clusters + 1)
     }
 
-def generate_dynamic_clusters(
-    returns_df: DataFrameFloat, 
-    max_clusters: int
-) -> dict[str, list[str]]:
 
-    flat_clusters: list[int] = get_flat_clusters(returns_array=returns_df.nparray, max_clusters=max_clusters)
+def generate_dynamic_clusters(
+    returns_df: DataFrameFloat, max_clusters: int
+) -> dict[str, list[str]]:
+    flat_clusters: list[int] = get_flat_clusters(
+        returns_array=returns_df.nparray, max_clusters=max_clusters
+    )
     asset_names: list[str] = returns_df.columns.tolist()
 
-    return assign_clusters(max_clusters=max_clusters, asset_names=asset_names, flat_clusters=flat_clusters)
+    return assign_clusters(
+        max_clusters=max_clusters, asset_names=asset_names, flat_clusters=flat_clusters
+    )

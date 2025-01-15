@@ -5,20 +5,19 @@ class Asset:
     name: str
     active: bool
 
+def load_entities(assets_to_test: dict[str, bool], asset_names: list[str]) -> dict[str, Asset]:
+    assets_objects: dict[str, Asset] = {}
+    for name in asset_names:
+        is_active: bool = assets_to_test.get(name, False)
+        assets_objects[name] = Asset(
+            name=name, 
+            active=is_active
+            )
+    return assets_objects
+
 class AssetsCollection:
     def __init__(self, assets_to_test: dict[str, bool], asset_names: list[str]) -> None:
-        self.assets_to_test: dict[str, bool] = assets_to_test
-        self.asset_names: list[str] = asset_names
-        self.assets_objects: dict[str, Asset] = {}
-        self.load_entities()
-
-    def load_entities(self) -> None:
-        for name in self.asset_names:
-            is_active: bool = self.assets_to_test.get(name, False)
-            self.assets_objects[name] = Asset(
-                name=name, 
-                active=is_active
-                )
+        self.assets_objects: dict[str, Asset] = load_entities(assets_to_test=assets_to_test, asset_names=asset_names)
 
     @property
     def all_entities_names(self) -> list[str]:
