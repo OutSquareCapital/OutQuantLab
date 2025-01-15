@@ -2,10 +2,8 @@ def handle_progress(progress: int, message: str) -> None:
     print(f"[{progress}%] {message}")
 
 def run() -> None:
-    oql: OutQuantLab = OutQuantLab(
-            progress_callback=handle_progress
-        )
-    oql.execute_backtest()
+    oql: OutQuantLab = OutQuantLab()
+    oql.execute_backtest(progress_callback=handle_progress)
     #graphs = GraphsCollection(stats=oql.stats)
     for metric, value in oql.stats.get_metrics():
         print(f"{metric}: {value}")

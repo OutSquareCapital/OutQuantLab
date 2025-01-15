@@ -16,25 +16,21 @@ from TypingConventions import DataFrameFloat, ProgressFunc
 
 
 class OutQuantLab:
-    def __init__(self, progress_callback: ProgressFunc) -> None:
+    def __init__(self) -> None:
         self.dbp = DataBaseProvider()
         self.assets_collection: AssetsCollection = self.dbp.get_assets_collection()
-        self.indics_collection: IndicatorsCollection = (
-            self.dbp.get_indicators_collection()
-        )
-        self.assets_clusters: ClustersTree = self.dbp.get_clusters_tree(
-            cluster_type="assets"
-        )
-        self.indics_clusters: ClustersTree = self.dbp.get_clusters_tree(
-            cluster_type="indics"
-        )
+        self.indics_collection: IndicatorsCollection = (self.dbp.get_indicators_collection())
+        self.assets_clusters: ClustersTree = self.dbp.get_clusters_tree(cluster_type="assets")
+        self.indics_clusters: ClustersTree = self.dbp.get_clusters_tree(cluster_type="indics")
         self.initial_df: DataFrameFloat = self.dbp.get_initial_data()
         self.stats = BacktestStats(
-            length=250, max_clusters=5, returns_limit=0.05, initial_data=self.initial_df
+            length=250, 
+            max_clusters=5, 
+            returns_limit=0.05, 
+            initial_data=self.initial_df
         )
-        self.progress_callback = progress_callback
 
-    def execute_backtest(self) -> None:
+    def execute_backtest(self, progress_callback: ProgressFunc) -> None:
         asset_names: list[str] = self.assets_collection.all_active_entities_names
         indics_params: list[Indicator] = self.indics_collection.indicators_params
         clusters_structure: list[str] = generate_clusters_structure(
@@ -56,7 +52,7 @@ class OutQuantLab:
             indics_methods=IndicatorsMethods(),
             dates_index=self.initial_df.dates,
             multi_index=multi_index,
-            progress_callback=self.progress_callback,
+            progress_callback=progress_callback,
         )
 
         (
@@ -67,15 +63,17 @@ class OutQuantLab:
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,
             all_history=True,
-            progress_callback=self.progress_callback,
+            progress_callback=progress_callback,
         )
 
     def save_all(self) -> None:
         self.dbp.save_assets_collection(assets_collection=self.assets_collection)
         self.dbp.save_indicators_collection(indics_collection=self.indics_collection)
         self.dbp.save_clusters_tree(
-            clusters_tree=self.assets_clusters, cluster_type="assets"
+            clusters_tree=self.assets_clusters, 
+            cluster_type="assets"
         )
         self.dbp.save_clusters_tree(
-            clusters_tree=self.indics_clusters, cluster_type="indics"
-        )
+            clusters_tree=self.indics_clusters, 
+            cluster_type="indics"
+            )
