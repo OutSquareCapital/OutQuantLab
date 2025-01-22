@@ -1,9 +1,10 @@
+from indicators import ReturnsData
 from config_classes import (
     AssetsCollection,
     ClustersTree,
     IndicatorsCollection,
 )
-from database import DataQueries
+from database.data_queries import DataQueries
 from typing_conventions import ArrayFloat, DataFrameFloat
 
 class DataBaseProvider:
@@ -27,10 +28,11 @@ class DataBaseProvider:
             asset_names=self.dbq.select(file="assets_names").load(),
         )
 
-    def get_indicators_collection(self) -> IndicatorsCollection:
+    def get_indicators_collection(self, returns_data: ReturnsData) -> IndicatorsCollection:
         return IndicatorsCollection(
             indicators_to_test=self.dbq.select(file="indics_to_test").load(),
             params_config=self.dbq.select(file="indics_params").load(),
+            returns_data=returns_data,
         )
 
     def get_clusters_tree(self, cluster_type: str) -> ClustersTree:

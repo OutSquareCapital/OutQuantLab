@@ -1,5 +1,5 @@
-from database.data_queries import DataQueries
+from database.data_provider import DataBaseProvider
 
 __all__: list[str] = [
-    'DataQueries'
+    'DataBaseProvider'
     ]
