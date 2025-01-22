@@ -12,7 +12,7 @@ from config_classes import (
 from stats import BacktestStats
 from typing_conventions import DataFrameFloat, ProgressFunc
 from indicators import BaseIndicator, ReturnsData
-
+from graphs import GraphsCollection
 
 class OutQuantLab:
     def __init__(self) -> None:
@@ -65,6 +65,9 @@ class OutQuantLab:
             all_history=True,
             progress_callback=progress_callback,
         )
+
+    def get_visuals(self) -> GraphsCollection:
+        return GraphsCollection(stats=self.stats)
 
     def save_all(self) -> None:
         self.dbp.save_assets_collection(assets_collection=self.assets_collection)

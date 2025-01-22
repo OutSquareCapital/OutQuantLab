@@ -17,8 +17,6 @@ def run() -> None:
         print(f'{i}')
     avg_time = total_time / iterations
     print(f"Average time: {avg_time}")
-    #oql.save_all()
-    graphs = GraphsCollection(stats=oql.stats)
     for metric, value in oql.stats.get_metrics().items():
         print(f"{metric}: {value}")
 
@@ -27,7 +25,7 @@ if __name__ == "__main__":
     print('initializing OutQuantLab...')
 
     from sys import exit
-    from outquantlab import OutQuantLab, GraphsCollection
+    from outquantlab import OutQuantLab
     print('OutQuantLab initialized')
     run()
     exit(0)
