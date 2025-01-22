@@ -41,7 +41,7 @@ class DataBaseProvider:
         )
 
     def save_assets_collection(self, assets_collection: AssetsCollection) -> None:
-        self.dbq.select("assets_to_test").save(
+        self.dbq.select(file="assets_to_test").save(
             data=assets_collection.all_active_entities_dict
         )
 
@@ -52,7 +52,9 @@ class DataBaseProvider:
             data=indics_collection.all_active_entities_dict
         )
         self.dbq.select(file="indics_params").save(
-            data=indics_collection.all_params_config
+            data={
+            name: indicator.params_values for name, indicator in indics_collection.entities.items()
+        }
         )
 
     def save_clusters_tree(

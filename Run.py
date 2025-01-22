@@ -7,7 +7,7 @@ def run() -> None:
     import time
     total_time = 0
     start = time.perf_counter()
-    iterations = 10
+    iterations = 1
     for i in range(iterations):
         oql.execute_backtest(progress_callback=handle_progress)
         # add time
@@ -17,9 +17,10 @@ def run() -> None:
         print(f'{i}')
     avg_time = total_time / iterations
     print(f"Average time: {avg_time}")
+    oql.save_all()
     #graphs = GraphsCollection(stats=oql.stats)
-    for metric, value in oql.stats.get_metrics().items():
-        print(f"{metric}: {value}")
+    #for metric, value in oql.stats.get_metrics().items():
+    #    print(f"{metric}: {value}")
 
 if __name__ == "__main__":
 

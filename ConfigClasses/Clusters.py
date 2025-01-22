@@ -2,7 +2,7 @@ from scipy.cluster.hierarchy import linkage, fcluster  # type: ignore
 from scipy.spatial.distance import squareform
 from TypingConventions import ArrayFloat, DataFrameFloat, ClustersHierarchy
 import pandas as pd
-from ConfigClasses.Indicators import Indicator
+from ConfigClasses.Collections import BaseIndicator
 from Metrics import calculate_distance_matrix
 from typing import Any
 
@@ -11,9 +11,10 @@ class ClustersTree:
     def __init__(self, clusters: ClustersHierarchy, prefix: str) -> None:
         self.clusters: ClustersHierarchy = clusters
         self.prefix: str = prefix
-        self.clusters_structure: list[str] = self.generate_clusters_structure()
+        self.clusters_structure: list[str] = []
+        self._generate_clusters_structure()
 
-    def generate_clusters_structure(self) -> list[str]:
+    def _generate_clusters_structure(self) -> None:
         def determine_depth(node: dict[str, Any] | list[str]) -> int:
             if isinstance(node, dict):
                 return 1 + max(
@@ -22,12 +23,10 @@ class ClustersTree:
             return 0
 
         depth: int = determine_depth(self.clusters)
-        cluster_names: list[str] = []
         for i in range(depth):
             cluster_name: str = f"{self.prefix}{'Sub' * i}Cluster"
-            cluster_names.append(cluster_name)
-        cluster_names.append(self.prefix)
-        return cluster_names
+            self.clusters_structure.append(cluster_name)
+        self.clusters_structure.append(self.prefix)
 
     def update_clusters_structure(self, new_structure: ClustersHierarchy) -> None:
         self.clusters = new_structure
@@ -41,7 +40,7 @@ class ClustersTree:
         }
 
 
-def generate_clusters_structure(
+def generate_overall_clusters_structure(
     indic_clusters_structure: list[str], asset_clusters_structure: list[str]
 ) -> list[str]:
     return asset_clusters_structure + indic_clusters_structure + ["Param"]
@@ -49,7 +48,7 @@ def generate_clusters_structure(
 
 def generate_multi_index_process(
     clusters_structure: list[str],
-    indicators_params: list[Indicator],
+    indicators_params: list[BaseIndicator],
     asset_names: list[str],
     assets_to_clusters: dict[str, tuple[str, str]],
     indics_to_clusters: dict[str, tuple[str, str]],
