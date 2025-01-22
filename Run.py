@@ -19,7 +19,6 @@ def run() -> None:
     print(f"Average time: {avg_time}")
     #oql.save_all()
     graphs = GraphsCollection(stats=oql.stats)
-    graphs.plot_stats_equity().show()
     for metric, value in oql.stats.get_metrics().items():
         print(f"{metric}: {value}")
 
