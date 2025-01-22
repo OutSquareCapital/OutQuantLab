@@ -32,6 +32,7 @@ class OutQuantLab:
         self.stats = BacktestStats(
             length=250, max_clusters=5, returns_limit=0.05, returns_data=self.returns_data
         )
+        self.graphs = GraphsCollection(stats=self.stats)
 
     def execute_backtest(self, progress_callback: ProgressFunc) -> None:
         
@@ -66,9 +67,6 @@ class OutQuantLab:
             all_history=True,
             progress_callback=progress_callback,
         )
-
-    def get_visuals(self) -> GraphsCollection:
-        return GraphsCollection(stats=self.stats)
 
     def save_all(self) -> None:
         self.dbp.save_assets_collection(assets_collection=self.assets_collection)
