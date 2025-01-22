@@ -1,18 +1,19 @@
-from typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
-from stats.transformations import (
+from collections.abc import Callable
+
+import outquantlab.metrics as Computations
+from outquantlab.config_classes import generate_dynamic_clusters
+from outquantlab.indicators import ReturnsData
+from outquantlab.indicators.indics_raw import smoothed_skewness
+from outquantlab.stats.transformations import (
+    convert_multiindex_to_labels,
+    fill_correlation_matrix,
+    format_returns,
+    normalize_data_for_colormap,
+    prepare_sunburst_data,
     sort_dataframe,
     sort_series,
-    convert_multiindex_to_labels,
-    format_returns,
-    fill_correlation_matrix,
-    prepare_sunburst_data,
-    normalize_data_for_colormap
 )
-import metrics as Computations
-from config_classes import generate_dynamic_clusters
-from collections.abc import Callable
-from indicators.indics_raw import smoothed_skewness
-from indicators import ReturnsData
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
 
 def format_metric_name(name: str) -> str:
@@ -61,7 +62,9 @@ class BacktestStats:
                 returns_array=self.returns_data.sub_portfolio_roll.nparray
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
-            columns=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_roll),
+            columns=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_roll
+            ),
         )
 
         return sort_dataframe(df=equity_curves_df, use_final=True, ascending=True)
@@ -72,7 +75,9 @@ class BacktestStats:
                 returns_array=self.returns_data.sub_portfolio_roll.nparray
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
-            columns=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_roll),
+            columns=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_roll
+            ),
         )
 
         return sort_dataframe(df=rolling_volatility_df, ascending=False)
@@ -80,10 +85,13 @@ class BacktestStats:
     def get_rolling_drawdown(self) -> DataFrameFloat:
         drawdowns_df = DataFrameFloat(
             data=Computations.calculate_rolling_drawdown(
-                returns_array=self.returns_data.sub_portfolio_roll.nparray, length=self.length
+                returns_array=self.returns_data.sub_portfolio_roll.nparray,
+                length=self.length,
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
-            columns=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_roll),
+            columns=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_roll
+            ),
         )
 
         return sort_dataframe(df=drawdowns_df, ascending=True)
@@ -96,7 +104,9 @@ class BacktestStats:
                 min_length=self.length,
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
-            columns=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_roll),
+            columns=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_roll
+            ),
         )
 
         return sort_dataframe(df=rolling_sharpe_ratio_df, ascending=True)
@@ -109,7 +119,9 @@ class BacktestStats:
                 LenSkew=self.length,
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
-            columns=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_roll),
+            columns=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_roll
+            ),
         )
 
         return sort_dataframe(df=rolling_skewness_df, ascending=True)
@@ -119,7 +131,9 @@ class BacktestStats:
             data=Computations.calculate_total_returns(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
-            index=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            index=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
 
         return sort_series(series=total_returns_series, ascending=True)
@@ -129,7 +143,9 @@ class BacktestStats:
             data=Computations.overall_sharpe_ratio(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
-            index=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            index=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
 
         return sort_series(series=sharpes_series, ascending=True)
@@ -139,7 +155,9 @@ class BacktestStats:
             data=Computations.overall_volatility_annualized(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
-            index=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            index=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
 
         return sort_series(series=overall_vol_series, ascending=True)
@@ -152,7 +170,9 @@ class BacktestStats:
 
         drawdowns_series = SeriesFloat(
             data=Computations.calculate_overall_mean(array=rolling_dd),
-            index=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            index=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
 
         return sort_series(series=drawdowns_series, ascending=True)
@@ -162,7 +182,9 @@ class BacktestStats:
             data=Computations.calculate_overall_average_correlation(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
-            index=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            index=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
 
         return sort_series(series=overall_average_corr, ascending=True)
@@ -172,7 +194,9 @@ class BacktestStats:
             data=Computations.calculate_overall_monthly_skewness(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
-            index=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            index=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
 
         return sort_series(series=skew_series, ascending=True)
@@ -180,19 +204,25 @@ class BacktestStats:
     def get_stats_distribution_violin(self) -> DataFrameFloat:
         return DataFrameFloat(
             data=format_returns(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray, limit=self.returns_limit
+                returns_array=self.returns_data.sub_portfolio_ovrll.nparray,
+                limit=self.returns_limit,
             ),
             index=self.returns_data.sub_portfolio_ovrll.dates,
-            columns=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            columns=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
 
     def get_stats_distribution_histogram(self) -> DataFrameFloat:
         return DataFrameFloat(
             data=format_returns(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray, limit=self.returns_limit
+                returns_array=self.returns_data.sub_portfolio_ovrll.nparray,
+                limit=self.returns_limit,
             ),
             index=self.returns_data.sub_portfolio_ovrll.dates,
-            columns=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            columns=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
 
     def get_correlation_heatmap(self) -> tuple[ArrayFloat, list[str], ArrayFloat]:
@@ -205,7 +235,9 @@ class BacktestStats:
         labels_list: list[str] = convert_multiindex_to_labels(
             df=self.returns_data.sub_portfolio_ovrll
         )
-        corr_matrix_normalised = normalize_data_for_colormap(data=filled_correlation_matrix)
+        corr_matrix_normalised = normalize_data_for_colormap(
+            data=filled_correlation_matrix
+        )
 
         return filled_correlation_matrix, labels_list, corr_matrix_normalised
 
@@ -213,7 +245,9 @@ class BacktestStats:
         renamed_returns_df = DataFrameFloat(
             data=self.returns_data.sub_portfolio_ovrll.nparray,
             index=self.returns_data.sub_portfolio_ovrll.dates,
-            columns=convert_multiindex_to_labels(df=self.returns_data.sub_portfolio_ovrll),
+            columns=convert_multiindex_to_labels(
+                df=self.returns_data.sub_portfolio_ovrll
+            ),
         )
         clusters_dict: dict[str, list[str]] = generate_dynamic_clusters(
             returns_df=renamed_returns_df, max_clusters=self.max_clusters

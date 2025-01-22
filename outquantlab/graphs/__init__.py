@@ -1,3 +1,3 @@
-from graphs.display import GraphsCollection
+from outquantlab.graphs.display import GraphsCollection
 
 __all__ = ["GraphsCollection"]

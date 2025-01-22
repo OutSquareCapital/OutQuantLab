@@ -1,9 +1,9 @@
-from typing_conventions import ArrayFloat
+from outquantlab.typing_conventions import ArrayFloat
 from abc import ABC, abstractmethod
 from typing import Any
 from itertools import product
 from inspect import signature
-from indicators.indics_data import ReturnsData
+from outquantlab.indicators.indics_data import ReturnsData
 
 class BaseIndicator(ABC):
     def __init__(self, name: str, active: bool, params_values: dict[str, list[int]], returns_data: ReturnsData) -> None:

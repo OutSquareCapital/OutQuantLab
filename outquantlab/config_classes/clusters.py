@@ -1,10 +1,12 @@
-from scipy.cluster.hierarchy import linkage, fcluster  # type: ignore
-from scipy.spatial.distance import squareform
-from typing_conventions import ArrayFloat, DataFrameFloat, ClustersHierarchy
-import pandas as pd
-from config_classes.collections import BaseIndicator
-from metrics import calculate_distance_matrix
 from typing import Any
+
+import pandas as pd
+from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
+from scipy.spatial.distance import squareform
+
+from outquantlab.config_classes.collections import BaseIndicator
+from outquantlab.metrics import calculate_distance_matrix
+from outquantlab.typing_conventions import ArrayFloat, ClustersHierarchy, DataFrameFloat
 
 
 class ClustersTree:

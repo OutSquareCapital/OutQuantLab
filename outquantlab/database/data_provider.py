@@ -1,11 +1,11 @@
-from indicators import ReturnsData
-from config_classes import (
+from outquantlab.indicators import ReturnsData
+from outquantlab.config_classes import (
     AssetsCollection,
     ClustersTree,
     IndicatorsCollection,
 )
-from database.data_queries import DataQueries
-from typing_conventions import ArrayFloat, DataFrameFloat
+from outquantlab.database.data_queries import DataQueries
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 class DataBaseProvider:
     def __init__(self) -> None:

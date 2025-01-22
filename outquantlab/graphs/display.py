@@ -1,7 +1,7 @@
 import plotly.graph_objects as go  # type: ignore
 
-import graphs.widgets as widgets
-from stats import BacktestStats
+import outquantlab.graphs.widgets as widgets
+from outquantlab.stats import BacktestStats
 
 
 def format_plot_name(name: str) -> str:

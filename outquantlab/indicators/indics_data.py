@@ -1,12 +1,12 @@
-from metrics import (
+from outquantlab.metrics import (
     hv_composite,
     calculate_volatility_adjusted_returns,
     calculate_equity_curves,
     log_returns_np,
     shift_array,
 )
-from typing_conventions import ArrayFloat, DataFrameFloat
-from typing_conventions.custom_classes import DatetimeIndex
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
+from outquantlab.typing_conventions.custom_classes import DatetimeIndex
 
 class ReturnsData:
     def __init__(self, returns_df: DataFrameFloat) -> None:

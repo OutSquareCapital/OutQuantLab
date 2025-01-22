@@ -1,9 +1,16 @@
 from collections.abc import Callable
 import numpy as np
-from metrics.aggregation import rolling_mean, rolling_median, rolling_min, rolling_max
-from metrics.volatility import rolling_volatility
-from typing_conventions import ArrayFloat, Float32
 from operator import gt
+
+from outquantlab.metrics.aggregation import (
+    rolling_mean,
+    rolling_median,
+    rolling_min,
+    rolling_max,
+)
+from outquantlab.metrics.volatility import rolling_volatility
+from outquantlab.typing_conventions import ArrayFloat, Float32
+
 
 
 def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> ArrayFloat:

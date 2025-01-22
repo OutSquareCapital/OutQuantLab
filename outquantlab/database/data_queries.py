@@ -1,6 +1,6 @@
 import os
 
-from database.data_file import DataFile
+from outquantlab.database.data_file import DataFile
 
 DATA_DIR: str = "data"
 

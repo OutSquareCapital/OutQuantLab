@@ -2,7 +2,7 @@ import numpy as np
 from numpy.typing import DTypeLike
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
-from typing_conventions.custom_types import ArrayFloat, Float32
+from outquantlab.typing_conventions.custom_types import ArrayFloat, Float32
 
 class SeriesFloat(Series):  # type: ignore
     """

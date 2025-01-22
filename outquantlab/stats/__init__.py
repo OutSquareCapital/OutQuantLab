@@ -1,3 +1,3 @@
-from stats.computations import BacktestStats
+from outquantlab.stats.computations import BacktestStats
 
 __all__ = ["BacktestStats"]

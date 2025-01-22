@@ -1,6 +1,6 @@
-from database.data_queries import DataQueries
-from metrics import pct_returns_np
-from typing_conventions import DataFrameFloat
+from outquantlab.database.data_queries import DataQueries
+from outquantlab.metrics import pct_returns_np
+from outquantlab.typing_conventions import DataFrameFloat
 import pandas as pd
 import yfinance as yf  # type: ignore
 

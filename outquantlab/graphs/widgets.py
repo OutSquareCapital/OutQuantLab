@@ -1,15 +1,15 @@
 import pandas as pd
 import plotly.graph_objects as go  # type: ignore
 
-from graphs.design import (
+from outquantlab.graphs.design import (
     get_color_map,
     get_heatmap_colorscale,
     get_marker_config,
     setup_figure_layout,
 )
-from graphs.ui_constants import COLOR_ADJUSTMENT
-from metrics import calculate_overall_max, calculate_overall_min
-from typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
+from outquantlab.graphs.ui_constants import COLOR_ADJUSTMENT
+from outquantlab.metrics import calculate_overall_max, calculate_overall_min
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
 
 def curves(

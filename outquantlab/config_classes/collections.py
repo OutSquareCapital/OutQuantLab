@@ -1,5 +1,5 @@
-from indicators import BaseIndicator, IndicatorsNormalized, ReturnsData
-from config_classes.generic_classes import BaseCollection
+from outquantlab.indicators import BaseIndicator, IndicatorsNormalized, ReturnsData
+from outquantlab.config_classes.generic_classes import BaseCollection
 from dataclasses import dataclass
 
 

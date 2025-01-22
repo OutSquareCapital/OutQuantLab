@@ -1,5 +1,5 @@
-import metrics as mt
-from typing_conventions import ArrayFloat
+import outquantlab.metrics as mt
+from outquantlab.typing_conventions import ArrayFloat
 
 
 def calculate_mean_price_ratio_raw(

@@ -1,4 +1,4 @@
-from metrics.aggregation import (
+from outquantlab.metrics.aggregation import (
     calculate_overall_mean,
     calculate_overall_max,
     calculate_overall_min,
@@ -11,7 +11,7 @@ from metrics.aggregation import (
     rolling_quantile_ratio,
 )
 
-from metrics.normalization import (
+from outquantlab.metrics.normalization import (
     ratio_normalization,
     sign_normalization,
     relative_normalization,
@@ -21,9 +21,9 @@ from metrics.normalization import (
     rolling_median_normalisation,
     dynamic_signal,
 )
-from metrics.distribution import rolling_kurtosis, rolling_skewness
+from outquantlab.metrics.distribution import rolling_kurtosis, rolling_skewness
 
-from metrics.volatility import (
+from outquantlab.metrics.volatility import (
     rolling_volatility,
     hv_composite,
     separate_volatility,
@@ -31,7 +31,7 @@ from metrics.volatility import (
     overall_volatility_annualized,
 )
 
-from metrics.performance import (
+from outquantlab.metrics.performance import (
     rolling_sharpe_ratios,
     expanding_sharpe_ratios,
     overall_sharpe_ratio,
@@ -46,13 +46,13 @@ from metrics.performance import (
     calculate_overall_monthly_skewness,
 )
 
-from metrics.correlation import (
+from outquantlab.metrics.correlation import (
     calculate_correlation_matrix,
     calculate_distance_matrix,
     calculate_overall_average_correlation,
 )
 
-from metrics.maths_constants import PERCENTAGE_FACTOR
+from outquantlab.metrics.maths_constants import PERCENTAGE_FACTOR
 
 __all__: list[str] = [
     "calculate_overall_monthly_skewness",

@@ -1,6 +1,6 @@
 
-from typing_conventions import ProgressFunc, DataFrameFloat
-from metrics import calculate_overall_mean
+from outquantlab.typing_conventions import ProgressFunc, DataFrameFloat
+from outquantlab.metrics import calculate_overall_mean
 
 def calculate_portfolio_returns(
     returns_df: DataFrameFloat,

@@ -9,8 +9,9 @@ def run() -> None:
     iterations = 1
     for i in range(iterations):
         start = time.perf_counter()
-        oql.execute_backtest(progress_callback=handle_progress)
-        
+        import cProfile
+        cProfile.run('oql.execute_backtest(progress_callback=handle_progress)')
+
         end = time.perf_counter()
         time_elapsed = end - start
         total_time += time_elapsed

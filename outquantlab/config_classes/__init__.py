@@ -1,5 +1,5 @@
-from config_classes.collections import IndicatorsCollection, AssetsCollection, Asset
-from config_classes.clusters import (
+from outquantlab.config_classes.collections import IndicatorsCollection, AssetsCollection, Asset
+from outquantlab.config_classes.clusters import (
     ClustersTree,
     generate_multi_index_process,
     generate_dynamic_clusters,

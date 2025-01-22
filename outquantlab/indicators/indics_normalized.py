@@ -1,8 +1,8 @@
 import numpy as np
-import indicators.indics_raw as raw
-import metrics.normalization as norm
-from typing_conventions import ArrayFloat, Float32
-from indicators.base_indicator import BaseIndicator
+import outquantlab.indicators.indics_raw as raw
+import outquantlab.metrics.normalization as norm
+from outquantlab.typing_conventions import ArrayFloat, Float32
+from outquantlab.indicators.base_indicator import BaseIndicator
 
 
 class IndicatorsNormalized:

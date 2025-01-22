@@ -1,8 +1,8 @@
 import numpy as np
-from typing_conventions import ArrayFloat
+from outquantlab.typing_conventions import ArrayFloat
 import bottleneck as bn # type: ignore
-from metrics.aggregation import rolling_mean, rolling_median
-from metrics.maths_constants import ANNUALIZED_PERCENTAGE_FACTOR
+from outquantlab.metrics.aggregation import rolling_mean, rolling_median
+from outquantlab.metrics.maths_constants import ANNUALIZED_PERCENTAGE_FACTOR
 
 def overall_volatility(returns_array: ArrayFloat) -> ArrayFloat:
     return bn.nanstd(returns_array, axis=0, ddof=1) # type: ignore
