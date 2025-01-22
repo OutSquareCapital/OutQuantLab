@@ -9,6 +9,5 @@ Int32: TypeAlias = int32
 ArrayFloat: TypeAlias = NDArray[Float32]
 ArrayInt: TypeAlias = NDArray[Int32]
 ProgressFunc: TypeAlias = Callable[[int, str], None]
-IndicatorFunc : TypeAlias = Callable[..., ArrayFloat]
 ClustersHierarchy: TypeAlias = dict[str, dict[str, list[str]]]
 GraphFunc: TypeAlias =  Callable[..., str|Figure]

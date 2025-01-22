@@ -10,7 +10,6 @@ from TypingConventions.custom_types import (
     ArrayFloat,
     ArrayInt,
     ProgressFunc,
-    IndicatorFunc,
     ClustersHierarchy,
     GraphFunc
 )
@@ -22,7 +21,6 @@ __all__: list[str] = [
     'ArrayFloat',
     'ArrayInt',
     'ProgressFunc',
-    'IndicatorFunc',
     'SeriesFloat',
     'DataFrameFloat',
     'ClustersHierarchy',
