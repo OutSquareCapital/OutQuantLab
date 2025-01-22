@@ -105,7 +105,7 @@ class BacktestStats:
     def get_rolling_smoothed_skewness(self) -> DataFrameFloat:
         rolling_skewness_df = DataFrameFloat(
             data=smoothed_skewness(
-                returns_array=self.sub_portfolio_roll.nparray,
+                log_returns_array=self.sub_portfolio_roll.nparray,
                 LenSmooth=20,
                 LenSkew=self.length,
             ),

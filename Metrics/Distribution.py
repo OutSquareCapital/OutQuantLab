@@ -55,25 +55,21 @@ def add_skewness_contribution(
     if value == value:  # Vérification NaN
         observation_count += 1
 
-        # Mise à jour pour la somme des valeurs
         temp: float = value - compensation_values
         total: float = sum_values + temp
         compensation_values = total - sum_values - temp
         sum_values = total
 
-        # Mise à jour pour la somme des carrés des valeurs
         temp = value * value - compensation_squared
         total = sum_values_squared + temp
         compensation_squared = total - sum_values_squared - temp
         sum_values_squared = total
 
-        # Mise à jour pour la somme des cubes des valeurs
         temp = value * value * value - compensation_cubed
         total = sum_values_cubed + temp
         compensation_cubed = total - sum_values_cubed - temp
         sum_values_cubed = total
 
-        # Gestion des valeurs consécutives identiques
         if value == previous_value:
             consecutive_equal_count += 1
         else:
