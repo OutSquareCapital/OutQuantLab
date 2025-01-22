@@ -1,4 +1,4 @@
-from DataBase import DataQueries
+from Database import DataQueries
 from Metrics import pct_returns_np
 from TypingConventions import DataFrameFloat
 import pandas as pd

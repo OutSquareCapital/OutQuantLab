@@ -3,7 +3,7 @@ from ConfigClasses import (
     ClustersTree,
     IndicatorsCollection,
 )
-from DataBase import DataQueries
+from Database import DataQueries
 from TypingConventions import ArrayFloat, DataFrameFloat
 
 class DataBaseProvider:

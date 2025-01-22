@@ -1,6 +1,6 @@
 import os
 
-from DataBase.Data_File import DataFile
+from Database.Data_File import DataFile
 
 DATA_DIR: str = "Data"
 
