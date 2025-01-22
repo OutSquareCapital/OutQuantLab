@@ -5,10 +5,6 @@ from ConfigClasses import (
 )
 from DataBase import DataQueries
 from TypingConventions import ArrayFloat, DataFrameFloat
-import pandas as pd
-from Metrics import pct_returns_np
-import yfinance as yf  # type: ignore
-
 
 class DataBaseProvider:
     def __init__(self) -> None:
@@ -24,30 +20,6 @@ class DataBaseProvider:
         return DataFrameFloat(
             data=self.dbq.select(file="returns_data").load(names=["Date", "SPY"])
         )
-
-    def refresh_yf_data(self, assets: list[str]) -> None:
-        data: pd.DataFrame | None = yf.download(  # type: ignore
-            tickers=assets,
-            interval="1d",
-            auto_adjust=True,
-            progress=False,
-        )
-        if data is None:
-            raise ValueError("Yahoo Finance Data Not Available")
-        else:
-            prices_data = DataFrameFloat(data=data["Close"])  # type: ignore
-
-            returns_data = DataFrameFloat(
-                data=pct_returns_np(prices_array=prices_data.nparray),
-                columns=prices_data.columns,
-                index=prices_data.dates,
-            )
-            
-            assets_names: list[str] = prices_data.columns.to_list()
-
-            self.dbq.select(file="price_data").save(data=prices_data)
-            self.dbq.select(file="returns_data").save(data=returns_data)
-            self.dbq.select(file="assets_names").save(data=assets_names)
 
     def get_assets_collection(self) -> AssetsCollection:
         return AssetsCollection(
