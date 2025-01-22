@@ -1,9 +1,9 @@
 import numpy as np
-from Indicators.Indics_Data import ReturnsData
-import Indicators.Indics_Raw as raw
-import Metrics.Normalization as norm
-from TypingConventions import ArrayFloat, Float32
-from Indicators.BaseIndicator import BaseIndicator
+from indicators.indics_data import ReturnsData
+import indicators.indics_raw as raw
+import metrics.normalization as norm
+from typing_conventions import ArrayFloat, Float32
+from indicators.base_indicator import BaseIndicator
 
 
 class IndicatorsNormalized:

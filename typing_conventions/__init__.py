@@ -1,10 +1,10 @@
 
-from TypingConventions.custom_classes import (
+from typing_conventions.custom_classes import (
     SeriesFloat,
     DataFrameFloat
 )
 
-from TypingConventions.custom_types import (
+from typing_conventions.custom_types import (
     Float32,
     Int32,
     ArrayFloat,

@@ -1,5 +1,5 @@
-from Indicators import BaseIndicator, IndicatorsNormalized
-from ConfigClasses.GenericClasses import BaseCollection
+from indicators import BaseIndicator, IndicatorsNormalized
+from config_classes.generic_classes import BaseCollection
 from dataclasses import dataclass
 
 

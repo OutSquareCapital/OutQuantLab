@@ -1,6 +1,6 @@
-from Database import DataQueries
-from Metrics import pct_returns_np
-from TypingConventions import DataFrameFloat
+from database import DataQueries
+from metrics import pct_returns_np
+from typing_conventions import DataFrameFloat
 import pandas as pd
 import yfinance as yf  # type: ignore
 

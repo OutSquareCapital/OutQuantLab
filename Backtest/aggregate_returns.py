@@ -1,6 +1,6 @@
 
-from TypingConventions import ProgressFunc, DataFrameFloat
-from Metrics import calculate_overall_mean
+from typing_conventions import ProgressFunc, DataFrameFloat
+from metrics import calculate_overall_mean
 
 def calculate_portfolio_returns(
     returns_df: DataFrameFloat,

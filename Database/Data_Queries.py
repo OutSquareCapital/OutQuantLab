@@ -1,8 +1,8 @@
 import os
 
-from Database.Data_File import DataFile
+from database.data_file import DataFile
 
-DATA_DIR: str = "Data"
+DATA_DIR: str = "data"
 
 
 def get_base_dir(data_dir: str = DATA_DIR) -> str:

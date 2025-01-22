@@ -2,9 +2,9 @@ import numpy as np
 import pandas as pd
 import os
 from typing import Final
-from TypingConventions import ArrayFloat, ProgressFunc, DataFrameFloat, Float32
+from typing_conventions import ArrayFloat, ProgressFunc, DataFrameFloat, Float32
 from concurrent.futures import ThreadPoolExecutor
-from Indicators import BaseIndicator, ReturnsData, process_data
+from indicators import BaseIndicator, ReturnsData, process_data
 
 N_THREADS: Final = os.cpu_count() or 8
 

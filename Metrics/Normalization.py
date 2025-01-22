@@ -1,8 +1,8 @@
 from collections.abc import Callable
 import numpy as np
-from Metrics.Aggregation import rolling_mean, rolling_median, rolling_min, rolling_max
-from Metrics.Volatility import rolling_volatility
-from TypingConventions import ArrayFloat, Float32
+from metrics.aggregation import rolling_mean, rolling_median, rolling_min, rolling_max
+from metrics.volatility import rolling_volatility
+from typing_conventions import ArrayFloat, Float32
 from operator import gt
 
 

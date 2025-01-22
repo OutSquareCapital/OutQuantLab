@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from Metrics import calculate_overall_mean, PERCENTAGE_FACTOR
-from TypingConventions import ArrayFloat, DataFrameFloat, SeriesFloat, Float32, ArrayInt
+from metrics import calculate_overall_mean, PERCENTAGE_FACTOR
+from typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat, Float32, ArrayInt
 
 def fill_correlation_matrix(corr_matrix: ArrayFloat) -> ArrayFloat:
     np.fill_diagonal(a=corr_matrix, val=np.nan)

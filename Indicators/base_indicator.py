@@ -1,4 +1,4 @@
-from TypingConventions import ArrayFloat
+from typing_conventions import ArrayFloat
 from abc import ABC, abstractmethod
 from typing import Any
 from itertools import product

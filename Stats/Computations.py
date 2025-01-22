@@ -1,5 +1,5 @@
-from TypingConventions import ArrayFloat, DataFrameFloat, SeriesFloat
-from Stats.Transformations import (
+from typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
+from stats.transformations import (
     sort_dataframe,
     sort_series,
     convert_multiindex_to_labels,
@@ -8,10 +8,10 @@ from Stats.Transformations import (
     prepare_sunburst_data,
     normalize_data_for_colormap
 )
-import Metrics as Computations
-from ConfigClasses import generate_dynamic_clusters
+import metrics as Computations
+from config_classes import generate_dynamic_clusters
 from collections.abc import Callable
-from Indicators.Indics_Raw import smoothed_skewness
+from indicators.indics_raw import smoothed_skewness
 
 
 def format_metric_name(name: str) -> str:

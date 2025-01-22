@@ -1,17 +1,17 @@
 from pandas import MultiIndex
 
-from App.Data_Provider import DataBaseProvider
-from Backtest import aggregate_raw_returns, calculate_strategy_returns
-from ConfigClasses import (
+from app.data_provider import DataBaseProvider
+from backtest import aggregate_raw_returns, calculate_strategy_returns
+from config_classes import (
     AssetsCollection,
     ClustersTree,
     IndicatorsCollection,
     generate_overall_clusters_structure,
     generate_multi_index_process,
 )
-from Stats import BacktestStats
-from TypingConventions import DataFrameFloat, ProgressFunc
-from Indicators import BaseIndicator
+from stats import BacktestStats
+from typing_conventions import DataFrameFloat, ProgressFunc
+from indicators import BaseIndicator
 
 
 class OutQuantLab:

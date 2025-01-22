@@ -1,10 +1,10 @@
-from ConfigClasses import (
+from config_classes import (
     AssetsCollection,
     ClustersTree,
     IndicatorsCollection,
 )
-from Database import DataQueries
-from TypingConventions import ArrayFloat, DataFrameFloat
+from database import DataQueries
+from typing_conventions import ArrayFloat, DataFrameFloat
 
 class DataBaseProvider:
     def __init__(self) -> None:

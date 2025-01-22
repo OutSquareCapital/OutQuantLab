@@ -1,5 +1,5 @@
-from Backtest.Process_Strategies import calculate_strategy_returns
-from Backtest.AggregateReturns import aggregate_raw_returns
+from backtest.process_strategies import calculate_strategy_returns
+from backtest.aggregate_returns import aggregate_raw_returns
 
 __all__ = [
     "calculate_strategy_returns",

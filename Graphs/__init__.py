@@ -1,3 +1,3 @@
-from Graphs.Display import GraphsCollection
+from graphs.display import GraphsCollection
 
 __all__ = ["GraphsCollection"]

@@ -1,5 +1,5 @@
-from ConfigClasses.Collections import IndicatorsCollection, AssetsCollection, Asset
-from ConfigClasses.Clusters import (
+from config_classes.collections import IndicatorsCollection, AssetsCollection, Asset
+from config_classes.clusters import (
     ClustersTree,
     generate_multi_index_process,
     generate_dynamic_clusters,

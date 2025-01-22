@@ -1,4 +1,4 @@
-from App.App_Backend import OutQuantLab
+from app.app_backend import OutQuantLab
 
 __all__: list[str] = [
     "OutQuantLab"

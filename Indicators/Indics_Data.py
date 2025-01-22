@@ -1,4 +1,4 @@
-from Metrics import (
+from metrics import (
     hv_composite,
     calculate_volatility_adjusted_returns,
     calculate_equity_curves,
@@ -6,7 +6,7 @@ from Metrics import (
     shift_array,
 )
 from dataclasses import dataclass
-from TypingConventions import ArrayFloat
+from typing_conventions import ArrayFloat
 
 
 @dataclass(frozen=True, slots=True)

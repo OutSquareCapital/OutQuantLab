@@ -1,19 +1,19 @@
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 import plotly.graph_objects as go # type: ignore
-import Graphs.UI_Constants as Design
+import graphs.ui_constants as design
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
     cmap_name = "custom_colormap"
     if n_colors == 1:
-        return LinearSegmentedColormap.from_list(name=cmap_name, colors=[Design.BASE_COLORS[0], Design.BASE_COLORS[0]], N=2)
-    elif n_colors <= len(Design.BASE_COLORS):
-        return LinearSegmentedColormap.from_list(name=cmap_name, colors=Design.BASE_COLORS[:n_colors], N=n_colors)
+        return LinearSegmentedColormap.from_list(name=cmap_name, colors=[design.BASE_COLORS[0], design.BASE_COLORS[0]], N=2)
+    elif n_colors <= len(design.BASE_COLORS):
+        return LinearSegmentedColormap.from_list(name=cmap_name, colors=design.BASE_COLORS[:n_colors], N=n_colors)
     else:
-        return LinearSegmentedColormap.from_list(name=cmap_name, colors=Design.BASE_COLORS, N=n_colors)
+        return LinearSegmentedColormap.from_list(name=cmap_name, colors=design.BASE_COLORS, N=n_colors)
     
 def map_colors_to_columns(n_colors: int) -> list[str]:
     if n_colors == 1:
-        return [mcolors.to_hex(Design.COLOR_PLOT_UNIQUE)]
+        return [mcolors.to_hex(design.COLOR_PLOT_UNIQUE)]
     cmap: LinearSegmentedColormap = generate_colormap(n_colors=n_colors)
     return [mcolors.to_hex(cmap(i / (n_colors - 1))) for i in range(n_colors)]
 
@@ -35,16 +35,16 @@ def setup_figure_layout(
     show_legend: bool = True) -> None:
     
     fig.update_layout( # type: ignore
-        font=Design.FIG_FONT,
+        font=design.FIG_FONT,
         title={
             'text': figtitle,
-            'font': Design.FIG_TITLE_FONT
+            'font': design.FIG_TITLE_FONT
         },
         autosize=True,
         margin=dict(l=30, r=30, t=40, b=30),
-        paper_bgcolor=Design.BACKGROUND_APP_DARK,
-        plot_bgcolor=Design.BACKGROUND_APP_DARK,
-        legend=Design.FIG_LEGEND_FONT
+        paper_bgcolor=design.BACKGROUND_APP_DARK,
+        plot_bgcolor=design.BACKGROUND_APP_DARK,
+        legend=design.FIG_LEGEND_FONT
     )
 
     fig.update_yaxes( # type: ignore
@@ -59,7 +59,7 @@ def setup_figure_layout(
     if hover_display_custom:
         
         for trace in fig.data: # type: ignore
-            trace.hovertemplate = f"<span style='color:{Design.COLOR_ADJUSTMENT}'><b>%{{{hover_data}}}</b></span><extra><b>%{{fullData.name}}</b></extra>" # type: ignore
+            trace.hovertemplate = f"<span style='color:{design.COLOR_ADJUSTMENT}'><b>%{{{hover_data}}}</b></span><extra><b>%{{fullData.name}}</b></extra>" # type: ignore
 
     if not show_legend:
         fig.update_layout(showlegend=False) # type: ignore
@@ -67,6 +67,6 @@ def setup_figure_layout(
 def get_marker_config(color:str):
     return dict(
         color=color,
-        line=dict(color=Design.COLOR_ADJUSTMENT, width=1)
+        line=dict(color=design.COLOR_ADJUSTMENT, width=1)
     )
 

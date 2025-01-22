@@ -1,4 +1,4 @@
-from Metrics.Aggregation import (
+from metrics.aggregation import (
     calculate_overall_mean,
     calculate_overall_max,
     calculate_overall_min,
@@ -11,7 +11,7 @@ from Metrics.Aggregation import (
     rolling_quantile_ratio,
 )
 
-from Metrics.Normalization import (
+from metrics.normalization import (
     ratio_normalization,
     sign_normalization,
     relative_normalization,
@@ -21,9 +21,9 @@ from Metrics.Normalization import (
     rolling_median_normalisation,
     dynamic_signal,
 )
-from Metrics.Distribution import rolling_kurtosis, rolling_skewness
+from metrics.distribution import rolling_kurtosis, rolling_skewness
 
-from Metrics.Volatility import (
+from metrics.volatility import (
     rolling_volatility,
     hv_composite,
     separate_volatility,
@@ -31,7 +31,7 @@ from Metrics.Volatility import (
     overall_volatility_annualized,
 )
 
-from Metrics.Performance import (
+from metrics.performance import (
     rolling_sharpe_ratios,
     expanding_sharpe_ratios,
     overall_sharpe_ratio,
@@ -46,13 +46,13 @@ from Metrics.Performance import (
     calculate_overall_monthly_skewness,
 )
 
-from Metrics.Correlation import (
+from metrics.correlation import (
     calculate_correlation_matrix,
     calculate_distance_matrix,
     calculate_overall_average_correlation,
 )
 
-from Metrics.Maths_Constants import PERCENTAGE_FACTOR
+from metrics.maths_constants import PERCENTAGE_FACTOR
 
 __all__: list[str] = [
     "calculate_overall_monthly_skewness",

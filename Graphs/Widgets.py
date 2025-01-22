@@ -1,15 +1,15 @@
 import pandas as pd
 import plotly.graph_objects as go  # type: ignore
 
-from Graphs.Design import (
+from graphs.design import (
     get_color_map,
     get_heatmap_colorscale,
     get_marker_config,
     setup_figure_layout,
 )
-from Graphs.UI_Constants import COLOR_ADJUSTMENT
-from Metrics import calculate_overall_max, calculate_overall_min
-from TypingConventions import ArrayFloat, DataFrameFloat, SeriesFloat
+from graphs.ui_constants import COLOR_ADJUSTMENT
+from metrics import calculate_overall_max, calculate_overall_min
+from typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
 
 def curves(
@@ -75,7 +75,7 @@ def table(
 ) -> go.Figure:
     fig = go.Figure(
         data=go.Table(
-            header=dict(values=["Metrics"] + columns, fill_color="black"),
+            header=dict(values=["metrics"] + columns, fill_color="black"),
             cells=dict(
                 values=[[rows[i] for i in range(len(rows))]] + metrics_array.T.tolist(),
                 fill_color=[["darkblue", "darkorange"] * (len(rows) // 2 + 1)],
