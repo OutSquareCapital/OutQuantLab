@@ -115,8 +115,8 @@ class BacktestStats:
         rolling_skewness_df = DataFrameFloat(
             data=smoothed_skewness(
                 log_returns_array=self.returns_data.sub_portfolio_roll.nparray,
-                LenSmooth=20,
-                LenSkew=self.length,
+                len_smooth=20,
+                len_skew=self.length,
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
             columns=convert_multiindex_to_labels(

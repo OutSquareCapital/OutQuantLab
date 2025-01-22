@@ -58,13 +58,13 @@ def hv_composite(
     composite_vol_array = ((st_weight * short_term_vol_array) + (lt_weight * long_term_vol_array)) * ANNUALIZED_PERCENTAGE_FACTOR
     return rolling_mean(composite_vol_array, length=4, min_length=1)
 
-def separate_volatility(array:ArrayFloat, LenVol: int) -> tuple[ArrayFloat, ArrayFloat]:
+def separate_volatility(array:ArrayFloat, len_vol: int) -> tuple[ArrayFloat, ArrayFloat]:
 
     positive_returns = np.where(np.isnan(array), np.nan, np.where(array > 0, array, 0))
     negative_returns = np.where(np.isnan(array), np.nan, np.where(array < 0, array, 0))
 
-    vol_positive = rolling_volatility(positive_returns, length=LenVol, min_length=1)
-    vol_negative = rolling_volatility(negative_returns, length=LenVol, min_length=1)
+    vol_positive = rolling_volatility(positive_returns, length=len_vol, min_length=1)
+    vol_negative = rolling_volatility(negative_returns, length=len_vol, min_length=1)
 
     return vol_positive, vol_negative
 

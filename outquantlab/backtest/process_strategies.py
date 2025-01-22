@@ -10,23 +10,22 @@ N_THREADS: Final = os.cpu_count() or 8
 
 
 def process_param(
-    indic: BaseIndicator, param: tuple[int, ...]
+    indic: BaseIndicator, param_tuple: tuple[int, ...]
 ) -> ArrayFloat:
     return (
-        indic.execute(*param)
+        indic.execute(*param_tuple)
         * indic.returns_data.adjusted_returns_array
     )
 
 
 def process_indicator_parallel(
     indic: BaseIndicator,
-    params: list[tuple[int, ...]],
     global_executor: ThreadPoolExecutor,
 ) -> list[ArrayFloat]:
     def process_single_param(param_tuple: tuple[int, ...]) -> ArrayFloat:
-        return process_param(indic=indic, param=param_tuple)
+        return process_param(indic=indic, param_tuple=param_tuple)
 
-    return list(global_executor.map(process_single_param, params))
+    return list(global_executor.map(process_single_param, indic.param_combos))
 
 
 def fill_signals_array(
@@ -63,7 +62,6 @@ def calculate_strategy_returns(
             try:
                 results: list[ArrayFloat] = process_indicator_parallel(
                     indic=indic,
-                    params=indic.param_combos,
                     global_executor=global_executor,
                 )
 

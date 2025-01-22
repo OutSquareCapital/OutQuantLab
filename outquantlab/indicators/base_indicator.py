@@ -48,22 +48,18 @@ class BaseIndicator(ABC):
         return valid_pairs
 
 def is_valid_combination(parameters_dict: dict[str, int]) -> bool:
-    short_term_param = next((k for k in parameters_dict if "ST" in k), None)
-    long_term_param = next((k for k in parameters_dict if "LT" in k), None)
+    short_term_param = next((k for k in parameters_dict if "st" in k), None)
+    long_term_param = next((k for k in parameters_dict if "lt" in k), None)
 
     if short_term_param and long_term_param:
         if parameters_dict[short_term_param] * 4 > parameters_dict[long_term_param]:
             return False
 
-    if "LenSmooth" in parameters_dict and "LenSkew" in parameters_dict:
+    if "len_smooth" in parameters_dict and "len_skew" in parameters_dict:
         if (
-            parameters_dict["LenSmooth"] > 1
-            and parameters_dict["LenSmooth"] * 8 > parameters_dict["LenSkew"]
+            parameters_dict["len_smooth"] > 1
+            and parameters_dict["len_smooth"] * 8 > parameters_dict["len_skew"]
         ):
-            return False
-
-    if "GroupBy" in parameters_dict and "GroupSelected" in parameters_dict:
-        if parameters_dict["GroupBy"] > 1 and parameters_dict["GroupSelected"] > 4:
             return False
 
     return True
