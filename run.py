@@ -27,8 +27,7 @@ if __name__ == "__main__":
     print('initializing OutQuantLab...')
 
     from sys import exit
-    from app import OutQuantLab
-    from graphs import GraphsCollection
+    from outquantlab import OutQuantLab, GraphsCollection
     print('OutQuantLab initialized')
     run()
     exit(0)
