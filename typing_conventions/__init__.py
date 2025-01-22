@@ -11,7 +11,6 @@ from typing_conventions.custom_types import (
     ArrayInt,
     ProgressFunc,
     ClustersHierarchy,
-    GraphFunc
 )
 
 __all__: list[str] = [
@@ -24,5 +23,4 @@ __all__: list[str] = [
     'SeriesFloat',
     'DataFrameFloat',
     'ClustersHierarchy',
-    'GraphFunc'
 ]

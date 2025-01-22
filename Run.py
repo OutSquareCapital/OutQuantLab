@@ -6,21 +6,22 @@ def run() -> None:
     oql: OutQuantLab = OutQuantLab()
     import time
     total_time = 0
-    start = time.perf_counter()
     iterations = 1
     for i in range(iterations):
+        start = time.perf_counter()
         oql.execute_backtest(progress_callback=handle_progress)
-        # add time
+        
         end = time.perf_counter()
         time_elapsed = end - start
         total_time += time_elapsed
         print(f'{i}')
     avg_time = total_time / iterations
     print(f"Average time: {avg_time}")
-    oql.save_all()
-    #graphs = GraphsCollection(stats=oql.stats)
-    #for metric, value in oql.stats.get_metrics().items():
-    #    print(f"{metric}: {value}")
+    #oql.save_all()
+    graphs = GraphsCollection(stats=oql.stats)
+    graphs.plot_stats_equity().show()
+    for metric, value in oql.stats.get_metrics().items():
+        print(f"{metric}: {value}")
 
 if __name__ == "__main__":
 
@@ -28,7 +29,7 @@ if __name__ == "__main__":
 
     from sys import exit
     from app import OutQuantLab
-    #from Graphs import GraphsCollection
+    from graphs import GraphsCollection
     print('OutQuantLab initialized')
     run()
     exit(0)
