@@ -7,6 +7,7 @@ def run() -> None:
     for metric, value in oql.stats.get_metrics().items():
         print(f"{metric}: {value}")
     oql.graphs.plot_stats_equity().show() # type: ignore
+    oql.save_all()
 
 if __name__ == "__main__":
 
