@@ -1,6 +1,6 @@
 from pandas import MultiIndex
 
-from app.data_provider import DataBaseProvider
+from database import DataBaseProvider
 from backtest import aggregate_raw_returns, calculate_strategy_returns
 from config_classes import (
     AssetsCollection,
@@ -11,15 +11,16 @@ from config_classes import (
 )
 from stats import BacktestStats
 from typing_conventions import DataFrameFloat, ProgressFunc
-from indicators import BaseIndicator
+from indicators import BaseIndicator, ReturnsData
 
 
 class OutQuantLab:
     def __init__(self) -> None:
         self.dbp = DataBaseProvider()
         self.assets_collection: AssetsCollection = self.dbp.get_assets_collection()
+        self.returns_data = ReturnsData(returns_df=self.dbp.get_initial_data())
         self.indics_collection: IndicatorsCollection = (
-            self.dbp.get_indicators_collection()
+            self.dbp.get_indicators_collection(returns_data=self.returns_data)
         )
         self.assets_clusters: ClustersTree = self.dbp.get_clusters_tree(
             cluster_type="assets"
@@ -27,12 +28,12 @@ class OutQuantLab:
         self.indics_clusters: ClustersTree = self.dbp.get_clusters_tree(
             cluster_type="indics"
         )
-        self.initial_df: DataFrameFloat = self.dbp.get_initial_data()
         self.stats = BacktestStats(
-            length=250, max_clusters=5, returns_limit=0.05, initial_data=self.initial_df
+            length=250, max_clusters=5, returns_limit=0.05, returns_data=self.returns_data
         )
 
     def execute_backtest(self, progress_callback: ProgressFunc) -> None:
+        
         asset_names: list[str] = self.assets_collection.all_active_entities_names
         indics_params: list[BaseIndicator] = self.indics_collection.indicators_params
         clusters_structure: list[str] = generate_overall_clusters_structure(
@@ -46,18 +47,18 @@ class OutQuantLab:
             assets_to_clusters=self.assets_clusters.map_nested_clusters_to_entities(),
             indics_to_clusters=self.indics_clusters.map_nested_clusters_to_entities(),
         )
+        self.returns_data.process_data(pct_returns_array=self.dbp.get_assets_returns(asset_names=asset_names))
 
         raw_adjusted_returns_df: DataFrameFloat = calculate_strategy_returns(
-            pct_returns_array=self.dbp.get_assets_returns(asset_names=asset_names),
+            returns_data=self.returns_data,
             indicators_params=indics_params,
-            dates_index=self.initial_df.dates,
             multi_index=multi_index,
             progress_callback=progress_callback,
         )
         (
-            self.stats.global_returns,
-            self.stats.sub_portfolio_roll,
-            self.stats.sub_portfolio_ovrll,
+            self.returns_data.global_returns,
+            self.returns_data.sub_portfolio_roll,
+            self.returns_data.sub_portfolio_ovrll,
         ) = aggregate_raw_returns(
             raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,

@@ -1,4 +1,4 @@
-from indicators import BaseIndicator, IndicatorsNormalized
+from indicators import BaseIndicator, IndicatorsNormalized, ReturnsData
 from config_classes.generic_classes import BaseCollection
 from dataclasses import dataclass
 
@@ -8,19 +8,21 @@ class IndicatorsCollection(BaseCollection[BaseIndicator]):
         self,
         indicators_to_test: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
+        returns_data: ReturnsData
+        
     ) -> None:
         self.entities: dict[str, BaseIndicator] = {}
         self._load_entities(
-            indicators_to_test=indicators_to_test, params_config=params_config
+            indicators_to_test=indicators_to_test, params_config=params_config, returns_data=returns_data
         )
 
     def _load_entities(
         self,
         indicators_to_test: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
+        returns_data: ReturnsData
     ) -> None:
         for name, cls in IndicatorsNormalized.__dict__.items():
-            print(f'cls: {cls}')
             if (
                 isinstance(cls, type)
                 and issubclass(cls, BaseIndicator)
@@ -33,9 +35,8 @@ class IndicatorsCollection(BaseCollection[BaseIndicator]):
                     name=name,
                     active=active,
                     params_values=params_values,
+                    returns_data=returns_data
                 )
-                print(f'indic: {name}')
-                print(f'params: {params_values}')
 
     @property
     def indicators_params(self) -> list[BaseIndicator]:

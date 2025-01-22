@@ -3,16 +3,17 @@ from abc import ABC, abstractmethod
 from typing import Any
 from itertools import product
 from inspect import signature
-
+from indicators.indics_data import ReturnsData
 
 class BaseIndicator(ABC):
-    def __init__(self, name: str, active: bool, params_values: dict[str, list[int]]) -> None:
+    def __init__(self, name: str, active: bool, params_values: dict[str, list[int]], returns_data: ReturnsData) -> None:
         self.name: str = name
         self.active: bool = active
         self.params_values: dict[str, list[int]] = params_values
         self.param_combos: list[tuple[int, ...]] = []
         self.strategies_nb: int = 0
-
+        self.returns_data: ReturnsData = returns_data
+        
     @abstractmethod
     def execute(self, *args: Any, **kwargs: Any) -> ArrayFloat: ...
 
@@ -21,7 +22,7 @@ class BaseIndicator(ABC):
         cls, name: str, params_config: dict[str, dict[str, list[int]]]
     ) -> dict[str, list[int]]:
 
-        params: list[str] = list(signature(cls.execute).parameters.keys())[2:]
+        params: list[str] = list(signature(cls.execute).parameters.keys())[1:]
         
         params_values: dict[str, list[int]] = {
             param: params_config.get(name, {}).get(param, [])

@@ -4,28 +4,27 @@ import os
 from typing import Final
 from typing_conventions import ArrayFloat, ProgressFunc, DataFrameFloat, Float32
 from concurrent.futures import ThreadPoolExecutor
-from indicators import BaseIndicator, ReturnsData, process_data
+from indicators import BaseIndicator, ReturnsData
 
 N_THREADS: Final = os.cpu_count() or 8
 
 
 def process_param(
-    indic: BaseIndicator, returns_data: ReturnsData, param: tuple[int, ...]
+    indic: BaseIndicator, param: tuple[int, ...]
 ) -> ArrayFloat:
     return (
-        indic.execute(returns_data=returns_data, *param)
-        * returns_data.adjusted_returns_array
+        indic.execute(*param)
+        * indic.returns_data.adjusted_returns_array
     )
 
 
 def process_indicator_parallel(
     indic: BaseIndicator,
     params: list[tuple[int, ...]],
-    returns_data: ReturnsData,
     global_executor: ThreadPoolExecutor,
 ) -> list[ArrayFloat]:
     def process_single_param(param_tuple: tuple[int, ...]) -> ArrayFloat:
-        return process_param(indic=indic, returns_data=returns_data, param=param_tuple)
+        return process_param(indic=indic, param=param_tuple)
 
     return list(global_executor.map(process_single_param, params))
 
@@ -46,16 +45,13 @@ def fill_signals_array(
 
 
 def calculate_strategy_returns(
-    pct_returns_array: ArrayFloat,
+    returns_data: ReturnsData,
     indicators_params: list[BaseIndicator],
-    dates_index: pd.DatetimeIndex,
     multi_index: pd.MultiIndex,
     progress_callback: ProgressFunc,
 ) -> DataFrameFloat:
-    returns_data: ReturnsData = process_data(pct_returns_array=pct_returns_array)
     signal_col_index = 0
-    total_assets_count: int = returns_data.prices_array.shape[1]
-    total_returns_streams: int = total_assets_count * sum(
+    total_returns_streams: int = returns_data.total_assets_count * sum(
         [indic.strategies_nb for indic in indicators_params]
     )
     signals_array: ArrayFloat = np.empty(
@@ -68,14 +64,13 @@ def calculate_strategy_returns(
                 results: list[ArrayFloat] = process_indicator_parallel(
                     indic=indic,
                     params=indic.param_combos,
-                    returns_data=returns_data,
                     global_executor=global_executor,
                 )
 
                 signal_col_index: int = fill_signals_array(
                     signals_array=signals_array,
                     results=results,
-                    total_assets_count=total_assets_count,
+                    total_assets_count=returns_data.total_assets_count,
                     start_index=signal_col_index,
                 )
 
@@ -86,4 +81,4 @@ def calculate_strategy_returns(
             except Exception as e:
                 raise Exception(f"Error processing indicator {indic.name}: {e}")
 
-    return DataFrameFloat(data=signals_array, index=dates_index, columns=multi_index)
+    return DataFrameFloat(data=signals_array, index=returns_data.date_index, columns=multi_index)

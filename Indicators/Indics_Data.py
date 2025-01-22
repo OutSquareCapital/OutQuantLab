@@ -5,31 +5,32 @@ from metrics import (
     log_returns_np,
     shift_array,
 )
-from dataclasses import dataclass
-from typing_conventions import ArrayFloat
+from typing_conventions import ArrayFloat, DataFrameFloat
+from typing_conventions.custom_classes import DatetimeIndex
 
-
-@dataclass(frozen=True, slots=True)
 class ReturnsData:
-    log_returns_array: ArrayFloat
-    prices_array: ArrayFloat
-    adjusted_returns_array: ArrayFloat
-    hv_array: ArrayFloat
+    def __init__(self, returns_df: DataFrameFloat) -> None:
+        returns_array = returns_df.nparray
+        self.log_returns_array: ArrayFloat = returns_array
+        self.prices_array: ArrayFloat = returns_array
+        self.adjusted_returns_array: ArrayFloat = returns_array
+        self.hv_array: ArrayFloat = returns_array
+        self.total_assets_count: int = 0
+        self.date_index: DatetimeIndex = returns_df.dates
+        self.global_returns: DataFrameFloat = returns_df
+        self.sub_portfolio_roll: DataFrameFloat = returns_df
+        self.sub_portfolio_ovrll: DataFrameFloat = returns_df
 
+    def process_data(self, pct_returns_array: ArrayFloat) -> None:
+        prices_array: ArrayFloat = calculate_equity_curves(returns_array=pct_returns_array)
 
-def process_data(pct_returns_array: ArrayFloat) -> ReturnsData:
-    prices_array: ArrayFloat = calculate_equity_curves(returns_array=pct_returns_array)
+        self.hv_array: ArrayFloat = hv_composite(returns_array=pct_returns_array)
 
-    hv_array: ArrayFloat = hv_composite(returns_array=pct_returns_array)
-
-    returns_data = ReturnsData(
-        log_returns_array=shift_array(
+        self.log_returns_array: ArrayFloat=shift_array(
             original_array=log_returns_np(prices_array=prices_array)
-        ),
-        prices_array=shift_array(original_array=prices_array),
-        hv_array=hv_array,
-        adjusted_returns_array=calculate_volatility_adjusted_returns(
-            pct_returns_array=pct_returns_array, hv_array=hv_array
-        ),
-    )
-    return returns_data
+        )
+        self.prices_array=shift_array(original_array=prices_array)
+        self.adjusted_returns_array: ArrayFloat =calculate_volatility_adjusted_returns(
+            pct_returns_array=pct_returns_array, hv_array=self.hv_array
+        )
+        self.total_assets_count: int = self.prices_array.shape[1]
