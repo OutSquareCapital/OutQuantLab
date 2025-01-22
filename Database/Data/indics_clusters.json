@@ -1,61 +1,61 @@
 {
    "divergent": {
       "direction": [
-         "mean_rate_of_change",
-         "central_rate_of_change",
-         "median_rate_of_change",
-         "median_price_ratio",
-         "central_price_ratio",
-         "mean_price_ratio"
+         "MeanRateOfChange",
+         "CentralRateOfChange",
+         "MedianRateOfChange",
+         "MedianPriceRatio",
+         "CentralPriceRatio",
+         "MeanPriceRatio"
       ],
       "acceleration": [
-         "mean_price_macd",
-         "median_rate_of_change_macd",
-         "central_price_macd",
-         "central_rate_of_change_macd",
-         "median_price_macd",
-         "mean_rate_of_change_macd",
-         "mean_price_macd_trend",
-         "median_rate_of_change_macd_trend",
-         "central_rate_of_change_macd_trend",
-         "mean_rate_of_change_macd_trend",
-         "central_price_macd_trend",
-         "median_price_macd_trend"
+         "MeanPriceMacd",
+         "MedianRateOfChangeMacd",
+         "CentralPriceMacd",
+         "CentralRateOfChangeMacd",
+         "MedianPriceMacd",
+         "MeanRateOfChangeMacd",
+         "MeanPriceMacdTrend",
+         "MedianRateOfChangeMacdTrend",
+         "CentralRateOfChangeMacdTrend",
+         "MeanRateOfChangeMacdTrend",
+         "CentralPriceMacdTrend",
+         "MedianPriceMacdTrend"
       ],
       "distribution": [
-         "relative_skewness",
-         "relative_skewness_trend"
+         "RelativeSkewness",
+         "RelativeSkewnessTrend"
       ],
       "volatility": [
-         "relative_directional_volatility",
-         "relative_directional_volatility_trend"
+         "RelativeDirectionalVolatility",
+         "RelativeDirectionalVolatilityTrend"
       ]
    },
    "convergent": {
       "mean_reversion": [
-         "mean_price_ratio_normalised",
-         "mean_price_ratio_normalised_trend",
-         "mean_rate_of_change_normalised",
-         "mean_rate_of_change_normalised_trend"
+         "MeanPriceRatioNormalised",
+         "MeanPriceRatioNormalisedTrend",
+         "MeanRateOfChangeNormalised",
+         "MeanRateOfChangeNormalisedTrend"
       ],
       "distribution": [
-         "skewness_trend",
-         "skewness"
+         "SkewnessTrend",
+         "Skewness"
       ],
       "volatility": [
-         "normalised_directional_volatility",
-         "normalised_directional_volatility_trend"
+         "NormalisedDirectionalVolatility",
+         "NormalisedDirectionalVolatilityTrend"
       ]
    },
    "dynamic": {
       "skewness_kurtosis": [
-         "relative_skewness_on_kurtosis",
-         "skewness_on_kurtosis",
-         "relative_skewness_on_kurtosis_trend",
-         "skewness_on_kurtosis_trend"
+         "RelativeSkewnessOnKurtosis",
+         "SkewnessOnKurtosis",
+         "RelativeSkewnessOnKurtosisTrend",
+         "SkewnessOnKurtosisTrend"
       ],
       "risk_premium": [
-         "fixed_bias"
+         "FixedBias"
       ]
    }
 }
