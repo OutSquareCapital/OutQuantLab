@@ -35,36 +35,40 @@ class ClustersTree:
 
     def map_nested_clusters_to_entities(self) -> dict[str, tuple[str, str]]:
         return {
-            asset: (level1, level2)
+            entity: (level1, level2)
             for level1, subclusters in self.clusters.items()
-            for level2, assets in subclusters.items()
-            for asset in assets
+            for level2, entities in subclusters.items()
+            for entity in entities
         }
 
 
-def generate_overall_clusters_structure(
-    indic_clusters_structure: list[str], asset_clusters_structure: list[str]
-) -> list[str]:
-    return asset_clusters_structure + indic_clusters_structure + ["Param"]
-
-
 def generate_multi_index_process(
-    clusters_structure: list[str],
-    indicators_params: list[BaseIndicator],
-    asset_names: list[str],
+    indic_clusters_structure: list[str],
+    asset_clusters_structure: list[str],
+    indics_params: list[BaseIndicator],
+    assets: list[str],
     assets_to_clusters: dict[str, tuple[str, str]],
     indics_to_clusters: dict[str, tuple[str, str]],
 ) -> pd.MultiIndex:
     multi_index_tuples: list[tuple[str, ...]] = []
+    clusters_structure: list[str] = (
+        asset_clusters_structure + indic_clusters_structure + ["Param"]
+    )
 
-    for indic in indicators_params:
+    for indic in indics_params:
         for param in indic.param_combos:
             param_str: str = "_".join(map(str, param))
-            for asset in asset_names:
+            for asset in assets:
                 asset_clusters: tuple[str, ...] = assets_to_clusters[asset]
                 indic_clusters: tuple[str, ...] = indics_to_clusters[indic.name]
                 multi_index_tuples.append(
-                    (*asset_clusters, asset, *indic_clusters, indic.name, param_str)
+                    (
+                        *asset_clusters,
+                        asset,
+                        *indic_clusters,
+                        indic.name,
+                        param_str,
+                    )
                 )
 
     return pd.MultiIndex.from_tuples(  # type: ignore
@@ -104,7 +108,7 @@ def generate_dynamic_clusters(
     returns_df: DataFrameFloat, max_clusters: int
 ) -> dict[str, list[str]]:
     flat_clusters: list[int] = get_flat_clusters(
-        returns_array=returns_df.nparray, max_clusters=max_clusters
+        returns_array=returns_df.get_array(), max_clusters=max_clusters
     )
     asset_names: list[str] = returns_df.columns.tolist()
 

@@ -6,17 +6,14 @@ from outquantlab.metrics import (
     shift_array,
 )
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
-from outquantlab.typing_conventions.custom_classes import DatetimeIndex
 
 class ReturnsData:
     def __init__(self, returns_df: DataFrameFloat) -> None:
-        returns_array = returns_df.nparray
+        returns_array = returns_df.get_array()
         self.log_returns_array: ArrayFloat = returns_array
         self.prices_array: ArrayFloat = returns_array
         self.adjusted_returns_array: ArrayFloat = returns_array
         self.hv_array: ArrayFloat = returns_array
-        self.total_assets_count: int = 0
-        self.date_index: DatetimeIndex = returns_df.dates
         self.global_returns: DataFrameFloat = returns_df
         self.sub_portfolio_roll: DataFrameFloat = returns_df
         self.sub_portfolio_ovrll: DataFrameFloat = returns_df
@@ -33,4 +30,3 @@ class ReturnsData:
         self.adjusted_returns_array: ArrayFloat =calculate_volatility_adjusted_returns(
             pct_returns_array=pct_returns_array, hv_array=self.hv_array
         )
-        self.total_assets_count: int = self.prices_array.shape[1]

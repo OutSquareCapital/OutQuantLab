@@ -3,6 +3,11 @@ from numpy.typing import DTypeLike
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
 from outquantlab.typing_conventions.custom_types import ArrayFloat, Float32
+from typing import Protocol
+
+class StrategyComponent(Protocol):
+    name: str
+    active: bool
 
 class SeriesFloat(Series):  # type: ignore
     """
@@ -18,8 +23,7 @@ class SeriesFloat(Series):  # type: ignore
 
         *Returns the index of the Series as a list of strings.*
 
-        >>> @property
-        >>> def nparray(
+        >>> def get_array()(
         ...     self,
         ...     dtype: DTypeLike = Float32,
         ...     copy: bool = False,
@@ -49,8 +53,7 @@ class SeriesFloat(Series):  # type: ignore
     def names(self) -> list[str]:  # type: ignore
         return super().index  # type: ignore
 
-    @property
-    def nparray(
+    def get_array(
         self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = np.nan
     ) -> ArrayFloat:
         array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
@@ -72,8 +75,7 @@ class DataFrameFloat(DataFrame):
 
         *Returns the index of the DataFrame as a DatetimeIndex.*
 
-        >>> @property
-        >>> def nparray(
+        >>> def get_array()(
         ...     self,
         ...     dtype: DTypeLike = Float32,
         ...     copy: bool = False,
@@ -102,8 +104,7 @@ class DataFrameFloat(DataFrame):
     def dates(self) -> DatetimeIndex:
         return super().index  # type: ignore
 
-    @property
-    def nparray(
+    def get_array(
         self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = np.nan
     ) -> ArrayFloat:
         array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore

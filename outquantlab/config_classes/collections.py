@@ -1,58 +1,50 @@
 from outquantlab.indicators import BaseIndicator, IndicatorsNormalized, ReturnsData
 from outquantlab.config_classes.generic_classes import BaseCollection
 from dataclasses import dataclass
-
+from inspect import signature
 
 class IndicatorsCollection(BaseCollection[BaseIndicator]):
     def __init__(
         self,
         indicators_to_test: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
-        returns_data: ReturnsData
-        
+        returns_data: ReturnsData,
     ) -> None:
         self.entities: dict[str, BaseIndicator] = {}
         self._load_entities(
-            indicators_to_test=indicators_to_test, params_config=params_config, returns_data=returns_data
+            indicators_to_test=indicators_to_test,
+            params_config=params_config,
+            returns_data=returns_data,
         )
 
     def _load_entities(
         self,
         indicators_to_test: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
-        returns_data: ReturnsData
+        returns_data: ReturnsData,
     ) -> None:
         for name, cls in IndicatorsNormalized.__dict__.items():
-            if (
-                isinstance(cls, type)
-                and issubclass(cls, BaseIndicator)
-            ):
+            if isinstance(cls, type) and issubclass(cls, BaseIndicator):
+        
                 active: bool = indicators_to_test.get(name, False)
-                params_values: dict[str, list[int]] = cls.determine_params(
-                    name=name, params_config=params_config
-                )
+                param_names: list[str] = list(signature(cls.execute).parameters.keys())[1:]
+                params_values: dict[str, list[int]] = {
+                    param: params_config.get(name, {}).get(param, [])
+                    for param in param_names
+                }
+
                 self.entities[name] = cls(
                     name=name,
                     active=active,
-                    params_values=params_values,
-                    returns_data=returns_data
+                    param_values=params_values,
+                    returns_data=returns_data,
                 )
 
-    @property
-    def indicators_params(self) -> list[BaseIndicator]:
-        for indicator in self.all_active_entities:
-            indicator.get_param_combos()
-        return self.all_active_entities
-
-    def get_params(self, name: str) -> dict[str, list[int]]:
-        return self.entities[name].params_values
-
-    def set_params(self, name: str, new_params: dict[str, list[int]]) -> None:
-        self.entities[name].params_values = new_params
-
-    def update_param_values(self, name: str, param_key: str, values: list[int]) -> None:
-        self.entities[name].params_values[param_key] = values
-
+    def get_indics_params(self) -> list[BaseIndicator]:
+        active_indics: list[BaseIndicator] = self.get_all_active_entities()
+        for indicator in active_indics:
+            indicator.param_combos = indicator.filter_valid_pairs()
+        return active_indics
 
 @dataclass(slots=True)
 class Asset:
@@ -69,5 +61,5 @@ class AssetsCollection(BaseCollection[Asset]):
         self, assets_to_test: dict[str, bool], asset_names: list[str]
     ) -> None:
         for name in asset_names:
-            is_active: bool = assets_to_test.get(name, False)
-            self.entities[name] = Asset(name=name, active=is_active)
+            active: bool = assets_to_test.get(name, False)
+            self.entities[name] = Asset(name=name, active=active)

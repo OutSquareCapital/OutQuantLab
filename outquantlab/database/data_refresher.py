@@ -19,7 +19,7 @@ def refresh_yf_data(dbq: DataQueries, assets: list[str]) -> None:
         prices_data = DataFrameFloat(data=data["Close"])  # type: ignore
 
         returns_data = DataFrameFloat(
-            data=pct_returns_np(prices_array=prices_data.nparray),
+            data=pct_returns_np(prices_array=prices_data.get_array()),
             columns=prices_data.columns,
             index=prices_data.dates,
         )

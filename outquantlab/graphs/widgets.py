@@ -47,7 +47,7 @@ def bars(series: SeriesFloat, title: str, show_legend: bool) -> go.Figure:
     color_map: dict[str, str] = get_color_map(assets=series.names)
 
     fig = go.Figure()
-    for label, value in zip(series.names, series.nparray):
+    for label, value in zip(series.names, series.get_array()):
         fig.add_trace(  # type: ignore
             trace=go.Bar(
                 x=[label],
@@ -148,10 +148,10 @@ def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
             )
         )
 
-    min_by_column: ArrayFloat = calculate_overall_min(array=data.nparray)
+    min_by_column: ArrayFloat = calculate_overall_min(array=data.get_array())
     y_min: ArrayFloat = calculate_overall_min(array=min_by_column)
 
-    max_by_column: ArrayFloat = calculate_overall_max(array=data.nparray)
+    max_by_column: ArrayFloat = calculate_overall_max(array=data.get_array())
     y_max: ArrayFloat = calculate_overall_max(array=max_by_column)
 
     fig.update_layout(  # type: ignore

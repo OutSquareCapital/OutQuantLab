@@ -15,7 +15,7 @@ class DataBaseProvider:
         returns_df = DataFrameFloat(
             data=self.dbq.select(file="returns_data").load(names=asset_names)
         )
-        return returns_df.nparray
+        return returns_df.get_array()
 
     def get_initial_data(self) -> DataFrameFloat:
         return DataFrameFloat(
@@ -44,14 +44,14 @@ class DataBaseProvider:
 
     def save_assets_collection(self, assets_collection: AssetsCollection) -> None:
         self.dbq.select(file="assets_to_test").save(
-            data=assets_collection.all_active_entities_dict
+            data=assets_collection.get_all_entities_dict()
         )
 
     def save_indicators_collection(
         self, indics_collection: IndicatorsCollection
     ) -> None:
         self.dbq.select(file="indics_to_test").save(
-            data=indics_collection.all_active_entities_dict
+            data=indics_collection.get_all_entities_dict()
         )
         self.dbq.select(file="indics_params").save(
             data={
