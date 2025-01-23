@@ -1,9 +1,8 @@
 from collections.abc import Callable
 
-import outquantlab.metrics as Computations
+import outquantlab.metrics as mt
 from outquantlab.config_classes import generate_dynamic_clusters
 from outquantlab.indicators import ReturnsData
-from outquantlab.indicators.indics_raw import smoothed_skewness
 from outquantlab.stats.transformations import (
     convert_multiindex_to_labels,
     fill_correlation_matrix,
@@ -37,11 +36,11 @@ class BacktestStats:
 
     def get_metrics(self) -> dict[str, float]:
         metric_functions: list[Callable[..., ArrayFloat]] = [
-            Computations.calculate_total_returns,
-            Computations.overall_sharpe_ratio,
-            Computations.calculate_max_drawdown,
-            Computations.overall_volatility_annualized,
-            # Computations.calculate_overall_monthly_skewness,
+            mt.calculate_total_returns,
+            mt.overall_sharpe_ratio,
+            mt.calculate_max_drawdown,
+            mt.overall_volatility_annualized,
+            # mt.calculate_overall_monthly_skewness,
         ]
 
         metric_names: list[str] = [
@@ -58,7 +57,7 @@ class BacktestStats:
 
     def get_stats_equity(self) -> DataFrameFloat:
         equity_curves_df = DataFrameFloat(
-            data=Computations.calculate_equity_curves(
+            data=mt.calculate_equity_curves(
                 returns_array=self.returns_data.sub_portfolio_roll.nparray
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
@@ -71,7 +70,7 @@ class BacktestStats:
 
     def get_rolling_volatility(self) -> DataFrameFloat:
         rolling_volatility_df = DataFrameFloat(
-            data=Computations.hv_composite(
+            data=mt.hv_composite(
                 returns_array=self.returns_data.sub_portfolio_roll.nparray
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
@@ -84,7 +83,7 @@ class BacktestStats:
 
     def get_rolling_drawdown(self) -> DataFrameFloat:
         drawdowns_df = DataFrameFloat(
-            data=Computations.calculate_rolling_drawdown(
+            data=mt.calculate_rolling_drawdown(
                 returns_array=self.returns_data.sub_portfolio_roll.nparray,
                 length=self.length,
             ),
@@ -98,7 +97,7 @@ class BacktestStats:
 
     def get_rolling_sharpe_ratio(self) -> DataFrameFloat:
         rolling_sharpe_ratio_df = DataFrameFloat(
-            data=Computations.rolling_sharpe_ratios(
+            data=mt.rolling_sharpe_ratios(
                 returns_array=self.returns_data.sub_portfolio_roll.nparray,
                 length=self.length,
                 min_length=self.length,
@@ -113,10 +112,10 @@ class BacktestStats:
 
     def get_rolling_smoothed_skewness(self) -> DataFrameFloat:
         rolling_skewness_df = DataFrameFloat(
-            data=smoothed_skewness(
-                log_returns_array=self.returns_data.sub_portfolio_roll.nparray,
-                len_smooth=20,
-                len_skew=self.length,
+            data=mt.rolling_skewness(
+                array=self.returns_data.sub_portfolio_roll.nparray,
+                length=self.length,
+                min_length=self.length
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
             columns=convert_multiindex_to_labels(
@@ -128,7 +127,7 @@ class BacktestStats:
 
     def get_overall_returns(self) -> SeriesFloat:
         total_returns_series = SeriesFloat(
-            data=Computations.calculate_total_returns(
+            data=mt.calculate_total_returns(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
             index=convert_multiindex_to_labels(
@@ -140,7 +139,7 @@ class BacktestStats:
 
     def get_overall_sharpe_ratio(self) -> SeriesFloat:
         sharpes_series = SeriesFloat(
-            data=Computations.overall_sharpe_ratio(
+            data=mt.overall_sharpe_ratio(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
             index=convert_multiindex_to_labels(
@@ -152,7 +151,7 @@ class BacktestStats:
 
     def get_overall_volatility(self) -> SeriesFloat:
         overall_vol_series = SeriesFloat(
-            data=Computations.overall_volatility_annualized(
+            data=mt.overall_volatility_annualized(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
             index=convert_multiindex_to_labels(
@@ -163,13 +162,13 @@ class BacktestStats:
         return sort_series(series=overall_vol_series, ascending=True)
 
     def get_overall_average_drawdown(self) -> SeriesFloat:
-        rolling_dd: ArrayFloat = Computations.calculate_rolling_drawdown(
+        rolling_dd: ArrayFloat = mt.calculate_rolling_drawdown(
             returns_array=self.returns_data.sub_portfolio_ovrll.nparray,
             length=self.returns_data.sub_portfolio_ovrll.shape[0],
         )
 
         drawdowns_series = SeriesFloat(
-            data=Computations.calculate_overall_mean(array=rolling_dd),
+            data=mt.calculate_overall_mean(array=rolling_dd),
             index=convert_multiindex_to_labels(
                 df=self.returns_data.sub_portfolio_ovrll
             ),
@@ -179,7 +178,7 @@ class BacktestStats:
 
     def get_overall_average_correlation(self) -> SeriesFloat:
         overall_average_corr = SeriesFloat(
-            data=Computations.calculate_overall_average_correlation(
+            data=mt.calculate_overall_average_correlation(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
             index=convert_multiindex_to_labels(
@@ -191,7 +190,7 @@ class BacktestStats:
 
     def get_overall_monthly_skew(self) -> SeriesFloat:
         skew_series: SeriesFloat = SeriesFloat(
-            data=Computations.calculate_overall_monthly_skewness(
+            data=mt.calculate_overall_monthly_skewness(
                 returns_array=self.returns_data.sub_portfolio_ovrll.nparray
             ),
             index=convert_multiindex_to_labels(
@@ -226,7 +225,7 @@ class BacktestStats:
         )
 
     def get_correlation_heatmap(self) -> tuple[ArrayFloat, list[str], ArrayFloat]:
-        correlation_matrix: ArrayFloat = Computations.calculate_correlation_matrix(
+        correlation_matrix: ArrayFloat = mt.calculate_correlation_matrix(
             returns_array=self.returns_data.sub_portfolio_ovrll.nparray
         )
         filled_correlation_matrix: ArrayFloat = fill_correlation_matrix(
