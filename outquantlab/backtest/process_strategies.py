@@ -1,21 +1,23 @@
+import os
+from concurrent.futures import ThreadPoolExecutor
+from typing import Final
+
 import numpy as np
 import pandas as pd
-import os
-from typing import Final
-from outquantlab.typing_conventions import ArrayFloat, ProgressFunc, DataFrameFloat, Float32
-from concurrent.futures import ThreadPoolExecutor
+
 from outquantlab.indicators import BaseIndicator, ReturnsData
+from outquantlab.typing_conventions import (
+    ArrayFloat,
+    DataFrameFloat,
+    Float32,
+    ProgressFunc,
+)
 
 N_THREADS: Final = os.cpu_count() or 8
 
 
-def process_param(
-    indic: BaseIndicator, param_tuple: tuple[int, ...]
-) -> ArrayFloat:
-    return (
-        indic.execute(*param_tuple)
-        * indic.returns_data.adjusted_returns_array
-    )
+def process_param(indic: BaseIndicator, param_tuple: tuple[int, ...]) -> ArrayFloat:
+    return indic.execute(*param_tuple) * indic.returns_data.adjusted_returns_array
 
 
 def process_indicator_parallel(
@@ -43,22 +45,34 @@ def fill_signals_array(
     return start_index
 
 
-def calculate_strategy_returns(
+def get_total_returns_streams(
     returns_data: ReturnsData,
     indicators_params: list[BaseIndicator],
-    multi_index: pd.MultiIndex,
-    progress_callback: ProgressFunc,
-) -> DataFrameFloat:
-    signal_col_index = 0
-    total_returns_streams: int = returns_data.total_assets_count * sum(
+) -> int:
+    return returns_data.total_assets_count * sum(
         [indic.strategies_nb for indic in indicators_params]
     )
-    signals_array: ArrayFloat = np.empty(
+
+
+def get_signals_array(
+    returns_data: ReturnsData,
+    total_returns_streams: int,
+) -> ArrayFloat:
+    return np.empty(
         shape=(returns_data.prices_array.shape[0], total_returns_streams), dtype=Float32
     )
 
+
+def orchestrate_backtest(
+    total_returns_streams: int,
+    signals_array: ArrayFloat,
+    indics_params: list[BaseIndicator],
+    returns_data: ReturnsData,
+    progress_callback: ProgressFunc,
+) -> ArrayFloat:
+    signal_col_index = 0
     with ThreadPoolExecutor(max_workers=N_THREADS) as global_executor:
-        for indic in indicators_params:
+        for indic in indics_params:
             try:
                 results: list[ArrayFloat] = process_indicator_parallel(
                     indic=indic,
@@ -79,4 +93,31 @@ def calculate_strategy_returns(
             except Exception as e:
                 raise Exception(f"Error processing indicator {indic.name}: {e}")
 
-    return DataFrameFloat(data=signals_array, index=returns_data.date_index, columns=multi_index)
+    return signals_array
+
+
+def process_strategies(
+    returns_data: ReturnsData,
+    indicators_params: list[BaseIndicator],
+    multi_index: pd.MultiIndex,
+    progress_callback: ProgressFunc,
+) -> DataFrameFloat:
+    total_returns_streams: int = get_total_returns_streams(
+        returns_data=returns_data,
+        indicators_params=indicators_params,
+    )
+    signals_array: ArrayFloat = get_signals_array(
+        returns_data=returns_data, total_returns_streams=total_returns_streams
+    )
+
+    signals_array = orchestrate_backtest(
+        total_returns_streams=total_returns_streams,
+        signals_array=signals_array,
+        indics_params=indicators_params,
+        returns_data=returns_data,
+        progress_callback=progress_callback,
+    )
+
+    return DataFrameFloat(
+        data=signals_array, index=returns_data.date_index, columns=multi_index
+    )

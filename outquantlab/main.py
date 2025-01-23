@@ -1,6 +1,6 @@
 from pandas import MultiIndex
 
-from outquantlab.backtest import aggregate_raw_returns, calculate_strategy_returns
+from outquantlab.backtest import execute_backtest
 from outquantlab.config_classes import (
     AssetsCollection,
     ClustersTree,
@@ -12,7 +12,7 @@ from outquantlab.database import DataBaseProvider
 from outquantlab.graphs import GraphsCollection
 from outquantlab.indicators import BaseIndicator, ReturnsData
 from outquantlab.stats import BacktestStats
-from outquantlab.typing_conventions import DataFrameFloat, ProgressFunc
+from outquantlab.typing_conventions import ProgressFunc
 
 
 class OutQuantLab:
@@ -34,10 +34,11 @@ class OutQuantLab:
         )
         self.graphs = GraphsCollection(stats=self.stats)
 
-    def execute_backtest(self, progress_callback: ProgressFunc) -> None:
+    def run(self, progress_callback: ProgressFunc) -> None:
         
         asset_names: list[str] = self.assets_collection.all_active_entities_names
         indics_params: list[BaseIndicator] = self.indics_collection.indicators_params
+        self.returns_data.process_data(pct_returns_array=self.dbp.get_assets_returns(asset_names=asset_names))
         clusters_structure: list[str] = generate_overall_clusters_structure(
             indic_clusters_structure=self.indics_clusters.clusters_structure,
             asset_clusters_structure=self.assets_clusters.clusters_structure,
@@ -49,22 +50,12 @@ class OutQuantLab:
             assets_to_clusters=self.assets_clusters.map_nested_clusters_to_entities(),
             indics_to_clusters=self.indics_clusters.map_nested_clusters_to_entities(),
         )
-        self.returns_data.process_data(pct_returns_array=self.dbp.get_assets_returns(asset_names=asset_names))
 
-        raw_adjusted_returns_df: DataFrameFloat = calculate_strategy_returns(
-            returns_data=self.returns_data,
-            indicators_params=indics_params,
+        execute_backtest(
+            indics_params=indics_params,
             multi_index=multi_index,
-            progress_callback=progress_callback,
-        )
-        (
-            self.returns_data.global_returns,
-            self.returns_data.sub_portfolio_roll,
-            self.returns_data.sub_portfolio_ovrll,
-        ) = aggregate_raw_returns(
-            raw_adjusted_returns_df=raw_adjusted_returns_df,
             clusters_structure=clusters_structure,
-            all_history=True,
+            returns_data=self.returns_data,
             progress_callback=progress_callback,
         )
 
