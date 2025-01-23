@@ -96,74 +96,290 @@
       ]
    },
    "MeanPriceMacd": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": []
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "MedianPriceMacd": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": []
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "CentralPriceMacd": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": []
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "MeanRateOfChangeMacd": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": []
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "MedianRateOfChangeMacd": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": []
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "CentralRateOfChangeMacd": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": []
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ]
    },
    "MeanPriceMacdTrend": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": [],
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
       "len_trend_st": [],
       "len_trend_lt": []
    },
    "MedianPriceMacdTrend": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": [],
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
       "len_trend_st": [],
       "len_trend_lt": []
    },
    "CentralPriceMacdTrend": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": [],
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
       "len_trend_st": [],
       "len_trend_lt": []
    },
    "MeanRateOfChangeMacdTrend": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": [],
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
       "len_trend_st": [],
       "len_trend_lt": []
    },
    "MedianRateOfChangeMacdTrend": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": [],
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
       "len_trend_st": [],
       "len_trend_lt": []
    },
    "CentralRateOfChangeMacdTrend": {
-      "len_st": [],
-      "len_lt": [],
-      "len_macd": [],
+      "len_st": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
+      "len_lt": [
+         16,
+         32,
+         64,
+         128,
+         256
+      ],
+      "len_macd": [
+         4,
+         8,
+         16,
+         32,
+         64
+      ],
       "len_trend_st": [],
       "len_trend_lt": []
    },

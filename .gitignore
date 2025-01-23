@@ -30,3 +30,5 @@ test.py
 
 #ignore jupyter
 *.ipynb
+
+*.pstats
