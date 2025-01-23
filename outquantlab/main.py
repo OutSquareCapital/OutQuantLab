@@ -1,18 +1,21 @@
 from pandas import MultiIndex
 
-from outquantlab.backtest import execute_backtest
+from outquantlab.backtest import (
+    process_strategies,
+    aggregate_raw_returns,
+    BacktestSpecs,
+)
 from outquantlab.config_classes import (
     AssetsCollection,
     ClustersTree,
     IndicatorsCollection,
     generate_multi_index_process,
-    generate_overall_clusters_structure,
 )
 from outquantlab.database import DataBaseProvider
 from outquantlab.graphs import GraphsCollection
 from outquantlab.indicators import BaseIndicator, ReturnsData
 from outquantlab.stats import BacktestStats
-from outquantlab.typing_conventions import ProgressFunc
+from outquantlab.typing_conventions import ProgressFunc, ArrayFloat
 
 
 class OutQuantLab:
@@ -30,32 +33,45 @@ class OutQuantLab:
             cluster_type="indics"
         )
         self.stats = BacktestStats(
-            length=250, max_clusters=5, returns_limit=0.05, returns_data=self.returns_data
+            length=250,
+            max_clusters=5,
+            returns_limit=0.05,
+            returns_data=self.returns_data,
         )
         self.graphs = GraphsCollection(stats=self.stats)
 
     def run(self, progress_callback: ProgressFunc) -> None:
-        
-        asset_names: list[str] = self.assets_collection.all_active_entities_names
-        indics_params: list[BaseIndicator] = self.indics_collection.indicators_params
-        self.returns_data.process_data(pct_returns_array=self.dbp.get_assets_returns(asset_names=asset_names))
-        clusters_structure: list[str] = generate_overall_clusters_structure(
+        indics_params: list[BaseIndicator] = self.indics_collection.get_indics_params()
+        assets_names: list[str] = self.assets_collection.get_all_active_entities_names()
+        self.returns_data.process_data(
+            pct_returns_array=self.dbp.get_assets_returns(asset_names=assets_names)
+        )
+
+        multi_index: MultiIndex = generate_multi_index_process(
             indic_clusters_structure=self.indics_clusters.clusters_structure,
             asset_clusters_structure=self.assets_clusters.clusters_structure,
-        )
-        multi_index: MultiIndex = generate_multi_index_process(
-            clusters_structure=clusters_structure,
-            indicators_params=indics_params,
-            asset_names=asset_names,
+            indics_params=indics_params,
+            assets=assets_names,
             assets_to_clusters=self.assets_clusters.map_nested_clusters_to_entities(),
             indics_to_clusters=self.indics_clusters.map_nested_clusters_to_entities(),
         )
-
-        execute_backtest(
+        backtest_specs: BacktestSpecs = BacktestSpecs(
+            returns_data=self.returns_data,
             indics_params=indics_params,
             multi_index=multi_index,
-            clusters_structure=clusters_structure,
-            returns_data=self.returns_data,
+        )
+        signals_array: ArrayFloat = process_strategies(
+            indics_params=indics_params,
+            backtest_specs=backtest_specs,
+            progress_callback=progress_callback,
+        )
+        (
+            self.returns_data.global_returns,
+            self.returns_data.sub_portfolio_roll,
+            self.returns_data.sub_portfolio_ovrll,
+        ) = aggregate_raw_returns(
+            signals_array=signals_array,
+            backtest_specs=backtest_specs,
             progress_callback=progress_callback,
         )
 

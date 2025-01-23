@@ -1,6 +1,7 @@
 
-from outquantlab.typing_conventions import ProgressFunc, DataFrameFloat
+from outquantlab.typing_conventions import ArrayFloat, ProgressFunc, DataFrameFloat
 from outquantlab.metrics import calculate_overall_mean
+from outquantlab.backtest.backtest_specs import BacktestSpecs
 
 def calculate_portfolio_returns(
     returns_df: DataFrameFloat,
@@ -16,19 +17,18 @@ def calculate_portfolio_returns(
         )
 
 def aggregate_raw_returns(
-    raw_adjusted_returns_df: DataFrameFloat,
-    clusters_structure: list[str],
-    all_history: bool,
+    signals_array: ArrayFloat,
+    backtest_specs: BacktestSpecs,
     progress_callback: ProgressFunc
 ) -> tuple[DataFrameFloat, DataFrameFloat, DataFrameFloat]:
-
-    if not all_history:
-        raw_adjusted_returns_df.dropna(axis=0, how='any', inplace=True)  # type: ignore
-    clusters_nb: int = len(clusters_structure) - 1
+    raw_adjusted_returns_df = DataFrameFloat(
+            data=signals_array, index=backtest_specs.dates, columns=backtest_specs.multi_index
+        )
+    del signals_array
+    clusters_nb: int = len(backtest_specs.multi_index.names) - 1
     for i in range(clusters_nb, 0, -1):
-        grouping_levels: list[str] = clusters_structure[:i]
-
-        raw_adjusted_returns_df = calculate_portfolio_returns(
+        grouping_levels: list[str] = backtest_specs.multi_index.names[:i]
+        raw_adjusted_returns_df: DataFrameFloat = calculate_portfolio_returns(
             returns_df=raw_adjusted_returns_df,
             grouping_levels=grouping_levels
         )
@@ -49,7 +49,7 @@ def aggregate_raw_returns(
     raw_adjusted_returns_df.dropna(axis=0, how='all', inplace=True)  # type: ignore
 
     return DataFrameFloat(
-        data=calculate_overall_mean(array=raw_adjusted_returns_df.nparray, axis=1),
+        data=calculate_overall_mean(array=raw_adjusted_returns_df.get_array(), axis=1),
         index=raw_adjusted_returns_df.dates,
         columns=['Portfolio']
         ), sub_portfolio_rolling, sub_portfolio_overall # type: ignore
