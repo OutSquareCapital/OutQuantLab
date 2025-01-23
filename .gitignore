@@ -32,3 +32,6 @@ test.py
 *.ipynb
 
 *.pstats
+
+*.parquet
+*.json
