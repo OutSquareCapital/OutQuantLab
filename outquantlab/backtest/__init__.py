@@ -1,5 +1,9 @@
-from outquantlab.backtest.orchestrator import execute_backtest
+from outquantlab.backtest.aggregate_returns import aggregate_raw_returns
+from outquantlab.backtest.process_strategies import process_strategies
+from outquantlab.backtest.backtest_specs import BacktestSpecs
 
 __all__ = [
-    "execute_backtest"
+    "aggregate_raw_returns",
+    "process_strategies",
+    "BacktestSpecs"
 ]

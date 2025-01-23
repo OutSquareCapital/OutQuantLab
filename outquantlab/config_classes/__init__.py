@@ -3,7 +3,6 @@ from outquantlab.config_classes.clusters import (
     ClustersTree,
     generate_multi_index_process,
     generate_dynamic_clusters,
-    generate_overall_clusters_structure,
 )
 
 __all__: list[str] = [
@@ -13,5 +12,4 @@ __all__: list[str] = [
     "ClustersTree",
     "generate_multi_index_process",
     "generate_dynamic_clusters",
-    "generate_overall_clusters_structure",
 ]

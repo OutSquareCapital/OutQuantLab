@@ -71,10 +71,10 @@ def prepare_sunburst_data(
 
 
 def sort_series(series: SeriesFloat, ascending: bool = True) -> SeriesFloat:
-    sorted_indices: ArrayInt = np.argsort(series.nparray)
+    sorted_indices: ArrayInt = np.argsort(series.get_array())
     if not ascending:
         sorted_indices = sorted_indices[::-1]
-    sorted_array: ArrayFloat = series.nparray[sorted_indices]
+    sorted_array: ArrayFloat = series.get_array()[sorted_indices]
     sorted_index: list[str] = [series.names[i] for i in sorted_indices]
     return SeriesFloat(data=sorted_array, index=sorted_index)
 
@@ -83,14 +83,14 @@ def sort_dataframe(
     df: DataFrameFloat, use_final: bool = False, ascending: bool = True
 ) -> DataFrameFloat:
     if use_final:
-        sorted_indices: ArrayInt = np.argsort(a=df.nparray[-1, :])
+        sorted_indices: ArrayInt = np.argsort(a=df.get_array()[-1, :])
     else:
-        mean_values: ArrayFloat = calculate_overall_mean(array=df.nparray, axis=0)
+        mean_values: ArrayFloat = calculate_overall_mean(array=df.get_array(), axis=0)
         sorted_indices: ArrayInt = np.argsort(a=mean_values)
     if not ascending:
         sorted_indices = sorted_indices[::-1]
 
-    sorted_data: ArrayFloat = df.nparray[:, sorted_indices]
+    sorted_data: ArrayFloat = df.get_array()[:, sorted_indices]
     sorted_columns: list[str] = [df.columns[i] for i in sorted_indices]
 
     return DataFrameFloat(data=sorted_data, columns=sorted_columns, index=df.dates)

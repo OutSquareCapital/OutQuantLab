@@ -47,7 +47,7 @@ class BacktestStats:
             format_metric_name(name=func.__name__) for func in metric_functions
         ]
         results: list[ArrayFloat] = [
-            func(self.returns_data.global_returns.nparray) for func in metric_functions
+            func(self.returns_data.global_returns.get_array()) for func in metric_functions
         ]
 
         return {
@@ -58,7 +58,7 @@ class BacktestStats:
     def get_stats_equity(self) -> DataFrameFloat:
         equity_curves_df = DataFrameFloat(
             data=mt.calculate_equity_curves(
-                returns_array=self.returns_data.sub_portfolio_roll.nparray
+                returns_array=self.returns_data.sub_portfolio_roll.get_array()
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
             columns=convert_multiindex_to_labels(
@@ -71,7 +71,7 @@ class BacktestStats:
     def get_rolling_volatility(self) -> DataFrameFloat:
         rolling_volatility_df = DataFrameFloat(
             data=mt.hv_composite(
-                returns_array=self.returns_data.sub_portfolio_roll.nparray
+                returns_array=self.returns_data.sub_portfolio_roll.get_array()
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
             columns=convert_multiindex_to_labels(
@@ -84,7 +84,7 @@ class BacktestStats:
     def get_rolling_drawdown(self) -> DataFrameFloat:
         drawdowns_df = DataFrameFloat(
             data=mt.calculate_rolling_drawdown(
-                returns_array=self.returns_data.sub_portfolio_roll.nparray,
+                returns_array=self.returns_data.sub_portfolio_roll.get_array(),
                 length=self.length,
             ),
             index=self.returns_data.sub_portfolio_roll.dates,
@@ -98,7 +98,7 @@ class BacktestStats:
     def get_rolling_sharpe_ratio(self) -> DataFrameFloat:
         rolling_sharpe_ratio_df = DataFrameFloat(
             data=mt.rolling_sharpe_ratios(
-                returns_array=self.returns_data.sub_portfolio_roll.nparray,
+                returns_array=self.returns_data.sub_portfolio_roll.get_array(),
                 length=self.length,
                 min_length=self.length,
             ),
@@ -113,7 +113,7 @@ class BacktestStats:
     def get_rolling_smoothed_skewness(self) -> DataFrameFloat:
         rolling_skewness_df = DataFrameFloat(
             data=mt.rolling_skewness(
-                array=self.returns_data.sub_portfolio_roll.nparray,
+                array=self.returns_data.sub_portfolio_roll.get_array(),
                 length=self.length,
                 min_length=self.length
             ),
@@ -128,7 +128,7 @@ class BacktestStats:
     def get_overall_returns(self) -> SeriesFloat:
         total_returns_series = SeriesFloat(
             data=mt.calculate_total_returns(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray
+                returns_array=self.returns_data.sub_portfolio_ovrll.get_array()
             ),
             index=convert_multiindex_to_labels(
                 df=self.returns_data.sub_portfolio_ovrll
@@ -140,7 +140,7 @@ class BacktestStats:
     def get_overall_sharpe_ratio(self) -> SeriesFloat:
         sharpes_series = SeriesFloat(
             data=mt.overall_sharpe_ratio(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray
+                returns_array=self.returns_data.sub_portfolio_ovrll.get_array()
             ),
             index=convert_multiindex_to_labels(
                 df=self.returns_data.sub_portfolio_ovrll
@@ -152,7 +152,7 @@ class BacktestStats:
     def get_overall_volatility(self) -> SeriesFloat:
         overall_vol_series = SeriesFloat(
             data=mt.overall_volatility_annualized(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray
+                returns_array=self.returns_data.sub_portfolio_ovrll.get_array()
             ),
             index=convert_multiindex_to_labels(
                 df=self.returns_data.sub_portfolio_ovrll
@@ -163,7 +163,7 @@ class BacktestStats:
 
     def get_overall_average_drawdown(self) -> SeriesFloat:
         rolling_dd: ArrayFloat = mt.calculate_rolling_drawdown(
-            returns_array=self.returns_data.sub_portfolio_ovrll.nparray,
+            returns_array=self.returns_data.sub_portfolio_ovrll.get_array(),
             length=self.returns_data.sub_portfolio_ovrll.shape[0],
         )
 
@@ -179,7 +179,7 @@ class BacktestStats:
     def get_overall_average_correlation(self) -> SeriesFloat:
         overall_average_corr = SeriesFloat(
             data=mt.calculate_overall_average_correlation(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray
+                returns_array=self.returns_data.sub_portfolio_ovrll.get_array()
             ),
             index=convert_multiindex_to_labels(
                 df=self.returns_data.sub_portfolio_ovrll
@@ -191,7 +191,7 @@ class BacktestStats:
     def get_overall_monthly_skew(self) -> SeriesFloat:
         skew_series: SeriesFloat = SeriesFloat(
             data=mt.calculate_overall_monthly_skewness(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray
+                returns_array=self.returns_data.sub_portfolio_ovrll.get_array()
             ),
             index=convert_multiindex_to_labels(
                 df=self.returns_data.sub_portfolio_ovrll
@@ -203,7 +203,7 @@ class BacktestStats:
     def get_stats_distribution_violin(self) -> DataFrameFloat:
         return DataFrameFloat(
             data=format_returns(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray,
+                returns_array=self.returns_data.sub_portfolio_ovrll.get_array(),
                 limit=self.returns_limit,
             ),
             index=self.returns_data.sub_portfolio_ovrll.dates,
@@ -215,7 +215,7 @@ class BacktestStats:
     def get_stats_distribution_histogram(self) -> DataFrameFloat:
         return DataFrameFloat(
             data=format_returns(
-                returns_array=self.returns_data.sub_portfolio_ovrll.nparray,
+                returns_array=self.returns_data.sub_portfolio_ovrll.get_array(),
                 limit=self.returns_limit,
             ),
             index=self.returns_data.sub_portfolio_ovrll.dates,
@@ -226,7 +226,7 @@ class BacktestStats:
 
     def get_correlation_heatmap(self) -> tuple[ArrayFloat, list[str], ArrayFloat]:
         correlation_matrix: ArrayFloat = mt.calculate_correlation_matrix(
-            returns_array=self.returns_data.sub_portfolio_ovrll.nparray
+            returns_array=self.returns_data.sub_portfolio_ovrll.get_array()
         )
         filled_correlation_matrix: ArrayFloat = fill_correlation_matrix(
             corr_matrix=correlation_matrix
@@ -242,7 +242,7 @@ class BacktestStats:
 
     def get_correlation_clusters_icicle(self) -> tuple[list[str], list[str]]:
         renamed_returns_df = DataFrameFloat(
-            data=self.returns_data.sub_portfolio_ovrll.nparray,
+            data=self.returns_data.sub_portfolio_ovrll.get_array(),
             index=self.returns_data.sub_portfolio_ovrll.dates,
             columns=convert_multiindex_to_labels(
                 df=self.returns_data.sub_portfolio_ovrll
