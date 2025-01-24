@@ -1,5 +1,5 @@
 from collections.abc import Callable
-import numpy as np
+from numpy import clip, sign, where
 from operator import gt
 
 from outquantlab.metrics.aggregation import (
@@ -18,7 +18,7 @@ def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> Array
 
 
 def sign_normalization(signal_array: ArrayFloat) -> ArrayFloat:
-    return np.sign(signal_array, out=signal_array)
+    return sign(signal_array, out=signal_array)
 
 
 def relative_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
@@ -32,14 +32,14 @@ def z_score_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
 
 
 def limit_normalization(signal_array: ArrayFloat, limit: int = 1) -> ArrayFloat:
-    return np.clip(signal_array, -limit, limit)
+    return clip(signal_array, -limit, limit)
 
 
 def calculate_indicator_on_trend_signal(
     trend_signal: ArrayFloat, indicator_signal: ArrayFloat
 ) -> ArrayFloat:
     limit: Float32 = Float32(0.0)
-    return np.where(
+    return where(
         ((trend_signal < limit) & (indicator_signal > limit))
         | ((trend_signal > limit) & (indicator_signal < limit)),
         limit,
@@ -68,4 +68,4 @@ def dynamic_signal(
     signal: ArrayFloat,
     comparaison: Callable[[ArrayFloat, Float32], ArrayFloat] = gt,
 ) -> ArrayFloat:
-    return np.where(comparaison(metric, Float32(0.0)), -signal, signal)
+    return where(comparaison(metric, Float32(0.0)), -signal, signal)

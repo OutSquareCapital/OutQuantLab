@@ -1,11 +1,11 @@
-from outquantlab.indicators import ReturnsData
 from outquantlab.config_classes import (
-    AssetsCollection,
-    IndicsCollection,
     AssetsClusters,
+    AssetsCollection,
     IndicsClusters,
+    IndicsCollection,
 )
 from outquantlab.database.data_queries import DataQueries
+from outquantlab.indicators import ReturnsData
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 
@@ -30,7 +30,7 @@ class DataBaseProvider:
             asset_names=self.dbq.select(file="assets_names").load(),
         )
 
-    def get_indicators_collection(self, returns_data: ReturnsData) -> IndicsCollection:
+    def get_indics_collection(self, returns_data: ReturnsData) -> IndicsCollection:
         return IndicsCollection(
             indics_to_test=self.dbq.select(file="indics_to_test").load(),
             params_config=self.dbq.select(file="indics_params").load(),

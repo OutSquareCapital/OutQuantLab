@@ -1,4 +1,4 @@
-import numpy as np
+from numpy import sqrt, nan, empty
 from outquantlab.typing_conventions import ArrayFloat, Float32
 from numba import prange, njit  # type: ignore
 
@@ -22,20 +22,20 @@ def calculate_skewness(
         )
 
         if observation_count < 3:
-            return np.nan
+            return nan
         elif consecutive_equal_count >= observation_count:
             return 0.0
         elif variance <= 1e-14:
-            return np.nan
+            return nan
         else:
-            std_dev = np.sqrt(variance)
+            std_dev = sqrt(variance)
             return (
-                np.sqrt(total_observations * (total_observations - 1))
+                sqrt(total_observations * (total_observations - 1))
                 * skewness_numerator
                 / ((total_observations - 2) * std_dev * std_dev * std_dev)
             )
     else:
-        return np.nan
+        return nan
 
 
 @njit
@@ -135,8 +135,8 @@ def rolling_skewness(
     min_length: int
 ) -> ArrayFloat:
     num_rows, num_cols = array.shape
-    output: ArrayFloat = np.empty((num_rows, num_cols), dtype=Float32)
-    output.fill(np.nan)
+    output: ArrayFloat = empty((num_rows, num_cols), dtype=Float32)
+    output.fill(nan)
 
     for col in prange(num_cols):
         observation_count, sum_values, sum_values_squared, sum_values_cubed = 0, 0.0, 0.0, 0.0
@@ -218,7 +218,7 @@ def calculate_kurtosis(
 ) -> float|Float32:
     if observation_count >= min_length:
         if observation_count < 4:
-            return np.nan
+            return nan
         elif consecutive_equal_count >= observation_count:
             return -3.0
         else:
@@ -238,7 +238,7 @@ def calculate_kurtosis(
             )
 
             if variance <= 1e-14:
-                return np.nan
+                return nan
             else:
                 kurtosis = (
                     (total_observations * total_observations - 1.0) * kurtosis_term
@@ -247,7 +247,7 @@ def calculate_kurtosis(
                 )
                 return kurtosis / ((total_observations - 2.0) * (total_observations - 3.0))
     else:
-        return np.nan
+        return nan
 
 @njit
 def add_kurtosis_contribution(
@@ -365,8 +365,8 @@ def rolling_kurtosis(
     min_length: int
 ) -> ArrayFloat:
     num_rows, num_cols = array.shape
-    output: ArrayFloat = np.empty((num_rows, num_cols), dtype=Float32)
-    output.fill(np.nan)
+    output: ArrayFloat = empty((num_rows, num_cols), dtype=Float32)
+    output.fill(nan)
 
     for col in prange(num_cols):
         observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth = 0, 0.0, 0.0, 0.0, 0.0

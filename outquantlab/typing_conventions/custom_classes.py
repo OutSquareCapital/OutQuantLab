@@ -1,4 +1,4 @@
-import numpy as np
+from numpy import nan
 from numpy.typing import DTypeLike
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
@@ -54,7 +54,7 @@ class SeriesFloat(Series):  # type: ignore
         return super().index  # type: ignore
 
     def get_array(
-        self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = np.nan
+        self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = nan
     ) -> ArrayFloat:
         array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
         return array
@@ -105,7 +105,7 @@ class DataFrameFloat(DataFrame):
         return super().index  # type: ignore
 
     def get_array(
-        self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = np.nan
+        self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = nan
     ) -> ArrayFloat:
         array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
         return array

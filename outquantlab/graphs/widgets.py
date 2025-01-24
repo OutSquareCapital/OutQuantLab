@@ -1,4 +1,4 @@
-import pandas as pd
+from pandas import DatetimeIndex
 import plotly.graph_objects as go  # type: ignore
 
 from outquantlab.graphs.design import (
@@ -18,7 +18,7 @@ def curves(
     show_legend: bool,
     log_scale: bool = False,
 ) -> go.Figure:
-    x_values: pd.DatetimeIndex = returns_df.dates
+    x_values: DatetimeIndex = returns_df.dates
     y_values: DataFrameFloat = returns_df
     fig = go.Figure()
 

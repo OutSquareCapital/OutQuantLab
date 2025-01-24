@@ -1,4 +1,4 @@
-import pandas as pd
+from pandas import MultiIndex
 from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
 from scipy.spatial.distance import squareform
 
@@ -42,14 +42,14 @@ def generate_levels(product_tuples: list[tuple[str, ...]]) -> list[str]:
 def generate_multi_index_process(
     indic_param_tuples: list[tuple[str, ...]],
     asset_tuples: list[tuple[str, ...]],
-) -> pd.MultiIndex:
+) -> MultiIndex:
     product_tuples: list[tuple[str, ...]] = [
         (*asset_clusters, *indic_clusters)
         for indic_clusters in indic_param_tuples
         for asset_clusters in asset_tuples
     ]
 
-    return pd.MultiIndex.from_tuples(  # type: ignore
+    return MultiIndex.from_tuples(  # type: ignore
         tuples=product_tuples,
         names=generate_levels(product_tuples=product_tuples),
     )

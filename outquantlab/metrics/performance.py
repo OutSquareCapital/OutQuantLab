@@ -1,90 +1,121 @@
 from outquantlab.typing_conventions import ArrayFloat, ArrayInt
 from outquantlab.metrics.maths_constants import ANNUALIZATION_FACTOR, PERCENTAGE_FACTOR
-from outquantlab.metrics.aggregation import rolling_mean, calculate_overall_mean, rolling_max, calculate_overall_min
+from outquantlab.metrics.aggregation import (
+    rolling_mean,
+    calculate_overall_mean,
+    rolling_max,
+    calculate_overall_min,
+)
 from outquantlab.metrics.volatility import rolling_volatility, overall_volatility
 from outquantlab.metrics.distribution import rolling_skewness
-import numpy as np
+from numpy import log, nan, cumprod, arange, append, empty_like, isnan
+
 
 def reduce_array(prices_array: ArrayFloat, frequency: int) -> ArrayFloat:
     array_length: int = prices_array.shape[0]
-    indices: ArrayInt = np.arange(
-        start=0,
-        stop=array_length, 
-        step=frequency)
+    indices: ArrayInt = arange(start=0, stop=array_length, step=frequency)
 
     if array_length % frequency != 0:
-        indices: ArrayInt = np.append(arr=indices, values=array_length - 1)
+        indices: ArrayInt = append(arr=indices, values=array_length - 1)
     return prices_array[indices]
 
-def shift_array(original_array: ArrayFloat, step:int = 1) -> ArrayFloat:
-    shifted_array: ArrayFloat = np.empty_like(prototype=original_array)
+
+def shift_array(original_array: ArrayFloat, step: int = 1) -> ArrayFloat:
+    shifted_array: ArrayFloat = empty_like(prototype=original_array)
     shifted_array[step:, :] = original_array[:-step, :]
-    shifted_array[:step, :] = np.nan
+    shifted_array[:step, :] = nan
     return shifted_array
 
+
 def calculate_volatility_adjusted_returns(
-    pct_returns_array: ArrayFloat, 
-    hv_array: ArrayFloat, 
-    target_volatility: int = 15
-    ) -> ArrayFloat:
-    vol_adj_position_size_shifted: ArrayFloat = shift_array(original_array=target_volatility / hv_array)
+    pct_returns_array: ArrayFloat, hv_array: ArrayFloat, target_volatility: int = 15
+) -> ArrayFloat:
+    vol_adj_position_size_shifted: ArrayFloat = shift_array(
+        original_array=target_volatility / hv_array
+    )
     return pct_returns_array * vol_adj_position_size_shifted
 
+
 def calculate_equity_curves(returns_array: ArrayFloat) -> ArrayFloat:
-    temp_array:ArrayFloat = returns_array.copy()
-    mask: ArrayFloat = np.isnan(temp_array)
+    temp_array: ArrayFloat = returns_array.copy()
+    mask: ArrayFloat = isnan(temp_array)
     temp_array[mask] = 0
-    cumulative_returns: ArrayFloat = np.cumprod(a=1 + temp_array, axis=0)
-    cumulative_returns[mask] = np.nan
+    cumulative_returns: ArrayFloat = cumprod(a=1 + temp_array, axis=0)
+    cumulative_returns[mask] = nan
 
     return cumulative_returns * PERCENTAGE_FACTOR
 
+
 def log_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
     ratios = prices_array[1:] / prices_array[:-1]
-    log_returns_array: ArrayFloat = np.empty_like(prototype=prices_array)
-    log_returns_array[0] = np.nan
-    log_returns_array[1:] = np.log(ratios)
+    log_returns_array: ArrayFloat = empty_like(prototype=prices_array)
+    log_returns_array[0] = nan
+    log_returns_array[1:] = log(ratios)
     return log_returns_array
 
+
 def pct_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
-    pct_returns_array: ArrayFloat = np.empty_like(prototype=prices_array)
-    pct_returns_array[0] = np.nan
+    pct_returns_array: ArrayFloat = empty_like(prototype=prices_array)
+    pct_returns_array[0] = nan
     pct_returns_array[1:] = prices_array[1:] / prices_array[:-1] - 1
     return pct_returns_array
+
 
 def calculate_total_returns(returns_array: ArrayFloat) -> ArrayFloat:
     equity_curves: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
     return equity_curves[-1] - 100
 
+
 def calculate_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayFloat:
     equity_curves: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
-    period_max: ArrayFloat = rolling_max(array=equity_curves, length=length, min_length=1)
+    period_max: ArrayFloat = rolling_max(
+        array=equity_curves, length=length, min_length=1
+    )
     return (equity_curves - period_max) / period_max * PERCENTAGE_FACTOR
 
+
 def calculate_max_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
-    drawdown: ArrayFloat = calculate_rolling_drawdown(returns_array=returns_array, length=returns_array.shape[0])
+    drawdown: ArrayFloat = calculate_rolling_drawdown(
+        returns_array=returns_array, length=returns_array.shape[0]
+    )
     return calculate_overall_min(array=drawdown)
+
 
 def expanding_sharpe_ratios(returns_array: ArrayFloat) -> ArrayFloat:
     length: int = returns_array.shape[0]
-    expanding_mean: ArrayFloat = rolling_mean(returns_array, length=length, min_length=125)
-    expanding_std: ArrayFloat = rolling_volatility(returns_array, length=length, min_length=125) 
-    return expanding_mean/expanding_std * ANNUALIZATION_FACTOR
+    expanding_mean: ArrayFloat = rolling_mean(
+        returns_array, length=length, min_length=125
+    )
+    expanding_std: ArrayFloat = rolling_volatility(
+        returns_array, length=length, min_length=125
+    )
+    return expanding_mean / expanding_std * ANNUALIZATION_FACTOR
 
-def rolling_sharpe_ratios(returns_array: ArrayFloat, length:int, min_length:int) -> ArrayFloat:
-    mean: ArrayFloat = rolling_mean(array=returns_array, length=length, min_length=min_length)
-    volatility: ArrayFloat = rolling_volatility(array=returns_array, length=length, min_length=min_length)
-    return  mean / volatility * ANNUALIZATION_FACTOR
+
+def rolling_sharpe_ratios(
+    returns_array: ArrayFloat, length: int, min_length: int
+) -> ArrayFloat:
+    mean: ArrayFloat = rolling_mean(
+        array=returns_array, length=length, min_length=min_length
+    )
+    volatility: ArrayFloat = rolling_volatility(
+        array=returns_array, length=length, min_length=min_length
+    )
+    return mean / volatility * ANNUALIZATION_FACTOR
+
 
 def overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     mean: ArrayFloat = calculate_overall_mean(array=returns_array)
     volatility: ArrayFloat = overall_volatility(returns_array=returns_array)
     return mean / volatility * ANNUALIZATION_FACTOR
 
+
 def calculate_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:
     prices_array: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
     monthly_prices: ArrayFloat = reduce_array(prices_array=prices_array, frequency=21)
     monthly_returns: ArrayFloat = pct_returns_np(prices_array=monthly_prices)
     length_to_use: int = monthly_returns.shape[0]
-    expanding_skew: ArrayFloat = rolling_skewness(array=monthly_returns, length=length_to_use, min_length=4)
+    expanding_skew: ArrayFloat = rolling_skewness(
+        array=monthly_returns, length=length_to_use, min_length=4
+    )
     return calculate_overall_mean(array=expanding_skew)

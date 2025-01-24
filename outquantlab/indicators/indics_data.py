@@ -9,7 +9,7 @@ from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 class ReturnsData:
     def __init__(self, returns_df: DataFrameFloat) -> None:
-        returns_array = returns_df.get_array()
+        returns_array: ArrayFloat = returns_df.get_array()
         self.log_returns_array: ArrayFloat = returns_array
         self.prices_array: ArrayFloat = returns_array
         self.adjusted_returns_array: ArrayFloat = returns_array

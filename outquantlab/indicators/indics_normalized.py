@@ -1,5 +1,4 @@
-import numpy as np
-
+from numpy import full
 import outquantlab.indicators.indics_raw as raw
 import outquantlab.metrics.normalization as norm
 from outquantlab.indicators.base_indicator import BaseIndic
@@ -298,7 +297,7 @@ class IndicatorsNormalized:
 
     class FixedBias(BaseIndic):
         def execute(self, Bias: int) -> ArrayFloat:
-            return np.full(self.returns_data.prices_array.shape, Bias, dtype=Float32)
+            return full(self.returns_data.prices_array.shape, Bias, dtype=Float32)
 
     class MeanPriceRatioNormalised(BaseIndic):
         def execute(self, len_signal: int, len_norm: int) -> ArrayFloat:

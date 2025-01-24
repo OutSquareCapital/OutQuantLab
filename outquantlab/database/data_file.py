@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Final, Protocol
 
-import pandas as pd
+from pandas import DataFrame, read_parquet
 
 JSON: Final[str] = ".json"
 PARQUET: Final[str] = ".parquet"
@@ -29,10 +29,10 @@ class JSONHandler(FileHandler):
 
 
 class ParquetHandler(FileHandler):
-    def load(self, path: str, names: list[str] | None = None) -> pd.DataFrame:
-        return pd.read_parquet(path, engine="pyarrow", columns=names)
+    def load(self, path: str, names: list[str] | None = None) -> DataFrame:
+        return read_parquet(path, engine="pyarrow", columns=names)
 
-    def save(self, path: str, data: pd.DataFrame) -> None:
+    def save(self, path: str, data: DataFrame) -> None:
         data.to_parquet(path, engine="pyarrow", index=True)
 
 

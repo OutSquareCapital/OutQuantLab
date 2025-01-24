@@ -23,6 +23,6 @@ __all__: list[str] = [
     'ProgressFunc',
     'SeriesFloat',
     'DataFrameFloat',
-    'StrategyComponent',
     'ClustersHierarchy',
+    'StrategyComponent',
 ]

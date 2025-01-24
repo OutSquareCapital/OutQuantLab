@@ -1,13 +1,13 @@
 from outquantlab.database.data_queries import DataQueries
 from outquantlab.metrics import pct_returns_np
 from outquantlab.typing_conventions import DataFrameFloat
-import pandas as pd
+from pandas import DataFrame
 import yfinance as yf  # type: ignore
 
 
     
 def refresh_yf_data(dbq: DataQueries, assets: list[str]) -> None:
-    data: pd.DataFrame | None = yf.download(  # type: ignore
+    data: DataFrame | None = yf.download(  # type: ignore
         tickers=assets,
         interval="1d",
         auto_adjust=True,
