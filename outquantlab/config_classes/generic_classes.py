@@ -32,22 +32,6 @@ class BaseClustersTree(ABC):
     def __init__(self, clusters: ClustersHierarchy, prefix: str) -> None:
         self.clusters: ClustersHierarchy = clusters
         self.prefix: str = prefix
-        self.clusters_structure: list[str] = []
-        self._generate_clusters_structure()
-
-    def _generate_clusters_structure(self) -> None:
-        def determine_depth(node: dict[str, Any] | list[str]) -> int:
-            if isinstance(node, dict):
-                return 1 + max(
-                    determine_depth(node=subnode) for subnode in node.values()
-                )
-            return 0
-
-        depth: int = determine_depth(self.clusters)
-        for i in range(depth):
-            cluster_name: str = f"{self.prefix}{'Sub' * i}Cluster"
-            self.clusters_structure.append(cluster_name)
-        self.clusters_structure.append(self.prefix)
 
     def update_clusters_structure(self, new_structure: ClustersHierarchy) -> None:
         self.clusters = new_structure
