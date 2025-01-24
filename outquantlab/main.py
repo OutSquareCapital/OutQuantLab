@@ -6,9 +6,11 @@ from outquantlab.backtest import (
     BacktestSpecs,
 )
 from outquantlab.config_classes import (
+    AssetsClusters,
+    IndicsClusters,
     AssetsCollection,
-    ClustersTree,
     IndicatorsCollection,
+    Asset,
     generate_multi_index_process,
 )
 from outquantlab.database import DataBaseProvider
@@ -26,12 +28,8 @@ class OutQuantLab:
         self.indics_collection: IndicatorsCollection = (
             self.dbp.get_indicators_collection(returns_data=self.returns_data)
         )
-        self.assets_clusters: ClustersTree = self.dbp.get_clusters_tree(
-            cluster_type="assets"
-        )
-        self.indics_clusters: ClustersTree = self.dbp.get_clusters_tree(
-            cluster_type="indics"
-        )
+        self.assets_clusters: AssetsClusters = self.dbp.get_assets_clusters_tree()
+        self.indics_clusters: IndicsClusters = self.dbp.get_indics_clusters_tree()
         self.stats = BacktestStats(
             length=250,
             max_clusters=5,
@@ -42,18 +40,20 @@ class OutQuantLab:
 
     def run(self, progress_callback: ProgressFunc) -> None:
         indics_params: list[BaseIndicator] = self.indics_collection.get_indics_params()
-        assets_names: list[str] = self.assets_collection.get_all_active_entities_names()
+        assets: list[Asset] = self.assets_collection.get_all_active_entities()
         self.returns_data.process_data(
-            pct_returns_array=self.dbp.get_assets_returns(asset_names=assets_names)
+            pct_returns_array=self.dbp.get_assets_returns(
+                asset_names=[asset.name for asset in assets]
+            )
         )
 
         multi_index: MultiIndex = generate_multi_index_process(
             indic_clusters_structure=self.indics_clusters.clusters_structure,
             asset_clusters_structure=self.assets_clusters.clusters_structure,
-            indics_params=indics_params,
-            assets=assets_names,
-            assets_to_clusters=self.assets_clusters.map_nested_clusters_to_entities(),
-            indics_to_clusters=self.indics_clusters.map_nested_clusters_to_entities(),
+            indic_param_tuples=self.indics_clusters.get_clusters_tuples(
+                entities=indics_params
+            ),
+            asset_tuples=self.assets_clusters.get_clusters_tuples(entities=assets),
         )
         backtest_specs: BacktestSpecs = BacktestSpecs(
             returns_data=self.returns_data,
@@ -77,10 +77,6 @@ class OutQuantLab:
 
     def save_all(self) -> None:
         self.dbp.save_assets_collection(assets_collection=self.assets_collection)
-        self.dbp.save_indicators_collection(indics_collection=self.indics_collection)
-        self.dbp.save_clusters_tree(
-            clusters_tree=self.assets_clusters, cluster_type="assets"
-        )
-        self.dbp.save_clusters_tree(
-            clusters_tree=self.indics_clusters, cluster_type="indics"
-        )
+        self.dbp.save_indics_collection(indics_collection=self.indics_collection)
+        self.dbp.save_assets_clusters_tree(clusters_tree=self.assets_clusters)
+        self.dbp.save_indics_clusters_tree(clusters_tree=self.indics_clusters)

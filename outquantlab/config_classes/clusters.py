@@ -1,76 +1,58 @@
-from typing import Any
-
 import pandas as pd
 from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
 from scipy.spatial.distance import squareform
 
-from outquantlab.config_classes.collections import BaseIndicator
+from outquantlab.config_classes.collections import Asset, BaseIndicator
+from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.metrics import calculate_distance_matrix
 from outquantlab.typing_conventions import ArrayFloat, ClustersHierarchy, DataFrameFloat
 
 
-class ClustersTree:
-    def __init__(self, clusters: ClustersHierarchy, prefix: str) -> None:
-        self.clusters: ClustersHierarchy = clusters
-        self.prefix: str = prefix
-        self.clusters_structure: list[str] = []
-        self._generate_clusters_structure()
+class AssetsClusters(BaseClustersTree):
+    def __init__(self, clusters: ClustersHierarchy) -> None:
+        super().__init__(clusters=clusters, prefix="Asset")
 
-    def _generate_clusters_structure(self) -> None:
-        def determine_depth(node: dict[str, Any] | list[str]) -> int:
-            if isinstance(node, dict):
-                return 1 + max(
-                    determine_depth(node=subnode) for subnode in node.values()
-                )
-            return 0
+    def get_clusters_tuples(self, entities: list[Asset]) -> list[tuple[str, ...]]:
+        assets_to_clusters: dict[str, tuple[str, ...]] = (
+            self.map_nested_clusters_to_entities()
+        )
+        return [(*assets_to_clusters[asset.name], asset.name) for asset in entities]
 
-        depth: int = determine_depth(self.clusters)
-        for i in range(depth):
-            cluster_name: str = f"{self.prefix}{'Sub' * i}Cluster"
-            self.clusters_structure.append(cluster_name)
-        self.clusters_structure.append(self.prefix)
 
-    def update_clusters_structure(self, new_structure: ClustersHierarchy) -> None:
-        self.clusters = new_structure
+class IndicsClusters(BaseClustersTree):
+    def __init__(self, clusters: ClustersHierarchy) -> None:
+        super().__init__(clusters=clusters, prefix="Indic")
 
-    def map_nested_clusters_to_entities(self) -> dict[str, tuple[str, str]]:
-        return {
-            entity: (level1, level2)
-            for level1, subclusters in self.clusters.items()
-            for level2, entities in subclusters.items()
-            for entity in entities
-        }
+    def get_clusters_tuples(
+        self, entities: list[BaseIndicator]
+    ) -> list[tuple[str, ...]]:
+        indics_to_clusters: dict[str, tuple[str, ...]] = (
+            self.map_nested_clusters_to_entities()
+        )
+        return [
+            (*indics_to_clusters[indic.name], indic.name, "_".join(map(str, combo)))
+            for indic in entities
+            for combo in indic.param_combos
+        ]
 
 
 def generate_multi_index_process(
     indic_clusters_structure: list[str],
     asset_clusters_structure: list[str],
-    indics_params: list[BaseIndicator],
-    assets: list[str],
-    assets_to_clusters: dict[str, tuple[str, ...]],
-    indics_to_clusters: dict[str, tuple[str, ...]],
+    indic_param_tuples: list[tuple[str, ...]],
+    asset_tuples: list[tuple[str, ...]],
 ) -> pd.MultiIndex:
-    asset_tuples: list[tuple[*tuple[str, ...], str]] = [
-        (*assets_to_clusters[asset], asset) for asset in assets
-    ]
-
-    indic_param_tuples: list[tuple[*tuple[str, ...], str, str]] = [
-        (*indics_to_clusters[indic.name], indic.name, "_".join(map(str, combo)))
-        for indic in indics_params
-        for combo in indic.param_combos
-    ]
-
     product_tuples: list[tuple[str, ...]] = [
         (*asset_clusters, *indic_clusters)
         for indic_clusters in indic_param_tuples
         for asset_clusters in asset_tuples
     ]
 
-    
     return pd.MultiIndex.from_tuples(  # type: ignore
         tuples=product_tuples,
         names=asset_clusters_structure + indic_clusters_structure + ["Param"],
     )
+
 
 def get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
     distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)

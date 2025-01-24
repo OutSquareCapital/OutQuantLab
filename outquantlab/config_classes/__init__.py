@@ -1,6 +1,7 @@
 from outquantlab.config_classes.collections import IndicatorsCollection, AssetsCollection, Asset
 from outquantlab.config_classes.clusters import (
-    ClustersTree,
+    AssetsClusters,
+    IndicsClusters,
     generate_multi_index_process,
     generate_dynamic_clusters,
 )
@@ -9,7 +10,8 @@ __all__: list[str] = [
     "IndicatorsCollection",
     "AssetsCollection",
     "Asset",
-    "ClustersTree",
+    "AssetsClusters",
+    "IndicsClusters",
     "generate_multi_index_process",
     "generate_dynamic_clusters",
 ]
