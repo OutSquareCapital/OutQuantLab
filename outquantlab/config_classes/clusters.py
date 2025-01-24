@@ -47,34 +47,30 @@ def generate_multi_index_process(
     asset_clusters_structure: list[str],
     indics_params: list[BaseIndicator],
     assets: list[str],
-    assets_to_clusters: dict[str, tuple[str, str]],
-    indics_to_clusters: dict[str, tuple[str, str]],
+    assets_to_clusters: dict[str, tuple[str, ...]],
+    indics_to_clusters: dict[str, tuple[str, ...]],
 ) -> pd.MultiIndex:
-    multi_index_tuples: list[tuple[str, ...]] = []
-    clusters_structure: list[str] = (
-        asset_clusters_structure + indic_clusters_structure + ["Param"]
-    )
+    asset_tuples: list[tuple[*tuple[str, ...], str]] = [
+        (*assets_to_clusters[asset], asset) for asset in assets
+    ]
 
-    for indic in indics_params:
-        for param in indic.param_combos:
-            param_str: str = "_".join(map(str, param))
-            for asset in assets:
-                asset_clusters: tuple[str, ...] = assets_to_clusters[asset]
-                indic_clusters: tuple[str, ...] = indics_to_clusters[indic.name]
-                multi_index_tuples.append(
-                    (
-                        *asset_clusters,
-                        asset,
-                        *indic_clusters,
-                        indic.name,
-                        param_str,
-                    )
-                )
+    indic_param_tuples: list[tuple[*tuple[str, ...], str, str]] = [
+        (*indics_to_clusters[indic.name], indic.name, "_".join(map(str, combo)))
+        for indic in indics_params
+        for combo in indic.param_combos
+    ]
 
+    product_tuples: list[tuple[str, ...]] = [
+        (*asset_clusters, *indic_clusters)
+        for indic_clusters in indic_param_tuples
+        for asset_clusters in asset_tuples
+    ]
+
+    
     return pd.MultiIndex.from_tuples(  # type: ignore
-        tuples=multi_index_tuples, names=clusters_structure
+        tuples=product_tuples,
+        names=asset_clusters_structure + indic_clusters_structure + ["Param"],
     )
-
 
 def get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
     distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
