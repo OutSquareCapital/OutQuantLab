@@ -38,49 +38,50 @@ class Backtester:
                 assets_names=[asset.name for asset in assets]
             )
         )
-        self.observations_nb: int = self.data_arrays.prices_array.shape[0]
-        self.assets_count: int = self.data_arrays.prices_array.shape[1]
-        self.strategies_nb: int = sum(
-            [len(indic.param_combos) for indic in self.indics_params]
-        )
-        self.threads_nb: int = cpu_count() or 8
         self.multi_index: MultiIndex = generate_multi_index_process(
             indic_param_tuples=indics_clusters.get_clusters_tuples(
                 entities=self.indics_params
             ),
             asset_tuples=assets_clusters.get_clusters_tuples(entities=self.assets),
         )
-        self.clusters_nb: int = len(self.multi_index.names) - 1
-        self.total_returns_streams: int = self.assets_count * self.strategies_nb
-        self.signal_col_index: int = 0
-        self.signals_array: ArrayFloat = empty(
-            shape=(self.observations_nb, self.total_returns_streams), dtype=Float32
+        self.total_returns_streams: int = self.data_arrays.assets_count * sum(
+            [len(indic.param_combos) for indic in self.indics_params]
         )
+        self.signal_col_index: int = 0
+        self.signals_array: ArrayFloat = self.get_signals_array()
         self.process_strategies()
         self.aggregate_raw_returns()
+
+    def get_signals_array(self) -> ArrayFloat:
+        return empty(
+            shape=(self.data_arrays.observations_nb, self.total_returns_streams),
+            dtype=Float32,
+        )
 
     def progress_callback(self, progress: int, message: str) -> None:
         print(f"[{progress}%] {message}")
 
     def get_strategies_process_progress(self, indic: BaseIndic) -> None:
         self.progress_callback(
-            int(100 * self.signal_col_index / self.total_returns_streams),
-            f"Processing {indic.name}...",
+            progress=int(100 * self.signal_col_index / self.total_returns_streams),
+            message=f"Processing {indic.name}...",
         )
 
-    def get_aggregation_progress(self, i: int, returns_df: DataFrameFloat) -> None:
+    def get_aggregation_progress(
+        self, i: int, clusters_nb: int, returns_df: DataFrameFloat
+    ) -> None:
         self.progress_callback(
-            int(100 * (self.clusters_nb - i) / self.clusters_nb),
-            f"Aggregating {' > '.join(self.multi_index.names[:i])}: {len(returns_df.columns)} columns left...",
+            progress=int(100 * (clusters_nb - i) / clusters_nb),
+            message=f"Aggregating {self.multi_index.names[i - 1]}: {len(returns_df.columns)} columns left...",
         )
 
     def get_backtest_completion(self) -> None:
-        self.progress_callback(100, "Backtest Completed!")
+        self.progress_callback(progress=100, message="Backtest Completed!")
 
     def fill_signals_array(self, results: list[ArrayFloat]) -> None:
         results_len: int = len(results)
         for i in range(results_len):
-            end_index: int = self.signal_col_index + self.assets_count
+            end_index: int = self.signal_col_index + self.data_arrays.assets_count
             self.signals_array[:, self.signal_col_index : end_index] = results[i]
             self.signal_col_index = end_index
 
@@ -94,7 +95,8 @@ class Backtester:
         return returns_df
 
     def process_strategies(self) -> ArrayFloat:
-        with ThreadPoolExecutor(max_workers=self.threads_nb) as global_executor:
+        threads_nb: int = cpu_count() or 8
+        with ThreadPoolExecutor(max_workers=threads_nb) as global_executor:
             for indic in self.indics_params:
                 try:
                     results: list[ArrayFloat] = process_indicator_parallel(
@@ -112,8 +114,8 @@ class Backtester:
 
     def aggregate_raw_returns(self) -> None:
         raw_adjusted_returns_df = self.get_returns_df()
-
-        for i in range(self.clusters_nb, 0, -1):
+        clusters_nb: int = len(self.multi_index.names) - 1
+        for i in range(clusters_nb, 0, -1):
             raw_adjusted_returns_df: DataFrameFloat = calculate_portfolio_returns(
                 returns_df=raw_adjusted_returns_df,
                 grouping_levels=self.multi_index.names[:i],
@@ -130,7 +132,9 @@ class Backtester:
                     data=raw_adjusted_returns_df
                 )
 
-            self.get_aggregation_progress(i=i, returns_df=raw_adjusted_returns_df)
+            self.get_aggregation_progress(
+                i=i, returns_df=raw_adjusted_returns_df, clusters_nb=clusters_nb
+            )
 
         self.get_backtest_completion()
 

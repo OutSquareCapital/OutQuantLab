@@ -25,6 +25,8 @@ class DataArrays:
         self.prices_array: ArrayFloat = returns_array
         self.adjusted_returns_array: ArrayFloat = returns_array
         self.hv_array: ArrayFloat = returns_array
+        self.observations_nb: int = self.prices_array.shape[0]
+        self.assets_count: int = self.prices_array.shape[1]
 
     def process_data(self, pct_returns_array: ArrayFloat) -> None:
         prices_array: ArrayFloat = calculate_equity_curves(
