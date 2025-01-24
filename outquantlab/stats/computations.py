@@ -24,14 +24,8 @@ def format_metric_name(name: str) -> str:
 class BacktestStats:
     def __init__(
         self,
-        length: int,
-        max_clusters: int,
-        returns_limit: float,
         data_dfs: DataDfs,
     ) -> None:
-        self.length: int = length
-        self.max_clusters: int = max_clusters
-        self.returns_limit: float = returns_limit
         self.data_dfs: DataDfs = data_dfs
 
     def get_metrics(self) -> dict[str, float]:
@@ -77,11 +71,11 @@ class BacktestStats:
 
         return sort_dataframe(df=rolling_volatility_df, ascending=False)
 
-    def get_rolling_drawdown(self) -> DataFrameFloat:
+    def get_rolling_drawdown(self, length: int) -> DataFrameFloat:
         drawdowns_df = DataFrameFloat(
             data=mt.calculate_rolling_drawdown(
                 returns_array=self.data_dfs.sub_portfolio_roll.get_array(),
-                length=self.length,
+                length=length,
             ),
             index=self.data_dfs.sub_portfolio_roll.dates,
             columns=convert_multiindex_to_labels(df=self.data_dfs.sub_portfolio_roll),
@@ -89,12 +83,12 @@ class BacktestStats:
 
         return sort_dataframe(df=drawdowns_df, ascending=True)
 
-    def get_rolling_sharpe_ratio(self) -> DataFrameFloat:
+    def get_rolling_sharpe_ratio(self, length: int) -> DataFrameFloat:
         rolling_sharpe_ratio_df = DataFrameFloat(
             data=mt.rolling_sharpe_ratios(
                 returns_array=self.data_dfs.sub_portfolio_roll.get_array(),
-                length=self.length,
-                min_length=self.length,
+                length=length,
+                min_length=length,
             ),
             index=self.data_dfs.sub_portfolio_roll.dates,
             columns=convert_multiindex_to_labels(df=self.data_dfs.sub_portfolio_roll),
@@ -102,12 +96,12 @@ class BacktestStats:
 
         return sort_dataframe(df=rolling_sharpe_ratio_df, ascending=True)
 
-    def get_rolling_smoothed_skewness(self) -> DataFrameFloat:
+    def get_rolling_smoothed_skewness(self, length: int) -> DataFrameFloat:
         rolling_skewness_df = DataFrameFloat(
             data=mt.rolling_skewness(
                 array=self.data_dfs.sub_portfolio_roll.get_array(),
-                length=self.length,
-                min_length=self.length,
+                length=length,
+                min_length=length,
             ),
             index=self.data_dfs.sub_portfolio_roll.dates,
             columns=convert_multiindex_to_labels(df=self.data_dfs.sub_portfolio_roll),
@@ -178,21 +172,21 @@ class BacktestStats:
 
         return sort_series(series=skew_series, ascending=True)
 
-    def get_stats_distribution_violin(self) -> DataFrameFloat:
+    def get_stats_distribution_violin(self, returns_limit: float) -> DataFrameFloat:
         return DataFrameFloat(
             data=format_returns(
                 returns_array=self.data_dfs.sub_portfolio_ovrll.get_array(),
-                limit=self.returns_limit,
+                limit=returns_limit,
             ),
             index=self.data_dfs.sub_portfolio_ovrll.dates,
             columns=convert_multiindex_to_labels(df=self.data_dfs.sub_portfolio_ovrll),
         )
 
-    def get_stats_distribution_histogram(self) -> DataFrameFloat:
+    def get_stats_distribution_histogram(self, returns_limit: float) -> DataFrameFloat:
         return DataFrameFloat(
             data=format_returns(
                 returns_array=self.data_dfs.sub_portfolio_ovrll.get_array(),
-                limit=self.returns_limit,
+                limit=returns_limit,
             ),
             index=self.data_dfs.sub_portfolio_ovrll.dates,
             columns=convert_multiindex_to_labels(df=self.data_dfs.sub_portfolio_ovrll),
@@ -214,14 +208,16 @@ class BacktestStats:
 
         return filled_correlation_matrix, labels_list, corr_matrix_normalised
 
-    def get_correlation_clusters_icicle(self) -> tuple[list[str], list[str]]:
+    def get_correlation_clusters_icicle(
+        self, max_clusters: int
+    ) -> tuple[list[str], list[str]]:
         renamed_returns_df = DataFrameFloat(
             data=self.data_dfs.sub_portfolio_ovrll.get_array(),
             index=self.data_dfs.sub_portfolio_ovrll.dates,
             columns=convert_multiindex_to_labels(df=self.data_dfs.sub_portfolio_ovrll),
         )
         clusters_dict: dict[str, list[str]] = generate_dynamic_clusters(
-            returns_df=renamed_returns_df, max_clusters=self.max_clusters
+            returns_df=renamed_returns_df, max_clusters=max_clusters
         )
         labels, parents = prepare_sunburst_data(cluster_dict=clusters_dict)
 

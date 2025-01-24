@@ -27,23 +27,27 @@ class GraphsCollection:
             show_legend=show_legend,
         )
 
-    def plot_rolling_drawdown(self, show_legend: bool = True) -> go.Figure:
+    def plot_rolling_drawdown(self, length: int, show_legend: bool = True) -> go.Figure:
         return widgets.curves(
-            returns_df=self.stats.get_rolling_drawdown(),
+            returns_df=self.stats.get_rolling_drawdown(length=length),
             title=format_plot_name(name=self.plot_rolling_drawdown.__name__),
             show_legend=show_legend,
         )
 
-    def plot_rolling_sharpe_ratio(self, show_legend: bool = True) -> go.Figure:
+    def plot_rolling_sharpe_ratio(
+        self, length: int, show_legend: bool = True
+    ) -> go.Figure:
         return widgets.curves(
-            returns_df=self.stats.get_rolling_sharpe_ratio(),
+            returns_df=self.stats.get_rolling_sharpe_ratio(length=length),
             title=format_plot_name(name=self.plot_rolling_sharpe_ratio.__name__),
             show_legend=show_legend,
         )
 
-    def plot_rolling_smoothed_skewness(self, show_legend: bool = True) -> go.Figure:
+    def plot_rolling_smoothed_skewness(
+        self, length: int, show_legend: bool = True
+    ) -> go.Figure:
         return widgets.curves(
-            returns_df=self.stats.get_rolling_smoothed_skewness(),
+            returns_df=self.stats.get_rolling_smoothed_skewness(length=length),
             title=format_plot_name(name=self.plot_rolling_smoothed_skewness.__name__),
             show_legend=show_legend,
         )
@@ -90,16 +94,22 @@ class GraphsCollection:
             show_legend=show_legend,
         )
 
-    def plot_stats_distribution_violin(self, show_legend: bool = True) -> go.Figure:
+    def plot_stats_distribution_violin(
+        self, returns_limit: int, show_legend: bool = True
+    ) -> go.Figure:
         return widgets.violin(
-            data=self.stats.get_stats_distribution_violin(),
+            data=self.stats.get_stats_distribution_violin(returns_limit=returns_limit),
             title=format_plot_name(name=self.plot_stats_distribution_violin.__name__),
             show_legend=show_legend,
         )
 
-    def plot_stats_distribution_histogram(self, show_legend: bool = True) -> go.Figure:
+    def plot_stats_distribution_histogram(
+        self, returns_limit: float, show_legend: bool = True
+    ) -> go.Figure:
         return widgets.histogram(
-            data=self.stats.get_stats_distribution_histogram(),
+            data=self.stats.get_stats_distribution_histogram(
+                returns_limit=returns_limit
+            ),
             title=format_plot_name(
                 name=self.plot_stats_distribution_histogram.__name__
             ),
@@ -120,8 +130,12 @@ class GraphsCollection:
             show_legend=show_legend,
         )
 
-    def plot_correlation_clusters_icicle(self, show_legend: bool = True) -> go.Figure:
-        labels, parents = self.stats.get_correlation_clusters_icicle()
+    def plot_correlation_clusters_icicle(
+        self, max_clusters: int, show_legend: bool = True
+    ) -> go.Figure:
+        labels, parents = self.stats.get_correlation_clusters_icicle(
+            max_clusters=max_clusters
+        )
 
         return widgets.icicle(
             labels=labels,

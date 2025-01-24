@@ -24,12 +24,7 @@ class OutQuantLab:
         )
         self.assets_clusters: AssetsClusters = self.dbp.get_assets_clusters_tree()
         self.indics_clusters: IndicsClusters = self.dbp.get_indics_clusters_tree()
-        self.stats = BacktestStats(
-            length=250,
-            max_clusters=5,
-            returns_limit=0.05,
-            data_dfs=self.data_dfs,
-        )
+        self.stats = BacktestStats(data_dfs=self.data_dfs)
         self.graphs = GraphsCollection(stats=self.stats)
 
     def run(self) -> None:
