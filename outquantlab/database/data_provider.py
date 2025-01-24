@@ -5,24 +5,16 @@ from outquantlab.config_classes import (
     IndicsCollection,
 )
 from outquantlab.database.data_queries import DataQueries
-from outquantlab.indicators import ReturnsData
-from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
+from outquantlab.indicators import DataArrays
+from outquantlab.typing_conventions import DataFrameFloat
 
 
 class DataBaseProvider:
     def __init__(self) -> None:
         self.dbq = DataQueries()
 
-    def get_assets_returns(self, asset_names: list[str]) -> ArrayFloat:
-        returns_df = DataFrameFloat(
-            data=self.dbq.select(file="returns_data").load(names=asset_names)
-        )
-        return returns_df.get_array()
-
     def get_initial_data(self) -> DataFrameFloat:
-        return DataFrameFloat(
-            data=self.dbq.select(file="returns_data").load(names=["Date", "SPY"])
-        )
+        return DataFrameFloat(data=self.dbq.select(file="returns_data").load())
 
     def get_assets_collection(self) -> AssetsCollection:
         return AssetsCollection(
@@ -30,11 +22,11 @@ class DataBaseProvider:
             asset_names=self.dbq.select(file="assets_names").load(),
         )
 
-    def get_indics_collection(self, returns_data: ReturnsData) -> IndicsCollection:
+    def get_indics_collection(self, data_arrays: DataArrays) -> IndicsCollection:
         return IndicsCollection(
             indics_to_test=self.dbq.select(file="indics_to_test").load(),
             params_config=self.dbq.select(file="indics_params").load(),
-            returns_data=returns_data,
+            data_arrays=data_arrays,
         )
 
     def get_assets_clusters_tree(self) -> AssetsClusters:

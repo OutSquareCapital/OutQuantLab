@@ -14,7 +14,7 @@ def calculate_portfolio_returns(
 
 
 def process_param(indic: BaseIndic, param_tuple: tuple[int, ...]) -> ArrayFloat:
-    return indic.execute(*param_tuple) * indic.returns_data.adjusted_returns_array
+    return indic.execute(*param_tuple) * indic.data_arrays.adjusted_returns_array
 
 
 def process_indicator_parallel(

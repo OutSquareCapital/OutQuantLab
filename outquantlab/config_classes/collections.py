@@ -1,4 +1,4 @@
-from outquantlab.indicators import BaseIndic, IndicatorsNormalized, ReturnsData
+from outquantlab.indicators import BaseIndic, IndicatorsNormalized, DataArrays
 from outquantlab.config_classes.generic_classes import BaseCollection
 from dataclasses import dataclass
 from inspect import signature
@@ -9,20 +9,20 @@ class IndicsCollection(BaseCollection[BaseIndic]):
         self,
         indics_to_test: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
-        returns_data: ReturnsData,
+        data_arrays: DataArrays,
     ) -> None:
         self.entities: dict[str, BaseIndic] = {}
         self._load_entities(
             indics_to_test=indics_to_test,
             params_config=params_config,
-            returns_data=returns_data,
+            data_arrays=data_arrays,
         )
 
     def _load_entities(
         self,
         indics_to_test: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
-        returns_data: ReturnsData,
+        data_arrays: DataArrays,
     ) -> None:
         for name, cls in IndicatorsNormalized.__dict__.items():
             if isinstance(cls, type) and issubclass(cls, BaseIndic):
@@ -39,7 +39,7 @@ class IndicsCollection(BaseCollection[BaseIndic]):
                     name=name,
                     active=active,
                     param_values=params_values,
-                    returns_data=returns_data,
+                    data_arrays=data_arrays,
                 )
 
     def get_indics_params(self) -> list[BaseIndic]:

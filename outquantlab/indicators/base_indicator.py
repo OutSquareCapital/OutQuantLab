@@ -2,7 +2,7 @@ from outquantlab.typing_conventions import ArrayFloat
 from abc import ABC, abstractmethod
 from typing import Any
 from itertools import product
-from outquantlab.indicators.indics_data import ReturnsData
+from outquantlab.indicators.indics_data import DataArrays
 
 
 class BaseIndic(ABC):
@@ -11,13 +11,13 @@ class BaseIndic(ABC):
         name: str,
         active: bool,
         param_values: dict[str, list[int]],
-        returns_data: ReturnsData,
+        data_arrays: DataArrays,
     ) -> None:
         self.name: str = name
         self.active: bool = active
         self.params_values: dict[str, list[int]] = param_values
         self.param_combos: list[tuple[int, ...]] = []
-        self.returns_data: ReturnsData = returns_data
+        self.data_arrays: DataArrays = data_arrays
 
     @abstractmethod
     def execute(self, *args: Any, **kwargs: Any) -> ArrayFloat: ...
