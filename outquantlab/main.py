@@ -9,13 +9,13 @@ from outquantlab.config_classes import (
     Asset,
     AssetsClusters,
     AssetsCollection,
-    IndicatorsCollection,
+    IndicsCollection,
     IndicsClusters,
     generate_multi_index_process,
 )
 from outquantlab.database import DataBaseProvider
 from outquantlab.graphs import GraphsCollection
-from outquantlab.indicators import BaseIndicator, ReturnsData
+from outquantlab.indicators import BaseIndic, ReturnsData
 from outquantlab.stats import BacktestStats
 from outquantlab.typing_conventions import ArrayFloat, ProgressFunc
 
@@ -25,7 +25,7 @@ class OutQuantLab:
         self.dbp = DataBaseProvider()
         self.assets_collection: AssetsCollection = self.dbp.get_assets_collection()
         self.returns_data = ReturnsData(returns_df=self.dbp.get_initial_data())
-        self.indics_collection: IndicatorsCollection = (
+        self.indics_collection: IndicsCollection = (
             self.dbp.get_indicators_collection(returns_data=self.returns_data)
         )
         self.assets_clusters: AssetsClusters = self.dbp.get_assets_clusters_tree()
@@ -39,7 +39,7 @@ class OutQuantLab:
         self.graphs = GraphsCollection(stats=self.stats)
 
     def run(self, progress_callback: ProgressFunc) -> None:
-        indics_params: list[BaseIndicator] = self.indics_collection.get_indics_params()
+        indics_params: list[BaseIndic] = self.indics_collection.get_indics_params()
         assets: list[Asset] = self.assets_collection.get_all_active_entities()
         self.returns_data.process_data(
             pct_returns_array=self.dbp.get_assets_returns(

@@ -5,8 +5,7 @@ from itertools import product
 from outquantlab.indicators.indics_data import ReturnsData
 
 
-class BaseIndicator(ABC):
-    
+class BaseIndic(ABC):
     def __init__(
         self,
         name: str,

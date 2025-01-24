@@ -2,7 +2,7 @@ import pandas as pd
 from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
 from scipy.spatial.distance import squareform
 
-from outquantlab.config_classes.collections import Asset, BaseIndicator
+from outquantlab.config_classes.collections import Asset, BaseIndic
 from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.metrics import calculate_distance_matrix
 from outquantlab.typing_conventions import ArrayFloat, ClustersHierarchy, DataFrameFloat
@@ -23,9 +23,7 @@ class IndicsClusters(BaseClustersTree):
     def __init__(self, clusters: ClustersHierarchy) -> None:
         super().__init__(clusters=clusters, prefix="Indic")
 
-    def get_clusters_tuples(
-        self, entities: list[BaseIndicator]
-    ) -> list[tuple[str, ...]]:
+    def get_clusters_tuples(self, entities: list[BaseIndic]) -> list[tuple[str, ...]]:
         indics_to_clusters: dict[str, tuple[str, ...]] = (
             self.map_nested_clusters_to_entities()
         )
@@ -35,11 +33,11 @@ class IndicsClusters(BaseClustersTree):
             for combo in indic.param_combos
         ]
 
-def generate_levels(
-    product_tuples: list[tuple[str, ...]]
-) -> list[str]:
+
+def generate_levels(product_tuples: list[tuple[str, ...]]) -> list[str]:
     num_levels: int = len(product_tuples[0])
-    return [f"lvl{i+1}" for i in range(num_levels)]
+    return [f"lvl{i + 1}" for i in range(num_levels)]
+
 
 def generate_multi_index_process(
     indic_param_tuples: list[tuple[str, ...]],

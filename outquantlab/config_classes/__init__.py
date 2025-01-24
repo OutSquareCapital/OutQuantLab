@@ -1,4 +1,4 @@
-from outquantlab.config_classes.collections import IndicatorsCollection, AssetsCollection, Asset
+from outquantlab.config_classes.collections import IndicsCollection, AssetsCollection, Asset
 from outquantlab.config_classes.clusters import (
     AssetsClusters,
     IndicsClusters,
@@ -7,7 +7,7 @@ from outquantlab.config_classes.clusters import (
 )
 
 __all__: list[str] = [
-    "IndicatorsCollection",
+    "IndicsCollection",
     "AssetsCollection",
     "Asset",
     "AssetsClusters",

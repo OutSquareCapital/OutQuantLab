@@ -1,19 +1,16 @@
 from concurrent.futures import ThreadPoolExecutor
 
 from outquantlab.backtest.backtest_specs import BacktestSpecs
-from outquantlab.indicators import BaseIndicator
-from outquantlab.typing_conventions import (
-    ArrayFloat,
-    ProgressFunc
-)
+from outquantlab.indicators import BaseIndic
+from outquantlab.typing_conventions import ArrayFloat, ProgressFunc
 
 
-def process_param(indic: BaseIndicator, param_tuple: tuple[int, ...]) -> ArrayFloat:
+def process_param(indic: BaseIndic, param_tuple: tuple[int, ...]) -> ArrayFloat:
     return indic.execute(*param_tuple) * indic.returns_data.adjusted_returns_array
 
 
 def process_indicator_parallel(
-    indic: BaseIndicator,
+    indic: BaseIndic,
     global_executor: ThreadPoolExecutor,
 ) -> list[ArrayFloat]:
     def process_single_param(param_tuple: tuple[int, ...]) -> ArrayFloat:
@@ -36,12 +33,12 @@ def fill_signals_array(
 
     return start_index
 
+
 def process_strategies(
-    indics_params: list[BaseIndicator],
+    indics_params: list[BaseIndic],
     backtest_specs: BacktestSpecs,
     progress_callback: ProgressFunc,
 ) -> ArrayFloat:
-
     signals_array: ArrayFloat = backtest_specs.get_signals_array()
 
     signal_col_index = 0

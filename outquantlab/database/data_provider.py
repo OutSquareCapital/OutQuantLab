@@ -1,7 +1,7 @@
 from outquantlab.indicators import ReturnsData
 from outquantlab.config_classes import (
     AssetsCollection,
-    IndicatorsCollection,
+    IndicsCollection,
     AssetsClusters,
     IndicsClusters,
 )
@@ -30,11 +30,9 @@ class DataBaseProvider:
             asset_names=self.dbq.select(file="assets_names").load(),
         )
 
-    def get_indicators_collection(
-        self, returns_data: ReturnsData
-    ) -> IndicatorsCollection:
-        return IndicatorsCollection(
-            indicators_to_test=self.dbq.select(file="indics_to_test").load(),
+    def get_indicators_collection(self, returns_data: ReturnsData) -> IndicsCollection:
+        return IndicsCollection(
+            indics_to_test=self.dbq.select(file="indics_to_test").load(),
             params_config=self.dbq.select(file="indics_params").load(),
             returns_data=returns_data,
         )
@@ -54,7 +52,7 @@ class DataBaseProvider:
             data=assets_collection.get_all_entities_dict()
         )
 
-    def save_indics_collection(self, indics_collection: IndicatorsCollection) -> None:
+    def save_indics_collection(self, indics_collection: IndicsCollection) -> None:
         self.dbq.select(file="indics_to_test").save(
             data=indics_collection.get_all_entities_dict()
         )
