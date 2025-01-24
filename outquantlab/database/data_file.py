@@ -7,6 +7,7 @@ from pandas import DataFrame, read_parquet
 JSON: Final[str] = ".json"
 PARQUET: Final[str] = ".parquet"
 
+
 class FileHandler(Protocol):
     def load(self, path: str, names: list[str] | None = None) -> Any:
         raise NotImplementedError
@@ -30,7 +31,9 @@ class JSONHandler(FileHandler):
 
 class ParquetHandler(FileHandler):
     def load(self, path: str, names: list[str] | None = None) -> DataFrame:
-        return read_parquet(path, engine="pyarrow", columns=names)
+        if names:
+            return read_parquet(path, engine="pyarrow", columns=names)
+        return read_parquet(path, engine="pyarrow")
 
     def save(self, path: str, data: DataFrame) -> None:
         data.to_parquet(path, engine="pyarrow", index=True)
