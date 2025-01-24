@@ -1,23 +1,23 @@
 from pandas import MultiIndex
 
 from outquantlab.backtest import (
-    process_strategies,
-    aggregate_raw_returns,
     BacktestSpecs,
+    aggregate_raw_returns,
+    process_strategies,
 )
 from outquantlab.config_classes import (
+    Asset,
     AssetsClusters,
-    IndicsClusters,
     AssetsCollection,
     IndicatorsCollection,
-    Asset,
+    IndicsClusters,
     generate_multi_index_process,
 )
 from outquantlab.database import DataBaseProvider
 from outquantlab.graphs import GraphsCollection
 from outquantlab.indicators import BaseIndicator, ReturnsData
 from outquantlab.stats import BacktestStats
-from outquantlab.typing_conventions import ProgressFunc, ArrayFloat
+from outquantlab.typing_conventions import ArrayFloat, ProgressFunc
 
 
 class OutQuantLab:
@@ -48,8 +48,6 @@ class OutQuantLab:
         )
 
         multi_index: MultiIndex = generate_multi_index_process(
-            indic_clusters_structure=self.indics_clusters.clusters_structure,
-            asset_clusters_structure=self.assets_clusters.clusters_structure,
             indic_param_tuples=self.indics_clusters.get_clusters_tuples(
                 entities=indics_params
             ),

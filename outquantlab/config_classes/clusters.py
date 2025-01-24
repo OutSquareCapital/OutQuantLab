@@ -35,10 +35,13 @@ class IndicsClusters(BaseClustersTree):
             for combo in indic.param_combos
         ]
 
+def generate_levels(
+    product_tuples: list[tuple[str, ...]]
+) -> list[str]:
+    num_levels: int = len(product_tuples[0])
+    return [f"lvl{i+1}" for i in range(num_levels)]
 
 def generate_multi_index_process(
-    indic_clusters_structure: list[str],
-    asset_clusters_structure: list[str],
     indic_param_tuples: list[tuple[str, ...]],
     asset_tuples: list[tuple[str, ...]],
 ) -> pd.MultiIndex:
@@ -50,7 +53,7 @@ def generate_multi_index_process(
 
     return pd.MultiIndex.from_tuples(  # type: ignore
         tuples=product_tuples,
-        names=asset_clusters_structure + indic_clusters_structure + ["Param"],
+        names=generate_levels(product_tuples=product_tuples),
     )
 
 
