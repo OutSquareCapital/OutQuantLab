@@ -17,6 +17,7 @@ class BaseIndic(ABC):
         self.active: bool = active
         self.params_values: dict[str, list[int]] = param_values
         self.param_combos: list[tuple[int, ...]] = []
+        self.strategies_nb: int = 0
         self.data_arrays: DataArrays = data_arrays
 
     @abstractmethod

@@ -8,6 +8,7 @@ from outquantlab.backtest.process_strategies import (
     calculate_portfolio_returns,
     process_indicator_parallel,
 )
+from outquantlab.backtest.progress_statut import ProgressStatus
 from outquantlab.config_classes import (
     Asset,
     AssetsClusters,
@@ -17,7 +18,6 @@ from outquantlab.config_classes import (
 from outquantlab.indicators import BaseIndic, DataArrays, DataDfs
 from outquantlab.metrics import calculate_overall_mean
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, Float32
-
 
 class Backtester:
     def __init__(
@@ -33,20 +33,21 @@ class Backtester:
         self.assets: list[Asset] = assets
         self.data_dfs: DataDfs = data_dfs
         self.data_arrays: DataArrays = data_arrays
-        self.data_arrays.process_data(
-            pct_returns_array=self.data_dfs.select_data(
-                assets_names=[asset.name for asset in assets]
-            )
-        )
         self.multi_index: MultiIndex = generate_multi_index_process(
             indic_param_tuples=indics_clusters.get_clusters_tuples(
                 entities=self.indics_params
             ),
             asset_tuples=assets_clusters.get_clusters_tuples(entities=self.assets),
         )
-        self.total_returns_streams: int = self.data_arrays.assets_count * sum(
-            [len(indic.param_combos) for indic in self.indics_params]
+        self.data_arrays.process_data(
+            pct_returns_array=self.data_dfs.select_data(
+                assets_names=[asset.name for asset in assets]
+            )
         )
+        self.total_returns_streams: int = self.data_arrays.assets_count * sum(
+            [indic.strategies_nb for indic in self.indics_params]
+        )
+        self.progress: ProgressStatus = ProgressStatus()
         self.signal_col_index: int = 0
         self.signals_array: ArrayFloat = self.get_signals_array()
         self.process_strategies()
@@ -58,41 +59,12 @@ class Backtester:
             dtype=Float32,
         )
 
-    def progress_callback(self, progress: int, message: str) -> None:
-        print(f"[{progress}%] {message}")
-
-    def get_strategies_process_progress(self, indic: BaseIndic) -> None:
-        self.progress_callback(
-            progress=int(100 * self.signal_col_index / self.total_returns_streams),
-            message=f"Processing {indic.name}...",
-        )
-
-    def get_aggregation_progress(
-        self, i: int, clusters_nb: int, returns_df: DataFrameFloat
-    ) -> None:
-        self.progress_callback(
-            progress=int(100 * (clusters_nb - i) / clusters_nb),
-            message=f"Aggregating {self.multi_index.names[i - 1]}: {len(returns_df.columns)} columns left...",
-        )
-
-    def get_backtest_completion(self) -> None:
-        self.progress_callback(progress=100, message="Backtest Completed!")
-
     def fill_signals_array(self, results: list[ArrayFloat]) -> None:
         results_len: int = len(results)
         for i in range(results_len):
             end_index: int = self.signal_col_index + self.data_arrays.assets_count
             self.signals_array[:, self.signal_col_index : end_index] = results[i]
             self.signal_col_index = end_index
-
-    def get_returns_df(self) -> DataFrameFloat:
-        returns_df = DataFrameFloat(
-            data=self.signals_array,
-            index=self.data_dfs.global_returns.dates,
-            columns=self.multi_index,
-        )
-        del self.signals_array
-        return returns_df
 
     def process_strategies(self) -> ArrayFloat:
         threads_nb: int = cpu_count() or 8
@@ -106,11 +78,26 @@ class Backtester:
 
                     self.fill_signals_array(results=results)
 
-                    self.get_strategies_process_progress(indic=indic)
+                    self.progress.get_strategies_process_progress(
+                        indic_name=indic.name,
+                        strategies_nb=indic.strategies_nb,
+                        signal_col_index=self.signal_col_index,
+                        total_returns_streams=self.total_returns_streams,
+                    )
                 except Exception as e:
                     raise Exception(f"Error processing indicator {indic.name}: {e}")
 
         return self.signals_array
+
+
+    def get_returns_df(self) -> DataFrameFloat:
+        returns_df = DataFrameFloat(
+            data=self.signals_array,
+            index=self.data_dfs.global_returns.dates,
+            columns=self.multi_index,
+        )
+        del self.signals_array
+        return returns_df
 
     def aggregate_raw_returns(self) -> None:
         raw_adjusted_returns_df = self.get_returns_df()
@@ -132,11 +119,12 @@ class Backtester:
                     data=raw_adjusted_returns_df
                 )
 
-            self.get_aggregation_progress(
-                i=i, returns_df=raw_adjusted_returns_df, clusters_nb=clusters_nb
+            self.progress.get_aggregation_progress(
+                i=i,
+                clusters_nb=clusters_nb,
+                current_lvl=self.multi_index.names[i-1],
+                columns_left=len(raw_adjusted_returns_df.columns),
             )
-
-        self.get_backtest_completion()
 
         raw_adjusted_returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
 

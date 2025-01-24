@@ -45,15 +45,16 @@ class IndicsCollection(BaseCollection[BaseIndic]):
     def get_indics_params(self) -> list[BaseIndic]:
         active_indics: list[BaseIndic] = self.get_all_active_entities()
 
-        for indicator in active_indics:
-            valid_combos: list[tuple[int, ...]] = indicator.filter_valid_pairs()
+        for indic in active_indics:
+            valid_combos: list[tuple[int, ...]] = indic.filter_valid_pairs()
 
             if not valid_combos:
                 raise ValueError(
-                    f"Aucune combinaison valide trouvée pour l'indicateur {indicator.name}"
+                    f"Aucune combinaison valide trouvée pour l'indicateur {indic.name}"
                 )
 
-            indicator.param_combos = valid_combos
+            indic.param_combos = valid_combos
+            indic.strategies_nb = len(valid_combos)
 
         return active_indics
 
