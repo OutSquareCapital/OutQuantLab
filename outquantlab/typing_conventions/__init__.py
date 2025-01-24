@@ -10,7 +10,6 @@ from outquantlab.typing_conventions.custom_types import (
     Int32,
     ArrayFloat,
     ArrayInt,
-    ProgressFunc,
     ClustersHierarchy,
 )
 
@@ -20,7 +19,6 @@ __all__: list[str] = [
     'Int32',
     'ArrayFloat',
     'ArrayInt',
-    'ProgressFunc',
     'SeriesFloat',
     'DataFrameFloat',
     'ClustersHierarchy',

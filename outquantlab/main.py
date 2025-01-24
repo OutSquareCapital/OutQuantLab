@@ -1,6 +1,5 @@
 from outquantlab.backtest import Backtester
 from outquantlab.config_classes import (
-    Asset,
     AssetsClusters,
     AssetsCollection,
     IndicsClusters,
@@ -8,18 +7,20 @@ from outquantlab.config_classes import (
 )
 from outquantlab.database import DataBaseProvider
 from outquantlab.graphs import GraphsCollection
-from outquantlab.indicators import ReturnsData
+from outquantlab.indicators import DataArrays, DataDfs
 from outquantlab.stats import BacktestStats
-from outquantlab.typing_conventions import ProgressFunc
 
 
 class OutQuantLab:
     def __init__(self) -> None:
         self.dbp = DataBaseProvider()
-        self.returns_data = ReturnsData(returns_df=self.dbp.get_initial_data())
+        self.data_dfs = DataDfs(returns_df=self.dbp.get_initial_data())
+        self.datas_arrays = DataArrays(
+            returns_array=self.data_dfs.global_returns.get_array()
+        )
         self.assets_collection: AssetsCollection = self.dbp.get_assets_collection()
         self.indics_collection: IndicsCollection = self.dbp.get_indics_collection(
-            returns_data=self.returns_data
+            data_arrays=self.datas_arrays
         )
         self.assets_clusters: AssetsClusters = self.dbp.get_assets_clusters_tree()
         self.indics_clusters: IndicsClusters = self.dbp.get_indics_clusters_tree()
@@ -27,25 +28,18 @@ class OutQuantLab:
             length=250,
             max_clusters=5,
             returns_limit=0.05,
-            returns_data=self.returns_data,
+            data_dfs=self.data_dfs,
         )
         self.graphs = GraphsCollection(stats=self.stats)
 
-    def run(self, progress_callback: ProgressFunc) -> None:
-        assets: list[Asset] = self.assets_collection.get_all_active_entities()
-        self.returns_data.process_data(
-            pct_returns_array=self.dbp.get_assets_returns(
-                asset_names=[asset.name for asset in assets]
-            )
-        )
-
+    def run(self) -> None:
         Backtester(
-            returns_data=self.returns_data,
+            data_arrays=self.datas_arrays,
+            data_dfs=self.data_dfs,
             indics_params=self.indics_collection.get_indics_params(),
-            assets=assets,
+            assets=self.assets_collection.get_all_active_entities(),
             indics_clusters=self.indics_clusters,
             assets_clusters=self.assets_clusters,
-            progress_callback=progress_callback,
         )
 
     def save_all(self) -> None:

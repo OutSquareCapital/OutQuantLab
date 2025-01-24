@@ -2,7 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from os import cpu_count
 
 from numpy import empty
-from pandas import DatetimeIndex, MultiIndex
+from pandas import MultiIndex
 
 from outquantlab.backtest.process_strategies import (
     calculate_portfolio_returns,
@@ -14,37 +14,36 @@ from outquantlab.config_classes import (
     IndicsClusters,
     generate_multi_index_process,
 )
-from outquantlab.indicators import BaseIndic, ReturnsData
+from outquantlab.indicators import BaseIndic, DataArrays, DataDfs
 from outquantlab.metrics import calculate_overall_mean
-from outquantlab.typing_conventions import (
-    ArrayFloat,
-    DataFrameFloat,
-    Float32,
-    ProgressFunc,
-)
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, Float32
 
 
 class Backtester:
     def __init__(
         self,
-        returns_data: ReturnsData,
+        data_arrays: DataArrays,
+        data_dfs: DataDfs,
         indics_params: list[BaseIndic],
         assets: list[Asset],
         indics_clusters: IndicsClusters,
         assets_clusters: AssetsClusters,
-        progress_callback: ProgressFunc,
     ) -> None:
-        self.progress_callback: ProgressFunc = progress_callback
         self.indics_params: list[BaseIndic] = indics_params
         self.assets: list[Asset] = assets
-        self.returns_data: ReturnsData = returns_data
-        self.observations_nb: int = self.returns_data.prices_array.shape[0]
-        self.assets_count: int = self.returns_data.prices_array.shape[1]
+        self.data_dfs: DataDfs = data_dfs
+        self.data_arrays: DataArrays = data_arrays
+        self.data_arrays.process_data(
+            pct_returns_array=self.data_dfs.select_data(
+                assets_names=[asset.name for asset in assets]
+            )
+        )
+        self.observations_nb: int = self.data_arrays.prices_array.shape[0]
+        self.assets_count: int = self.data_arrays.prices_array.shape[1]
         self.strategies_nb: int = sum(
             [len(indic.param_combos) for indic in self.indics_params]
         )
         self.threads_nb: int = cpu_count() or 8
-        self.dates: DatetimeIndex = self.returns_data.global_returns.dates
         self.multi_index: MultiIndex = generate_multi_index_process(
             indic_param_tuples=indics_clusters.get_clusters_tuples(
                 entities=self.indics_params
@@ -60,21 +59,8 @@ class Backtester:
         self.process_strategies()
         self.aggregate_raw_returns()
 
-    def fill_signals_array(self, results: list[ArrayFloat]) -> None:
-        results_len: int = len(results)
-        for i in range(results_len):
-            end_index: int = self.signal_col_index + self.assets_count
-            self.signals_array[:, self.signal_col_index : end_index] = results[i]
-            self.signal_col_index = end_index
-
-    def get_returns_df(self) -> DataFrameFloat:
-        returns_df = DataFrameFloat(
-            data=self.signals_array,
-            index=self.dates,
-            columns=self.multi_index,
-        )
-        del self.signals_array
-        return returns_df
+    def progress_callback(self, progress: int, message: str) -> None:
+        print(f"[{progress}%] {message}")
 
     def get_strategies_process_progress(self, indic: BaseIndic) -> None:
         self.progress_callback(
@@ -90,6 +76,22 @@ class Backtester:
 
     def get_backtest_completion(self) -> None:
         self.progress_callback(100, "Backtest Completed!")
+
+    def fill_signals_array(self, results: list[ArrayFloat]) -> None:
+        results_len: int = len(results)
+        for i in range(results_len):
+            end_index: int = self.signal_col_index + self.assets_count
+            self.signals_array[:, self.signal_col_index : end_index] = results[i]
+            self.signal_col_index = end_index
+
+    def get_returns_df(self) -> DataFrameFloat:
+        returns_df = DataFrameFloat(
+            data=self.signals_array,
+            index=self.data_dfs.global_returns.dates,
+            columns=self.multi_index,
+        )
+        del self.signals_array
+        return returns_df
 
     def process_strategies(self) -> ArrayFloat:
         with ThreadPoolExecutor(max_workers=self.threads_nb) as global_executor:
@@ -118,13 +120,13 @@ class Backtester:
             )
             if i == 5:
                 raw_adjusted_returns_df.dropna(axis=0, how="any", inplace=True)  # type: ignore
-                self.returns_data.sub_portfolio_ovrll = DataFrameFloat(
+                self.data_dfs.sub_portfolio_ovrll = DataFrameFloat(
                     data=raw_adjusted_returns_df
                 )
 
             if i == 2:
                 raw_adjusted_returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
-                self.returns_data.sub_portfolio_roll = DataFrameFloat(
+                self.data_dfs.sub_portfolio_roll = DataFrameFloat(
                     data=raw_adjusted_returns_df
                 )
 
@@ -134,7 +136,7 @@ class Backtester:
 
         raw_adjusted_returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
 
-        self.returns_data.global_returns = DataFrameFloat(
+        self.data_dfs.global_returns = DataFrameFloat(
             data=calculate_overall_mean(
                 array=raw_adjusted_returns_df.get_array(), axis=1
             ),
