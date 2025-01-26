@@ -1,8 +1,7 @@
 
 from outquantlab.typing_conventions.custom_classes import (
     SeriesFloat,
-    DataFrameFloat,
-    StrategyComponent
+    DataFrameFloat
 )
 
 from outquantlab.typing_conventions.custom_types import (
@@ -21,6 +20,5 @@ __all__: list[str] = [
     'ArrayInt',
     'SeriesFloat',
     'DataFrameFloat',
-    'ClustersHierarchy',
-    'StrategyComponent',
+    'ClustersHierarchy'
 ]

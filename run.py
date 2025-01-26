@@ -2,7 +2,6 @@ def run() -> None:
     oql: OutQuantLab = OutQuantLab()
     oql.run()
     print(oql.data_dfs.global_returns)
-    oql.save_all()
 
 
 if __name__ == "__main__":

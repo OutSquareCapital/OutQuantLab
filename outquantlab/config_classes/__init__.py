@@ -13,5 +13,5 @@ __all__: list[str] = [
     "AssetsClusters",
     "IndicsClusters",
     "generate_multi_index_process",
-    "generate_dynamic_clusters",
+    "generate_dynamic_clusters"
 ]
