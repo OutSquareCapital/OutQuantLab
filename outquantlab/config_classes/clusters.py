@@ -2,7 +2,8 @@ from pandas import MultiIndex
 from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
 from scipy.spatial.distance import squareform
 
-from outquantlab.config_classes.collections import Asset, BaseIndic
+from outquantlab.config_classes.collections import Asset
+from outquantlab.indicators import BaseIndic
 from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.metrics import calculate_distance_matrix
 from outquantlab.typing_conventions import ArrayFloat, ClustersHierarchy, DataFrameFloat

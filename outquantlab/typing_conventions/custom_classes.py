@@ -3,11 +3,7 @@ from numpy.typing import DTypeLike
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
 from outquantlab.typing_conventions.custom_types import ArrayFloat, Float32
-from typing import Protocol
 
-class StrategyComponent(Protocol):
-    name: str
-    active: bool
 
 class SeriesFloat(Series):  # type: ignore
     """
