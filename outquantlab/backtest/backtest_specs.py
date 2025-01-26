@@ -1,12 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
 from os import cpu_count
 
-from numpy import empty
 from pandas import MultiIndex
 
 from outquantlab.backtest.process_strategies import (
-    calculate_portfolio_returns,
     process_indicator_parallel,
+    get_signals_array,
+    calculate_portfolio_returns,
 )
 from outquantlab.backtest.progress_statut import ProgressStatus
 from outquantlab.config_classes import (
@@ -15,123 +15,122 @@ from outquantlab.config_classes import (
     IndicsClusters,
     generate_multi_index_process,
 )
-from outquantlab.indicators import BaseIndic, DataArrays, DataDfs
 from outquantlab.metrics import calculate_overall_mean
-from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, Float32
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
+from outquantlab.indicators import BaseIndic, DataArrays, DataDfs
+
 
 class Backtester:
     def __init__(
         self,
-        data_arrays: DataArrays,
         data_dfs: DataDfs,
         indics_params: list[BaseIndic],
         assets: list[Asset],
         indics_clusters: IndicsClusters,
         assets_clusters: AssetsClusters,
     ) -> None:
-        self.indics_params: list[BaseIndic] = indics_params
-        self.assets: list[Asset] = assets
-        self.data_dfs: DataDfs = data_dfs
-        self.data_arrays: DataArrays = data_arrays
-        self.multi_index: MultiIndex = generate_multi_index_process(
-            indic_param_tuples=indics_clusters.get_clusters_tuples(
-                entities=self.indics_params
-            ),
-            asset_tuples=assets_clusters.get_clusters_tuples(entities=self.assets),
-        )
-        self.data_arrays.process_data(
-            pct_returns_array=self.data_dfs.select_data(
+        self.signal_col_index: int = 0
+        data_arrays = DataArrays(
+            returns_array=data_dfs.select_data(
                 assets_names=[asset.name for asset in assets]
             )
         )
-        self.total_returns_streams: int = self.data_arrays.assets_count * sum(
-            [indic.strategies_nb for indic in self.indics_params]
-        )
-        self.progress: ProgressStatus = ProgressStatus()
-        self.signal_col_index: int = 0
-        self.signals_array: ArrayFloat = self.get_signals_array()
-        self.process_strategies()
-        self.aggregate_raw_returns()
-
-    def get_signals_array(self) -> ArrayFloat:
-        return empty(
-            shape=(self.data_arrays.observations_nb, self.total_returns_streams),
-            dtype=Float32,
+        multi_index: MultiIndex = generate_multi_index_process(
+            indic_param_tuples=indics_clusters.get_clusters_tuples(
+                entities=indics_params
+            ),
+            asset_tuples=assets_clusters.get_clusters_tuples(entities=assets),
         )
 
-    def fill_signals_array(self, results: list[ArrayFloat]) -> None:
-        results_len: int = len(results)
-        for i in range(results_len):
-            end_index: int = self.signal_col_index + self.data_arrays.assets_count
+        total_returns_streams: int = data_arrays.prices_array.shape[1] * sum(
+            [indic.strategies_nb for indic in indics_params]
+        )
+        clusters_nb: int = len(multi_index.names) - 1
+        clusters_names: list[str] = multi_index.names
+        self.progress: ProgressStatus = ProgressStatus(
+            total_returns_streams=total_returns_streams, clusters_nb=clusters_nb
+        )
+        self.signals_array: ArrayFloat = get_signals_array(
+            total_returns_streams=total_returns_streams,
+            observations_nb=data_arrays.prices_array.shape[0],
+        )
+        self.process_strategies(
+            data_arrays=data_arrays,
+            indics_params=indics_params,
+            assets_count=data_arrays.prices_array.shape[1],
+        )
+        data_dfs.global_returns = DataFrameFloat(
+            data=self.signals_array,
+            index=data_dfs.global_returns.dates,
+            columns=multi_index,
+        )
+        del self.signals_array
+        self.aggregate_raw_returns(
+            data_dfs=data_dfs, clusters_nb=clusters_nb, clusters_names=clusters_names
+        )
+
+    def fill_signals_array(
+        self, results: list[ArrayFloat], strategies_nb: int, assets_count: int
+    ) -> None:
+        for i in range(strategies_nb):
+            end_index: int = self.signal_col_index + assets_count
             self.signals_array[:, self.signal_col_index : end_index] = results[i]
             self.signal_col_index = end_index
 
-    def process_strategies(self) -> ArrayFloat:
+    def process_strategies(
+        self, data_arrays: DataArrays, indics_params: list[BaseIndic], assets_count: int
+    ) -> ArrayFloat:
         threads_nb: int = cpu_count() or 8
         with ThreadPoolExecutor(max_workers=threads_nb) as global_executor:
-            for indic in self.indics_params:
+            for indic in indics_params:
                 try:
                     results: list[ArrayFloat] = process_indicator_parallel(
                         indic=indic,
+                        data_arrays=data_arrays,
                         global_executor=global_executor,
                     )
 
-                    self.fill_signals_array(results=results)
+                    self.fill_signals_array(
+                        results=results,
+                        strategies_nb=indic.strategies_nb,
+                        assets_count=assets_count,
+                    )
 
                     self.progress.get_strategies_process_progress(
-                        indic_name=indic.name,
-                        strategies_nb=indic.strategies_nb,
-                        signal_col_index=self.signal_col_index,
-                        total_returns_streams=self.total_returns_streams,
+                        signal_col_index=self.signal_col_index
                     )
                 except Exception as e:
                     raise Exception(f"Error processing indicator {indic.name}: {e}")
 
         return self.signals_array
 
-
-    def get_returns_df(self) -> DataFrameFloat:
-        returns_df = DataFrameFloat(
-            data=self.signals_array,
-            index=self.data_dfs.global_returns.dates,
-            columns=self.multi_index,
-        )
-        del self.signals_array
-        return returns_df
-
-    def aggregate_raw_returns(self) -> None:
-        raw_adjusted_returns_df = self.get_returns_df()
-        clusters_nb: int = len(self.multi_index.names) - 1
+    def aggregate_raw_returns(
+        self, clusters_nb: int, clusters_names: list[str], data_dfs: DataDfs
+    ) -> None:
         for i in range(clusters_nb, 0, -1):
-            raw_adjusted_returns_df: DataFrameFloat = calculate_portfolio_returns(
-                returns_df=raw_adjusted_returns_df,
-                grouping_levels=self.multi_index.names[:i],
+            calculate_portfolio_returns(
+                returns_df=data_dfs.global_returns, grouping_levels=clusters_names[:i]
             )
             if i == 5:
-                raw_adjusted_returns_df.dropna(axis=0, how="any", inplace=True)  # type: ignore
-                self.data_dfs.sub_portfolio_ovrll = DataFrameFloat(
-                    data=raw_adjusted_returns_df
+                data_dfs.global_returns.dropna(axis=0, how="any", inplace=True)  # type: ignore
+                data_dfs.sub_portfolio_ovrll = DataFrameFloat(
+                    data=data_dfs.global_returns
                 )
 
             if i == 2:
-                raw_adjusted_returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
-                self.data_dfs.sub_portfolio_roll = DataFrameFloat(
-                    data=raw_adjusted_returns_df
+                data_dfs.global_returns.dropna(axis=0, how="all", inplace=True)  # type: ignore
+                data_dfs.sub_portfolio_roll = DataFrameFloat(
+                    data=data_dfs.global_returns
                 )
 
-            self.progress.get_aggregation_progress(
-                i=i,
-                clusters_nb=clusters_nb,
-                current_lvl=self.multi_index.names[i-1],
-                columns_left=len(raw_adjusted_returns_df.columns),
-            )
+            self.progress.get_aggregation_progress(i=i)
 
-        raw_adjusted_returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
+        data_dfs.global_returns.dropna(axis=0, how="all", inplace=True)  # type: ignore
 
-        self.data_dfs.global_returns = DataFrameFloat(
+        data_dfs.global_returns = DataFrameFloat(
             data=calculate_overall_mean(
-                array=raw_adjusted_returns_df.get_array(), axis=1
+                array=data_dfs.global_returns.get_array(), axis=1
             ),
-            index=raw_adjusted_returns_df.dates,
+            index=data_dfs.global_returns.dates,
             columns=["Portfolio"],
         )
