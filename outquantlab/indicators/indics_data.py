@@ -1,11 +1,21 @@
+from dataclasses import dataclass
+
 from outquantlab.metrics import (
-    hv_composite,
-    calculate_volatility_adjusted_returns,
     calculate_equity_curves,
+    calculate_volatility_adjusted_returns,
+    hv_composite,
     log_returns_np,
     shift_array,
 )
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
+
+
+@dataclass(slots=True, frozen=True)
+class DataArrays:
+    prices_array: ArrayFloat
+    log_returns_array: ArrayFloat
+    adjusted_returns_array: ArrayFloat
+    hv_array: ArrayFloat
 
 
 class DataDfs:
@@ -14,23 +24,24 @@ class DataDfs:
         self.sub_portfolio_roll: DataFrameFloat = returns_df
         self.sub_portfolio_ovrll: DataFrameFloat = returns_df
 
-    def select_data(self, assets_names: list[str]) -> ArrayFloat:
+    def select_data(self, assets_names: list[str]) -> DataArrays:
         selected_returns = DataFrameFloat(data=self.global_returns.loc[:, assets_names])
-        return selected_returns.get_array()
+        returns_array: ArrayFloat = selected_returns.get_array()
+        prices_array: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
 
+        hv_array: ArrayFloat = hv_composite(returns_array=returns_array)
 
-class DataArrays:
-    def __init__(self, returns_array: ArrayFloat) -> None:
-        prices_array: ArrayFloat = calculate_equity_curves(
-            returns_array=returns_array
-        )
-
-        self.hv_array: ArrayFloat = hv_composite(returns_array=returns_array)
-
-        self.log_returns_array: ArrayFloat = shift_array(
+        log_returns_array: ArrayFloat = shift_array(
             original_array=log_returns_np(prices_array=prices_array)
         )
-        self.prices_array: ArrayFloat = shift_array(original_array=prices_array)
-        self.adjusted_returns_array: ArrayFloat = calculate_volatility_adjusted_returns(
-            pct_returns_array=returns_array, hv_array=self.hv_array
+        prices_array: ArrayFloat = shift_array(original_array=prices_array)
+        adjusted_returns_array: ArrayFloat = calculate_volatility_adjusted_returns(
+            pct_returns_array=returns_array, hv_array=hv_array
+        )
+
+        return DataArrays(
+            prices_array=prices_array,
+            log_returns_array=log_returns_array,
+            adjusted_returns_array=adjusted_returns_array,
+            hv_array=hv_array,
         )
