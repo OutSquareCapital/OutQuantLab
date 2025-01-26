@@ -1,7 +1,8 @@
 import plotly.graph_objects as go  # type: ignore
 
 import outquantlab.graphs.widgets as widgets
-from outquantlab.stats import BacktestStats
+import outquantlab.stats as stats
+from outquantlab.indicators import DataDfs
 
 
 def format_plot_name(name: str) -> str:
@@ -9,12 +10,14 @@ def format_plot_name(name: str) -> str:
 
 
 class GraphsCollection:
-    def __init__(self, stats: BacktestStats) -> None:
-        self.stats: BacktestStats = stats
+    def __init__(self, data_dfs: DataDfs) -> None:
+        self.data_dfs: DataDfs = data_dfs
 
     def plot_stats_equity(self, show_legend: bool = True) -> go.Figure:
         return widgets.curves(
-            returns_df=self.stats.get_stats_equity(),
+            returns_df=stats.get_stats_equity(
+                returns_df=self.data_dfs.sub_portfolio_ovrll
+            ),
             title=format_plot_name(name=self.plot_stats_equity.__name__),
             log_scale=True,
             show_legend=show_legend,
@@ -22,14 +25,18 @@ class GraphsCollection:
 
     def plot_rolling_volatility(self, show_legend: bool = True) -> go.Figure:
         return widgets.curves(
-            returns_df=self.stats.get_rolling_volatility(),
+            returns_df=stats.get_rolling_volatility(
+                returns_df=self.data_dfs.sub_portfolio_roll
+            ),
             title=format_plot_name(name=self.plot_rolling_volatility.__name__),
             show_legend=show_legend,
         )
 
     def plot_rolling_drawdown(self, length: int, show_legend: bool = True) -> go.Figure:
         return widgets.curves(
-            returns_df=self.stats.get_rolling_drawdown(length=length),
+            returns_df=stats.get_rolling_drawdown(
+                returns_df=self.data_dfs.sub_portfolio_roll, length=length
+            ),
             title=format_plot_name(name=self.plot_rolling_drawdown.__name__),
             show_legend=show_legend,
         )
@@ -38,7 +45,9 @@ class GraphsCollection:
         self, length: int, show_legend: bool = True
     ) -> go.Figure:
         return widgets.curves(
-            returns_df=self.stats.get_rolling_sharpe_ratio(length=length),
+            returns_df=stats.get_rolling_sharpe_ratio(
+                returns_df=self.data_dfs.sub_portfolio_roll, length=length
+            ),
             title=format_plot_name(name=self.plot_rolling_sharpe_ratio.__name__),
             show_legend=show_legend,
         )
@@ -47,49 +56,63 @@ class GraphsCollection:
         self, length: int, show_legend: bool = True
     ) -> go.Figure:
         return widgets.curves(
-            returns_df=self.stats.get_rolling_smoothed_skewness(length=length),
+            returns_df=stats.get_rolling_smoothed_skewness(
+                returns_df=self.data_dfs.sub_portfolio_roll, length=length
+            ),
             title=format_plot_name(name=self.plot_rolling_smoothed_skewness.__name__),
             show_legend=show_legend,
         )
 
     def plot_overall_returns(self, show_legend: bool = True) -> go.Figure:
         return widgets.bars(
-            series=self.stats.get_overall_returns(),
+            series=stats.get_overall_returns(
+                returns_df=self.data_dfs.sub_portfolio_ovrll
+            ),
             title=format_plot_name(name=self.plot_overall_returns.__name__),
             show_legend=show_legend,
         )
 
     def plot_overall_sharpe_ratio(self, show_legend: bool = True) -> go.Figure:
         return widgets.bars(
-            series=self.stats.get_overall_sharpe_ratio(),
+            series=stats.get_overall_sharpe_ratio(
+                returns_df=self.data_dfs.sub_portfolio_ovrll
+            ),
             title=format_plot_name(name=self.plot_overall_sharpe_ratio.__name__),
             show_legend=show_legend,
         )
 
     def plot_overall_volatility(self, show_legend: bool = True) -> go.Figure:
         return widgets.bars(
-            series=self.stats.get_overall_volatility(),
+            series=stats.get_overall_volatility(
+                returns_df=self.data_dfs.sub_portfolio_ovrll
+            ),
             title=format_plot_name(name=self.plot_overall_volatility.__name__),
             show_legend=show_legend,
         )
 
     def plot_overall_average_drawdown(self, show_legend: bool = True) -> go.Figure:
         return widgets.bars(
-            series=self.stats.get_overall_average_drawdown(),
+            series=stats.get_overall_average_drawdown(
+                returns_df=self.data_dfs.sub_portfolio_ovrll
+            ),
             title=format_plot_name(name=self.plot_overall_average_drawdown.__name__),
             show_legend=show_legend,
         )
 
     def plot_overall_average_correlation(self, show_legend: bool = True) -> go.Figure:
         return widgets.bars(
-            series=self.stats.get_overall_average_correlation(),
+            series=stats.get_overall_average_correlation(
+                returns_df=self.data_dfs.sub_portfolio_ovrll
+            ),
             title=format_plot_name(name=self.plot_overall_average_correlation.__name__),
             show_legend=show_legend,
         )
 
     def plot_overall_monthly_skew(self, show_legend: bool = True) -> go.Figure:
         return widgets.bars(
-            series=self.stats.get_overall_monthly_skew(),
+            series=stats.get_overall_monthly_skew(
+                returns_df=self.data_dfs.sub_portfolio_ovrll
+            ),
             title=format_plot_name(name=self.plot_overall_monthly_skew.__name__),
             show_legend=show_legend,
         )
@@ -98,7 +121,10 @@ class GraphsCollection:
         self, returns_limit: int, show_legend: bool = True
     ) -> go.Figure:
         return widgets.violin(
-            data=self.stats.get_stats_distribution_violin(returns_limit=returns_limit),
+            data=stats.get_stats_distribution_violin(
+                returns_df=self.data_dfs.sub_portfolio_ovrll,
+                returns_limit=returns_limit,
+            ),
             title=format_plot_name(name=self.plot_stats_distribution_violin.__name__),
             show_legend=show_legend,
         )
@@ -107,8 +133,9 @@ class GraphsCollection:
         self, returns_limit: float, show_legend: bool = True
     ) -> go.Figure:
         return widgets.histogram(
-            data=self.stats.get_stats_distribution_histogram(
-                returns_limit=returns_limit
+            data=stats.get_stats_distribution_histogram(
+                returns_df=self.data_dfs.sub_portfolio_ovrll,
+                returns_limit=returns_limit,
             ),
             title=format_plot_name(
                 name=self.plot_stats_distribution_histogram.__name__
@@ -118,7 +145,7 @@ class GraphsCollection:
 
     def plot_correlation_heatmap(self, show_legend: bool = True) -> go.Figure:
         filled_correlation_matrix, labels_list, corr_matrix_normalised = (
-            self.stats.get_correlation_heatmap()
+            stats.get_correlation_heatmap(returns_df=self.data_dfs.sub_portfolio_ovrll)
         )
 
         return widgets.heatmap(
@@ -133,8 +160,8 @@ class GraphsCollection:
     def plot_correlation_clusters_icicle(
         self, max_clusters: int, show_legend: bool = True
     ) -> go.Figure:
-        labels, parents = self.stats.get_correlation_clusters_icicle(
-            max_clusters=max_clusters
+        labels, parents = stats.get_correlation_clusters_icicle(
+            returns_df=self.data_dfs.sub_portfolio_ovrll, max_clusters=max_clusters
         )
 
         return widgets.icicle(

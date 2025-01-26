@@ -10,6 +10,10 @@ from outquantlab.typing_conventions import (
     SeriesFloat,
 )
 
+def format_metric_name(name: str) -> str:
+    return (
+        name.replace("calculate_", "").replace("overall_", "").replace("_", " ").title()
+    )
 
 def fill_correlation_matrix(corr_matrix: ArrayFloat) -> ArrayFloat:
     fill_diagonal(a=corr_matrix, val=nan)
