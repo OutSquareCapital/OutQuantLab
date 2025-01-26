@@ -108,7 +108,7 @@ class Backtester:
         self, clusters_nb: int, clusters_names: list[str], data_dfs: DataDfs
     ) -> None:
         for i in range(clusters_nb, 0, -1):
-            calculate_portfolio_returns(
+            data_dfs.global_returns = calculate_portfolio_returns(
                 returns_df=data_dfs.global_returns, grouping_levels=clusters_names[:i]
             )
             if i == 5:

@@ -15,8 +15,8 @@ def get_signals_array(observations_nb: int, total_returns_streams: int) -> Array
 
 def calculate_portfolio_returns(
     returns_df: DataFrameFloat, grouping_levels: list[str]
-) -> None:
-    returns_df = DataFrameFloat(
+) -> DataFrameFloat:
+    return DataFrameFloat(
         data=returns_df.T.groupby(  # type: ignore
             level=grouping_levels, observed=True
         )
