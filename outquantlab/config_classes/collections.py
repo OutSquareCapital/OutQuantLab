@@ -4,6 +4,7 @@ from outquantlab.config_classes.generic_classes import BaseCollection
 from outquantlab.indicators import IndicsNormalized, BaseIndic
 from dataclasses import dataclass
 
+
 @dataclass(slots=True)
 class Asset:
     name: str
