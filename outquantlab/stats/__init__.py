@@ -1,3 +1,37 @@
-from outquantlab.stats.computations import BacktestStats
+from outquantlab.stats.computations import (
+    get_metrics,
+    get_stats_equity,
+    get_rolling_volatility,
+    get_rolling_drawdown,
+    get_rolling_sharpe_ratio,
+    get_rolling_smoothed_skewness,
+    get_overall_returns,
+    get_overall_sharpe_ratio,
+    get_overall_volatility,
+    get_overall_average_drawdown,
+    get_overall_average_correlation,
+    get_overall_monthly_skew,
+    get_stats_distribution_violin,
+    get_stats_distribution_histogram,
+    get_correlation_heatmap,
+    get_correlation_clusters_icicle,
+)
 
-__all__ = ["BacktestStats"]
+__all__ = [
+    "get_metrics",
+    "get_stats_equity",
+    "get_rolling_volatility",
+    "get_rolling_drawdown",
+    "get_rolling_sharpe_ratio",
+    "get_rolling_smoothed_skewness",
+    "get_overall_returns",
+    "get_overall_sharpe_ratio",
+    "get_overall_volatility",
+    "get_overall_average_drawdown",
+    "get_overall_average_correlation",
+    "get_overall_monthly_skew",
+    "get_stats_distribution_violin",
+    "get_stats_distribution_histogram",
+    "get_correlation_heatmap",
+    "get_correlation_clusters_icicle"
+]

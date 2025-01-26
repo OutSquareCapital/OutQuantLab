@@ -1,8 +1,7 @@
 def run() -> None:
     oql: OutQuantLab = OutQuantLab()
     oql.run()
-    for metric, value in oql.stats.get_metrics().items():
-        print(f"{metric}: {value}")
+    print(oql.data_dfs.global_returns)
     oql.save_all()
 
 
