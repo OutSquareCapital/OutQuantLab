@@ -1,7 +1,13 @@
-from outquantlab.indicators import BaseIndic, IndicatorsNormalized, DataArrays
-from outquantlab.config_classes.generic_classes import BaseCollection
-from dataclasses import dataclass
 from inspect import signature
+
+from outquantlab.config_classes.generic_classes import BaseCollection
+from outquantlab.indicators import IndicsNormalized, BaseIndic
+from dataclasses import dataclass
+
+@dataclass(slots=True)
+class Asset:
+    name: str
+    active: bool
 
 
 class IndicsCollection(BaseCollection[BaseIndic]):
@@ -9,26 +15,23 @@ class IndicsCollection(BaseCollection[BaseIndic]):
         self,
         indics_to_test: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
-        data_arrays: DataArrays,
     ) -> None:
         self.entities: dict[str, BaseIndic] = {}
         self._load_entities(
             indics_to_test=indics_to_test,
             params_config=params_config,
-            data_arrays=data_arrays,
         )
 
     def _load_entities(
         self,
         indics_to_test: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
-        data_arrays: DataArrays,
     ) -> None:
-        for name, cls in IndicatorsNormalized.__dict__.items():
+        for name, cls in IndicsNormalized.__dict__.items():
             if isinstance(cls, type) and issubclass(cls, BaseIndic):
                 active: bool = indics_to_test.get(name, False)
                 param_names: list[str] = list(signature(cls.execute).parameters.keys())[
-                    1:
+                    2:
                 ]
                 params_values: dict[str, list[int]] = {
                     param: params_config.get(name, {}).get(param, [])
@@ -39,7 +42,6 @@ class IndicsCollection(BaseCollection[BaseIndic]):
                     name=name,
                     active=active,
                     param_values=params_values,
-                    data_arrays=data_arrays,
                 )
 
     def get_indics_params(self) -> list[BaseIndic]:
@@ -57,12 +59,6 @@ class IndicsCollection(BaseCollection[BaseIndic]):
             indic.strategies_nb = len(valid_combos)
 
         return active_indics
-
-
-@dataclass(slots=True)
-class Asset:
-    name: str
-    active: bool
 
 
 class AssetsCollection(BaseCollection[Asset]):

@@ -2,10 +2,10 @@ from outquantlab.config_classes import (
     AssetsClusters,
     AssetsCollection,
     IndicsClusters,
-    IndicsCollection,
+    IndicsCollection
 )
+from outquantlab.indicators import DataDfs
 from outquantlab.database.data_queries import DataQueries
-from outquantlab.indicators import DataArrays, DataDfs
 from outquantlab.typing_conventions import DataFrameFloat
 
 
@@ -24,11 +24,10 @@ class DataBaseProvider:
             asset_names=self.dbq.select(file="assets_names").load(),
         )
 
-    def get_indics_collection(self, data_arrays: DataArrays) -> IndicsCollection:
+    def get_indics_collection(self) -> IndicsCollection:
         return IndicsCollection(
             indics_to_test=self.dbq.select(file="indics_to_test").load(),
             params_config=self.dbq.select(file="indics_params").load(),
-            data_arrays=data_arrays,
         )
 
     def get_assets_clusters_tree(self) -> AssetsClusters:

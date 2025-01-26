@@ -21,24 +21,16 @@ class DataDfs:
 
 class DataArrays:
     def __init__(self, returns_array: ArrayFloat) -> None:
-        self.log_returns_array: ArrayFloat = returns_array
-        self.prices_array: ArrayFloat = returns_array
-        self.adjusted_returns_array: ArrayFloat = returns_array
-        self.hv_array: ArrayFloat = returns_array
-        self.observations_nb: int = self.prices_array.shape[0]
-        self.assets_count: int = self.prices_array.shape[1]
-
-    def process_data(self, pct_returns_array: ArrayFloat) -> None:
         prices_array: ArrayFloat = calculate_equity_curves(
-            returns_array=pct_returns_array
+            returns_array=returns_array
         )
 
-        self.hv_array: ArrayFloat = hv_composite(returns_array=pct_returns_array)
+        self.hv_array: ArrayFloat = hv_composite(returns_array=returns_array)
 
         self.log_returns_array: ArrayFloat = shift_array(
             original_array=log_returns_np(prices_array=prices_array)
         )
-        self.prices_array = shift_array(original_array=prices_array)
+        self.prices_array: ArrayFloat = shift_array(original_array=prices_array)
         self.adjusted_returns_array: ArrayFloat = calculate_volatility_adjusted_returns(
-            pct_returns_array=pct_returns_array, hv_array=self.hv_array
+            pct_returns_array=returns_array, hv_array=self.hv_array
         )

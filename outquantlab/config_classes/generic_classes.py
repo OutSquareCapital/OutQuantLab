@@ -1,6 +1,12 @@
 from typing import Generic, Any, TypeVar
 from abc import ABC, abstractmethod
-from outquantlab.typing_conventions import ClustersHierarchy, StrategyComponent
+from outquantlab.typing_conventions import ClustersHierarchy
+from typing import Protocol
+
+class StrategyComponent(Protocol):
+    name: str
+    active: bool
+
 
 T = TypeVar("T", bound=StrategyComponent)
 
