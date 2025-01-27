@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from pandas import MultiIndex
 
@@ -16,17 +16,11 @@ from outquantlab.config_classes.progress_statut import ProgressStatus
 class BacktestConfig:
     multi_index: MultiIndex
     indics_params: list[BaseIndic]
-    assets_nb: int
     clusters_names: list[str]
+    assets_nb: int
     total_returns_streams: int
     clusters_nb: int
-    progress: ProgressStatus = field(init=False)
-
-    def __post_init__(self) -> None:
-        self.progress = ProgressStatus(
-            total_returns_streams=self.total_returns_streams,
-            clusters_nb=self.clusters_nb,
-        )
+    progress = ProgressStatus()
 
 
 @dataclass(slots=True)
@@ -40,7 +34,7 @@ class ConfigState:
         self,
     ) -> BacktestConfig:
         indics_params: list[BaseIndic] = self.indics_collection.get_indics_params()
-    
+
         asset_tuples: list[tuple[str, ...]] = self.assets_clusters.get_clusters_tuples(
             entities=self.assets_collection.get_all_active_entities()
         )

@@ -1,17 +1,11 @@
 from concurrent.futures import ThreadPoolExecutor
 from os import cpu_count
+
 from numpy import empty
 
+from outquantlab.config_classes import BacktestConfig
 from outquantlab.indicators import BaseIndic, DataArrays
 from outquantlab.typing_conventions import ArrayFloat, Float32
-from outquantlab.config_classes import BacktestConfig
-
-
-def get_signals_array(observations_nb: int, total_returns_streams: int) -> ArrayFloat:
-    return empty(
-        shape=(observations_nb, total_returns_streams),
-        dtype=Float32,
-    )
 
 
 def process_param(
@@ -37,12 +31,15 @@ def process_strategies(
     data_arrays: DataArrays,
     backtest_config: BacktestConfig,
 ) -> ArrayFloat:
-    signals_array: ArrayFloat = get_signals_array(
-        total_returns_streams=backtest_config.total_returns_streams,
-        observations_nb=data_arrays.prices_array.shape[0],
+    signals_array: ArrayFloat = empty(
+        shape=(
+            data_arrays.prices_array.shape[0],
+            backtest_config.total_returns_streams,
+        ),
+        dtype=Float32,
     )
+    start_index: int = 0
     threads_nb: int = cpu_count() or 8
-    signal_col_index: int = 0
     with ThreadPoolExecutor(max_workers=threads_nb) as global_executor:
         for indic in backtest_config.indics_params:
             try:
@@ -53,12 +50,13 @@ def process_strategies(
                 )
 
                 for i in range(indic.strategies_nb):
-                    end_index: int = signal_col_index + backtest_config.assets_nb
-                    signals_array[:, signal_col_index:end_index] = results[i]
-                    signal_col_index = end_index
+                    end_index: int = start_index + backtest_config.assets_nb
+                    signals_array[:, start_index:end_index] = results[i]
+                    start_index = end_index
 
                 backtest_config.progress.get_strategies_process_progress(
-                    signal_col_index=signal_col_index
+                    start_index=start_index,
+                    total_returns_streams=backtest_config.total_returns_streams,
                 )
             except Exception as e:
                 raise Exception(f"Error processing indicator {indic.name}: {e}")

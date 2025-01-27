@@ -65,7 +65,9 @@ def aggregate_raw_returns(
             data_dfs.global_returns.dropna(axis=0, how="all", inplace=True)  # type: ignore
             data_dfs.sub_portfolio_roll = DataFrameFloat(data=data_dfs.global_returns)
 
-        backtest_config.progress.get_aggregation_progress(lvl=lvl)
+        backtest_config.progress.get_aggregation_progress(
+            lvl=lvl, clusters_nb=backtest_config.clusters_nb
+        )
 
     data_dfs.global_returns.dropna(axis=0, how="all", inplace=True)  # type: ignore
 
