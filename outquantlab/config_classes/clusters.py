@@ -7,6 +7,15 @@ from outquantlab.indicators import BaseIndic
 from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.metrics import calculate_distance_matrix
 from outquantlab.typing_conventions import ArrayFloat, ClustersHierarchy, DataFrameFloat
+from dataclasses import dataclass
+
+
+@dataclass(slots=True)
+class ClustersIndex:
+    multi_index: MultiIndex
+    total_returns_streams: int
+    clusters_nb: int
+    clusters_names: list[str]
 
 
 class AssetsClusters(BaseClustersTree):
@@ -43,16 +52,23 @@ def generate_levels(product_tuples: list[tuple[str, ...]]) -> list[str]:
 def generate_multi_index_process(
     indic_param_tuples: list[tuple[str, ...]],
     asset_tuples: list[tuple[str, ...]],
-) -> MultiIndex:
+) -> ClustersIndex:
     product_tuples: list[tuple[str, ...]] = [
         (*asset_clusters, *indic_clusters)
         for indic_clusters in indic_param_tuples
         for asset_clusters in asset_tuples
     ]
 
-    return MultiIndex.from_tuples(  # type: ignore
+    multi_index: MultiIndex = MultiIndex.from_tuples(  # type: ignore
         tuples=product_tuples,
         names=generate_levels(product_tuples=product_tuples),
+    )
+
+    return ClustersIndex(
+        multi_index=multi_index,
+        total_returns_streams=len(multi_index),
+        clusters_nb=len(multi_index.names) - 1,
+        clusters_names=multi_index.names,
     )
 
 

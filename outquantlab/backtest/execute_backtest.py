@@ -1,14 +1,13 @@
-from pandas import MultiIndex
-
-from outquantlab.backtest.process_strategies import (
-    process_strategies,
-    get_signals_array,
-)
 from outquantlab.backtest.aggregate_returns import aggregate_raw_returns
+from outquantlab.backtest.process_strategies import (
+    get_signals_array,
+    process_strategies,
+)
 from outquantlab.backtest.progress_statut import ProgressStatus
 from outquantlab.config_classes import (
     Asset,
     AssetsClusters,
+    ClustersIndex,
     IndicsClusters,
     generate_multi_index_process,
 )
@@ -26,7 +25,7 @@ def execute_backtest(
     data_arrays: DataArrays = data_dfs.select_data(
         assets_names=[asset.name for asset in assets]
     )
-    multi_index: MultiIndex = generate_multi_index_process(
+    clusters_index: ClustersIndex = generate_multi_index_process(
         indic_param_tuples=indics_clusters.get_clusters_tuples(entities=indics_params),
         asset_tuples=assets_clusters.get_clusters_tuples(entities=assets),
     )
@@ -35,7 +34,7 @@ def execute_backtest(
         data_arrays=data_arrays,
         data_dfs=data_dfs,
         indics_params=indics_params,
-        multi_index=multi_index,
+        clusters_index=clusters_index,
     )
 
 
@@ -43,17 +42,15 @@ def main_process_strategies(
     data_arrays: DataArrays,
     data_dfs: DataDfs,
     indics_params: list[BaseIndic],
-    multi_index: MultiIndex,
+    clusters_index: ClustersIndex,
 ) -> None:
-    total_returns_streams: int = len(multi_index)
-    clusters_nb: int = len(multi_index.names) - 1
-    clusters_names: list[str] = multi_index.names
     progress: ProgressStatus = ProgressStatus(
-        total_returns_streams=total_returns_streams, clusters_nb=clusters_nb
+        total_returns_streams=clusters_index.total_returns_streams,
+        clusters_nb=clusters_index.clusters_nb,
     )
 
     signals_array: ArrayFloat = get_signals_array(
-        total_returns_streams=total_returns_streams,
+        total_returns_streams=clusters_index.total_returns_streams,
         observations_nb=data_arrays.prices_array.shape[0],
     )
     signals_array = process_strategies(
@@ -66,12 +63,12 @@ def main_process_strategies(
     data_dfs.global_returns = DataFrameFloat(
         data=signals_array,
         index=data_dfs.global_returns.dates,
-        columns=multi_index,
+        columns=clusters_index.multi_index,
     )
     del signals_array
     aggregate_raw_returns(
         data_dfs=data_dfs,
-        clusters_nb=clusters_nb,
-        clusters_names=clusters_names,
+        clusters_nb=clusters_index.clusters_nb,
+        clusters_names=clusters_index.clusters_names,
         progress=progress,
     )
