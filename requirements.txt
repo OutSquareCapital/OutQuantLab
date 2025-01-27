@@ -8,5 +8,4 @@ yfinance
 matplotlib
 plotly
 numexpr
-PySide6
 pyarrow
