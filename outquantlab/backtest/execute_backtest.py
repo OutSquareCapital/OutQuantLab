@@ -44,10 +44,7 @@ def main_process_strategies(
     indics_params: list[BaseIndic],
     clusters_index: ClustersIndex,
 ) -> None:
-    progress: ProgressStatus = ProgressStatus(
-        total_returns_streams=clusters_index.total_returns_streams,
-        clusters_nb=clusters_index.clusters_nb,
-    )
+    progress: ProgressStatus = clusters_index.get_progress()
 
     signals_array: ArrayFloat = get_signals_array(
         total_returns_streams=clusters_index.total_returns_streams,

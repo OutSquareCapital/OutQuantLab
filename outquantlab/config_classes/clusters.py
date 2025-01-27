@@ -8,14 +8,26 @@ from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.metrics import calculate_distance_matrix
 from outquantlab.typing_conventions import ArrayFloat, ClustersHierarchy, DataFrameFloat
 from dataclasses import dataclass
+from outquantlab.config_classes.progress_statut import ProgressStatus
 
 
 @dataclass(slots=True)
 class ClustersIndex:
     multi_index: MultiIndex
-    total_returns_streams: int
-    clusters_nb: int
-    clusters_names: list[str]
+    total_returns_streams: int = 0
+    clusters_nb: int = 0
+    clusters_names: list[str] = []
+
+    def __post_init__(self) -> None:
+        self.clusters_names: list[str] = self.multi_index.names
+        self.total_returns_streams: int = len(self.multi_index)
+        self.clusters_nb: int = len(self.multi_index.names) - 1
+
+    def get_progress(self) -> ProgressStatus:
+        return ProgressStatus(
+            total_returns_streams=self.total_returns_streams,
+            clusters_nb=self.clusters_nb,
+        )
 
 
 class AssetsClusters(BaseClustersTree):
@@ -65,10 +77,7 @@ def generate_multi_index_process(
     )
 
     return ClustersIndex(
-        multi_index=multi_index,
-        total_returns_streams=len(multi_index),
-        clusters_nb=len(multi_index.names) - 1,
-        clusters_names=multi_index.names,
+        multi_index=multi_index
     )
 
 
