@@ -1,33 +1,12 @@
-from pandas import MultiIndex
+
 from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
 from scipy.spatial.distance import squareform
 
 from outquantlab.config_classes.collections import Asset
-from outquantlab.indicators import BaseIndic
 from outquantlab.config_classes.generic_classes import BaseClustersTree
+from outquantlab.indicators import BaseIndic
 from outquantlab.metrics import calculate_distance_matrix
 from outquantlab.typing_conventions import ArrayFloat, ClustersHierarchy, DataFrameFloat
-from dataclasses import dataclass
-from outquantlab.config_classes.progress_statut import ProgressStatus
-
-
-@dataclass(slots=True)
-class ClustersIndex:
-    multi_index: MultiIndex
-    total_returns_streams: int = 0
-    clusters_nb: int = 0
-    clusters_names: list[str] = []
-
-    def __post_init__(self) -> None:
-        self.clusters_names: list[str] = self.multi_index.names
-        self.total_returns_streams: int = len(self.multi_index)
-        self.clusters_nb: int = len(self.multi_index.names) - 1
-
-    def get_progress(self) -> ProgressStatus:
-        return ProgressStatus(
-            total_returns_streams=self.total_returns_streams,
-            clusters_nb=self.clusters_nb,
-        )
 
 
 class AssetsClusters(BaseClustersTree):
@@ -56,29 +35,9 @@ class IndicsClusters(BaseClustersTree):
         ]
 
 
-def generate_levels(product_tuples: list[tuple[str, ...]]) -> list[str]:
-    num_levels: int = len(product_tuples[0])
+def generate_levels(num_levels: int) -> list[str]:
     return [f"lvl{i + 1}" for i in range(num_levels)]
 
-
-def generate_multi_index_process(
-    indic_param_tuples: list[tuple[str, ...]],
-    asset_tuples: list[tuple[str, ...]],
-) -> ClustersIndex:
-    product_tuples: list[tuple[str, ...]] = [
-        (*asset_clusters, *indic_clusters)
-        for indic_clusters in indic_param_tuples
-        for asset_clusters in asset_tuples
-    ]
-
-    multi_index: MultiIndex = MultiIndex.from_tuples(  # type: ignore
-        tuples=product_tuples,
-        names=generate_levels(product_tuples=product_tuples),
-    )
-
-    return ClustersIndex(
-        multi_index=multi_index
-    )
 
 
 def get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:

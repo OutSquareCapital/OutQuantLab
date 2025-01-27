@@ -6,10 +6,8 @@ from outquantlab.backtest.process_strategies import (
 from outquantlab.config_classes import ProgressStatus
 from outquantlab.config_classes import (
     Asset,
-    AssetsClusters,
+    ConfigState,
     ClustersIndex,
-    IndicsClusters,
-    generate_multi_index_process,
 )
 from outquantlab.indicators import BaseIndic, DataArrays, DataDfs
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
@@ -17,35 +15,39 @@ from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 def execute_backtest(
     data_dfs: DataDfs,
-    indics_params: list[BaseIndic],
-    assets: list[Asset],
-    indics_clusters: IndicsClusters,
-    assets_clusters: AssetsClusters,
+    config: ConfigState
 ) -> None:
-    data_arrays: DataArrays = data_dfs.select_data(
-        assets_names=[asset.name for asset in assets]
-    )
-    clusters_index: ClustersIndex = generate_multi_index_process(
-        indic_param_tuples=indics_clusters.get_clusters_tuples(entities=indics_params),
-        asset_tuples=assets_clusters.get_clusters_tuples(entities=assets),
+    indics_params: list[BaseIndic]=config.indics_collection.get_indics_params()
+    assets: list[Asset]=config.assets_collection.get_all_active_entities()
+    
+    clusters_index: ClustersIndex = config.generate_multi_index_process(
+        indics_params=indics_params,
+        assets=assets
     )
 
-    main_process_strategies(
-        data_arrays=data_arrays,
+    progress: ProgressStatus = clusters_index.get_progress()
+
+    get_backtest_returns(
         data_dfs=data_dfs,
         indics_params=indics_params,
         clusters_index=clusters_index,
+        progress=progress,
+    )
+    aggregate_raw_returns(
+        data_dfs=data_dfs,
+        clusters_nb=clusters_index.clusters_nb,
+        clusters_names=clusters_index.clusters_names,
+        progress=progress,
     )
 
 
-def main_process_strategies(
-    data_arrays: DataArrays,
+def get_backtest_returns(
     data_dfs: DataDfs,
     indics_params: list[BaseIndic],
     clusters_index: ClustersIndex,
+    progress: ProgressStatus,
 ) -> None:
-    progress: ProgressStatus = clusters_index.get_progress()
-
+    data_arrays: DataArrays = data_dfs.select_data()
     signals_array: ArrayFloat = get_signals_array(
         total_returns_streams=clusters_index.total_returns_streams,
         observations_nb=data_arrays.prices_array.shape[0],
@@ -54,18 +56,11 @@ def main_process_strategies(
         signals_array=signals_array,
         data_arrays=data_arrays,
         indics_params=indics_params,
-        assets_count=data_arrays.prices_array.shape[1],
+        assets_count=clusters_index.assets_nb,
         progress=progress,
     )
     data_dfs.global_returns = DataFrameFloat(
         data=signals_array,
         index=data_dfs.global_returns.dates,
         columns=clusters_index.multi_index,
-    )
-    del signals_array
-    aggregate_raw_returns(
-        data_dfs=data_dfs,
-        clusters_nb=clusters_index.clusters_nb,
-        clusters_names=clusters_index.clusters_names,
-        progress=progress,
     )

@@ -2,7 +2,8 @@ from outquantlab.config_classes import (
     AssetsClusters,
     AssetsCollection,
     IndicsClusters,
-    IndicsCollection
+    IndicsCollection,
+    ConfigState,
 )
 from outquantlab.indicators import DataDfs
 from outquantlab.database.data_queries import DataQueries
@@ -13,39 +14,56 @@ class DataBaseProvider:
     def __init__(self) -> None:
         self.dbq = DataQueries()
 
-    def get_initial_data(self) -> DataDfs:
+    def get_data(self, names: list[str]) -> DataDfs:
         return DataDfs(
-            returns_df=DataFrameFloat(data=self.dbq.select(file="returns_data").load())
+            returns_df=DataFrameFloat(data=self.dbq.select(file="returns_data").load(names=names))
         )
 
-    def get_assets_collection(self) -> AssetsCollection:
+    def get_config(self) -> ConfigState:
+        return ConfigState(
+            indics_collection=self._get_indics_collection(),
+            assets_collection=self._get_assets_collection(),
+            assets_clusters=self._get_assets_clusters_tree(),
+            indics_clusters=self._get_indics_clusters_tree(),
+        )
+
+    def save_config(
+        self,
+        config: ConfigState,
+    ) -> None:
+        self._save_assets_collection(assets_collection=config.assets_collection)
+        self._save_indics_collection(indics_collection=config.indics_collection)
+        self._save_assets_clusters_tree(clusters_tree=config.assets_clusters)
+        self._save_indics_clusters_tree(clusters_tree=config.indics_clusters)
+
+    def _get_assets_collection(self) -> AssetsCollection:
         return AssetsCollection(
             assets_to_test=self.dbq.select(file="assets_to_test").load(),
             asset_names=self.dbq.select(file="assets_names").load(),
         )
 
-    def get_indics_collection(self) -> IndicsCollection:
+    def _get_indics_collection(self) -> IndicsCollection:
         return IndicsCollection(
             indics_to_test=self.dbq.select(file="indics_to_test").load(),
             params_config=self.dbq.select(file="indics_params").load(),
         )
 
-    def get_assets_clusters_tree(self) -> AssetsClusters:
+    def _get_assets_clusters_tree(self) -> AssetsClusters:
         return AssetsClusters(
             clusters=self.dbq.select(file="assets_clusters").load(),
         )
 
-    def get_indics_clusters_tree(self) -> IndicsClusters:
+    def _get_indics_clusters_tree(self) -> IndicsClusters:
         return IndicsClusters(
             clusters=self.dbq.select(file="indics_clusters").load(),
         )
 
-    def save_assets_collection(self, assets_collection: AssetsCollection) -> None:
+    def _save_assets_collection(self, assets_collection: AssetsCollection) -> None:
         self.dbq.select(file="assets_to_test").save(
             data=assets_collection.get_all_entities_dict()
         )
 
-    def save_indics_collection(self, indics_collection: IndicsCollection) -> None:
+    def _save_indics_collection(self, indics_collection: IndicsCollection) -> None:
         self.dbq.select(file="indics_to_test").save(
             data=indics_collection.get_all_entities_dict()
         )
@@ -56,20 +74,8 @@ class DataBaseProvider:
             }
         )
 
-    def save_assets_clusters_tree(self, clusters_tree: AssetsClusters) -> None:
+    def _save_assets_clusters_tree(self, clusters_tree: AssetsClusters) -> None:
         self.dbq.select(file="assets_clusters").save(data=clusters_tree.clusters)
 
-    def save_indics_clusters_tree(self, clusters_tree: IndicsClusters) -> None:
+    def _save_indics_clusters_tree(self, clusters_tree: IndicsClusters) -> None:
         self.dbq.select(file="indics_clusters").save(data=clusters_tree.clusters)
-
-    def save_all(
-        self,
-        assets_collection: AssetsCollection,
-        indics_collection: IndicsCollection,
-        assets_clusters: AssetsClusters,
-        indics_clusters: IndicsClusters,
-    ) -> None:
-        self.save_assets_collection(assets_collection=assets_collection)
-        self.save_indics_collection(indics_collection=indics_collection)
-        self.save_assets_clusters_tree(clusters_tree=assets_clusters)
-        self.save_indics_clusters_tree(clusters_tree=indics_clusters)
