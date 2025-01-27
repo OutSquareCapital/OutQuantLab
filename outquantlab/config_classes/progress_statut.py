@@ -11,9 +11,9 @@ class ProgressStatus:
         self.current_progress = int(50 * signal_col_index / self.total_returns_streams)
         self.progress_callback(message="Processing strategies...")
 
-    def get_aggregation_progress(self, i: int) -> None:
+    def get_aggregation_progress(self, lvl: int) -> None:
         self.current_progress = 50 + int(
-            50 * (self.clusters_nb - i + 1) / self.clusters_nb
+            50 * (self.clusters_nb - lvl + 1) / self.clusters_nb
         )
 
         if self.current_progress == 100:

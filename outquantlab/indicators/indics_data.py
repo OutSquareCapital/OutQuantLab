@@ -24,9 +24,8 @@ class DataDfs:
         self.sub_portfolio_roll: DataFrameFloat = returns_df
         self.sub_portfolio_ovrll: DataFrameFloat = returns_df
 
-    def select_data(self, assets_names: list[str]) -> DataArrays:
-        selected_returns = DataFrameFloat(data=self.global_returns.loc[:, assets_names])
-        returns_array: ArrayFloat = selected_returns.get_array()
+    def select_data(self) -> DataArrays:
+        returns_array: ArrayFloat = self.global_returns.get_array()
         prices_array: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
 
         hv_array: ArrayFloat = hv_composite(returns_array=returns_array)
