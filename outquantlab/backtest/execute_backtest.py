@@ -3,7 +3,7 @@ from outquantlab.backtest.process_strategies import (
     get_signals_array,
     process_strategies,
 )
-from outquantlab.backtest.progress_statut import ProgressStatus
+from outquantlab.config_classes import ProgressStatus
 from outquantlab.config_classes import (
     Asset,
     AssetsClusters,

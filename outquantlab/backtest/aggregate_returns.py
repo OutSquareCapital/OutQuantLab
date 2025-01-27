@@ -1,6 +1,6 @@
 from outquantlab.metrics import calculate_overall_mean
 from outquantlab.typing_conventions import DataFrameFloat
-from outquantlab.backtest.progress_statut import ProgressStatus
+from outquantlab.config_classes import ProgressStatus
 from outquantlab.indicators import DataDfs
 
 

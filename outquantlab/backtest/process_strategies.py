@@ -4,7 +4,7 @@ from numpy import empty
 
 from outquantlab.indicators import BaseIndic, DataArrays
 from outquantlab.typing_conventions import ArrayFloat, Float32
-from outquantlab.backtest.progress_statut import ProgressStatus
+from outquantlab.config_classes import ProgressStatus
 
 
 def get_signals_array(observations_nb: int, total_returns_streams: int) -> ArrayFloat:
