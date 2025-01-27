@@ -4,7 +4,7 @@ from numpy import empty
 
 from outquantlab.indicators import BaseIndic, DataArrays
 from outquantlab.typing_conventions import ArrayFloat, Float32
-from outquantlab.config_classes import ProgressStatus
+from outquantlab.config_classes import BacktestConfig
 
 
 def get_signals_array(observations_nb: int, total_returns_streams: int) -> ArrayFloat:
@@ -33,32 +33,18 @@ def process_indicator_parallel(
     return list(global_executor.map(process_single_param, indic.param_combos))
 
 
-def fill_signals_array(
-    signal_col_index: int,
-    signals_array: ArrayFloat,
-    results: list[ArrayFloat],
-    strategies_nb: int,
-    assets_count: int,
-) -> int:
-    for i in range(strategies_nb):
-        end_index: int = signal_col_index + assets_count
-        signals_array[:, signal_col_index:end_index] = results[i]
-        signal_col_index = end_index
-
-    return signal_col_index
-
-
 def process_strategies(
-    signals_array: ArrayFloat,
     data_arrays: DataArrays,
-    indics_params: list[BaseIndic],
-    assets_count: int,
-    progress: ProgressStatus,
+    backtest_config: BacktestConfig,
 ) -> ArrayFloat:
+    signals_array: ArrayFloat = get_signals_array(
+        total_returns_streams=backtest_config.total_returns_streams,
+        observations_nb=data_arrays.prices_array.shape[0],
+    )
     threads_nb: int = cpu_count() or 8
     signal_col_index: int = 0
     with ThreadPoolExecutor(max_workers=threads_nb) as global_executor:
-        for indic in indics_params:
+        for indic in backtest_config.indics_params:
             try:
                 results: list[ArrayFloat] = process_indicator_parallel(
                     indic=indic,
@@ -66,15 +52,12 @@ def process_strategies(
                     global_executor=global_executor,
                 )
 
-                signal_col_index = fill_signals_array(
-                    signal_col_index=signal_col_index,
-                    signals_array=signals_array,
-                    results=results,
-                    strategies_nb=indic.strategies_nb,
-                    assets_count=assets_count,
-                )
+                for i in range(indic.strategies_nb):
+                    end_index: int = signal_col_index + backtest_config.assets_nb
+                    signals_array[:, signal_col_index:end_index] = results[i]
+                    signal_col_index = end_index
 
-                progress.get_strategies_process_progress(
+                backtest_config.progress.get_strategies_process_progress(
                     signal_col_index=signal_col_index
                 )
             except Exception as e:
