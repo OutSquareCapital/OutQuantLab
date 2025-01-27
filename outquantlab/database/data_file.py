@@ -48,7 +48,7 @@ def create_handler(ext: str) -> FileHandler:
         raise ValueError(f"Unsupported extension: {ext}")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class DataFile:
     ext: str
     path: str
