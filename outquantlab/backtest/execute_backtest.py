@@ -21,7 +21,7 @@ def execute_backtest(
 
     backtest_config: BacktestConfig = config.generate_multi_index_process()
 
-    get_backtest_returns(
+    get_strategies_returns(
         data_dfs=data_dfs,
         backtest_config=backtest_config,
     )
@@ -33,7 +33,7 @@ def execute_backtest(
     return GraphsCollection(data_dfs=data_dfs)
 
 
-def get_backtest_returns(
+def get_strategies_returns(
     data_dfs: DataDfs,
     backtest_config: BacktestConfig,
 ) -> None:
