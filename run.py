@@ -1,4 +1,4 @@
-def run() -> None:
+def launch_app() -> None:
     oql: OutQuantLab = OutQuantLab()
     oql.run()
 
@@ -11,5 +11,5 @@ if __name__ == "__main__":
     from outquantlab import OutQuantLab
 
     print("OutQuantLab initialized")
-    run()
+    launch_app()
     exit(0)
