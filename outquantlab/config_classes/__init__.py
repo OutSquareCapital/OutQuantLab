@@ -1,21 +1,15 @@
-from outquantlab.config_classes.collections import IndicsCollection, AssetsCollection, Asset
+from outquantlab.config_classes.clusters import generate_dynamic_clusters, AssetsClusters, IndicsClusters
+from outquantlab.config_classes.collections import Asset, IndicsCollection, AssetsCollection
+from outquantlab.config_classes.config_state import ClustersIndex, ConfigState
 from outquantlab.config_classes.progress_statut import ProgressStatus
-from outquantlab.config_classes.clusters import (
-    AssetsClusters,
-    IndicsClusters,
-    generate_multi_index_process,
-    ClustersIndex,
-    generate_dynamic_clusters,
-)
-
 __all__: list[str] = [
+    "AssetsClusters",
+    "IndicsClusters",
     "IndicsCollection",
     "AssetsCollection",
     "Asset",
-    "AssetsClusters",
-    "IndicsClusters",
+    "ConfigState",
     "ClustersIndex",
-    "generate_multi_index_process",
     "generate_dynamic_clusters",
     "ProgressStatus",
 ]
