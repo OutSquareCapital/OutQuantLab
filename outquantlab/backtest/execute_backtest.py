@@ -19,7 +19,7 @@ def execute_backtest(
 ) -> GraphsCollection:
     data_dfs: DataDfs = DataDfs(returns_df=returns_df)
 
-    backtest_config: BacktestConfig = config.generate_multi_index_process()
+    backtest_config: BacktestConfig = config.get_backtest_config()
 
     get_strategies_returns(
         data_dfs=data_dfs,

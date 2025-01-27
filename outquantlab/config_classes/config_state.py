@@ -36,7 +36,7 @@ class ConfigState:
     assets_clusters: AssetsClusters
     indics_clusters: IndicsClusters
 
-    def generate_multi_index_process(
+    def get_backtest_config(
         self,
     ) -> BacktestConfig:
         indics_params: list[BaseIndic] = self.indics_collection.get_indics_params()
