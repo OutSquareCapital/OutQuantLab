@@ -1,8 +1,9 @@
 from outquantlab.backtest import execute_backtest
 from outquantlab.config_classes import ConfigState
 from outquantlab.database import DataBaseProvider
+
 from outquantlab.graphs import GraphsCollection
-from outquantlab.indicators import DataDfs
+from outquantlab.typing_conventions import DataFrameFloat
 
 
 class OutQuantLab:
@@ -11,15 +12,13 @@ class OutQuantLab:
         self.config: ConfigState = self.dbp.get_config()
 
     def run(self) -> GraphsCollection:
-        data_dfs: DataDfs = self.dbp.get_data(
+        returns_df: DataFrameFloat = self.dbp.get_data(
             names=self.config.assets_collection.get_all_active_entities_names()
         )
-        execute_backtest(
-            data_dfs=data_dfs,
+        return execute_backtest(
+            returns_df=returns_df,
             config=self.config,
         )
-        print(data_dfs.global_returns)
-        return GraphsCollection(data_dfs=data_dfs)
 
     def save(self) -> None:
         self.dbp.save_config(config=self.config)
