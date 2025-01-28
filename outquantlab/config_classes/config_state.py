@@ -8,7 +8,7 @@ from outquantlab.config_classes.clusters import (
     IndicsClusters,
     generate_levels,
 )
-from outquantlab.config_classes.collections import AssetsCollection, IndicsCollection
+from outquantlab.config_classes.collections import AssetsConfig, IndicsConfig
 from outquantlab.config_classes.progress_statut import ProgressStatus
 
 
@@ -24,19 +24,19 @@ class BacktestConfig:
 
 
 @dataclass(slots=True)
-class ConfigState:
-    indics_collection: IndicsCollection
-    assets_collection: AssetsCollection
+class AppConfig:
+    indics_config: IndicsConfig
+    assets_config: AssetsConfig
     assets_clusters: AssetsClusters
     indics_clusters: IndicsClusters
 
     def get_backtest_config(
         self,
     ) -> BacktestConfig:
-        indics_params: list[BaseIndic] = self.indics_collection.get_indics_params()
+        indics_params: list[BaseIndic] = self.indics_config.get_indics_params()
 
         asset_tuples: list[tuple[str, ...]] = self.assets_clusters.get_clusters_tuples(
-            entities=self.assets_collection.get_all_active_entities()
+            entities=self.assets_config.get_all_active_entities()
         )
         indics_tuples: list[tuple[str, ...]] = self.indics_clusters.get_clusters_tuples(
             entities=indics_params

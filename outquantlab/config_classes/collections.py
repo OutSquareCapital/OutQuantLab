@@ -1,6 +1,6 @@
 from inspect import signature
 
-from outquantlab.config_classes.generic_classes import BaseCollection
+from outquantlab.config_classes.generic_classes import BaseConfig
 from outquantlab.indicators import IndicsNormalized, BaseIndic
 from dataclasses import dataclass
 
@@ -11,7 +11,7 @@ class Asset:
     active: bool
 
 
-class IndicsCollection(BaseCollection[BaseIndic]):
+class IndicsConfig(BaseConfig[BaseIndic]):
     def __init__(
         self,
         indics_to_test: dict[str, bool],
@@ -62,7 +62,7 @@ class IndicsCollection(BaseCollection[BaseIndic]):
         return active_indics
 
 
-class AssetsCollection(BaseCollection[Asset]):
+class AssetsConfig(BaseConfig[Asset]):
     def __init__(self, assets_to_test: dict[str, bool], asset_names: list[str]) -> None:
         self.entities: dict[str, Asset] = {}
         self._load_entities(assets_to_test=assets_to_test, asset_names=asset_names)

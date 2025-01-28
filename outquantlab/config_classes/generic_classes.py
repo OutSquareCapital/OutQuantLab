@@ -10,7 +10,7 @@ class StrategyComponent(Protocol):
 
 T = TypeVar("T", bound=StrategyComponent)
 
-class BaseCollection(ABC, Generic[T]):
+class BaseConfig(ABC, Generic[T]):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.entities: dict[str, T] = {} 
         self._load_entities(*args, **kwargs)
