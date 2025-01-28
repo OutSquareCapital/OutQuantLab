@@ -5,21 +5,15 @@ from outquantlab.backtest.aggregate_returns import (
 from outquantlab.backtest.process_strategies import (
     process_strategies,
 )
-from outquantlab.config_classes import (
-    BacktestConfig,
-    ConfigState,
-)
+from outquantlab.config_classes import BacktestConfig
 from outquantlab.graphs import GraphsCollection
 from outquantlab.indicators import DataDfs
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 
 def execute_backtest(
-    returns_df: DataFrameFloat, config: ConfigState
+    data_dfs: DataDfs, backtest_config: BacktestConfig
 ) -> GraphsCollection:
-    data_dfs: DataDfs = DataDfs(returns_df=returns_df)
-
-    backtest_config: BacktestConfig = config.get_backtest_config()
 
     get_strategies_returns(
         data_dfs=data_dfs,
