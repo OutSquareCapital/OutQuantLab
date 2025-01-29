@@ -1,4 +1,4 @@
-from outquantlab.backtest.aggregate_returns import calculate_portfolio_returns
+from outquantlab.backtest.aggregate_returns import calculate_portfolio_returns, get_global_portfolio_returns
 from outquantlab.backtest.process_strategies import process_strategies
 from outquantlab.config_classes import BacktestConfig
 from outquantlab.indicators import get_data_arrays
@@ -55,6 +55,6 @@ def aggregate_raw_returns(
             lvl=lvl, clusters_nb=backtest_config.clusters_nb
         )
 
-    portfolio_dict["lvl0"] = returns_df
+    portfolio_dict["lvl0"] = get_global_portfolio_returns(returns_df=returns_df)
 
     return portfolio_dict
