@@ -1,70 +1,60 @@
-from outquantlab.backtest.aggregate_returns import (
-    calculate_portfolio_returns,
-    get_global_portfolio_returns,
-)
-from outquantlab.backtest.process_strategies import (
-    process_strategies,
-)
+from outquantlab.backtest.aggregate_returns import calculate_portfolio_returns
+from outquantlab.backtest.process_strategies import process_strategies
 from outquantlab.config_classes import BacktestConfig
-from outquantlab.graphs import GraphsCollection
-from outquantlab.indicators import DataDfs
+from outquantlab.indicators import get_data_arrays
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 
 def execute_backtest(
-    data_dfs: DataDfs, backtest_config: BacktestConfig
-) -> GraphsCollection:
-
-    get_strategies_returns(
-        data_dfs=data_dfs,
+    returns_df: DataFrameFloat, backtest_config: BacktestConfig
+) -> dict[str, DataFrameFloat]:
+    returns_df = get_strategies_returns(
+        returns_df=returns_df,
         backtest_config=backtest_config,
     )
-    aggregate_raw_returns(
-        data_dfs=data_dfs,
+    return aggregate_raw_returns(
+        returns_df=returns_df,
         backtest_config=backtest_config,
     )
-    print(data_dfs.global_returns)
-    return GraphsCollection(data_dfs=data_dfs)
 
 
 def get_strategies_returns(
-    data_dfs: DataDfs,
+    returns_df: DataFrameFloat,
     backtest_config: BacktestConfig,
-) -> None:
+) -> DataFrameFloat:
     signals_array: ArrayFloat = process_strategies(
-        data_arrays=data_dfs.select_data(),
+        data_arrays=get_data_arrays(returns_array=returns_df.get_array()),
         backtest_config=backtest_config,
     )
-    data_dfs.global_returns = DataFrameFloat(
+    return DataFrameFloat(
         data=signals_array,
-        index=data_dfs.global_returns.dates,
+        index=returns_df.dates,
         columns=backtest_config.multi_index,
     )
 
 
 def aggregate_raw_returns(
-    data_dfs: DataDfs,
+    returns_df: DataFrameFloat,
     backtest_config: BacktestConfig,
-) -> None:
+) -> dict[str, DataFrameFloat]:
+    portfolio_dict: dict[str, DataFrameFloat] = {}
+
     for lvl in range(backtest_config.clusters_nb, 0, -1):
-        data_dfs.global_returns = calculate_portfolio_returns(
-            returns_df=data_dfs.global_returns,
+        returns_df = calculate_portfolio_returns(
+            returns_df=returns_df,
             grouping_levels=backtest_config.clusters_names[:lvl],
         )
-        if lvl == 5:
-            data_dfs.global_returns.dropna(axis=0, how="any", inplace=True)  # type: ignore
-            data_dfs.sub_portfolio_ovrll = DataFrameFloat(data=data_dfs.global_returns)
 
-        if lvl == 2:
-            data_dfs.global_returns.dropna(axis=0, how="all", inplace=True)  # type: ignore
-            data_dfs.sub_portfolio_roll = DataFrameFloat(data=data_dfs.global_returns)
+        returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
+
+        portfolio_dict[backtest_config.clusters_names[lvl - 1]] = returns_df
+
+        returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
 
         backtest_config.progress.get_aggregation_progress(
             lvl=lvl, clusters_nb=backtest_config.clusters_nb
         )
 
-    data_dfs.global_returns.dropna(axis=0, how="all", inplace=True)  # type: ignore
+    portfolio_dict["lvl0"] = returns_df
 
-    data_dfs.global_returns = get_global_portfolio_returns(
-        returns_df=data_dfs.global_returns
-    )
+    return portfolio_dict

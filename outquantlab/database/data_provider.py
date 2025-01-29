@@ -7,18 +7,16 @@ from outquantlab.config_classes import (
 )
 from outquantlab.database.data_queries import DataQueries
 from outquantlab.typing_conventions import DataFrameFloat
-from outquantlab.indicators import DataDfs
 
 class DataBaseProvider:
     def __init__(self) -> None:
         self.dbq = DataQueries()
 
-    def get_data(self, names: list[str]) -> DataDfs:
-        returns_df = DataFrameFloat(
+    def get_data(self, names: list[str]) -> DataFrameFloat:
+    
+        return DataFrameFloat(
             data=self.dbq.select(file="returns_data").load(names=names)
         )
-        
-        return DataDfs(returns_df=returns_df)
 
     def get_config(self) -> AppConfig:
         return AppConfig(
