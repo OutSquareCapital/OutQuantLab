@@ -1,3 +1,36 @@
-from outquantlab.graphs.display import GraphsCollection
+from outquantlab.graphs.display import (
+    plot_correlation_clusters_icicle,
+    plot_correlation_heatmap,
+    plot_stats_distribution_histogram,
+    plot_stats_distribution_violin,
+    plot_overall_average_correlation,
+    plot_overall_average_drawdown,
+    plot_overall_monthly_skew,
+    plot_overall_returns,
+    plot_overall_sharpe_ratio,
+    plot_overall_volatility,
+    plot_rolling_drawdown,
+    plot_rolling_sharpe_ratio,
+    plot_rolling_volatility,
+    plot_rolling_smoothed_skewness,
+    plot_stats_equity,
+)
 
-__all__ = ["GraphsCollection"]
+
+__all__: list[str] = [
+    "plot_correlation_clusters_icicle",
+    "plot_correlation_heatmap",
+    "plot_stats_distribution_histogram",
+    "plot_stats_distribution_violin",
+    "plot_overall_average_correlation",
+    "plot_overall_average_drawdown",
+    "plot_overall_monthly_skew",
+    "plot_overall_returns",
+    "plot_overall_sharpe_ratio",
+    "plot_overall_volatility",
+    "plot_rolling_drawdown",
+    "plot_rolling_sharpe_ratio",
+    "plot_rolling_volatility",
+    "plot_rolling_smoothed_skewness",
+    "plot_stats_equity",
+]
