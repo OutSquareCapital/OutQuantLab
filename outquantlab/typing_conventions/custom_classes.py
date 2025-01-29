@@ -37,11 +37,6 @@ class SeriesFloat(Series):  # type: ignore
     ) -> None:
         if isinstance(data, Series):
             data = data.astype(dtype=Float32)  # type: ignore
-        else:
-            if not isinstance(index, (Index, MultiIndex, list)):
-                raise TypeError(
-                    "index must be a a pandas {Index}, {MultiIndex}, or a {list} of strings"
-                )
 
         super().__init__(data=data, index=index, dtype=dtype)  # type: ignore
 
