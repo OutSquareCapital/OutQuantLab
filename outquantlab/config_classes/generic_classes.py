@@ -1,7 +1,8 @@
-from typing import Generic, Any, TypeVar
 from abc import ABC, abstractmethod
+from typing import Any, Generic, Protocol, TypeVar
+
 from outquantlab.typing_conventions import ClustersHierarchy
-from typing import Protocol
+
 
 class StrategyComponent(Protocol):
     name: str
@@ -10,9 +11,10 @@ class StrategyComponent(Protocol):
 
 T = TypeVar("T", bound=StrategyComponent)
 
+
 class BaseConfig(ABC, Generic[T]):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.entities: dict[str, T] = {} 
+        self.entities: dict[str, T] = {}
         self._load_entities(*args, **kwargs)
 
     @abstractmethod
@@ -26,7 +28,7 @@ class BaseConfig(ABC, Generic[T]):
 
     def get_all_entities_dict(self) -> dict[str, bool]:
         return {name: entity.active for name, entity in self.entities.items()}
-    
+
     def is_active(self, name: str) -> bool:
         return self.entities[name].active
 
@@ -49,7 +51,6 @@ class BaseClustersTree(ABC):
             for level2, entities in subclusters.items()
             for entity in entities
         }
-        
+
     @abstractmethod
-    def get_clusters_tuples(
-        self, entities: list[T]) -> list[tuple[str, ...]]: ...
+    def get_clusters_tuples(self, entities: list[T]) -> list[tuple[str, ...]]: ...

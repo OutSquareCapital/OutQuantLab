@@ -1,4 +1,7 @@
-from outquantlab.backtest.aggregate_returns import calculate_portfolio_returns, get_global_portfolio_returns
+from outquantlab.backtest.aggregate_returns import (
+    calculate_portfolio_returns,
+    get_global_portfolio_returns,
+)
 from outquantlab.backtest.process_strategies import process_strategies
 from outquantlab.config_classes import BacktestConfig
 from outquantlab.indicators import get_data_arrays

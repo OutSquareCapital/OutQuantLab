@@ -12,7 +12,6 @@ from outquantlab.metrics.volatility import rolling_volatility
 from outquantlab.typing_conventions import ArrayFloat, Float32
 
 
-
 def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> ArrayFloat:
     return (nominator / denominator) - Float32(1.0)
 

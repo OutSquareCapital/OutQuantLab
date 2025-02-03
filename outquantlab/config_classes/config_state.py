@@ -30,16 +30,19 @@ class AppConfig:
     assets_clusters: AssetsClusters
     indics_clusters: IndicsClusters
 
+
 def get_backtest_config(
     app_config: AppConfig,
 ) -> BacktestConfig:
     indics_params: list[BaseIndic] = app_config.indics_config.get_indics_params()
 
-    asset_tuples: list[tuple[str, ...]] = app_config.assets_clusters.get_clusters_tuples(
-        entities=app_config.assets_config.get_all_active_entities()
+    asset_tuples: list[tuple[str, ...]] = (
+        app_config.assets_clusters.get_clusters_tuples(
+            entities=app_config.assets_config.get_all_active_entities()
+        )
     )
-    indics_tuples: list[tuple[str, ...]] = app_config.indics_clusters.get_clusters_tuples(
-        entities=indics_params
+    indics_tuples: list[tuple[str, ...]] = (
+        app_config.indics_clusters.get_clusters_tuples(entities=indics_params)
     )
     product_tuples: list[tuple[str, ...]] = [
         (*asset_clusters, *indic_clusters)

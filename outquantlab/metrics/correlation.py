@@ -1,12 +1,15 @@
 from outquantlab.typing_conventions import ArrayFloat, Float32
 from numpy import corrcoef, sqrt, sum
 
+
 def calculate_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:
     return corrcoef(returns_array, rowvar=False, dtype=Float32)
+
 
 def calculate_distance_matrix(returns_array: ArrayFloat) -> ArrayFloat:
     corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)
     return sqrt(2 * (1 - corr_matrix))
+
 
 def calculate_overall_average_correlation(returns_array: ArrayFloat) -> ArrayFloat:
     corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)

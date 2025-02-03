@@ -2,6 +2,7 @@ from numpy import sqrt, nan, empty
 from outquantlab.typing_conventions import ArrayFloat, Float32
 from numba import prange, njit  # type: ignore
 
+
 @njit
 def calculate_skewness(
     min_length: int,
@@ -9,7 +10,7 @@ def calculate_skewness(
     sum_values: float,
     sum_values_squared: float,
     sum_values_cubed: float,
-    consecutive_equal_count: int
+    consecutive_equal_count: int,
 ) -> float:
     if observation_count >= min_length:
         total_observations = float(observation_count)
@@ -49,9 +50,8 @@ def add_skewness_contribution(
     compensation_squared: float,
     compensation_cubed: float,
     consecutive_equal_count: int,
-    previous_value: float
-    ) -> tuple[int, float, float, float, float, float, float, int, float]:
-
+    previous_value: float,
+) -> tuple[int, float, float, float, float, float, float, int, float]:
     if value == value:  # Vérification NaN
         observation_count += 1
 
@@ -98,8 +98,8 @@ def remove_skewness_contribution(
     sum_values_cubed: float,
     compensation_values: float,
     compensation_squared: float,
-    compensation_cubed: float
-    ) -> tuple[int, float, float, float, float, float, float]:
+    compensation_cubed: float,
+) -> tuple[int, float, float, float, float, float, float]:
     if value == value:
         observation_count -= 1
 
@@ -128,18 +128,20 @@ def remove_skewness_contribution(
         compensation_cubed,
     )
 
+
 @njit
-def rolling_skewness(
-    array: ArrayFloat,
-    length: int,
-    min_length: int
-) -> ArrayFloat:
+def rolling_skewness(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
     num_rows, num_cols = array.shape
     output: ArrayFloat = empty((num_rows, num_cols), dtype=Float32)
     output.fill(nan)
 
     for col in prange(num_cols):
-        observation_count, sum_values, sum_values_squared, sum_values_cubed = 0, 0.0, 0.0, 0.0
+        observation_count, sum_values, sum_values_squared, sum_values_cubed = (
+            0,
+            0.0,
+            0.0,
+            0.0,
+        )
         compensation_values, compensation_squared, compensation_cubed = 0.0, 0.0, 0.0
         previous_value = array[0, col]
         consecutive_equal_count = 0
@@ -149,41 +151,21 @@ def rolling_skewness(
             end_idx: int = row + 1
 
             if row == 0 or start_idx >= row - 1:
-                observation_count, sum_values, sum_values_squared, sum_values_cubed = 0, 0.0, 0.0, 0.0
-                compensation_values, compensation_squared, compensation_cubed = 0.0, 0.0, 0.0
+                observation_count, sum_values, sum_values_squared, sum_values_cubed = (
+                    0,
+                    0.0,
+                    0.0,
+                    0.0,
+                )
+                compensation_values, compensation_squared, compensation_cubed = (
+                    0.0,
+                    0.0,
+                    0.0,
+                )
                 previous_value = array[start_idx, col]
                 consecutive_equal_count = 0
                 for idx in range(start_idx, end_idx):
-                    observation_count, sum_values, sum_values_squared, sum_values_cubed, compensation_values, compensation_squared, compensation_cubed, consecutive_equal_count, previous_value = \
-                        add_skewness_contribution(
-                            array[idx, col],
-                            observation_count,
-                            sum_values,
-                            sum_values_squared,
-                            sum_values_cubed,
-                            compensation_values,
-                            compensation_squared,
-                            compensation_cubed,
-                            consecutive_equal_count,
-                            previous_value
-                        )
-            else:
-                for idx in range(max(0, row - length), start_idx):
-                    observation_count, sum_values, sum_values_squared, sum_values_cubed, compensation_values, compensation_squared, compensation_cubed = \
-                        remove_skewness_contribution(
-                            array[idx, col],
-                            observation_count,
-                            sum_values,
-                            sum_values_squared,
-                            sum_values_cubed,
-                            compensation_values,
-                            compensation_squared,
-                            compensation_cubed
-                        )
-
-                observation_count, sum_values, sum_values_squared, sum_values_cubed, compensation_values, compensation_squared, compensation_cubed, consecutive_equal_count, previous_value = \
-                    add_skewness_contribution(
-                        array[row, col],
+                    (
                         observation_count,
                         sum_values,
                         sum_values_squared,
@@ -192,8 +174,62 @@ def rolling_skewness(
                         compensation_squared,
                         compensation_cubed,
                         consecutive_equal_count,
-                        previous_value
+                        previous_value,
+                    ) = add_skewness_contribution(
+                        array[idx, col],
+                        observation_count,
+                        sum_values,
+                        sum_values_squared,
+                        sum_values_cubed,
+                        compensation_values,
+                        compensation_squared,
+                        compensation_cubed,
+                        consecutive_equal_count,
+                        previous_value,
                     )
+            else:
+                for idx in range(max(0, row - length), start_idx):
+                    (
+                        observation_count,
+                        sum_values,
+                        sum_values_squared,
+                        sum_values_cubed,
+                        compensation_values,
+                        compensation_squared,
+                        compensation_cubed,
+                    ) = remove_skewness_contribution(
+                        array[idx, col],
+                        observation_count,
+                        sum_values,
+                        sum_values_squared,
+                        sum_values_cubed,
+                        compensation_values,
+                        compensation_squared,
+                        compensation_cubed,
+                    )
+
+                (
+                    observation_count,
+                    sum_values,
+                    sum_values_squared,
+                    sum_values_cubed,
+                    compensation_values,
+                    compensation_squared,
+                    compensation_cubed,
+                    consecutive_equal_count,
+                    previous_value,
+                ) = add_skewness_contribution(
+                    array[row, col],
+                    observation_count,
+                    sum_values,
+                    sum_values_squared,
+                    sum_values_cubed,
+                    compensation_values,
+                    compensation_squared,
+                    compensation_cubed,
+                    consecutive_equal_count,
+                    previous_value,
+                )
 
             output[row, col] = calculate_skewness(
                 min_length,
@@ -201,10 +237,11 @@ def rolling_skewness(
                 sum_values,
                 sum_values_squared,
                 sum_values_cubed,
-                consecutive_equal_count
+                consecutive_equal_count,
             )
 
     return output
+
 
 @njit
 def calculate_kurtosis(
@@ -214,8 +251,8 @@ def calculate_kurtosis(
     sum_values_squared: float,
     sum_values_cubed: float,
     sum_values_fourth: float,
-    consecutive_equal_count: int
-) -> float|Float32:
+    consecutive_equal_count: int,
+) -> float | Float32:
     if observation_count >= min_length:
         if observation_count < 4:
             return nan
@@ -241,13 +278,16 @@ def calculate_kurtosis(
                 return nan
             else:
                 kurtosis = (
-                    (total_observations * total_observations - 1.0) * kurtosis_term
-                    / (variance * variance)
-                    - 3.0 * ((total_observations - 1.0) ** 2)
+                    total_observations * total_observations - 1.0
+                ) * kurtosis_term / (variance * variance) - 3.0 * (
+                    (total_observations - 1.0) ** 2
                 )
-                return kurtosis / ((total_observations - 2.0) * (total_observations - 3.0))
+                return kurtosis / (
+                    (total_observations - 2.0) * (total_observations - 3.0)
+                )
     else:
         return nan
+
 
 @njit
 def add_kurtosis_contribution(
@@ -262,9 +302,8 @@ def add_kurtosis_contribution(
     compensation_cubed: float,
     compensation_fourth: float,
     consecutive_equal_count: int,
-    previous_value: float
+    previous_value: float,
 ) -> tuple[int, float, float, float, float, float, float, float, float, int, float]:
-
     if value == value:
         observation_count += 1
 
@@ -308,6 +347,7 @@ def add_kurtosis_contribution(
         previous_value,
     )
 
+
 @njit
 def remove_kurtosis_contribution(
     value: float,
@@ -319,10 +359,8 @@ def remove_kurtosis_contribution(
     compensation_values: float,
     compensation_squared: float,
     compensation_cubed: float,
-    compensation_fourth: float
-) -> tuple[
-    int, float, float, float, float, float, float, float, float
-]:
+    compensation_fourth: float,
+) -> tuple[int, float, float, float, float, float, float, float, float]:
     if value == value:
         observation_count -= 1
 
@@ -358,19 +396,27 @@ def remove_kurtosis_contribution(
         compensation_fourth,
     )
 
+
 @njit
-def rolling_kurtosis(
-    array: ArrayFloat,
-    length: int,
-    min_length: int
-) -> ArrayFloat:
+def rolling_kurtosis(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
     num_rows, num_cols = array.shape
     output: ArrayFloat = empty((num_rows, num_cols), dtype=Float32)
     output.fill(nan)
 
     for col in prange(num_cols):
-        observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth = 0, 0.0, 0.0, 0.0, 0.0
-        compensation_values, compensation_squared, compensation_cubed, compensation_fourth = 0.0, 0.0, 0.0, 0.0
+        (
+            observation_count,
+            sum_values,
+            sum_values_squared,
+            sum_values_cubed,
+            sum_values_fourth,
+        ) = 0, 0.0, 0.0, 0.0, 0.0
+        (
+            compensation_values,
+            compensation_squared,
+            compensation_cubed,
+            compensation_fourth,
+        ) = 0.0, 0.0, 0.0, 0.0
         previous_value = array[0, col]
         consecutive_equal_count = 0
 
@@ -379,45 +425,23 @@ def rolling_kurtosis(
             end_idx: int = row + 1
 
             if row == 0 or start_idx >= row - 1:
-                observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth = 0, 0.0, 0.0, 0.0, 0.0
-                compensation_values, compensation_squared, compensation_cubed, compensation_fourth = 0.0, 0.0, 0.0, 0.0
+                (
+                    observation_count,
+                    sum_values,
+                    sum_values_squared,
+                    sum_values_cubed,
+                    sum_values_fourth,
+                ) = 0, 0.0, 0.0, 0.0, 0.0
+                (
+                    compensation_values,
+                    compensation_squared,
+                    compensation_cubed,
+                    compensation_fourth,
+                ) = 0.0, 0.0, 0.0, 0.0
                 previous_value = array[start_idx, col]
                 consecutive_equal_count = 0
                 for idx in range(start_idx, end_idx):
-                    observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth, compensation_values, compensation_squared, compensation_cubed, compensation_fourth, consecutive_equal_count, previous_value = \
-                        add_kurtosis_contribution(
-                            array[idx, col],
-                            observation_count,
-                            sum_values,
-                            sum_values_squared,
-                            sum_values_cubed,
-                            sum_values_fourth,
-                            compensation_values,
-                            compensation_squared,
-                            compensation_cubed,
-                            compensation_fourth,
-                            consecutive_equal_count,
-                            previous_value
-                        )
-            else:
-                for idx in range(max(0, row - length), start_idx):
-                    observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth, compensation_values, compensation_squared, compensation_cubed, compensation_fourth = \
-                        remove_kurtosis_contribution(
-                            array[idx, col],
-                            observation_count,
-                            sum_values,
-                            sum_values_squared,
-                            sum_values_cubed,
-                            sum_values_fourth,
-                            compensation_values,
-                            compensation_squared,
-                            compensation_cubed,
-                            compensation_fourth
-                        )
-
-                observation_count, sum_values, sum_values_squared, sum_values_cubed, sum_values_fourth, compensation_values, compensation_squared, compensation_cubed, compensation_fourth, consecutive_equal_count, previous_value = \
-                    add_kurtosis_contribution(
-                        array[row, col],
+                    (
                         observation_count,
                         sum_values,
                         sum_values_squared,
@@ -428,8 +452,72 @@ def rolling_kurtosis(
                         compensation_cubed,
                         compensation_fourth,
                         consecutive_equal_count,
-                        previous_value
+                        previous_value,
+                    ) = add_kurtosis_contribution(
+                        array[idx, col],
+                        observation_count,
+                        sum_values,
+                        sum_values_squared,
+                        sum_values_cubed,
+                        sum_values_fourth,
+                        compensation_values,
+                        compensation_squared,
+                        compensation_cubed,
+                        compensation_fourth,
+                        consecutive_equal_count,
+                        previous_value,
                     )
+            else:
+                for idx in range(max(0, row - length), start_idx):
+                    (
+                        observation_count,
+                        sum_values,
+                        sum_values_squared,
+                        sum_values_cubed,
+                        sum_values_fourth,
+                        compensation_values,
+                        compensation_squared,
+                        compensation_cubed,
+                        compensation_fourth,
+                    ) = remove_kurtosis_contribution(
+                        array[idx, col],
+                        observation_count,
+                        sum_values,
+                        sum_values_squared,
+                        sum_values_cubed,
+                        sum_values_fourth,
+                        compensation_values,
+                        compensation_squared,
+                        compensation_cubed,
+                        compensation_fourth,
+                    )
+
+                (
+                    observation_count,
+                    sum_values,
+                    sum_values_squared,
+                    sum_values_cubed,
+                    sum_values_fourth,
+                    compensation_values,
+                    compensation_squared,
+                    compensation_cubed,
+                    compensation_fourth,
+                    consecutive_equal_count,
+                    previous_value,
+                ) = add_kurtosis_contribution(
+                    array[row, col],
+                    observation_count,
+                    sum_values,
+                    sum_values_squared,
+                    sum_values_cubed,
+                    sum_values_fourth,
+                    compensation_values,
+                    compensation_squared,
+                    compensation_cubed,
+                    compensation_fourth,
+                    consecutive_equal_count,
+                    previous_value,
+                )
 
             output[row, col] = calculate_kurtosis(
                 min_length,
@@ -438,7 +526,7 @@ def rolling_kurtosis(
                 sum_values_squared,
                 sum_values_cubed,
                 sum_values_fourth,
-                consecutive_equal_count
+                consecutive_equal_count,
             )
 
     return output
