@@ -43,8 +43,8 @@ def generate_levels(num_levels: int) -> list[str]:
 def get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
     distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
     distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
-    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")
-    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")
+    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward") # type: ignore
+    return fcluster(linkage_matrix, max_clusters, criterion="maxclust") # type: ignore
 
 
 def get_assets_in_cluster(
