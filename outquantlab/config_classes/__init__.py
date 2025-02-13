@@ -1,6 +1,6 @@
 from outquantlab.config_classes.clusters import generate_dynamic_clusters, AssetsClusters, IndicsClusters
 from outquantlab.config_classes.collections import IndicsConfig, AssetsConfig
-from outquantlab.config_classes.config_state import BacktestConfig, AppConfig, BacktestData
+from outquantlab.config_classes.config_state import BacktestConfig, AppConfig, BacktestResults
 __all__: list[str] = [
     "AssetsClusters",
     "IndicsClusters",
@@ -8,6 +8,6 @@ __all__: list[str] = [
     "AssetsConfig",
     "AppConfig",
     "BacktestConfig",
-    "BacktestData",
+    "BacktestResults",
     "generate_dynamic_clusters",
 ]

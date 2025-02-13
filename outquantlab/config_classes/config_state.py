@@ -14,25 +14,25 @@ from numpy import empty
 
 
 @dataclass(slots=True)
-class BacktestData:
+class BacktestResults:
     assets_nb: int
     start_index: int = 0
-    data: ArrayFloat = field(default_factory=lambda: empty(shape=(0, 0), dtype=Float32))
+    results: ArrayFloat = field(default_factory=lambda: empty(shape=(0, 0), dtype=Float32))
 
-    def get_data_array(self, nb_days: int, total_returns_streams: int) -> None:
-        self.data = empty(
+    def get_results_array(self, nb_days: int, total_returns_streams: int) -> None:
+        self.results = empty(
             shape=(nb_days, total_returns_streams),
             dtype=Float32,
         )
 
-    def fill_data_array(
+    def fill_results_array(
         self,
         results: list[ArrayFloat],
         strategies_nb: int,
     ) -> None:
         for i in range(strategies_nb):
             end_index: int = self.start_index + self.assets_nb
-            self.data[:, self.start_index : end_index] = results[i]
+            self.results[:, self.start_index : end_index] = results[i]
             self.start_index = end_index
 
 

@@ -22,12 +22,12 @@ def get_strategies_returns(
     returns_df: DataFrameFloat,
     backtest_config: BacktestConfig,
 ) -> DataFrameFloat:
-    signals_array: ArrayFloat = process_strategies(
+    results_array: ArrayFloat = process_strategies(
         data_arrays=get_data_arrays(returns_array=returns_df.get_array()),
         backtest_config=backtest_config,
     )
     return DataFrameFloat(
-        data=signals_array,
+        data=results_array,
         index=returns_df.dates,
         columns=backtest_config.multi_index,
     )

@@ -1,7 +1,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from os import cpu_count
 
-from outquantlab.config_classes import BacktestConfig, BacktestData
+from outquantlab.config_classes import BacktestConfig, BacktestResults
 from outquantlab.indicators import BaseIndic, DataArrays
 from outquantlab.typing_conventions import ArrayFloat
 
@@ -10,8 +10,8 @@ def process_strategies(
     data_arrays: DataArrays,
     backtest_config: BacktestConfig,
 ) -> ArrayFloat:
-    backtest_data = BacktestData(assets_nb=data_arrays.prices_array.shape[1])
-    backtest_data.get_data_array(
+    backtest_results = BacktestResults(assets_nb=data_arrays.prices_array.shape[1])
+    backtest_results.get_results_array(
         nb_days=data_arrays.prices_array.shape[0],
         total_returns_streams=len(backtest_config.multi_index),
     )
@@ -26,14 +26,14 @@ def process_strategies(
                     global_executor=global_executor,
                 )
 
-                backtest_data.fill_data_array(
+                backtest_results.fill_results_array(
                     results=results, strategies_nb=indic.strategies_nb
                 )
 
             except Exception as e:
                 raise Exception(f"Error processing indicator {indic.name}: {e}")
 
-    return backtest_data.data
+    return backtest_results.results
 
 
 def process_params_parallel(
