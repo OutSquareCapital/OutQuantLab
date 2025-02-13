@@ -36,13 +36,13 @@ class BaseIndic(ABC):
 
         for combination in parameter_values_combinations:
             combination_dict = dict(zip(parameter_names, combination))
-            if is_valid_combination(parameters_dict=combination_dict):
+            if validate_combination(parameters_dict=combination_dict):
                 valid_pairs.append(combination)
 
         return valid_pairs
 
 
-def is_valid_combination(parameters_dict: dict[str, int]) -> bool:
+def validate_combination(parameters_dict: dict[str, int]) -> bool:
     short_term_param = next((k for k in parameters_dict if "st" in k), None)
     long_term_param = next((k for k in parameters_dict if "lt" in k), None)
 
