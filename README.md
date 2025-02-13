@@ -38,7 +38,6 @@ OutQuantLab is a comprehensive Python-based quantitative analysis platform for b
 - Full-featured GUI built with PySide6
 - Command-line interface
 - Interactive parameter configuration
-- Real-time progress tracking
 - Expandable/collapsible panels
 
 ## Requirements
