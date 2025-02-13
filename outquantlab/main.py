@@ -1,6 +1,6 @@
 import outquantlab.graphs as graphs
 from outquantlab.backtest import execute_backtest
-from outquantlab.config_classes import AppConfig, get_backtest_config
+from outquantlab.config_classes import AppConfig
 from outquantlab.database import DataBaseProvider
 from outquantlab.typing_conventions import DataFrameFloat
 
@@ -17,7 +17,7 @@ class OutQuantLab:
             returns_df=self._dbp.get_data(
                 names=self.app_config.assets_config.get_all_active_entities_names()
             ),
-            backtest_config=get_backtest_config(app_config=self.app_config),
+            backtest_config=self.app_config.get_backtest_config(),
         )
 
     def save(self) -> None:
