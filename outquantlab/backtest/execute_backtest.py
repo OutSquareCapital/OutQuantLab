@@ -15,10 +15,7 @@ def execute_backtest(
         returns_df=returns_df,
         backtest_config=backtest_config,
     )
-    return aggregate_raw_returns(
-        returns_df=returns_df,
-        backtest_config=backtest_config,
-    )
+    return aggregate_raw_returns(returns_df=returns_df)
 
 
 def get_strategies_returns(
@@ -36,27 +33,16 @@ def get_strategies_returns(
     )
 
 
-def aggregate_raw_returns(
-    returns_df: DataFrameFloat,
-    backtest_config: BacktestConfig,
-) -> dict[str, DataFrameFloat]:
+def aggregate_raw_returns(returns_df: DataFrameFloat) -> dict[str, DataFrameFloat]:
     portfolio_dict: dict[str, DataFrameFloat] = {}
-
-    for lvl in range(backtest_config.clusters_nb, 0, -1):
+    for lvl in range(len(returns_df.columns.names), 0, -1):
         returns_df = calculate_portfolio_returns(
             returns_df=returns_df,
-            grouping_levels=backtest_config.clusters_names[:lvl],
+            grouping_levels=returns_df.columns.names[:lvl],
         )
 
         returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
-
-        portfolio_dict[backtest_config.clusters_names[lvl - 1]] = returns_df
-
-        returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
-
-        backtest_config.progress.get_aggregation_progress(
-            lvl=lvl, clusters_nb=backtest_config.clusters_nb
-        )
+        portfolio_dict[returns_df.columns.names[lvl - 1]] = returns_df
 
     portfolio_dict["lvl0"] = get_global_portfolio_returns(returns_df=returns_df)
 
