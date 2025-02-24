@@ -19,23 +19,6 @@ def reduce_array(prices_array: ArrayFloat, frequency: int) -> ArrayFloat:
         indices: ArrayInt = append(arr=indices, values=array_length - 1)
     return prices_array[indices]
 
-
-def shift_array(original_array: ArrayFloat, step: int = 1) -> ArrayFloat:
-    shifted_array: ArrayFloat = empty_like(prototype=original_array)
-    shifted_array[step:, :] = original_array[:-step, :]
-    shifted_array[:step, :] = nan
-    return shifted_array
-
-
-def calculate_volatility_adjusted_returns(
-    pct_returns_array: ArrayFloat, hv_array: ArrayFloat, target_volatility: int = 15
-) -> ArrayFloat:
-    vol_adj_position_size_shifted: ArrayFloat = shift_array(
-        original_array=target_volatility / hv_array
-    )
-    return pct_returns_array * vol_adj_position_size_shifted
-
-
 def calculate_equity_curves(returns_array: ArrayFloat) -> ArrayFloat:
     temp_array: ArrayFloat = returns_array.copy()
     mask: ArrayFloat = isnan(temp_array)

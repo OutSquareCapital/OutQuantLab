@@ -2,9 +2,9 @@ from concurrent.futures import ThreadPoolExecutor
 from os import cpu_count
 
 from outquantlab.config_classes import BacktestConfig, BacktestResults
-from outquantlab.indicators import BaseIndic, DataArrays
+from outquantlab.indicators import BaseIndic
 from outquantlab.typing_conventions import ArrayFloat
-
+from outquantlab.backtest.data_arrays import DataArrays
 
 def process_strategies(
     data_arrays: DataArrays,
