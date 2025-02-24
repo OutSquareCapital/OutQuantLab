@@ -20,18 +20,14 @@ class BaseIndic(ABC):
     @abstractmethod
     def execute(*args: Any, **kwargs: Any) -> ArrayFloat: ...
 
-    def filter_valid_pairs(self) -> list[tuple[int, ...]]:
+    def filter_valid_pairs(self) -> None:
         parameter_names = list(self.params_values.keys())
         parameter_values_combinations = product(*self.params_values.values())
-        valid_pairs: list[tuple[int, ...]] = []
 
         for combination in parameter_values_combinations:
             combination_dict = dict(zip(parameter_names, combination))
             if validate_combination(parameters_dict=combination_dict):
-                valid_pairs.append(combination)
-
-        return valid_pairs
-
+                self.param_combos.append(combination)
 
 def validate_combination(parameters_dict: dict[str, int]) -> bool:
     short_term_param = next((k for k in parameters_dict if "st" in k), None)
