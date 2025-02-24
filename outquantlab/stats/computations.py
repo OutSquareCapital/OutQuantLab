@@ -10,9 +10,14 @@ from outquantlab.stats.transformations import (
     prepare_sunburst_data,
     sort_dataframe,
     sort_series,
-    format_metric_name,
 )
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
+
+
+def _format_metric_name(name: str) -> str:
+    return (
+        name.replace("calculate_", "").replace("overall_", "").replace("_", " ").title()
+    )
 
 
 def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
@@ -25,7 +30,7 @@ def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
     ]
 
     metric_names: list[str] = [
-        format_metric_name(name=func.__name__) for func in metric_functions
+        _format_metric_name(name=func.__name__) for func in metric_functions
     ]
     results: list[ArrayFloat] = [
         func(returns_df.get_array()) for func in metric_functions

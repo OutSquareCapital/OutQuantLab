@@ -1,5 +1,4 @@
 import plotly.graph_objects as go  # type: ignore
-
 import outquantlab.graphs.widgets as widgets
 import outquantlab.stats as stats
 from outquantlab.typing_conventions import DataFrameFloat
@@ -7,6 +6,10 @@ from outquantlab.typing_conventions import DataFrameFloat
 def _format_plot_name(name: str) -> str:
     return name.replace("plot", "").replace("_", " ").title()
 
+def plot_metrics(returns_df: DataFrameFloat)-> None:
+    metrics: dict[str, float] = stats.get_metrics(returns_df=returns_df)
+    for key, value in metrics.items():
+        print(f"{key}: {value}")
 
 def plot_stats_equity(
     returns_df: DataFrameFloat, show_legend: bool = True
