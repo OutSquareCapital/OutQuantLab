@@ -12,7 +12,7 @@ class DataArrays(NamedTuple):
 
 
 def calculate_volatility_adjusted_returns(
-    pct_returns_array: ArrayFloat, hv_array: ArrayFloat, target_volatility: int = 15
+    pct_returns_array: ArrayFloat, hv_array: ArrayFloat, target_volatility: int = 25
 ) -> ArrayFloat:
     vol_adj_position_size = target_volatility / hv_array
 
