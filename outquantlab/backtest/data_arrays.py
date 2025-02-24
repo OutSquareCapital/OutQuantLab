@@ -5,10 +5,10 @@ from typing import NamedTuple
 
 
 class DataArrays(NamedTuple):
-    prices_array: ArrayFloat
-    hv_array: ArrayFloat
-    log_returns_array: ArrayFloat
-    adjusted_returns_array: ArrayFloat
+    prices: ArrayFloat
+    hv: ArrayFloat
+    log_returns: ArrayFloat
+    adjusted_returns: ArrayFloat
 
 
 def calculate_volatility_adjusted_returns(
@@ -40,8 +40,8 @@ def create_data_arrays(returns_array: ArrayFloat) -> DataArrays:
         pct_returns_array=returns_array, hv_array=hv
     )
     return DataArrays(
-        prices_array=prices_shifted,
-        hv_array=hv,
-        log_returns_array=log_returns,
-        adjusted_returns_array=adjusted_returns,
+        prices=prices_shifted,
+        hv=hv,
+        log_returns=log_returns,
+        adjusted_returns=adjusted_returns,
     )

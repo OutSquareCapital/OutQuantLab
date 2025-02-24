@@ -10,9 +10,9 @@ def process_strategies(
     data_arrays: DataArrays,
     backtest_config: BacktestConfig,
 ) -> ArrayFloat:
-    backtest_results = BacktestResults(assets_nb=data_arrays.prices_array.shape[1])
+    backtest_results = BacktestResults(assets_nb=data_arrays.prices.shape[1])
     backtest_results.get_results_array(
-        nb_days=data_arrays.prices_array.shape[0],
+        nb_days=data_arrays.prices.shape[0],
         total_returns_streams=len(backtest_config.multi_index),
     )
     threads_nb: int = cpu_count() or 8
@@ -52,4 +52,4 @@ def process_params_parallel(
 def process_param(
     indic: BaseIndic, data_arrays: DataArrays, param_tuple: tuple[int, ...]
 ) -> ArrayFloat:
-    return indic.execute(data_arrays, *param_tuple) * data_arrays.adjusted_returns_array
+    return indic.execute(data_arrays, *param_tuple) * data_arrays.adjusted_returns
