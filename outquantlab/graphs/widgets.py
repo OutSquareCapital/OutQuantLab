@@ -1,13 +1,14 @@
-from pandas import DatetimeIndex
 import plotly.graph_objects as go  # type: ignore
+from pandas import DatetimeIndex
 
 from outquantlab.graphs.design import (
     get_color_map,
     get_heatmap_colorscale,
     get_marker_config,
+    setup_custom_hover,
     setup_figure_layout,
 )
-from outquantlab.graphs.ui_constants import COLOR_ADJUSTMENT
+from outquantlab.graphs.ui_constants import Colors
 from outquantlab.metrics import calculate_overall_max, calculate_overall_min
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
@@ -39,6 +40,7 @@ def curves(
         fig.update_layout(yaxis=dict(type="log"))  # type: ignore
 
     setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_custom_hover(fig=fig)
 
     return fig
 
@@ -62,7 +64,7 @@ def bars(series: SeriesFloat, title: str, show_legend: bool) -> go.Figure:
     )
 
     setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
-
+    setup_custom_hover(fig=fig)
     return fig
 
 
@@ -82,9 +84,7 @@ def table(
             ),
         )
     )
-    setup_figure_layout(
-        fig=fig, figtitle=title, show_legend=show_legend, hover_display_custom=False
-    )
+    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
     return fig
 
 
@@ -96,7 +96,6 @@ def heatmap(
     title: str,
     show_legend: bool,
 ) -> go.Figure:
-
     colorscale = get_heatmap_colorscale()
 
     fig = go.Figure(
@@ -122,9 +121,7 @@ def heatmap(
         yaxis=dict(showgrid=False, autorange="reversed")
     )
 
-    setup_figure_layout(
-        fig=fig, figtitle=title, hover_display_custom=False, show_legend=show_legend
-    )
+    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
 
     return fig
 
@@ -142,7 +139,7 @@ def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
                 box_visible=True,
                 points=False,
                 marker=get_marker_config(color=color_map[column]),
-                box_line_color=COLOR_ADJUSTMENT,
+                box_line_color=Colors.WHITE,
                 hoveron="violins",
                 hoverinfo="y",
             )
@@ -161,8 +158,8 @@ def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
         ),
     )
 
-    setup_figure_layout(fig, figtitle=title, show_legend=show_legend)
-
+    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_custom_hover(fig=fig)
     return fig
 
 
@@ -182,16 +179,14 @@ def histogram(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
     fig.update_layout(  # type: ignore
         barmode="overlay"
     )
-    setup_figure_layout(
-        fig=fig, figtitle=title, hover_data="x", show_legend=show_legend
-    )
+    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_custom_hover(fig=fig, hover_data="x")
     return fig
 
 
 def icicle(
     labels: list[str], parents: list[str], title: str, show_legend: bool
 ) -> go.Figure:
-    
     fig = go.Figure(
         data=go.Icicle(
             labels=labels,
@@ -199,8 +194,6 @@ def icicle(
             tiling=dict(orientation="h"),
         )
     )
-    setup_figure_layout(
-        fig=fig, figtitle=title, hover_display_custom=False, show_legend=show_legend
-    )
+    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
 
     return fig
