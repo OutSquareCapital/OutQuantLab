@@ -1,4 +1,5 @@
 from outquantlab.graphs.display import (
+    plot_metrics,
     plot_correlation_clusters_icicle,
     plot_correlation_heatmap,
     plot_stats_distribution_histogram,
@@ -18,6 +19,7 @@ from outquantlab.graphs.display import (
 
 
 __all__: list[str] = [
+    "plot_metrics",
     "plot_correlation_clusters_icicle",
     "plot_correlation_heatmap",
     "plot_stats_distribution_histogram",
