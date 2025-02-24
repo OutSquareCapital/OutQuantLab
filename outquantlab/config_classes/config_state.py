@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from pandas import MultiIndex
 
@@ -9,32 +9,7 @@ from outquantlab.config_classes.clusters import (
     generate_levels,
 )
 from outquantlab.config_classes.collections import AssetsConfig, IndicsConfig
-from outquantlab.typing_conventions import ArrayFloat, Float32
-from numpy import empty
 from typing import NamedTuple
-
-@dataclass(slots=True)
-class BacktestResults:
-    assets_nb: int
-    start_index: int = 0
-    results: ArrayFloat = field(default_factory=lambda: empty(shape=(0, 0), dtype=Float32))
-
-    def get_results_array(self, nb_days: int, total_returns_streams: int) -> None:
-        self.results = empty(
-            shape=(nb_days, total_returns_streams),
-            dtype=Float32,
-        )
-
-    def fill_results_array(
-        self,
-        results: list[ArrayFloat],
-        strategies_nb: int,
-    ) -> None:
-        for i in range(strategies_nb):
-            end_index: int = self.start_index + self.assets_nb
-            self.results[:, self.start_index : end_index] = results[i]
-            self.start_index = end_index
-
 
 class BacktestConfig(NamedTuple):
     multi_index: MultiIndex

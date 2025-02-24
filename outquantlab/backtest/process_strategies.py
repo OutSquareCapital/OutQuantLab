@@ -1,19 +1,42 @@
 from concurrent.futures import ThreadPoolExecutor
 from os import cpu_count
-
-from outquantlab.config_classes import BacktestConfig, BacktestResults
+from dataclasses import dataclass, field
+from outquantlab.config_classes import BacktestConfig
 from outquantlab.indicators import BaseIndic
-from outquantlab.typing_conventions import ArrayFloat
+from outquantlab.typing_conventions import ArrayFloat, Float32
 from outquantlab.backtest.data_arrays import DataArrays
+from numpy import empty
+
+@dataclass(slots=True)
+class BacktestResults:
+    assets_nb: int
+    start_index: int = 0
+    results: ArrayFloat = field(default_factory=lambda: empty(shape=(0, 0), dtype=Float32))
+
+    def get_results_array(self, nb_days: int, total_returns_streams: int) -> None:
+        self.results = empty(
+            shape=(nb_days, total_returns_streams),
+            dtype=Float32,
+        )
+
+    def fill_results_array(
+        self,
+        results: list[ArrayFloat],
+        strategies_nb: int,
+    ) -> None:
+        for i in range(strategies_nb):
+            end_index: int = self.start_index + self.assets_nb
+            self.results[:, self.start_index : end_index] = results[i]
+            self.start_index = end_index
+
 
 def process_strategies(
     data_arrays: DataArrays,
     backtest_config: BacktestConfig,
 ) -> ArrayFloat:
-    backtest_results = BacktestResults(assets_nb=data_arrays.prices.shape[1])
-    backtest_results.get_results_array(
-        nb_days=data_arrays.prices.shape[0],
-        total_returns_streams=len(backtest_config.multi_index),
+    backtest_results: BacktestResults = prepare_backtest_results(
+        data_arrays=data_arrays,
+        backtest_config=backtest_config,
     )
     threads_nb: int = cpu_count() or 8
 
@@ -35,6 +58,16 @@ def process_strategies(
 
     return backtest_results.results
 
+def prepare_backtest_results(
+    data_arrays: DataArrays,
+    backtest_config: BacktestConfig,
+) -> BacktestResults:
+    backtest_results = BacktestResults(assets_nb=data_arrays.prices.shape[1])
+    backtest_results.get_results_array(
+        nb_days=data_arrays.prices.shape[0],
+        total_returns_streams=len(backtest_config.multi_index),
+    )
+    return backtest_results
 
 def process_params_parallel(
     indic: BaseIndic,
