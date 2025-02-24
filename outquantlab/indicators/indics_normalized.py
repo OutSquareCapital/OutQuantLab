@@ -1,11 +1,16 @@
 import outquantlab.indicators.indics_raw as raw
 import outquantlab.metrics.normalization as norm
-from outquantlab.indicators.indics_config import DataArrays, BaseIndic
+from outquantlab.indicators.indics_config import BaseIndic
 from outquantlab.typing_conventions import ArrayFloat
+from typing import Protocol
+
+class AssetsData(Protocol):
+    prices_array: ArrayFloat
+    log_returns_array: ArrayFloat
 
 class IndicsNormalized:
     class MeanPriceRatio(BaseIndic):
-        def execute(self, data_arrays: DataArrays, len_st: int, len_lt: int) -> ArrayFloat:
+        def execute(self, data_arrays: AssetsData, len_st: int, len_lt: int) -> ArrayFloat:
             mean_price_ratio_raw: ArrayFloat = raw.calculate_mean_price_ratio_raw(
                 prices_array=data_arrays.prices_array,
                 len_st=len_st,
@@ -15,7 +20,7 @@ class IndicsNormalized:
 
 
     class MedianPriceRatio(BaseIndic):
-        def execute(self, data_arrays: DataArrays, len_st: int, len_lt: int) -> ArrayFloat:
+        def execute(self, data_arrays: AssetsData, len_st: int, len_lt: int) -> ArrayFloat:
             median_price_ratio_raw: ArrayFloat = raw.calculate_median_price_ratio_raw(
                 prices_array=data_arrays.prices_array,
                 len_st=len_st,
@@ -25,7 +30,7 @@ class IndicsNormalized:
 
 
     class CentralPriceRatio(BaseIndic):
-        def execute(self, data_arrays: DataArrays, len_st: int, len_lt: int) -> ArrayFloat:
+        def execute(self, data_arrays: AssetsData, len_st: int, len_lt: int) -> ArrayFloat:
             central_price_ratio_raw: ArrayFloat = raw.calculate_central_price_ratio_raw(
                 prices_array=data_arrays.prices_array,
                 len_st=len_st,
@@ -35,7 +40,7 @@ class IndicsNormalized:
 
 
     class MeanRateOfChange(BaseIndic):
-        def execute(self, data_arrays: DataArrays, len_st: int, len_lt: int) -> ArrayFloat:
+        def execute(self, data_arrays: AssetsData, len_st: int, len_lt: int) -> ArrayFloat:
             mean_roc_raw: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns_array,
                 len_st=len_st,
@@ -45,7 +50,7 @@ class IndicsNormalized:
 
 
     class MedianRateOfChange(BaseIndic):
-        def execute(self, data_arrays: DataArrays, len_st: int, len_lt: int) -> ArrayFloat:
+        def execute(self, data_arrays: AssetsData, len_st: int, len_lt: int) -> ArrayFloat:
             median_roc_raw: ArrayFloat = raw.calculate_median_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns_array,
                 len_st=len_st,
@@ -55,7 +60,7 @@ class IndicsNormalized:
 
 
     class CentralRateOfChange(BaseIndic):
-        def execute(self, data_arrays: DataArrays, len_st: int, len_lt: int) -> ArrayFloat:
+        def execute(self, data_arrays: AssetsData, len_st: int, len_lt: int) -> ArrayFloat:
             central_roc_raw: ArrayFloat = raw.calculate_central_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns_array,
                 len_st=len_st,
@@ -66,7 +71,7 @@ class IndicsNormalized:
 
     class MeanPriceMacd(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_st: int, len_lt: int, len_macd: int
+            self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
         ) -> ArrayFloat:
             mean_price_ratio_macd_raw: ArrayFloat = raw.calculate_mean_price_macd_raw(
                 prices_array=data_arrays.prices_array,
@@ -79,7 +84,7 @@ class IndicsNormalized:
 
     class MedianPriceMacd(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_st: int, len_lt: int, len_macd: int
+            self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
         ) -> ArrayFloat:
             median_price_ratio_macd_raw: ArrayFloat = raw.calculate_median_price_macd_raw(
                 prices_array=data_arrays.prices_array,
@@ -92,7 +97,7 @@ class IndicsNormalized:
 
     class CentralPriceMacd(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_st: int, len_lt: int, len_macd: int
+            self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
         ) -> ArrayFloat:
             central_price_ratio_macd_raw: ArrayFloat = raw.calculate_central_price_macd_raw(
                 prices_array=data_arrays.prices_array,
@@ -105,7 +110,7 @@ class IndicsNormalized:
 
     class MeanRateOfChangeMacd(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_st: int, len_lt: int, len_macd: int
+            self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
         ) -> ArrayFloat:
             mean_roc_macd_raw: ArrayFloat = raw.calculate_mean_rate_of_change_macd_raw(
                 returns_array=data_arrays.log_returns_array,
@@ -118,7 +123,7 @@ class IndicsNormalized:
 
     class MedianRateOfChangeMacd(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_st: int, len_lt: int, len_macd: int
+            self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
         ) -> ArrayFloat:
             median_roc_macd_raw: ArrayFloat = raw.calculate_median_rate_of_change_macd_raw(
                 returns_array=data_arrays.log_returns_array,
@@ -131,7 +136,7 @@ class IndicsNormalized:
 
     class CentralRateOfChangeMacd(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_st: int, len_lt: int, len_macd: int
+            self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
         ) -> ArrayFloat:
             central_roc_macd_raw: ArrayFloat = (
                 raw.calculate_central_rate_of_change_macd_raw(
@@ -147,7 +152,7 @@ class IndicsNormalized:
     class MeanPriceMacdTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_st: int,
             len_lt: int,
             len_macd: int,
@@ -175,7 +180,7 @@ class IndicsNormalized:
     class MedianPriceMacdTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_st: int,
             len_lt: int,
             len_macd: int,
@@ -202,7 +207,7 @@ class IndicsNormalized:
     class CentralPriceMacdTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_st: int,
             len_lt: int,
             len_macd: int,
@@ -229,7 +234,7 @@ class IndicsNormalized:
     class MeanRateOfChangeMacdTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_st: int,
             len_lt: int,
             len_macd: int,
@@ -256,7 +261,7 @@ class IndicsNormalized:
     class MedianRateOfChangeMacdTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_st: int,
             len_lt: int,
             len_macd: int,
@@ -285,7 +290,7 @@ class IndicsNormalized:
     class CentralRateOfChangeMacdTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_st: int,
             len_lt: int,
             len_macd: int,
@@ -312,13 +317,13 @@ class IndicsNormalized:
 
 
     class FixedBias(BaseIndic):
-        def execute(self, data_arrays: DataArrays, Bias: int) -> ArrayFloat:
+        def execute(self, data_arrays: AssetsData, Bias: int) -> ArrayFloat:
             return raw.get_fixed_bias(prices_array=data_arrays.prices_array, Bias=Bias)
 
 
     class MeanPriceRatioNormalised(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_signal: int, len_norm: int
+            self, data_arrays: AssetsData, len_signal: int, len_norm: int
         ) -> ArrayFloat:
             normalised_price_ratio: ArrayFloat = (
                 raw.calculate_normalised_mean_price_ratio_raw(
@@ -332,7 +337,7 @@ class IndicsNormalized:
 
     class MeanRateOfChangeNormalised(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_signal: int, len_norm: int
+            self, data_arrays: AssetsData, len_signal: int, len_norm: int
         ) -> ArrayFloat:
             normalised_roc: ArrayFloat = raw.calculate_normalised_mean_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns_array,
@@ -346,7 +351,7 @@ class IndicsNormalized:
     class MeanRateOfChangeNormalisedTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_signal: int,
             len_norm: int,
             len_st: int,
@@ -373,7 +378,7 @@ class IndicsNormalized:
     class MeanPriceRatioNormalisedTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_signal: int,
             len_norm: int,
             len_st: int,
@@ -399,7 +404,7 @@ class IndicsNormalized:
 
     class Skewness(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_smooth: int, len_skew: int
+            self, data_arrays: AssetsData, len_smooth: int, len_skew: int
         ) -> ArrayFloat:
             skewness_array: ArrayFloat = raw.smoothed_skewness(
                 log_returns_array=data_arrays.log_returns_array,
@@ -411,7 +416,7 @@ class IndicsNormalized:
 
     class RelativeSkewness(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_smooth: int, len_skew: int
+            self, data_arrays: AssetsData, len_smooth: int, len_skew: int
         ) -> ArrayFloat:
             relative_skew: ArrayFloat = raw.calculate_relative_skewness(
                 log_returns_array=data_arrays.log_returns_array,
@@ -423,7 +428,7 @@ class IndicsNormalized:
 
     class SkewnessOnKurtosis(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_smooth: int, len_skew: int
+            self, data_arrays: AssetsData, len_smooth: int, len_skew: int
         ) -> ArrayFloat:
             skew_on_kurt_signal: ArrayFloat = raw.calculate_skew_on_kurtosis(
                 log_returns_array=data_arrays.log_returns_array,
@@ -435,7 +440,7 @@ class IndicsNormalized:
 
     class RelativeSkewnessOnKurtosis(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_smooth: int, len_skew: int
+            self, data_arrays: AssetsData, len_smooth: int, len_skew: int
         ) -> ArrayFloat:
             relative_skew_on_kurt_signal: ArrayFloat = (
                 raw.calculate_relative_skew_on_kurtosis(
@@ -450,7 +455,7 @@ class IndicsNormalized:
     class SkewnessTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_smooth: int,
             len_skew: int,
             len_trend_st: int,
@@ -475,7 +480,7 @@ class IndicsNormalized:
     class RelativeSkewnessTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_smooth: int,
             len_skew: int,
             len_trend_st: int,
@@ -501,7 +506,7 @@ class IndicsNormalized:
     class SkewnessOnKurtosisTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_smooth: int,
             len_skew: int,
             len_trend_st: int,
@@ -525,7 +530,7 @@ class IndicsNormalized:
     class RelativeSkewnessOnKurtosisTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_smooth: int,
             len_skew: int,
             len_trend_st: int,
@@ -555,7 +560,7 @@ class IndicsNormalized:
 
     class RelativeDirectionalVolatility(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_smooth: int, len_relative: int, len_vol: int
+            self, data_arrays: AssetsData, len_smooth: int, len_relative: int, len_vol: int
         ) -> ArrayFloat:
             relative_directional_vol_signal: ArrayFloat = (
                 raw.relative_directional_volatility(
@@ -570,7 +575,7 @@ class IndicsNormalized:
 
     class NormalisedDirectionalVolatility(BaseIndic):
         def execute(
-            self, data_arrays: DataArrays, len_smooth: int, len_norm: int, len_vol: int
+            self, data_arrays: AssetsData, len_smooth: int, len_norm: int, len_vol: int
         ) -> ArrayFloat:
             normalised_directional_vol: ArrayFloat = raw.normalised_directional_volatility(
                 log_returns_array=data_arrays.log_returns_array,
@@ -585,7 +590,7 @@ class IndicsNormalized:
     class RelativeDirectionalVolatilityTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_smooth: int,
             len_relative: int,
             len_vol: int,
@@ -618,7 +623,7 @@ class IndicsNormalized:
     class NormalisedDirectionalVolatilityTrend(BaseIndic):
         def execute(
             self,
-            data_arrays: DataArrays,
+            data_arrays: AssetsData,
             len_smooth: int,
             len_norm: int,
             len_vol: int,
