@@ -11,7 +11,7 @@ from outquantlab.config_classes.clusters import (
 from outquantlab.config_classes.collections import AssetsConfig, IndicsConfig
 from outquantlab.typing_conventions import ArrayFloat, Float32
 from numpy import empty
-
+from typing import NamedTuple
 
 @dataclass(slots=True)
 class BacktestResults:
@@ -36,8 +36,7 @@ class BacktestResults:
             self.start_index = end_index
 
 
-@dataclass(slots=True, frozen=True)
-class BacktestConfig:
+class BacktestConfig(NamedTuple):
     multi_index: MultiIndex
     indics_params: list[BaseIndic]
 
