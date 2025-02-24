@@ -7,6 +7,8 @@ from outquantlab.typing_conventions import ArrayFloat
 def calculate_overall_mean(array: ArrayFloat, axis: None | int = 0) -> ArrayFloat:
     return bn.nanmean(array, axis)  # type: ignore
 
+def calculate_overall_median(array: ArrayFloat, axis: None | int = 0) -> ArrayFloat:
+    return bn.nanmedian(array, axis)  # type: ignore
 
 def rolling_mean(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
     return bn.move_mean(array, window=length, min_count=min_length, axis=0)  # type: ignore
