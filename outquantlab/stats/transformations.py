@@ -1,5 +1,5 @@
 from numpy import argsort, fill_diagonal, nan, nanmax, nanmin, quantile, where, zeros_like
-from pandas import MultiIndex, Index
+from pandas import MultiIndex
 
 from outquantlab.metrics import PERCENTAGE_FACTOR, calculate_overall_mean
 from outquantlab.typing_conventions import (
@@ -30,11 +30,13 @@ def format_returns(returns_array: ArrayFloat, limit: float) -> ArrayFloat:
 
 
 def convert_multiindex_to_labels(df: DataFrameFloat) -> list[str]:
-    multi_index: MultiIndex = df.columns  # type: ignore
-    flattened_index: Index = multi_index.map(mapper="_".join)  # type: ignore
-    labels: list[str] = flattened_index.to_list()
+    if isinstance(df.columns, MultiIndex):
+        labels: list[str] = [
+            "_".join(col).replace(" ", "_") for col in df.columns.to_list()
+        ]
+    else:
+        labels: list[str] = df.columns.to_list()
     return labels
-
 
 def prepare_sunburst_data(
     cluster_dict: dict[str, list[str]],
