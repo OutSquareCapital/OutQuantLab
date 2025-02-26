@@ -1,4 +1,3 @@
-
 from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
 from scipy.spatial.distance import squareform
 
@@ -6,11 +5,11 @@ from outquantlab.config_classes.collections import Asset
 from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.indicators import BaseIndic
 from outquantlab.metrics import calculate_distance_matrix
-from outquantlab.typing_conventions import ArrayFloat, ClustersHierarchy, DataFrameFloat
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 
 class AssetsClusters(BaseClustersTree):
-    def __init__(self, clusters: ClustersHierarchy) -> None:
+    def __init__(self, clusters: dict[str, dict[str, list[str]]]) -> None:
         super().__init__(clusters=clusters, prefix="Asset")
 
     def get_clusters_tuples(self, entities: list[Asset]) -> list[tuple[str, ...]]:
@@ -21,7 +20,7 @@ class AssetsClusters(BaseClustersTree):
 
 
 class IndicsClusters(BaseClustersTree):
-    def __init__(self, clusters: ClustersHierarchy) -> None:
+    def __init__(self, clusters: dict[str, dict[str, list[str]]]) -> None:
         super().__init__(clusters=clusters, prefix="Indic")
 
     def get_clusters_tuples(self, entities: list[BaseIndic]) -> list[tuple[str, ...]]:
@@ -39,12 +38,11 @@ def generate_levels(num_levels: int) -> list[str]:
     return [f"lvl{i + 1}" for i in range(num_levels)]
 
 
-
 def get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
     distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
     distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
-    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward") # type: ignore
-    return fcluster(linkage_matrix, max_clusters, criterion="maxclust") # type: ignore
+    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")  # type: ignore
+    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")  # type: ignore
 
 
 def get_assets_in_cluster(

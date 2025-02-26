@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Protocol, TypeVar
 
-from outquantlab.typing_conventions import ClustersHierarchy
-
 
 class StrategyComponent(Protocol):
     name: str
@@ -37,11 +35,13 @@ class BaseConfig(ABC, Generic[T]):
 
 
 class BaseClustersTree(ABC):
-    def __init__(self, clusters: ClustersHierarchy, prefix: str) -> None:
-        self.clusters: ClustersHierarchy = clusters
+    def __init__(self, clusters: dict[str, dict[str, list[str]]], prefix: str) -> None:
+        self.clusters: dict[str, dict[str, list[str]]] = clusters
         self.prefix: str = prefix
 
-    def update_clusters_structure(self, new_structure: ClustersHierarchy) -> None:
+    def update_clusters_structure(
+        self, new_structure: dict[str, dict[str, list[str]]]
+    ) -> None:
         self.clusters = new_structure
 
     def map_nested_clusters_to_entities(self) -> dict[str, tuple[str, str]]:

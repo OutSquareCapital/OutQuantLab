@@ -9,7 +9,6 @@ from outquantlab.typing_conventions.custom_types import (
     Int32,
     ArrayFloat,
     ArrayInt,
-    ClustersHierarchy
 )
 
 __all__: list[str] = [
@@ -20,5 +19,4 @@ __all__: list[str] = [
     'ArrayInt',
     'SeriesFloat',
     'DataFrameFloat',
-    'ClustersHierarchy',
 ]
