@@ -14,6 +14,7 @@ Welcome to this project! This guide outlines the conventions to follow to mainta
    - **All** variables, function arguments, and return types must be explicitly typed.
    - Type aliases (`TypeAlias`) must be used where appropriate.
    - Type hints must align with the project's `custom_types.py` and `custom_classes.py` standards.
+   - Deprecated typing module (List instead of list for example) must NOT be used
 4. **Linting and Formatting**:  
    - **Ruff** is used for linting and import formatting.
    - **Pylance** must run in strict mode.
