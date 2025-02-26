@@ -1,11 +1,14 @@
 import json
 from dataclasses import dataclass, field
-from typing import Any, Final, Protocol
+from typing import Any, Protocol
 
 from pandas import DataFrame, read_parquet
+from enum import Enum
 
-JSON: Final[str] = ".json"
-PARQUET: Final[str] = ".parquet"
+
+class Extension(Enum):
+    JSON = ".json"
+    PARQUET = ".parquet"
 
 
 class FileHandler(Protocol):
@@ -39,13 +42,17 @@ class ParquetHandler(FileHandler):
         data.to_parquet(path, engine="pyarrow", index=True)
 
 
+_HANDLER_REGISTRY = {
+    Extension.JSON.value: JSONHandler,
+    Extension.PARQUET.value: ParquetHandler,
+}
+
+
 def create_handler(ext: str) -> FileHandler:
-    if ext == JSON:
-        return JSONHandler()
-    elif ext == PARQUET:
-        return ParquetHandler()
-    else:
+    handler_class = _HANDLER_REGISTRY.get(ext)
+    if handler_class is None:
         raise ValueError(f"Unsupported extension: {ext}")
+    return handler_class()
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,3 +69,7 @@ class DataFile:
 
     def save(self, data: Any) -> None:
         self.handler.save(path=self.path, data=data)
+
+    @property
+    def handler_name(self) -> str:
+        return self.handler.__class__.__name__
