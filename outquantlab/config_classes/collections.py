@@ -60,6 +60,12 @@ class IndicsConfig(BaseConfig[BaseIndic]):
 
         return active_indics
 
+    def prepare_indic_params(self) -> dict[str, dict[str, list[int]]]:
+        data: dict[str, dict[str, list[int]]] = {}
+        for name, indicator in self.entities.items():
+            data[name] = indicator.params_values
+        return data
+
 
 class AssetsConfig(BaseConfig[Asset]):
     def __init__(self, assets_to_test: dict[str, bool], asset_names: list[str]) -> None:
