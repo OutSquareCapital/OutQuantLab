@@ -47,9 +47,9 @@ def process_data(data: ArrayFloat) -> ArrayFloat:
     return data * 1.5
 ```
 
-### 2. Using Dataclasses as Structs
+### 2. Using Dataclasses and Enums as Structs
 
-If a data structure is required, use a dataclass with no methods:
+If a data structure with variables is required (to better handle related variables when passing them as arguments for example), use a dataclass with no methods:
 
 ```python
 from dataclasses import dataclass
@@ -60,7 +60,11 @@ class Measurement:
     value: Float32
 ```
 
-If methods and state management are necessary, justify the use of a class.
+If methods and state management are necessary, justify the use of a "regular" class.
+A convenient API is a justification. But by default, if a method is private, it should be outside of the class, unless there's a whole lot of arguments to pass.
+If the dataclass contain constants that are computed during execution AND there's no method, use a NamedTuple.
+If there's a method, use a frozen dataclass.
+If there's no method and the constants values are hardcoded, use an Enum.
 
 ### 3. Handling DataFrames and Series
 
@@ -72,6 +76,24 @@ from custom_classes import DataFrameFloat, SeriesFloat
 df: DataFrameFloat = DataFrameFloat(data=my_array, index=my_dates, columns=my_labels)
 ```
 
+### 4. Scope
+
+If a function is used only into it's own module, precise it with an underscore:
+
+```python
+def _private_function_() -> None:
+    pass
+```
+This allow  IDE to warn you if a function is not used, and facilitate the __init__.py files when setting up a package, since you will only import the public funcs into it. 
+Same logic applies with private methods, altough as already said into point 2, it shouldn't happen often.
+By definition, there's no private class or const, it will be public for the package.
+The public scope of a package will be handled with the init file, like this:
+```python
+from module import public_func
+ __all__: list[str] = [
+    'public_func'
+]
+```
 ---
 
 ## 📝 Documentation
