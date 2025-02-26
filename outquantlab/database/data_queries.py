@@ -1,11 +1,10 @@
 import os
 
 from outquantlab.database.data_file import DataFile
+from outquantlab.database.data_structure import DB_NAME
 
-DATA_DIR: str = "data"
 
-
-def get_base_dir(data_dir: str = DATA_DIR) -> str:
+def get_base_dir(data_dir: str = DB_NAME) -> str:
     current_file_path: str = os.path.abspath(__file__)
     current_dir: str = os.path.dirname(current_file_path)
     return os.path.join(current_dir, data_dir)

@@ -1,15 +1,8 @@
 import json
 from dataclasses import dataclass, field
 from typing import Any, Protocol
-
+from outquantlab.database.data_structure import Extension
 from pandas import DataFrame, read_parquet
-from enum import Enum
-
-
-class Extension(Enum):
-    JSON = ".json"
-    PARQUET = ".parquet"
-
 
 class FileHandler(Protocol):
     def load(self, path: str, names: list[str] | None = None) -> Any:
