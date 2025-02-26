@@ -24,6 +24,7 @@ def generate_datafiles() -> dict[str, DataFile]:
             data_files[file_name] = datafile
     return data_files
 
+
 class DataQueries:
     def __init__(self) -> None:
         self.data_files: dict[str, DataFile] = generate_datafiles()
@@ -32,3 +33,9 @@ class DataQueries:
         if file not in self.data_files:
             raise KeyError(f"No file mapped for key: {file}")
         return self.data_files[file]
+
+    def get_data_structure(self) -> None:
+        for key, value in self.data_files.items():
+            print(
+                f"{key}:\n  ext: {value.ext}\n  path: {value.path}\n  handler: {value.handler_name}\n"
+            )
