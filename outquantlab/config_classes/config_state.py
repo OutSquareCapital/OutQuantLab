@@ -10,9 +10,11 @@ from outquantlab.config_classes.clusters import (
 from outquantlab.config_classes.collections import AssetsConfig, IndicsConfig
 from typing import NamedTuple
 
+
 class BacktestConfig(NamedTuple):
     multi_index: MultiIndex
     indics_params: list[BaseIndic]
+
 
 @dataclass(slots=True)
 class AppConfig:
@@ -32,20 +34,29 @@ class AppConfig:
         indics_tuples: list[tuple[str, ...]] = self.indics_clusters.get_clusters_tuples(
             entities=indics_params
         )
-        product_tuples: list[tuple[str, ...]] = [
-            (*asset_clusters, *indic_clusters)
-            for indic_clusters in indics_tuples
-            for asset_clusters in asset_tuples
-        ]
-        num_levels: int = len(product_tuples[0])
-        multi_index: MultiIndex = MultiIndex.from_tuples(  # type: ignore
-            tuples=product_tuples,
-            names=_generate_levels(num_levels=num_levels),
+        multi_index: MultiIndex = _get_multi_index(
+            asset_tuples=asset_tuples,
+            indics_tuples=indics_tuples,
         )
-        return BacktestConfig(
-            multi_index=multi_index,
-            indics_params=indics_params
-        )
+        return BacktestConfig(multi_index=multi_index, indics_params=indics_params)
+
 
 def _generate_levels(num_levels: int) -> list[str]:
     return [f"lvl{i + 1}" for i in range(num_levels)]
+
+
+def _get_multi_index(
+    asset_tuples: list[tuple[str, ...]],
+    indics_tuples: list[tuple[str, ...]],
+) -> MultiIndex:
+    product_tuples: list[tuple[str, ...]] = [
+        (*asset_clusters, *indic_clusters)
+        for indic_clusters in indics_tuples
+        for asset_clusters in asset_tuples
+    ]
+    num_levels: int = len(product_tuples[0])
+
+    return MultiIndex.from_tuples(  # type: ignore
+        tuples=product_tuples,
+        names=_generate_levels(num_levels=num_levels),
+    )
