@@ -34,18 +34,31 @@ class IndicsClusters(BaseClustersTree):
         ]
 
 
-def generate_levels(num_levels: int) -> list[str]:
-    return [f"lvl{i + 1}" for i in range(num_levels)]
+def generate_dynamic_clusters(
+    returns_df: DataFrameFloat, max_clusters: int
+) -> dict[str, list[str]]:
+    flat_clusters: list[int] = _get_flat_clusters(
+        returns_array=returns_df.get_array(), max_clusters=max_clusters
+    )
+    asset_names: list[str] = returns_df.columns.tolist()
+
+    return _assign_clusters(
+        max_clusters=max_clusters, asset_names=asset_names, flat_clusters=flat_clusters
+    )
 
 
-def get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
-    distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
-    distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
-    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")  # type: ignore
-    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")  # type: ignore
+def _assign_clusters(
+    max_clusters: int, asset_names: list[str], flat_clusters: list[int]
+) -> dict[str, list[str]]:
+    return {
+        str(object=cluster_id): _get_assets_in_cluster(
+            cluster_id=cluster_id, asset_names=asset_names, flat_clusters=flat_clusters
+        )
+        for cluster_id in range(1, max_clusters + 1)
+    }
 
 
-def get_assets_in_cluster(
+def _get_assets_in_cluster(
     cluster_id: int, asset_names: list[str], flat_clusters: list[int]
 ) -> list[str]:
     return [
@@ -55,25 +68,8 @@ def get_assets_in_cluster(
     ]
 
 
-def assign_clusters(
-    max_clusters: int, asset_names: list[str], flat_clusters: list[int]
-) -> dict[str, list[str]]:
-    return {
-        str(object=cluster_id): get_assets_in_cluster(
-            cluster_id=cluster_id, asset_names=asset_names, flat_clusters=flat_clusters
-        )
-        for cluster_id in range(1, max_clusters + 1)
-    }
-
-
-def generate_dynamic_clusters(
-    returns_df: DataFrameFloat, max_clusters: int
-) -> dict[str, list[str]]:
-    flat_clusters: list[int] = get_flat_clusters(
-        returns_array=returns_df.get_array(), max_clusters=max_clusters
-    )
-    asset_names: list[str] = returns_df.columns.tolist()
-
-    return assign_clusters(
-        max_clusters=max_clusters, asset_names=asset_names, flat_clusters=flat_clusters
-    )
+def _get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
+    distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
+    distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
+    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")  # type: ignore
+    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")  # type: ignore
