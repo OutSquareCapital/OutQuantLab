@@ -84,16 +84,19 @@ If a function is used only into it's own module, precise it with an underscore:
 def _private_function_() -> None:
     pass
 ```
-This allow  IDE to warn you if a function is not used, and facilitate the __init__.py files when setting up a package, since you will only import the public funcs into it. 
+
+This allow  IDE to warn you if a function is not used, and facilitate the init.py files when setting up a package, since you will only import the public funcs into it.
 Same logic applies with private methods, altough as already said into point 2, it shouldn't happen often.
 By definition, there's no private class or const, it will be public for the package.
 The public scope of a package will be handled with the init file, like this:
+
 ```python
 from module import public_func
  __all__: list[str] = [
     'public_func'
 ]
 ```
+
 ---
 
 ## 📝 Documentation
