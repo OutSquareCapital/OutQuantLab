@@ -6,7 +6,6 @@ from outquantlab.config_classes.clusters import (
     AssetsClusters,
     BaseIndic,
     IndicsClusters,
-    generate_levels,
 )
 from outquantlab.config_classes.collections import AssetsConfig, IndicsConfig
 from typing import NamedTuple
@@ -41,9 +40,12 @@ class AppConfig:
         num_levels: int = len(product_tuples[0])
         multi_index: MultiIndex = MultiIndex.from_tuples(  # type: ignore
             tuples=product_tuples,
-            names=generate_levels(num_levels=num_levels),
+            names=_generate_levels(num_levels=num_levels),
         )
         return BacktestConfig(
             multi_index=multi_index,
             indics_params=indics_params
         )
+
+def _generate_levels(num_levels: int) -> list[str]:
+    return [f"lvl{i + 1}" for i in range(num_levels)]
