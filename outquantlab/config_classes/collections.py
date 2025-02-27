@@ -49,15 +49,7 @@ class IndicsConfig(BaseConfig[BaseIndic]):
         active_indics: list[BaseIndic] = self.get_all_active_entities()
 
         for indic in active_indics:
-            indic.filter_valid_pairs()
-
-            if not indic.param_combos:
-                raise ValueError(
-                    f"Aucune combinaison valide trouvée pour l'indicateur {indic.name}"
-                )
-
-            indic.strategies_nb = len(indic.param_combos)
-
+            indic.get_valid_pairs()
         return active_indics
 
     def prepare_indic_params(self) -> dict[str, dict[str, list[int]]]:

@@ -1,8 +1,7 @@
 from outquantlab.typing_conventions import ArrayFloat
+from outquantlab.indicators.params_validations import filter_valid_pairs
 from abc import ABC, abstractmethod
 from typing import Any
-from itertools import product
-
 
 class BaseIndic(ABC):
     def __init__(
@@ -20,28 +19,12 @@ class BaseIndic(ABC):
     @abstractmethod
     def execute(*args: Any, **kwargs: Any) -> ArrayFloat: ...
 
-    def filter_valid_pairs(self) -> None:
-        parameter_names = list(self.params_values.keys())
-        parameter_values_combinations = product(*self.params_values.values())
+    def get_valid_pairs(self) -> None:
+        self.param_combos = filter_valid_pairs(params_values=self.params_values)
 
-        for combination in parameter_values_combinations:
-            combination_dict = dict(zip(parameter_names, combination))
-            if validate_combination(parameters_dict=combination_dict):
-                self.param_combos.append(combination)
+        if not self.param_combos:
+            raise ValueError(
+                f"Aucune combinaison valide trouvée pour l'indicateur {self.name}"
+            )
 
-def validate_combination(parameters_dict: dict[str, int]) -> bool:
-    short_term_param = next((k for k in parameters_dict if "st" in k), None)
-    long_term_param = next((k for k in parameters_dict if "lt" in k), None)
-
-    if short_term_param and long_term_param:
-        if parameters_dict[short_term_param] * 4 > parameters_dict[long_term_param]:
-            return False
-
-    if "len_smooth" in parameters_dict and "len_skew" in parameters_dict:
-        if (
-            parameters_dict["len_smooth"] > 1
-            and parameters_dict["len_smooth"] * 8 > parameters_dict["len_skew"]
-        ):
-            return False
-
-    return True
+        self.strategies_nb = len(self.param_combos)
