@@ -1,10 +1,8 @@
 from collections.abc import Callable
 from itertools import product
 
-ValidationPredicate = Callable[[dict[str, int]], bool]
-ValidationRule = tuple[ValidationPredicate, ValidationPredicate]
-
-# TODO: integrer name de la class indic afin de pouvoir directement lier le check a l'indic
+ParamsValidator = Callable[[dict[str, int]], bool]
+ValidationProcess = tuple[ParamsValidator, ParamsValidator]
 
 def _check_trend(params: dict[str, int]) -> bool:
     return bool(next((k for k in params if "st" in k), None)) and bool(
@@ -26,7 +24,7 @@ def _validate_skew(params: dict[str, int]) -> bool:
     return params["len_smooth"] * 8 <= params["len_skew"]
 
 
-_VALIDATION_RULES: list[ValidationRule] = [
+_VALIDATION_RULES: list[ValidationProcess] = [
     (_check_trend, _validate_trend),
     (_check_skew, _validate_skew),
 ]
