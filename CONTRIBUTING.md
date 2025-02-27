@@ -2,33 +2,6 @@
 
 Welcome to this project! This guide outlines the conventions to follow to maintain code consistency and ensure seamless integration of contributions.
 
----
-
-## 📌 General Principles
-
-1. **Preferred Paradigm**: Functional programming (FP) is the default. Functions should be pure whenever possible.
-2. **Data Structures**:  
-   - If a data structure repeats, use a dataclass with `slots=True` but **without methods** (it serves as a struct).
-   - A class **with both attributes and methods** should only be used if maintaining an internal state is necessary.
-3. **Strict Type Annotations**:  
-   - **All** variables, function arguments, and return types must be explicitly typed.
-   - Type aliases (`TypeAlias`) must be used where appropriate.
-   - Type hints must align with the project's `custom_types.py` and `custom_classes.py` standards.
-   - Deprecated typing module (List instead of list for example) must NOT be used
-4. **Linting and Formatting**:  
-   - **Ruff** is used for linting and import formatting.
-   - **Pylance** must run in strict mode.
-   - All inlay hints must be enabled.
-5. **Code Style**:  
-   - Use `pyproject.toml` for formatting rules.
-   - Follow `black`'s default line length (88 characters).
-   - Avoid unnecessary one-liners for better readability.
-6. **Imports**:  
-   - Group imports: standard library first, third-party libraries next, then project-specific modules.
-   - Use explicit imports whenever possible.
-
----
-
 ## ✅ Writing Code
 
 ### 1. Functions and Typing
@@ -47,9 +20,11 @@ def process_data(data: ArrayFloat) -> ArrayFloat:
     return data * 1.5
 ```
 
-### 2. Using Dataclasses and Enums as Structs
+### 2. Using Dataclasses and Enums as Structs 🏗️
 
-If a data structure with variables is required (to better handle related variables when passing them as arguments for example), use a dataclass with no methods:
+When creating data structures, prefer dataclasses and enums for simplicity and type safety.
+
+-**Dataclasses as Structs**: Use dataclasses (without methods) when you need a simple data structure to hold related variables. Think of them as structs. 🧱
 
 ```python
 from dataclasses import dataclass
@@ -60,11 +35,49 @@ class Measurement:
     value: Float32
 ```
 
-If methods and state management are necessary, justify the use of a "regular" class.
-A convenient API is a justification. But by default, if a method is private, it should be outside of the class, unless there's a whole lot of arguments to pass.
-If the dataclass contain constants that are computed during execution AND there's no method, use a NamedTuple.
-If there's a method, use a frozen dataclass.
-If there's no method and the constants values are hardcoded, use an Enum.
+- **Regular Classes**: Use a class with both attributes and methods only when maintaining an internal state is necessary. A convenient API can also justify the use of a class. 👨‍💻
+
+    -If a method is private, consider placing it outside the class, especially if it doesn't rely heavily on the class's internal state, unless there's a significant number of arguments to pass. 📤
+
+- **NamedTuples**: If your dataclass contains constants that are computed during execution and there are no methods, use a `NamedTuple`. 🧮
+
+    ```python
+    from typing import NamedTuple
+
+    class Config(NamedTuple):
+        RATE: float = compute_rate()  # Assuming compute_rate() is defined elsewhere
+        SCALE: int = 10
+    ```
+
+- **Frozen Dataclasses**: If your dataclass contains constants that are computed during execution AND requires methods, use a frozen dataclass. ❄️
+
+    ```python
+    from dataclasses import dataclass, field
+
+    @dataclass(frozen=True, slots=True)
+    class ImmutableConfig:
+        RATE: float = field(default_factory=compute_rate)
+        SCALE: int = 10
+
+        def description(self) -> str:
+            return f"Rate: {self.RATE}, Scale: {self.SCALE}"
+    ```
+
+    -`frozen=True` makes the dataclass immutable after creation. 🧊
+    -Use `field(default_factory=...)` for default values that are computed.
+
+- **Enums**: If your data structure represents a set of named constants with hardcoded values AND no methods, use an `Enum`. 🚦
+
+    ```python
+    from enum import Enum
+
+    class Status(Enum):
+        ACTIVE = "active"
+        INACTIVE = "inactive"
+        PENDING = "pending"
+    ```
+
+    -Enums are great for representing a fixed set of options. 📊
 
 ### 3. Handling DataFrames and Series
 
