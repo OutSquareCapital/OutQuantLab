@@ -20,11 +20,9 @@ def process_data(data: ArrayFloat) -> ArrayFloat:
     return data * 1.5
 ```
 
-### 2. Using Dataclasses and Enums as Structs 🏗️
+### 2. Data Structures 🏗️
 
-When creating data structures, prefer dataclasses and enums for simplicity and type safety.
-
--**Dataclasses as Structs**: Use dataclasses (without methods) when you need a simple data structure to hold related variables. Think of them as structs. 🧱
+-**Dataclasses**: Use dataclasses (without methods) when you need a simple data structure to hold related variables. 🧱
 
 ```python
 from dataclasses import dataclass
@@ -35,9 +33,9 @@ class Measurement:
     value: Float32
 ```
 
-- **Regular Classes**: Use a class with both attributes and methods only when maintaining an internal state is necessary. A convenient API can also justify the use of a class. 👨‍💻
+- **Regular Classes**: Use a class with both attributes and methods only when maintaining an internal state is necessary. A convenient public API can also justify the use of a class. 👨‍💻
 
-    -If a method is private, consider placing it outside the class, especially if it doesn't rely heavily on the class's internal state, unless there's a significant number of arguments to pass. 📤
+    -If a method is private, consider placing it outside the class, especially if it doesn't rely heavily on the class's internal state, unless there's a significant number of arguments to pass, who are directly related to the class attributes. 📤
 
 - **NamedTuples**: If your dataclass contains constants that are computed during execution and there are no methods, use a `NamedTuple`. 🧮
 
