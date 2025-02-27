@@ -8,8 +8,11 @@ import yfinance as yf  # type: ignore
 
 def refresh_yf_data(dbq: DataQueries, assets: list[str]) -> None:
     prices_data: DataFrameFloat = _get_prices_data(assets=assets)
-    returns_data: DataFrameFloat = _get_returns_data(prices_data=prices_data)
-    _save_data(dbq=dbq, prices_data=prices_data, returns_data=returns_data)
+    _save_data(
+        dbq=dbq,
+        prices_data=prices_data,
+        returns_data=_get_returns_data(prices_data=prices_data),
+    )
 
 
 def _get_prices_data(assets: list[str]) -> DataFrameFloat:
