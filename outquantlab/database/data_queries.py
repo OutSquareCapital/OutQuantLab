@@ -28,14 +28,21 @@ class DataQueries:
             return
 
         if validation["missing"]:
-            print("\nMissing files (in enum but not found):")
-            for file in validation["missing"]:
-                print(f"  - {file}")
-
+            _dispay_missing_files(validation=validation)
         if validation["extra"]:
-            print("\nExtra files (found but not in enum):")
-            for file in validation["extra"]:
-                print(f"  - {file}")
+            _display_extra_files(validation=validation)
+
+
+def _dispay_missing_files(validation: dict[str, list[str]]) -> None:
+    print("\nMissing files (in enum but not found):")
+    for file in validation["missing"]:
+        print(f"  - {file}")
+
+
+def _display_extra_files(validation: dict[str, list[str]]) -> None:
+    print("\nExtra files (found but not in enum):")
+    for file in validation["extra"]:
+        print(f"  - {file}")
 
 
 def _generate_datafiles() -> dict[str, DataFile]:
