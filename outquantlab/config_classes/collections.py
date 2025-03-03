@@ -14,23 +14,23 @@ class Asset:
 class IndicsConfig(BaseConfig[BaseIndic]):
     def __init__(
         self,
-        indics_to_test: dict[str, bool],
+        indics_active: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
     ) -> None:
         self.entities: dict[str, BaseIndic] = {}
         self._load_entities(
-            indics_to_test=indics_to_test,
+            indics_active=indics_active,
             params_config=params_config,
         )
 
     def _load_entities(
         self,
-        indics_to_test: dict[str, bool],
+        indics_active: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
     ) -> None:
         for name, cls in IndicsNormalized.__dict__.items():
             if isinstance(cls, type) and issubclass(cls, BaseIndic):
-                active: bool = indics_to_test.get(name, False)
+                active: bool = indics_active.get(name, False)
                 param_names: list[str] = list(signature(cls.execute).parameters.keys())[
                     2:
                 ]
@@ -60,13 +60,13 @@ class IndicsConfig(BaseConfig[BaseIndic]):
 
 
 class AssetsConfig(BaseConfig[Asset]):
-    def __init__(self, assets_to_test: dict[str, bool], asset_names: list[str]) -> None:
+    def __init__(self, assets_active: dict[str, bool], asset_names: list[str]) -> None:
         self.entities: dict[str, Asset] = {}
-        self._load_entities(assets_to_test=assets_to_test, asset_names=asset_names)
+        self._load_entities(assets_active=assets_active, asset_names=asset_names)
 
     def _load_entities(
-        self, assets_to_test: dict[str, bool], asset_names: list[str]
+        self, assets_active: dict[str, bool], asset_names: list[str]
     ) -> None:
         for name in asset_names:
-            active: bool = assets_to_test.get(name, False)
+            active: bool = assets_active.get(name, False)
             self.entities[name] = Asset(name=name, active=active)
