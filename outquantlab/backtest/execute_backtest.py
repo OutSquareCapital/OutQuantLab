@@ -8,14 +8,14 @@ from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 def execute_backtest(
     returns_df: DataFrameFloat, backtest_config: BacktestConfig
 ) -> dict[str, DataFrameFloat]:
-    returns_df = get_strategies_returns(
+    returns_df = _get_strategies_returns(
         returns_df=returns_df,
         backtest_config=backtest_config,
     )
     return aggregate_raw_returns(returns_df=returns_df)
 
 
-def get_strategies_returns(
+def _get_strategies_returns(
     returns_df: DataFrameFloat,
     backtest_config: BacktestConfig,
 ) -> DataFrameFloat:

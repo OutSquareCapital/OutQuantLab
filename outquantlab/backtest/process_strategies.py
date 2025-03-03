@@ -1,17 +1,22 @@
 from concurrent.futures import ThreadPoolExecutor
-from os import cpu_count
 from dataclasses import dataclass, field
+from os import cpu_count
+
+from numpy import empty
+
+from outquantlab.backtest.data_arrays import DataArrays
 from outquantlab.config_classes import BacktestConfig
 from outquantlab.indicators import BaseIndic
 from outquantlab.typing_conventions import ArrayFloat, Float32
-from outquantlab.backtest.data_arrays import DataArrays
-from numpy import empty
+
 
 @dataclass(slots=True)
 class BacktestResults:
     assets_nb: int
     start_index: int = 0
-    results: ArrayFloat = field(default_factory=lambda: empty(shape=(0, 0), dtype=Float32))
+    results: ArrayFloat = field(
+        default_factory=lambda: empty(shape=(0, 0), dtype=Float32)
+    )
 
     def get_results_array(self, nb_days: int, total_returns_streams: int) -> None:
         self.results = empty(
@@ -34,7 +39,7 @@ def process_strategies(
     data_arrays: DataArrays,
     backtest_config: BacktestConfig,
 ) -> ArrayFloat:
-    backtest_results: BacktestResults = prepare_backtest_results(
+    backtest_results: BacktestResults = _prepare_backtest_results(
         data_arrays=data_arrays,
         backtest_config=backtest_config,
     )
@@ -43,7 +48,7 @@ def process_strategies(
     with ThreadPoolExecutor(max_workers=threads_nb) as global_executor:
         for indic in backtest_config.indics_params:
             try:
-                results: list[ArrayFloat] = process_params_parallel(
+                results: list[ArrayFloat] = _process_params_parallel(
                     indic=indic,
                     data_arrays=data_arrays,
                     global_executor=global_executor,
@@ -58,7 +63,8 @@ def process_strategies(
 
     return backtest_results.results
 
-def prepare_backtest_results(
+
+def _prepare_backtest_results(
     data_arrays: DataArrays,
     backtest_config: BacktestConfig,
 ) -> BacktestResults:
@@ -69,20 +75,21 @@ def prepare_backtest_results(
     )
     return backtest_results
 
-def process_params_parallel(
+
+def _process_params_parallel(
     indic: BaseIndic,
     data_arrays: DataArrays,
     global_executor: ThreadPoolExecutor,
 ) -> list[ArrayFloat]:
     def process_single_param(param_tuple: tuple[int, ...]) -> ArrayFloat:
-        return process_param(
+        return _process_param(
             indic=indic, data_arrays=data_arrays, param_tuple=param_tuple
         )
 
     return list(global_executor.map(process_single_param, indic.param_combos))
 
 
-def process_param(
+def _process_param(
     indic: BaseIndic, data_arrays: DataArrays, param_tuple: tuple[int, ...]
 ) -> ArrayFloat:
     return indic.execute(data_arrays, *param_tuple) * data_arrays.adjusted_returns
