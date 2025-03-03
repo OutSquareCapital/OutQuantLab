@@ -41,6 +41,6 @@ def _save_data(
 ) -> None:
     assets_names: list[str] = prices_data.columns.to_list()
 
-    dbq.select(file=FileNames.PRICES_DATA.value).save(data=prices_data)
-    dbq.select(file=FileNames.RETURNS_DATA.value).save(data=returns_data)
-    dbq.select(file=FileNames.ASSETS_NAMES.value).save(data=assets_names)
+    dbq.select(file_name=FileNames.PRICES_DATA.value).save(data=prices_data)
+    dbq.select(file_name=FileNames.RETURNS_DATA.value).save(data=returns_data)
+    dbq.select(file_name=FileNames.ASSETS_NAMES.value).save(data=assets_names)

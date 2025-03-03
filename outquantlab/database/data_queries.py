@@ -8,11 +8,11 @@ class DataQueries:
     def __init__(self) -> None:
         self.data_files: dict[str, DataFile] = _generate_datafiles()
 
-    def select(self, file: str) -> DataFile:
+    def select(self, file_name: str) -> DataFile:
         try:
-            return self.data_files[file]
+            return self.data_files[file_name]
         except KeyError:
-            raise KeyError(f"Data file not found: {file}")
+            raise KeyError(f"Data file not found: {file_name}")
 
     def print_file_validation(self) -> None:
         validation: dict[str, list[str]] = _validate_file_names(
@@ -28,12 +28,12 @@ class DataQueries:
             return
 
         if validation["missing"]:
-            _dispay_missing_files(validation=validation)
+            _display_missing_files(validation=validation)
         if validation["extra"]:
             _display_extra_files(validation=validation)
 
 
-def _dispay_missing_files(validation: dict[str, list[str]]) -> None:
+def _display_missing_files(validation: dict[str, list[str]]) -> None:
     print("\nMissing files (in enum but not found):")
     for file in validation["missing"]:
         print(f"  - {file}")
