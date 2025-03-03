@@ -6,7 +6,7 @@ from outquantlab.database.data_structure import DB_NAME, FileNames
 
 class DataQueries:
     def __init__(self) -> None:
-        self.data_files: dict[str, DataFile] = _generate_datafiles()
+        self.data_files: dict[str, DataFile] = _generate_datafiles(db_name=DB_NAME)
 
     def select(self, file_name: str) -> DataFile:
         try:
@@ -33,21 +33,9 @@ class DataQueries:
             _display_extra_files(validation=validation)
 
 
-def _display_missing_files(validation: dict[str, list[str]]) -> None:
-    print("\nMissing files (in enum but not found):")
-    for file in validation["missing"]:
-        print(f"  - {file}")
-
-
-def _display_extra_files(validation: dict[str, list[str]]) -> None:
-    print("\nExtra files (found but not in enum):")
-    for file in validation["extra"]:
-        print(f"  - {file}")
-
-
-def _generate_datafiles() -> dict[str, DataFile]:
+def _generate_datafiles(db_name: str) -> dict[str, DataFile]:
     data_files: dict[str, DataFile] = {}
-    base_dir: str = _get_db_path(db_name=DB_NAME)
+    base_dir: str = _get_db_path(db_name=db_name)
 
     for root, _, files in os.walk(base_dir):
         for file in files:
@@ -70,6 +58,18 @@ def _display_data_structure(data_files: dict[str, DataFile]) -> None:
         print(
             f"{key}:\n  ext: {value.ext}\n  path: {value.path}\n  handler: {value.handler_name}\n"
         )
+
+
+def _display_missing_files(validation: dict[str, list[str]]) -> None:
+    print("\nMissing files (in enum but not found):")
+    for file in validation["missing"]:
+        print(f"  - {file}")
+
+
+def _display_extra_files(validation: dict[str, list[str]]) -> None:
+    print("\nExtra files (found but not in enum):")
+    for file in validation["extra"]:
+        print(f"  - {file}")
 
 
 def _validate_file_names(actual_files: list[str]) -> dict[str, list[str]]:
