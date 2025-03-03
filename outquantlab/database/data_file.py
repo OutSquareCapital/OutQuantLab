@@ -1,8 +1,11 @@
 import json
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Any, Protocol, TypeVar, cast
 from outquantlab.database.data_structure import Extension
 from pandas import DataFrame, read_parquet
+
+T = TypeVar("T")
+
 
 class FileHandler(Protocol):
     def load(self, path: str, names: list[str] | None = None) -> Any:
@@ -57,11 +60,19 @@ class DataFile:
     def __post_init__(self) -> None:
         object.__setattr__(self, "handler", create_handler(self.ext))
 
-    def load(self, names: list[str] | None = None) -> Any:
-        return self.handler.load(path=self.path, names=names)
+    def load(self, default_value: T, names: list[str] | None = None) -> T:
+        try:
+            data: T = cast(T, self.handler.load(path=self.path, names=names))
+            return data
+        except Exception as e:
+            print(f"Error loading {self.path}: {e}")
+            return default_value
 
     def save(self, data: Any) -> None:
-        self.handler.save(path=self.path, data=data)
+        try:
+            self.handler.save(path=self.path, data=data)
+        except Exception as e:
+            print(f"Error saving {self.path}: {e}")
 
     @property
     def handler_name(self) -> str:
