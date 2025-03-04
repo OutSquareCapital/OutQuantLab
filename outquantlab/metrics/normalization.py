@@ -71,16 +71,12 @@ def get_rolling_median_normalisation(
 
 
 def rolling_scalar_normalisation(
-    data: ArrayFloat, length: int = 500, target: int = 1, limit: int = 2
+    raw_signal: ArrayFloat, limit: int = 2
 ) -> ArrayFloat:
-    median: ArrayFloat = get_overall_median(array=abs(data), axis=1)
-    mean: ArrayFloat = get_rolling_mean(
-        array=median, length=data.shape[0], min_length=length
-    )
-    scalar: ArrayFloat = target / mean
-    filled_scalar: ArrayFloat = _bfill(array=scalar)
-    reshaped_scalar: ArrayFloat = filled_scalar.reshape(-1, 1)
-    return limit_normalization(signal_array=reshaped_scalar, limit=limit)
+    scalar: ArrayFloat = _get_normalized_scalar(raw_signal=raw_signal)
+    reshaped_scalar: ArrayFloat = scalar.reshape(-1, 1)
+    normalized_signal: ArrayFloat = reshaped_scalar * raw_signal
+    return limit_normalization(signal_array=normalized_signal, limit=limit)
 
 
 def dynamic_signal(
@@ -90,6 +86,15 @@ def dynamic_signal(
 ) -> ArrayFloat:
     return where(comparator(metric, Float32(0.0)), -signal, signal)
 
+def _get_normalized_scalar(
+    raw_signal: ArrayFloat, length: int = 500, target: int = 1
+) -> ArrayFloat:
+    median: ArrayFloat = get_overall_median(array=abs(raw_signal), axis=1)
+    mean: ArrayFloat = get_rolling_mean(
+        array=median, length=raw_signal.shape[0], min_length=length
+    )
+    scalar: ArrayFloat = target / mean
+    return _bfill(array=scalar)
 
 def _bfill(array: ArrayFloat) -> ArrayFloat:
     return nb.bfill(array, axis=0)  # type: ignore

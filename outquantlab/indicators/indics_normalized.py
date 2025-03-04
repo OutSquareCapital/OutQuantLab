@@ -1,8 +1,9 @@
+from typing import Protocol
+
 import outquantlab.indicators.indics_raw as raw
 import outquantlab.metrics.normalization as norm
 from outquantlab.indicators.indics_config import BaseIndic
 from outquantlab.typing_conventions import ArrayFloat
-from typing import Protocol
 
 
 class AssetsData(Protocol):
@@ -566,6 +567,16 @@ class IndicsNormalized:
             )
 
             return norm.limit_normalization(signal_array=relative_skew_on_kurt_on_trend)
+
+    class DirectionalVolatility(BaseIndic):
+        def execute(
+            self, data_arrays: AssetsData, len_smooth: int, len_vol: int
+        ) -> ArrayFloat:
+            return raw.smoothed_directional_volatility(
+                returns_array=data_arrays.log_returns,
+                len_st=len_smooth,
+                len_vol=len_vol,
+            )
 
     class RelativeDirectionalVolatility(BaseIndic):
         def execute(

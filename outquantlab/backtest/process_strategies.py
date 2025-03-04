@@ -93,10 +93,9 @@ def _process_params_parallel(
 def _process_param(
     indic: BaseIndic, data_arrays: DataArrays, param_tuple: tuple[int, ...]
 ) -> ArrayFloat:
-    raw_signal: ArrayFloat = indic.execute(data_arrays, *param_tuple)
-
     return (
-        rolling_scalar_normalisation(data=raw_signal)
-        * raw_signal
+        rolling_scalar_normalisation(
+            raw_signal=indic.execute(data_arrays, *param_tuple)
+        )
         * data_arrays.adjusted_returns
     )
