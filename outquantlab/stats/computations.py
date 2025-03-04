@@ -26,7 +26,6 @@ def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
         mt.overall_sharpe_ratio,
         mt.calculate_max_drawdown,
         mt.overall_volatility_annualized,
-        # mt.calculate_overall_monthly_skewness,
     ]
 
     metric_names: list[str] = [
@@ -41,6 +40,13 @@ def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
         for name, result in zip(metric_names, results)
     }
 
+def get_raw_data_formatted(returns_df: DataFrameFloat) -> DataFrameFloat:
+    formatted_returns_df = DataFrameFloat(
+        data=returns_df.get_array(),
+        index=returns_df.dates,
+        columns=convert_multiindex_to_labels(df=returns_df),
+    )
+    return sort_dataframe(df=formatted_returns_df, use_final=True, ascending=True)
 
 def get_stats_equity(returns_df: DataFrameFloat) -> DataFrameFloat:
     equity_curves_df = DataFrameFloat(

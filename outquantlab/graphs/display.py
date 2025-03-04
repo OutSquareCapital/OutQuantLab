@@ -11,6 +11,13 @@ def plot_metrics(returns_df: DataFrameFloat)-> None:
     for key, value in metrics.items():
         print(f"{key}: {value}")
 
+def plot_raw_data(returns_df: DataFrameFloat, show_legend: bool = True) -> go.Figure:
+    return widgets.curves(
+        returns_df=stats.get_raw_data_formatted(returns_df=returns_df),
+        title=_format_plot_name(name=plot_raw_data.__name__),
+        show_legend=show_legend,
+    )
+
 def plot_stats_equity(
     returns_df: DataFrameFloat, show_legend: bool = True
 ) -> go.Figure:
@@ -168,7 +175,7 @@ def plot_correlation_heatmap(
 
 
 def plot_correlation_clusters_icicle(
-    returns_df: DataFrameFloat, max_clusters: int, show_legend: bool = True
+    returns_df: DataFrameFloat, max_clusters: int = 4, show_legend: bool = True
 ) -> go.Figure:
     labels, parents = stats.get_correlation_clusters_icicle(
         returns_df=returns_df, max_clusters=max_clusters

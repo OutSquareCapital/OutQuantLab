@@ -15,6 +15,7 @@ from outquantlab.stats.computations import (
     get_stats_distribution_histogram,
     get_stats_distribution_violin,
     get_stats_equity,
+    get_raw_data_formatted
 )
 
 __all__: list[str] = [
@@ -34,4 +35,5 @@ __all__: list[str] = [
     "get_stats_distribution_histogram",
     "get_correlation_heatmap",
     "get_correlation_clusters_icicle",
+    "get_raw_data_formatted"
 ]
