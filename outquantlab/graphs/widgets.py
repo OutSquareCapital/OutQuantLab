@@ -9,7 +9,7 @@ from outquantlab.graphs.design import (
     setup_figure_layout,
 )
 from outquantlab.graphs.ui_constants import Colors
-from outquantlab.metrics import calculate_overall_max, calculate_overall_min
+from outquantlab.metrics import get_overall_max, get_overall_min
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
 
@@ -145,11 +145,11 @@ def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
             )
         )
 
-    min_by_column: ArrayFloat = calculate_overall_min(array=data.get_array())
-    y_min: ArrayFloat = calculate_overall_min(array=min_by_column)
+    min_by_column: ArrayFloat = get_overall_min(array=data.get_array())
+    y_min: ArrayFloat = get_overall_min(array=min_by_column)
 
-    max_by_column: ArrayFloat = calculate_overall_max(array=data.get_array())
-    y_max: ArrayFloat = calculate_overall_max(array=max_by_column)
+    max_by_column: ArrayFloat = get_overall_max(array=data.get_array())
+    y_max: ArrayFloat = get_overall_max(array=max_by_column)
 
     fig.update_layout(  # type: ignore
         yaxis=dict(range=[y_min, y_max], showgrid=False),

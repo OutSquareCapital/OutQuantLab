@@ -139,7 +139,7 @@ def get_overall_average_drawdown(returns_df: DataFrameFloat) -> SeriesFloat:
     )
 
     drawdowns_series = SeriesFloat(
-        data=mt.calculate_overall_mean(array=rolling_dd),
+        data=mt.get_overall_mean(array=rolling_dd),
         index=convert_multiindex_to_labels(df=returns_df),
     )
 

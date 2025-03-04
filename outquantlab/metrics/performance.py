@@ -1,10 +1,10 @@
 from outquantlab.typing_conventions import ArrayFloat, ArrayInt
 from outquantlab.metrics.maths_constants import ANNUALIZATION_FACTOR, PERCENTAGE_FACTOR
 from outquantlab.metrics.aggregation import (
-    rolling_mean,
-    calculate_overall_mean,
-    rolling_max,
-    calculate_overall_min,
+    get_rolling_mean,
+    get_overall_mean,
+    get_rolling_max,
+    get_overall_min,
 )
 from outquantlab.metrics.volatility import rolling_volatility, overall_volatility
 from outquantlab.metrics.distribution import rolling_skewness
@@ -51,7 +51,7 @@ def calculate_total_returns(returns_array: ArrayFloat) -> ArrayFloat:
 
 def calculate_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayFloat:
     equity_curves: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
-    period_max: ArrayFloat = rolling_max(
+    period_max: ArrayFloat = get_rolling_max(
         array=equity_curves, length=length, min_length=1
     )
     return (equity_curves - period_max) / period_max * PERCENTAGE_FACTOR
@@ -61,12 +61,12 @@ def calculate_max_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
     drawdown: ArrayFloat = calculate_rolling_drawdown(
         returns_array=returns_array, length=returns_array.shape[0]
     )
-    return calculate_overall_min(array=drawdown)
+    return get_overall_min(array=drawdown)
 
 
 def expanding_sharpe_ratios(returns_array: ArrayFloat) -> ArrayFloat:
     length: int = returns_array.shape[0]
-    expanding_mean: ArrayFloat = rolling_mean(
+    expanding_mean: ArrayFloat = get_rolling_mean(
         returns_array, length=length, min_length=125
     )
     expanding_std: ArrayFloat = rolling_volatility(
@@ -78,7 +78,7 @@ def expanding_sharpe_ratios(returns_array: ArrayFloat) -> ArrayFloat:
 def rolling_sharpe_ratios(
     returns_array: ArrayFloat, length: int, min_length: int
 ) -> ArrayFloat:
-    mean: ArrayFloat = rolling_mean(
+    mean: ArrayFloat = get_rolling_mean(
         array=returns_array, length=length, min_length=min_length
     )
     volatility: ArrayFloat = rolling_volatility(
@@ -88,7 +88,7 @@ def rolling_sharpe_ratios(
 
 
 def overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
-    mean: ArrayFloat = calculate_overall_mean(array=returns_array)
+    mean: ArrayFloat = get_overall_mean(array=returns_array)
     volatility: ArrayFloat = overall_volatility(returns_array=returns_array)
     return mean / volatility * ANNUALIZATION_FACTOR
 
@@ -101,4 +101,4 @@ def calculate_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:
     expanding_skew: ArrayFloat = rolling_skewness(
         array=monthly_returns, length=length_to_use, min_length=4
     )
-    return calculate_overall_mean(array=expanding_skew)
+    return get_overall_mean(array=expanding_skew)

@@ -1,14 +1,14 @@
 from outquantlab.metrics.aggregation import (
-    calculate_overall_mean,
-    calculate_overall_max,
-    calculate_overall_min,
-    rolling_mean,
-    rolling_median,
-    rolling_min,
-    rolling_max,
-    rolling_central,
-    rolling_sum,
-    rolling_quantile_ratio,
+    get_overall_mean,
+    get_overall_max,
+    get_overall_min,
+    get_rolling_mean,
+    get_rolling_median,
+    get_rolling_min,
+    get_rolling_max,
+    get_rolling_central,
+    get_rolling_sum,
+    get_rolling_quantile_ratio,
 )
 
 from outquantlab.metrics.normalization import (
@@ -18,8 +18,9 @@ from outquantlab.metrics.normalization import (
     z_score_normalization,
     limit_normalization,
     calculate_indicator_on_trend_signal,
-    rolling_median_normalisation,
+    get_rolling_median_normalisation,
     dynamic_signal,
+    rolling_scalar_normalisation
 )
 from outquantlab.metrics.distribution import rolling_kurtosis, rolling_skewness
 
@@ -54,16 +55,16 @@ from outquantlab.metrics.maths_constants import PERCENTAGE_FACTOR
 
 __all__: list[str] = [
     "calculate_overall_monthly_skewness",
-    "calculate_overall_min",
-    "calculate_overall_max",
-    "calculate_overall_mean",
-    "rolling_mean",
-    "rolling_median",
-    "rolling_min",
-    "rolling_max",
-    "rolling_central",
-    "rolling_sum",
-    "rolling_quantile_ratio",
+    "get_overall_min",
+    "get_overall_max",
+    "get_overall_mean",
+    "get_rolling_mean",
+    "get_rolling_median",
+    "get_rolling_min",
+    "get_rolling_max",
+    "get_rolling_central",
+    "get_rolling_sum",
+    "get_rolling_quantile_ratio",
     "rolling_kurtosis",
     "rolling_skewness",
     "rolling_volatility",
@@ -79,7 +80,7 @@ __all__: list[str] = [
     "log_returns_np",
     "pct_returns_np",
     "calculate_max_drawdown",
-    "calculate_overall_mean",
+    "get_overall_mean",
     "calculate_overall_average_correlation",
     "calculate_correlation_matrix",
     "calculate_distance_matrix",
@@ -91,6 +92,7 @@ __all__: list[str] = [
     "z_score_normalization",
     "limit_normalization",
     "calculate_indicator_on_trend_signal",
-    "rolling_median_normalisation",
+    "get_rolling_median_normalisation",
     "dynamic_signal",
+    "rolling_scalar_normalisation",
 ]

@@ -2,7 +2,7 @@ import bottleneck as bn  # type: ignore
 from numpy import isnan, nan, where
 from outquantlab.metrics.maths_constants import ANNUALIZED_PERCENTAGE_FACTOR
 from outquantlab.typing_conventions import ArrayFloat
-from outquantlab.metrics.aggregation import calculate_overall_mean
+from outquantlab.metrics.aggregation import get_overall_mean
 
 
 def overall_volatility(returns_array: ArrayFloat) -> ArrayFloat:
@@ -62,7 +62,7 @@ def get_composite_vol_raw(
 
 
 def get_composite_vol_filled(composite_vol: ArrayFloat) -> ArrayFloat:
-    mean_vol: ArrayFloat = calculate_overall_mean(array=composite_vol, axis=0)
+    mean_vol: ArrayFloat = get_overall_mean(array=composite_vol, axis=0)
     return where(isnan(composite_vol), mean_vol, composite_vol)
 
 

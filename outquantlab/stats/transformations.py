@@ -1,7 +1,7 @@
 from numpy import argsort, fill_diagonal, nan, nanmax, nanmin, quantile, where, zeros_like
 from pandas import MultiIndex
 
-from outquantlab.metrics import PERCENTAGE_FACTOR, calculate_overall_mean
+from outquantlab.metrics import PERCENTAGE_FACTOR, get_overall_mean
 from outquantlab.typing_conventions import (
     ArrayFloat,
     ArrayInt,
@@ -87,7 +87,7 @@ def sort_dataframe(
     if use_final:
         sorted_indices: ArrayInt = argsort(a=df.get_array()[-1, :])
     else:
-        mean_values: ArrayFloat = calculate_overall_mean(array=df.get_array(), axis=0)
+        mean_values: ArrayFloat = get_overall_mean(array=df.get_array(), axis=0)
         sorted_indices: ArrayInt = argsort(a=mean_values)
     if not ascending:
         sorted_indices = sorted_indices[::-1]

@@ -1,5 +1,5 @@
 from outquantlab.backtest.data_arrays import calculate_volatility_adjusted_returns
-from outquantlab.metrics import calculate_overall_mean, hv_composite
+from outquantlab.metrics import get_overall_mean, hv_composite
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 
@@ -48,7 +48,7 @@ def _calculate_portfolio_returns(
 
 def _get_global_portfolio_returns(returns_df: DataFrameFloat) -> DataFrameFloat:
     return DataFrameFloat(
-        data=calculate_overall_mean(array=returns_df.get_array(), axis=1),
+        data=get_overall_mean(array=returns_df.get_array(), axis=1),
         index=returns_df.dates,
         columns=["Portfolio"],
     )
