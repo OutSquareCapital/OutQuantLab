@@ -8,6 +8,7 @@ from outquantlab.backtest.data_arrays import DataArrays
 from outquantlab.config_classes import BacktestConfig
 from outquantlab.indicators import BaseIndic
 from outquantlab.typing_conventions import ArrayFloat, Float32
+from outquantlab.metrics import rolling_scalar_normalisation
 
 
 @dataclass(slots=True)
@@ -92,4 +93,10 @@ def _process_params_parallel(
 def _process_param(
     indic: BaseIndic, data_arrays: DataArrays, param_tuple: tuple[int, ...]
 ) -> ArrayFloat:
-    return indic.execute(data_arrays, *param_tuple) * data_arrays.adjusted_returns
+    raw_signal: ArrayFloat = indic.execute(data_arrays, *param_tuple)
+
+    return (
+        rolling_scalar_normalisation(data=raw_signal)
+        * raw_signal
+        * data_arrays.adjusted_returns
+    )

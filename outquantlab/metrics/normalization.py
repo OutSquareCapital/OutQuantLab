@@ -1,15 +1,21 @@
 from collections.abc import Callable
-from numpy import clip, sign, where
 from operator import gt
 
+import numbagg as nb
+from numpy import clip, sign, where
+
 from outquantlab.metrics.aggregation import (
-    rolling_mean,
-    rolling_median,
-    rolling_min,
-    rolling_max,
+    get_overall_median,
+    get_rolling_max,
+    get_rolling_mean,
+    get_rolling_median,
+    get_rolling_min,
 )
 from outquantlab.metrics.volatility import rolling_volatility
-from outquantlab.typing_conventions import ArrayFloat, Float32
+from outquantlab.typing_conventions import (
+    ArrayFloat,
+    Float32,
+)
 
 
 def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> ArrayFloat:
@@ -21,7 +27,9 @@ def sign_normalization(signal_array: ArrayFloat) -> ArrayFloat:
 
 
 def relative_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
-    return signal_array - rolling_mean(array=signal_array, length=length, min_length=1)
+    return signal_array - get_rolling_mean(
+        array=signal_array, length=length, min_length=1
+    )
 
 
 def z_score_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
@@ -46,25 +54,42 @@ def calculate_indicator_on_trend_signal(
     )
 
 
-def rolling_median_normalisation(
+def get_rolling_median_normalisation(
     signal_array: ArrayFloat, window_length: int
 ) -> ArrayFloat:
-    median_array: ArrayFloat = rolling_median(
+    median_array: ArrayFloat = get_rolling_median(
         array=signal_array, length=window_length, min_length=window_length
     )
-    max_array: ArrayFloat = rolling_max(
+    max_array: ArrayFloat = get_rolling_max(
         array=signal_array, length=window_length, min_length=window_length
     )
-    min_array: ArrayFloat = rolling_min(
+    min_array: ArrayFloat = get_rolling_min(
         array=signal_array, length=window_length, min_length=window_length
     )
 
     return ((signal_array - median_array) / (max_array - min_array)) * Float32(2.0)
 
 
+def rolling_scalar_normalisation(
+    data: ArrayFloat, length: int = 500, target: int = 1, limit: int = 20
+) -> ArrayFloat:
+    median: ArrayFloat = get_overall_median(array=abs(data), axis=1)
+    mean: ArrayFloat = get_rolling_mean(
+        array=median, length=data.shape[0], min_length=length
+    )
+    scalar: ArrayFloat = target / mean
+    filled_scalar: ArrayFloat = _bfill(array=scalar)
+    reshaped_scalar: ArrayFloat = filled_scalar.reshape(-1, 1)
+    return limit_normalization(signal_array=reshaped_scalar, limit=limit)
+
+
 def dynamic_signal(
     metric: ArrayFloat,
     signal: ArrayFloat,
-    comparaison: Callable[[ArrayFloat, Float32], ArrayFloat] = gt,
+    comparator: Callable[[ArrayFloat, Float32], ArrayFloat] = gt,
 ) -> ArrayFloat:
-    return where(comparaison(metric, Float32(0.0)), -signal, signal)
+    return where(comparator(metric, Float32(0.0)), -signal, signal)
+
+
+def _bfill(array: ArrayFloat) -> ArrayFloat:
+    return nb.bfill(array, axis=0)  # type: ignore
