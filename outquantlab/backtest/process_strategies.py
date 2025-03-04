@@ -12,7 +12,7 @@ from outquantlab.metrics import rolling_scalar_normalisation
 
 
 @dataclass(slots=True)
-class BacktestResults:
+class BacktestArray:
     assets_nb: int
     start_index: int = 0
     results: ArrayFloat = field(
@@ -40,7 +40,7 @@ def process_strategies(
     data_arrays: DataArrays,
     backtest_config: BacktestConfig,
 ) -> ArrayFloat:
-    backtest_results: BacktestResults = _prepare_backtest_results(
+    backtest_results: BacktestArray = _prepare_backtest_results(
         data_arrays=data_arrays,
         backtest_config=backtest_config,
     )
@@ -68,8 +68,8 @@ def process_strategies(
 def _prepare_backtest_results(
     data_arrays: DataArrays,
     backtest_config: BacktestConfig,
-) -> BacktestResults:
-    backtest_results = BacktestResults(assets_nb=data_arrays.prices.shape[1])
+) -> BacktestArray:
+    backtest_results = BacktestArray(assets_nb=data_arrays.prices.shape[1])
     backtest_results.get_results_array(
         nb_days=data_arrays.prices.shape[0],
         total_returns_streams=len(backtest_config.multi_index),
