@@ -71,7 +71,7 @@ def get_rolling_median_normalisation(
 
 
 def rolling_scalar_normalisation(
-    data: ArrayFloat, length: int = 500, target: int = 1, limit: int = 20
+    data: ArrayFloat, length: int = 500, target: int = 1, limit: int = 2
 ) -> ArrayFloat:
     median: ArrayFloat = get_overall_median(array=abs(data), axis=1)
     mean: ArrayFloat = get_rolling_mean(
