@@ -1,4 +1,7 @@
-from outquantlab.backtest.aggregate_returns import aggregate_raw_returns
+from outquantlab.backtest.aggregate_returns import (
+    BacktestResults,
+    aggregate_raw_returns,
+)
 from outquantlab.backtest.data_arrays import create_data_arrays
 from outquantlab.backtest.process_strategies import process_strategies
 from outquantlab.config_classes import BacktestConfig
@@ -7,7 +10,7 @@ from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 
 def execute_backtest(
     returns_df: DataFrameFloat, backtest_config: BacktestConfig
-) -> dict[str, DataFrameFloat]:
+) -> BacktestResults:
     returns_df = _get_strategies_returns(
         returns_df=returns_df,
         backtest_config=backtest_config,
