@@ -44,7 +44,7 @@ _HANDLER_REGISTRY = {
 }
 
 
-def create_handler(ext: str) -> FileHandler:
+def _create_handler(ext: str) -> FileHandler:
     handler_class = _HANDLER_REGISTRY.get(ext)
     if handler_class is None:
         raise ValueError(f"Unsupported extension: {ext}")
@@ -58,7 +58,7 @@ class DataFile:
     handler: FileHandler = field(init=False)
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "handler", create_handler(self.ext))
+        object.__setattr__(self, "handler", _create_handler(self.ext))
 
     def load(self, default_value: T, names: list[str] | None = None) -> T:
         try:
