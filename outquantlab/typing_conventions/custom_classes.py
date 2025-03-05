@@ -47,8 +47,7 @@ class SeriesFloat(Series):  # type: ignore
     def get_array(
         self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = nan
     ) -> ArrayFloat:
-        array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
-        return array
+        return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
 
 
 class DataFrameFloat(DataFrame):
@@ -78,17 +77,13 @@ class DataFrameFloat(DataFrame):
 
     def __init__(
         self,
-        data: ArrayFloat | DataFrame,
+        data: ArrayFloat | DataFrame | None = None,
         index: DatetimeIndex | None = None,
         columns: list[str] | MultiIndex | Index | None = None,  # type: ignore
         dtype: type = Float32,
     ) -> None:
         if isinstance(data, DataFrame):
             data = data.astype(dtype=Float32)  # type: ignore
-        else:
-            if not isinstance(index, (DatetimeIndex)):
-                raise TypeError("index must be a pandas {DatetimeIndex}")
-
         super().__init__(data=data, index=index, columns=columns, dtype=dtype)  # type: ignore
 
     @property
@@ -98,5 +93,4 @@ class DataFrameFloat(DataFrame):
     def get_array(
         self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = nan
     ) -> ArrayFloat:
-        array: ArrayFloat = super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
-        return array
+        return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
