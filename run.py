@@ -6,7 +6,10 @@ def launch_app() -> None:
     oql.run()
     end: float = time.perf_counter()
     print(f"Backtest completed in {end - start:.2f} seconds.")
-    oql.graphs.plot_metrics(returns_df=oql.data["lvl0"])
+    oql.graphs.plot_metrics(returns_df=oql.data['assets_clusters'])
+    oql.graphs.plot_stats_equity(returns_df=oql.data['assets']).show()
+    
+    oql.save()
 
 
 if __name__ == "__main__":

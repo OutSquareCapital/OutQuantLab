@@ -21,24 +21,28 @@ def _format_metric_name(name: str) -> str:
 
 
 def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
-    metric_functions: list[Callable[..., ArrayFloat]] = [
-        mt.calculate_total_returns,
-        mt.overall_sharpe_ratio,
-        mt.calculate_max_drawdown,
-        mt.overall_volatility_annualized,
-    ]
+    array: ArrayFloat = returns_df.get_array()
+    if array.shape[1] > 1:
+        print("Metrics can only be calculated for a single asset")
+        return {}
+    else:
+        metric_functions: list[Callable[..., ArrayFloat]] = [
+            mt.calculate_total_returns,
+            mt.overall_sharpe_ratio,
+            mt.calculate_max_drawdown,
+            mt.overall_volatility_annualized,
+        ]
 
-    metric_names: list[str] = [
-        _format_metric_name(name=func.__name__) for func in metric_functions
-    ]
-    results: list[ArrayFloat] = [
-        func(returns_df.get_array()) for func in metric_functions
-    ]
+        metric_names: list[str] = [
+            _format_metric_name(name=func.__name__) for func in metric_functions
+        ]
+        results: list[ArrayFloat] = [func(array) for func in metric_functions]
 
-    return {
-        name: round(number=result.item(), ndigits=2)
-        for name, result in zip(metric_names, results)
-    }
+        return {
+            name: round(number=result.item(), ndigits=2)
+            for name, result in zip(metric_names, results)
+        }
+
 
 def get_raw_data_formatted(returns_df: DataFrameFloat) -> DataFrameFloat:
     formatted_returns_df = DataFrameFloat(
@@ -47,6 +51,7 @@ def get_raw_data_formatted(returns_df: DataFrameFloat) -> DataFrameFloat:
         columns=convert_multiindex_to_labels(df=returns_df),
     )
     return sort_dataframe(df=formatted_returns_df, use_final=True, ascending=True)
+
 
 def get_stats_equity(returns_df: DataFrameFloat) -> DataFrameFloat:
     equity_curves_df = DataFrameFloat(
