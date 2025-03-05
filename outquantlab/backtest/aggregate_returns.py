@@ -3,6 +3,8 @@ from outquantlab.metrics import get_overall_mean, hv_composite
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 from typing import TypedDict
 
+_PORTFOLIO = "portfolio"
+
 
 class BacktestResults(TypedDict, total=False):
     portfolio: DataFrameFloat
@@ -27,7 +29,7 @@ def aggregate_raw_returns(returns_df: DataFrameFloat) -> BacktestResults:
         returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
         key_name: str = returns_df.columns.names[lvl - 1]
         portfolio_dict[key_name] = returns_df
-    portfolio_dict["portfolio"] = _get_global_portfolio_returns(
+    portfolio_dict[_PORTFOLIO] = _get_global_portfolio_returns(
         returns_df=_adjust_portfolio(returns_df=returns_df)
     )
     return portfolio_dict
@@ -60,5 +62,5 @@ def _get_global_portfolio_returns(returns_df: DataFrameFloat) -> DataFrameFloat:
     return DataFrameFloat(
         data=get_overall_mean(array=returns_df.get_array(), axis=1),
         index=returns_df.dates,
-        columns=["portfolio"],
+        columns=[_PORTFOLIO],
     )
