@@ -6,11 +6,15 @@ from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.indicators import BaseIndic
 from outquantlab.metrics import calculate_distance_matrix
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
+from enum import StrEnum
 
+class Prefix(StrEnum):
+    ASSET = "Asset"
+    INDIC = "Indic"
 
 class AssetsClusters(BaseClustersTree):
     def __init__(self, clusters: dict[str, dict[str, list[str]]]) -> None:
-        super().__init__(clusters=clusters, prefix="Asset")
+        super().__init__(clusters=clusters, prefix=Prefix.ASSET)
 
     def get_clusters_tuples(self, entities: list[Asset]) -> list[tuple[str, ...]]:
         assets_to_clusters: dict[str, tuple[str, ...]] = (
@@ -21,7 +25,7 @@ class AssetsClusters(BaseClustersTree):
 
 class IndicsClusters(BaseClustersTree):
     def __init__(self, clusters: dict[str, dict[str, list[str]]]) -> None:
-        super().__init__(clusters=clusters, prefix="Indic")
+        super().__init__(clusters=clusters, prefix=Prefix.INDIC)
 
     def get_clusters_tuples(self, entities: list[BaseIndic]) -> list[tuple[str, ...]]:
         indics_to_clusters: dict[str, tuple[str, ...]] = (
