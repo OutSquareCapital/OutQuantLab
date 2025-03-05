@@ -1,23 +1,29 @@
+import pandas as pd
+
 import outquantlab.config_classes as cfg
-from outquantlab.database.data_queries import DataQueries
 from outquantlab.database.data_file import DataFile
+from outquantlab.database.data_queries import DataQueries
+from outquantlab.database.data_refresher import get_yf_data
 from outquantlab.database.data_structure import FileNames
 from outquantlab.typing_conventions import DataFrameFloat
-import pandas as pd
 
 
 class DataBaseProvider:
     def __init__(self) -> None:
         self.dbq = DataQueries()
 
-    def get_data(self, names: list[str]) -> DataFrameFloat:
+    def refresh_assets_data(self, assets: list[str]) -> None:
+        prices_data, returns_data = get_yf_data(assets=assets)
+        self._save_assets_data(prices_data=prices_data, returns_data=returns_data)
+
+    def get_returns_data(self, names: list[str]) -> DataFrameFloat:
         return DataFrameFloat(
             data=self.dbq.select(file_name=FileNames.RETURNS_DATA).load(
                 default_value=pd.DataFrame(), names=names
             )
         )
 
-    def get_config(self) -> cfg.AppConfig:
+    def get_app_config(self) -> cfg.AppConfig:
         return cfg.AppConfig(
             indics_config=_instanciate_indics_config(
                 indics_active_file=self.dbq.select(file_name=FileNames.INDICS_ACTIVE),
@@ -35,7 +41,7 @@ class DataBaseProvider:
             ),
         )
 
-    def save_config(
+    def save_app_config(
         self,
         config: cfg.AppConfig,
     ) -> None:
@@ -54,6 +60,15 @@ class DataBaseProvider:
         self.dbq.select(file_name=FileNames.INDICS_CLUSTERS).save(
             data=config.indics_clusters.clusters
         )
+
+    def _save_assets_data(
+        self, prices_data: DataFrameFloat, returns_data: DataFrameFloat
+    ) -> None:
+        assets_names: list[str] = prices_data.columns.to_list()
+
+        self.dbq.select(file_name=FileNames.PRICES_DATA.value).save(data=prices_data)
+        self.dbq.select(file_name=FileNames.RETURNS_DATA.value).save(data=returns_data)
+        self.dbq.select(file_name=FileNames.ASSETS_NAMES.value).save(data=assets_names)
 
 
 def _instanciate_assets_config(
