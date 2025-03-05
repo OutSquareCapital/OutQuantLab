@@ -1,8 +1,8 @@
+from dataclasses import dataclass
 from inspect import signature
 
 from outquantlab.config_classes.generic_classes import BaseConfig
-from outquantlab.indicators import IndicsNormalized, BaseIndic
-from dataclasses import dataclass
+from outquantlab.indicators import BaseIndic, IndicsNormalized
 
 
 @dataclass(slots=True)
@@ -30,18 +30,14 @@ class IndicsConfig(BaseConfig[BaseIndic]):
     ) -> None:
         for name, cls in IndicsNormalized.__dict__.items():
             if isinstance(cls, type) and issubclass(cls, BaseIndic):
-                active: bool = indics_active.get(name, False)
-                param_names: list[str] = list(signature(cls.execute).parameters.keys())[
-                    2:
-                ]
-                params_values: dict[str, list[int]] = {
-                    param: params_config.get(name, {}).get(param, [])
-                    for param in param_names
-                }
+                param_names: list[str] = _get_params_names(cls=cls)
+                params_values: dict[str, list[int]] = _get_params_values(
+                    param_names=param_names, name=name, params_config=params_config
+                )
 
                 self.entities[name] = cls(
                     name=name,
-                    active=active,
+                    active=_get_active_statut(entity=indics_active, name=name),
                     param_values=params_values,
                 )
 
@@ -68,5 +64,23 @@ class AssetsConfig(BaseConfig[Asset]):
         self, assets_active: dict[str, bool], asset_names: list[str]
     ) -> None:
         for name in asset_names:
-            active: bool = assets_active.get(name, False)
-            self.entities[name] = Asset(name=name, active=active)
+            self.entities[name] = Asset(
+                name=name, active=_get_active_statut(entity=assets_active, name=name)
+            )
+
+
+def _get_active_statut(entity: dict[str, bool], name: str) -> bool:
+    return entity.get(name, False)
+
+
+def _get_params_names(cls: type[BaseIndic]) -> list[str]:
+    return list(signature(cls.execute).parameters.keys())[2:]
+
+
+def _get_params_values(
+    param_names: list[str], name: str, params_config: dict[str, dict[str, list[int]]]
+) -> dict[str, list[int]]:
+    params_values: dict[str, list[int]] = {
+        param: params_config.get(name, {}).get(param, []) for param in param_names
+    }
+    return params_values
