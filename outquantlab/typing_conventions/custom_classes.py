@@ -82,6 +82,8 @@ class DataFrameFloat(DataFrame):
         columns: list[str] | MultiIndex | Index | None = None,  # type: ignore
         dtype: type = Float32,
     ) -> None:
+        if data is None:
+            data = DataFrame(dtype=Float32)
         if isinstance(data, DataFrame):
             data = data.astype(dtype=Float32)  # type: ignore
         super().__init__(data=data, index=index, columns=columns, dtype=dtype)  # type: ignore
