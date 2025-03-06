@@ -96,3 +96,12 @@ class DataFrameFloat(DataFrame):
         self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = nan
     ) -> ArrayFloat:
         return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
+
+    def convert_multiindex_to_labels(self) -> list[str]:
+        if isinstance(self.columns, MultiIndex):
+            labels: list[str] = [
+                "_".join(col).replace(" ", "_") for col in self.columns.to_list()
+            ]
+        else:
+            labels: list[str] = self.columns.to_list()
+        return labels
