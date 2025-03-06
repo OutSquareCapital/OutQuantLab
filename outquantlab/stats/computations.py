@@ -48,7 +48,7 @@ def get_raw_data_formatted(returns_df: DataFrameFloat) -> DataFrameFloat:
         index=returns_df.dates,
         columns=returns_df.convert_multiindex_to_labels(),
     )
-    return sort_dataframe(df=formatted_returns_df, use_final=True, ascending=True)
+    return sort_dataframe(df=formatted_returns_df, ascending=True)
 
 
 def get_stats_equity(returns_df: DataFrameFloat) -> DataFrameFloat:
