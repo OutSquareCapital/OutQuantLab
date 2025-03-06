@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from inspect import signature
 
 from outquantlab.config_classes.generic_classes import BaseConfig
-from outquantlab.indicators import BaseIndic, IndicsNormalized
+from outquantlab.indicators import BaseIndic, INDICATOR_REGISTRY
 
 
 @dataclass(slots=True)
@@ -28,18 +28,17 @@ class IndicsConfig(BaseConfig[BaseIndic]):
         indics_active: dict[str, bool],
         params_config: dict[str, dict[str, list[int]]],
     ) -> None:
-        for name, cls in IndicsNormalized.__dict__.items():
-            if isinstance(cls, type) and issubclass(cls, BaseIndic):
-                param_names: list[str] = _get_params_names(cls=cls)
-                params_values: dict[str, list[int]] = _get_params_values(
-                    param_names=param_names, name=name, params_config=params_config
-                )
+        for name, cls in INDICATOR_REGISTRY.items():
+            param_names: list[str] = _get_params_names(cls=cls)
+            params_values: dict[str, list[int]] = _get_params_values(
+                param_names=param_names, name=name, params_config=params_config
+            )
 
-                self.entities[name] = cls(
-                    name=name,
-                    active=_get_active_statut(entity=indics_active, name=name),
-                    param_values=params_values,
-                )
+            self.entities[name] = cls(
+                name=name,
+                active=_get_active_statut(entity=indics_active, name=name),
+                param_values=params_values,
+            )
 
     def get_indics_params(self) -> list[BaseIndic]:
         active_indics: list[BaseIndic] = self.get_all_active_entities()
