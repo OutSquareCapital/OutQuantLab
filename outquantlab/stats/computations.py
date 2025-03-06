@@ -8,7 +8,6 @@ from outquantlab.stats.transformations import (
     normalize_data_for_colormap,
     prepare_sunburst_data,
     sort_dataframe,
-    sort_series,
 )
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
@@ -120,8 +119,9 @@ def get_overall_returns(returns_df: DataFrameFloat) -> SeriesFloat:
         data=mt.calculate_total_returns(returns_array=returns_df.get_array()),
         index=returns_df.convert_multiindex_to_labels(),
     )
-
-    return sort_series(series=total_returns_series, ascending=True)
+    
+    total_returns_series.sort_data(ascending=True)
+    return total_returns_series
 
 
 def get_overall_sharpe_ratio(returns_df: DataFrameFloat) -> SeriesFloat:
@@ -129,8 +129,8 @@ def get_overall_sharpe_ratio(returns_df: DataFrameFloat) -> SeriesFloat:
         data=mt.overall_sharpe_ratio(returns_array=returns_df.get_array()),
         index=returns_df.convert_multiindex_to_labels(),
     )
-
-    return sort_series(series=sharpes_series, ascending=True)
+    sharpes_series.sort_data(ascending=True)
+    return sharpes_series
 
 
 def get_overall_volatility(returns_df: DataFrameFloat) -> SeriesFloat:
@@ -138,8 +138,8 @@ def get_overall_volatility(returns_df: DataFrameFloat) -> SeriesFloat:
         data=mt.overall_volatility_annualized(returns_array=returns_df.get_array()),
         index=returns_df.convert_multiindex_to_labels(),
     )
-
-    return sort_series(series=overall_vol_series, ascending=True)
+    overall_vol_series.sort_data(ascending=True)
+    return overall_vol_series
 
 
 def get_overall_average_drawdown(returns_df: DataFrameFloat) -> SeriesFloat:
@@ -152,8 +152,9 @@ def get_overall_average_drawdown(returns_df: DataFrameFloat) -> SeriesFloat:
         data=mt.get_overall_mean(array=rolling_dd),
         index=returns_df.convert_multiindex_to_labels(),
     )
-
-    return sort_series(series=drawdowns_series, ascending=True)
+    
+    drawdowns_series.sort_data(ascending=True)
+    return drawdowns_series
 
 
 def get_overall_average_correlation(returns_df: DataFrameFloat) -> SeriesFloat:
@@ -163,8 +164,9 @@ def get_overall_average_correlation(returns_df: DataFrameFloat) -> SeriesFloat:
         ),
         index=returns_df.convert_multiindex_to_labels(),
     )
-
-    return sort_series(series=overall_average_corr, ascending=True)
+    
+    overall_average_corr.sort_data(ascending=True)
+    return overall_average_corr
 
 
 def get_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
@@ -174,8 +176,9 @@ def get_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
         ),
         index=returns_df.convert_multiindex_to_labels(),
     )
-
-    return sort_series(series=skew_series, ascending=True)
+    
+    skew_series.sort_data(ascending=True)
+    return skew_series
 
 
 def get_stats_distribution_violin(

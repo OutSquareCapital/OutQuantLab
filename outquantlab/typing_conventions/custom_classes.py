@@ -49,6 +49,9 @@ class SeriesFloat(Series):  # type: ignore
     ) -> ArrayFloat:
         return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
 
+    def sort_data(self, ascending: bool = True) -> None:
+        return SeriesFloat(super().sort_values(ascending=ascending, inplace=True))  # type: ignore
+
 
 class DataFrameFloat(DataFrame):
     """

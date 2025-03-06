@@ -6,7 +6,6 @@ from outquantlab.typing_conventions import (
     ArrayInt,
     DataFrameFloat,
     Float32,
-    SeriesFloat,
 )
 
 
@@ -59,16 +58,6 @@ def prepare_sunburst_data(
             parents.append("")
 
     return labels, parents
-
-
-def sort_series(series: SeriesFloat, ascending: bool = True) -> SeriesFloat:
-    sorted_indices: ArrayInt = argsort(series.get_array())
-    if not ascending:
-        sorted_indices = sorted_indices[::-1]
-    sorted_array: ArrayFloat = series.get_array()[sorted_indices]
-    sorted_index: list[str] = [series.names[i] for i in sorted_indices]
-    return SeriesFloat(data=sorted_array, index=sorted_index)
-
 
 def sort_dataframe(
     df: DataFrameFloat, use_final: bool = False, ascending: bool = True
