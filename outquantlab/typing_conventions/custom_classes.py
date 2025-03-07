@@ -49,6 +49,9 @@ class SeriesFloat(Series):  # type: ignore
     ) -> ArrayFloat:
         return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
 
+    def get_names(self) -> list[str]:
+        return self.index.to_list() # type: ignore
+
     def sort_data(self, ascending: bool) -> "SeriesFloat":
         array: ArrayFloat = self.get_array()
         sorted_indices: ArrayInt = argsort(array)
