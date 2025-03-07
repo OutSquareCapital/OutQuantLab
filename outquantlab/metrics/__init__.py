@@ -51,6 +51,7 @@ from outquantlab.metrics.correlation import (
     calculate_correlation_matrix,
     calculate_distance_matrix,
     calculate_overall_average_correlation,
+    get_corr_clusters
 )
 
 from outquantlab.metrics.maths_constants import PERCENTAGE_FACTOR
@@ -99,4 +100,5 @@ __all__: list[str] = [
     "rolling_scalar_normalisation",
     "calculate_overall_average_drawdown",
     "limit_outliers",
+    "get_corr_clusters",
 ]

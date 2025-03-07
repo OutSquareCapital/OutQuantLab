@@ -1,11 +1,8 @@
-from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
-from scipy.spatial.distance import squareform
-
 from outquantlab.config_classes.collections import Asset
 from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.indicators import BaseIndic
-from outquantlab.metrics import calculate_distance_matrix
-from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
+from outquantlab.metrics import get_corr_clusters
+from outquantlab.typing_conventions import DataFrameFloat
 from enum import StrEnum
 
 class Prefix(StrEnum):
@@ -41,7 +38,7 @@ class IndicsClusters(BaseClustersTree):
 def generate_dynamic_clusters(
     returns_df: DataFrameFloat, max_clusters: int
 ) -> dict[str, list[str]]:
-    flat_clusters: list[int] = _get_flat_clusters(
+    flat_clusters: list[int] = get_corr_clusters(
         returns_array=returns_df.get_array(), max_clusters=max_clusters
     )
     asset_names: list[str] = returns_df.columns.tolist()
@@ -70,10 +67,3 @@ def _get_assets_in_cluster(
         for asset, cluster in zip(asset_names, flat_clusters)
         if cluster == cluster_id
     ]
-
-
-def _get_flat_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
-    distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
-    distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
-    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")  # type: ignore
-    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")  # type: ignore
