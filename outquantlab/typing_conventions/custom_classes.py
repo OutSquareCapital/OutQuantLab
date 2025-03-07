@@ -1,8 +1,8 @@
-from numpy import nan
+from numpy import nan, argsort, nanmean
 from numpy.typing import DTypeLike
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
-from outquantlab.typing_conventions.custom_types import ArrayFloat, Float32
+from outquantlab.typing_conventions.custom_types import ArrayFloat, Float32, ArrayInt
 
 
 class SeriesFloat(Series):  # type: ignore
@@ -49,8 +49,14 @@ class SeriesFloat(Series):  # type: ignore
     ) -> ArrayFloat:
         return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
 
-    def sort_data(self, ascending: bool = True) -> None:
-        return SeriesFloat(super().sort_values(ascending=ascending, inplace=True))  # type: ignore
+    def sort_data(self, ascending: bool) -> "SeriesFloat":
+        array: ArrayFloat = self.get_array()
+        sorted_indices: ArrayInt = argsort(array)
+        if not ascending:
+            sorted_indices = sorted_indices[::-1]
+        sorted_array: ArrayFloat = array[sorted_indices]
+        sorted_index: list[str] = [self.names[i] for i in sorted_indices]
+        return SeriesFloat(data=sorted_array, index=sorted_index)
 
 
 class DataFrameFloat(DataFrame):
@@ -108,3 +114,16 @@ class DataFrameFloat(DataFrame):
         else:
             labels: list[str] = self.columns.to_list()
         return labels
+
+    def sort_data(self, ascending: bool) -> "DataFrameFloat":
+        mean_values: ArrayFloat = nanmean(self.get_array(), axis=0)
+        sorted_indices: ArrayInt = argsort(a=mean_values)
+        if not ascending:
+            sorted_indices = sorted_indices[::-1]
+
+        sorted_data: ArrayFloat = self.get_array()[:, sorted_indices]
+        sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]
+
+        return DataFrameFloat(
+            data=sorted_data, columns=sorted_columns, index=self.dates
+        )

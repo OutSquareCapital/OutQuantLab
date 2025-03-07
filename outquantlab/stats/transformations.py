@@ -1,5 +1,4 @@
 from numpy import (
-    argsort,
     fill_diagonal,
     nan,
     nanmax,
@@ -9,11 +8,9 @@ from numpy import (
     zeros_like,
 )
 
-from outquantlab.metrics import PERCENTAGE_FACTOR, get_overall_mean
+from outquantlab.metrics import PERCENTAGE_FACTOR
 from outquantlab.typing_conventions import (
     ArrayFloat,
-    ArrayInt,
-    DataFrameFloat,
     Float32,
 )
 
@@ -68,19 +65,6 @@ def prepare_sunburst_data(
             parents.append("")
 
     return labels, parents
-
-
-def sort_dataframe(df: DataFrameFloat, ascending: bool = True) -> DataFrameFloat:
-    array: ArrayFloat = df.get_array()
-    sorted_indices: ArrayInt = argsort(a=get_overall_mean(array=array, axis=0))
-    if not ascending:
-        sorted_indices = sorted_indices[::-1]
-
-    sorted_data: ArrayFloat = array[:, sorted_indices]
-    sorted_columns: list[str] = [df.columns[i] for i in sorted_indices]
-
-    return DataFrameFloat(data=sorted_data, columns=sorted_columns, index=df.dates)
-
 
 def normalize_data_for_colormap(data: ArrayFloat):
     z_min: Float32 = nanmin(data)
