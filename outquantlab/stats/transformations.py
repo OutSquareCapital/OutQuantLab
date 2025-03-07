@@ -1,4 +1,13 @@
-from numpy import argsort, fill_diagonal, nan, nanmax, nanmin, quantile, where, zeros_like
+from numpy import (
+    argsort,
+    fill_diagonal,
+    nan,
+    nanmax,
+    nanmin,
+    quantile,
+    where,
+    zeros_like,
+)
 
 from outquantlab.metrics import PERCENTAGE_FACTOR, get_overall_mean
 from outquantlab.typing_conventions import (
@@ -25,6 +34,7 @@ def format_returns(returns_array: ArrayFloat, limit: float) -> ArrayFloat:
     )
 
     return limited_returns_array * PERCENTAGE_FACTOR
+
 
 def prepare_sunburst_data(
     cluster_dict: dict[str, list[str]],
@@ -59,18 +69,14 @@ def prepare_sunburst_data(
 
     return labels, parents
 
-def sort_dataframe(
-    df: DataFrameFloat, use_final: bool = False, ascending: bool = True
-) -> DataFrameFloat:
-    if use_final:
-        sorted_indices: ArrayInt = argsort(a=df.get_array()[-1, :])
-    else:
-        mean_values: ArrayFloat = get_overall_mean(array=df.get_array(), axis=0)
-        sorted_indices: ArrayInt = argsort(a=mean_values)
+
+def sort_dataframe(df: DataFrameFloat, ascending: bool = True) -> DataFrameFloat:
+    array: ArrayFloat = df.get_array()
+    sorted_indices: ArrayInt = argsort(a=get_overall_mean(array=array, axis=0))
     if not ascending:
         sorted_indices = sorted_indices[::-1]
 
-    sorted_data: ArrayFloat = df.get_array()[:, sorted_indices]
+    sorted_data: ArrayFloat = array[:, sorted_indices]
     sorted_columns: list[str] = [df.columns[i] for i in sorted_indices]
 
     return DataFrameFloat(data=sorted_data, columns=sorted_columns, index=df.dates)

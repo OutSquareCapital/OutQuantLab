@@ -58,7 +58,7 @@ def get_stats_equity(returns_df: DataFrameFloat) -> DataFrameFloat:
         columns=returns_df.convert_multiindex_to_labels(),
     )
 
-    return sort_dataframe(df=equity_curves_df, use_final=True, ascending=True)
+    return sort_dataframe(df=equity_curves_df, ascending=True)
 
 
 def get_rolling_volatility(returns_df: DataFrameFloat) -> DataFrameFloat:
@@ -119,7 +119,6 @@ def get_overall_returns(returns_df: DataFrameFloat) -> SeriesFloat:
         data=mt.calculate_total_returns(returns_array=returns_df.get_array()),
         index=returns_df.convert_multiindex_to_labels(),
     )
-    
     total_returns_series.sort_data(ascending=True)
     return total_returns_series
 
@@ -152,7 +151,7 @@ def get_overall_average_drawdown(returns_df: DataFrameFloat) -> SeriesFloat:
         data=mt.get_overall_mean(array=rolling_dd),
         index=returns_df.convert_multiindex_to_labels(),
     )
-    
+
     drawdowns_series.sort_data(ascending=True)
     return drawdowns_series
 
@@ -164,7 +163,7 @@ def get_overall_average_correlation(returns_df: DataFrameFloat) -> SeriesFloat:
         ),
         index=returns_df.convert_multiindex_to_labels(),
     )
-    
+
     overall_average_corr.sort_data(ascending=True)
     return overall_average_corr
 
@@ -176,7 +175,7 @@ def get_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
         ),
         index=returns_df.convert_multiindex_to_labels(),
     )
-    
+
     skew_series.sort_data(ascending=True)
     return skew_series
 
