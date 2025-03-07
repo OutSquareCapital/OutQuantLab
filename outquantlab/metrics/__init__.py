@@ -33,8 +33,8 @@ from outquantlab.metrics.volatility import (
 )
 
 from outquantlab.metrics.performance import (
-    rolling_sharpe_ratios,
-    expanding_sharpe_ratios,
+    rolling_sharpe_ratio,
+    expanding_sharpe_ratio,
     overall_sharpe_ratio,
     calculate_equity_curves,
     calculate_rolling_drawdown,
@@ -43,6 +43,7 @@ from outquantlab.metrics.performance import (
     calculate_max_drawdown,
     calculate_total_returns,
     calculate_overall_monthly_skewness,
+    calculate_overall_average_drawdown
 )
 
 from outquantlab.metrics.correlation import (
@@ -70,8 +71,8 @@ __all__: list[str] = [
     "rolling_volatility",
     "hv_composite",
     "separate_volatility",
-    "rolling_sharpe_ratios",
-    "expanding_sharpe_ratios",
+    "rolling_sharpe_ratio",
+    "expanding_sharpe_ratio",
     "overall_volatility",
     "overall_volatility_annualized",
     "overall_sharpe_ratio",
@@ -95,4 +96,5 @@ __all__: list[str] = [
     "get_rolling_median_normalisation",
     "dynamic_signal",
     "rolling_scalar_normalisation",
+    "calculate_overall_average_drawdown"
 ]

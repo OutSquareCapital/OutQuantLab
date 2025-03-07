@@ -19,6 +19,7 @@ def reduce_array(prices_array: ArrayFloat, frequency: int) -> ArrayFloat:
         indices: ArrayInt = append(arr=indices, values=array_length - 1)
     return prices_array[indices]
 
+
 def calculate_equity_curves(returns_array: ArrayFloat) -> ArrayFloat:
     temp_array: ArrayFloat = returns_array.copy()
     mask: ArrayFloat = isnan(temp_array)
@@ -64,7 +65,16 @@ def calculate_max_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
     return get_overall_min(array=drawdown)
 
 
-def expanding_sharpe_ratios(returns_array: ArrayFloat) -> ArrayFloat:
+def calculate_overall_average_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
+    rolling_dd: ArrayFloat = calculate_rolling_drawdown(
+        returns_array=returns_array,
+        length=returns_array.shape[0],
+    )
+
+    return get_overall_mean(array=rolling_dd)
+
+
+def expanding_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     length: int = returns_array.shape[0]
     expanding_mean: ArrayFloat = get_rolling_mean(
         returns_array, length=length, min_length=125
@@ -75,7 +85,7 @@ def expanding_sharpe_ratios(returns_array: ArrayFloat) -> ArrayFloat:
     return expanding_mean / expanding_std * ANNUALIZATION_FACTOR
 
 
-def rolling_sharpe_ratios(
+def rolling_sharpe_ratio(
     returns_array: ArrayFloat, length: int, min_length: int
 ) -> ArrayFloat:
     mean: ArrayFloat = get_rolling_mean(

@@ -13,7 +13,7 @@ def plot_metrics(returns_df: DataFrameFloat)-> None:
 
 def plot_raw_data(returns_df: DataFrameFloat, show_legend: bool = True) -> go.Figure:
     return widgets.curves(
-        returns_df=stats.get_raw_data_formatted(returns_df=returns_df),
+        returns_df=returns_df,
         title=_format_plot_name(name=plot_raw_data.__name__),
         show_legend=show_legend,
     )
