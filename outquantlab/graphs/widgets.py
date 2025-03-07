@@ -1,6 +1,6 @@
 import plotly.graph_objects as go  # type: ignore
 from pandas import DatetimeIndex
-
+from numpy import nanmax, nanmin, zeros_like
 from outquantlab.graphs.design import (
     get_color_map,
     get_heatmap_colorscale,
@@ -10,7 +10,12 @@ from outquantlab.graphs.design import (
 )
 from outquantlab.graphs.ui_constants import Colors
 from outquantlab.metrics import get_overall_max, get_overall_min
-from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
+from outquantlab.typing_conventions import (
+    ArrayFloat,
+    DataFrameFloat,
+    SeriesFloat,
+    Float32,
+)
 
 
 def curves(
@@ -89,25 +94,22 @@ def table(
 
 
 def heatmap(
-    z_values: ArrayFloat,
-    x_labels: list[str],
-    y_labels: list[str],
-    z_normalized: ArrayFloat,
+    returns_df: DataFrameFloat,
     title: str,
     show_legend: bool,
 ) -> go.Figure:
-    colorscale = get_heatmap_colorscale()
-
+    colorscale: list[list[float | str]] = get_heatmap_colorscale()
+    corr_matrix_normalised = _normalize_data_for_colormap(data=returns_df.get_array())
     fig = go.Figure(
         data=go.Heatmap(
-            z=z_normalized,
-            x=x_labels,
-            y=y_labels,
+            z=corr_matrix_normalised,
+            x=returns_df.columns,
+            y=returns_df.columns,
             colorscale=colorscale,
             showscale=False,
             zmin=0,
             zmax=1,
-            customdata=z_values,
+            customdata=returns_df.get_array(),
             hovertemplate=(
                 "X: %{x}<br>"
                 "Y: %{y}<br>"
@@ -185,8 +187,9 @@ def histogram(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
 
 
 def icicle(
-    labels: list[str], parents: list[str], title: str, show_legend: bool
+    clusters_dict: dict[str, list[str]], title: str, show_legend: bool
 ) -> go.Figure:
+    labels, parents = _prepare_sunburst_data(cluster_dict=clusters_dict)
     fig = go.Figure(
         data=go.Icicle(
             labels=labels,
@@ -197,3 +200,47 @@ def icicle(
     setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
 
     return fig
+
+
+def _normalize_data_for_colormap(data: ArrayFloat) -> ArrayFloat:
+    z_min: Float32 = nanmin(data)
+    z_max: Float32 = nanmax(data)
+    return (
+        (data - z_min) / (z_max - z_min)
+        if z_max > z_min
+        else zeros_like(a=data, dtype=Float32)
+    )
+
+
+def _prepare_sunburst_data(
+    cluster_dict: dict[str, list[str]],
+    parent_label: str = "",
+    labels: list[str] | None = None,
+    parents: list[str] | None = None,
+) -> tuple[list[str], list[str]]:
+    if labels is None:
+        labels = []
+    if parents is None:
+        parents = []
+
+    for key, value in cluster_dict.items():
+        current_label: str = parent_label + str(key) if parent_label else str(key)
+        if isinstance(value, dict):
+            _prepare_sunburst_data(
+                cluster_dict=value,
+                parent_label=current_label,
+                labels=labels,
+                parents=parents,
+            )
+        else:
+            for asset in value:
+                labels.append(asset)
+                parents.append(current_label)
+        if parent_label:
+            labels.append(current_label)
+            parents.append(parent_label)
+        else:
+            labels.append(current_label)
+            parents.append("")
+
+    return labels, parents
