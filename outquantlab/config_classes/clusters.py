@@ -1,13 +1,14 @@
+from enum import StrEnum
+
 from outquantlab.config_classes.collections import Asset
 from outquantlab.config_classes.generic_classes import BaseClustersTree
 from outquantlab.indicators import BaseIndic
-from outquantlab.metrics import get_corr_clusters
-from outquantlab.typing_conventions import DataFrameFloat
-from enum import StrEnum
+
 
 class Prefix(StrEnum):
     ASSET = "Asset"
     INDIC = "Indic"
+
 
 class AssetsClusters(BaseClustersTree):
     def __init__(self, clusters: dict[str, dict[str, list[str]]]) -> None:
@@ -34,23 +35,10 @@ class IndicsClusters(BaseClustersTree):
             for combo in indic.param_combos
         ]
 
-
-def generate_dynamic_clusters(
-    returns_df: DataFrameFloat, max_clusters: int
-) -> dict[str, list[str]]:
-    flat_clusters: list[int] = get_corr_clusters(
-        returns_array=returns_df.get_array(), max_clusters=max_clusters
-    )
-    asset_names: list[str] = returns_df.columns.tolist()
-
-    return _assign_clusters(
-        max_clusters=max_clusters, asset_names=asset_names, flat_clusters=flat_clusters
-    )
-
-
-def _assign_clusters(
+def assign_clusters(
     max_clusters: int, asset_names: list[str], flat_clusters: list[int]
 ) -> dict[str, list[str]]:
+    print(flat_clusters)
     return {
         str(object=cluster_id): _get_assets_in_cluster(
             cluster_id=cluster_id, asset_names=asset_names, flat_clusters=flat_clusters

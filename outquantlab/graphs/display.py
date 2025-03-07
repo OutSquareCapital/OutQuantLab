@@ -3,13 +3,16 @@ import outquantlab.graphs.widgets as widgets
 import outquantlab.stats as stats
 from outquantlab.typing_conventions import DataFrameFloat
 
+
 def _format_plot_name(name: str) -> str:
     return name.replace("plot", "").replace("_", " ").title()
 
-def plot_metrics(returns_df: DataFrameFloat)-> None:
+
+def plot_metrics(returns_df: DataFrameFloat) -> None:
     metrics: dict[str, float] = stats.get_metrics(returns_df=returns_df)
     for key, value in metrics.items():
         print(f"{key}: {value}")
+
 
 def plot_raw_data(returns_df: DataFrameFloat, show_legend: bool = True) -> go.Figure:
     return widgets.curves(
@@ -17,6 +20,7 @@ def plot_raw_data(returns_df: DataFrameFloat, show_legend: bool = True) -> go.Fi
         title=_format_plot_name(name=plot_raw_data.__name__),
         show_legend=show_legend,
     )
+
 
 def plot_stats_equity(
     returns_df: DataFrameFloat, show_legend: bool = True
@@ -160,15 +164,8 @@ def plot_stats_distribution_histogram(
 def plot_correlation_heatmap(
     returns_df: DataFrameFloat, show_legend: bool = True
 ) -> go.Figure:
-    filled_correlation_matrix, labels_list, corr_matrix_normalised = (
-        stats.get_correlation_heatmap(returns_df=returns_df)
-    )
-
     return widgets.heatmap(
-        z_values=filled_correlation_matrix,
-        x_labels=labels_list,
-        y_labels=labels_list,
-        z_normalized=corr_matrix_normalised,
+        returns_df=stats.get_correlation_heatmap(returns_df=returns_df),
         title=_format_plot_name(name=plot_correlation_heatmap.__name__),
         show_legend=show_legend,
     )
@@ -177,13 +174,12 @@ def plot_correlation_heatmap(
 def plot_correlation_clusters_icicle(
     returns_df: DataFrameFloat, max_clusters: int = 4, show_legend: bool = True
 ) -> go.Figure:
-    labels, parents = stats.get_correlation_clusters_icicle(
+    clusters_dict: dict[str, list[str]] = stats.get_correlation_clusters_icicle(
         returns_df=returns_df, max_clusters=max_clusters
     )
 
     return widgets.icicle(
-        labels=labels,
-        parents=parents,
+        clusters_dict=clusters_dict,
         title=_format_plot_name(name=plot_correlation_clusters_icicle.__name__),
         show_legend=show_legend,
     )
