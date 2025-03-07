@@ -12,21 +12,6 @@ class SeriesFloat(Series):  # type: ignore
     This class enforces:
     - Data of type Float32.
     - Index of type list[str], Index, or MultiIndex.
-
-    **Methods**:
-        >>> @property
-        >>> def names(self) -> list[str]:
-
-        *Returns the index of the Series as a list of strings.*
-
-        >>> def get_array()(
-        ...     self,
-        ...     dtype: DTypeLike = Float32,
-        ...     copy: bool = False,
-        ...     na_value: float = np.nan
-        ... ) -> ArrayFloat:
-
-        *Converts the Series to a NumPy array with specified dtype, copy, and NA value.*
     """
 
     def __init__(
@@ -50,7 +35,7 @@ class SeriesFloat(Series):  # type: ignore
         return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
 
     def get_names(self) -> list[str]:
-        return self.index.to_list() # type: ignore
+        return self.index.to_list()  # type: ignore
 
     def sort_data(self, ascending: bool) -> "SeriesFloat":
         array: ArrayFloat = self.get_array()
@@ -70,21 +55,6 @@ class DataFrameFloat(DataFrame):
     - Data of type Float32.
     - Index of type DatetimeIndex.
     - Columns of type list[str], Index, or MultiIndex.
-
-    **Methods**:
-        >>> @property
-        >>> def dates(self) -> DatetimeIndex:
-
-        *Returns the index of the DataFrame as a DatetimeIndex.*
-
-        >>> def get_array()(
-        ...     self,
-        ...     dtype: DTypeLike = Float32,
-        ...     copy: bool = False,
-        ...     na_value: float = np.nan,
-        ... ) -> ArrayFloat:
-
-        *Converts the DataFrame to a NumPy array with specified dtype, copy, and NA value.*
     """
 
     def __init__(
