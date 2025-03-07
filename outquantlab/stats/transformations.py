@@ -3,12 +3,9 @@ from numpy import (
     nan,
     nanmax,
     nanmin,
-    quantile,
-    where,
     zeros_like,
 )
 
-from outquantlab.metrics import PERCENTAGE_FACTOR
 from outquantlab.typing_conventions import (
     ArrayFloat,
     Float32,
@@ -18,20 +15,6 @@ from outquantlab.typing_conventions import (
 def fill_correlation_matrix(corr_matrix: ArrayFloat) -> ArrayFloat:
     fill_diagonal(a=corr_matrix, val=nan)
     return corr_matrix
-
-
-def format_returns(returns_array: ArrayFloat, limit: float) -> ArrayFloat:
-    lower_threshold: ArrayFloat = quantile(a=returns_array, q=limit, axis=0)
-    upper_threshold: ArrayFloat = quantile(a=returns_array, q=1 - limit, axis=0)
-
-    limited_returns_array: ArrayFloat = where(
-        (returns_array >= lower_threshold) & (returns_array <= upper_threshold),
-        returns_array,
-        nan,
-    )
-
-    return limited_returns_array * PERCENTAGE_FACTOR
-
 
 def prepare_sunburst_data(
     cluster_dict: dict[str, list[str]],

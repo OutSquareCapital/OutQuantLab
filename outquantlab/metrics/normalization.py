@@ -2,7 +2,7 @@ from collections.abc import Callable
 from operator import gt
 
 import numbagg as nb
-from numpy import clip, sign, where
+from numpy import clip, sign, where, quantile, nan
 
 from outquantlab.metrics.aggregation import (
     get_overall_median,
@@ -70,9 +70,7 @@ def get_rolling_median_normalisation(
     return ((signal_array - median_array) / (max_array - min_array)) * Float32(2.0)
 
 
-def rolling_scalar_normalisation(
-    raw_signal: ArrayFloat, limit: int = 2
-) -> ArrayFloat:
+def rolling_scalar_normalisation(raw_signal: ArrayFloat, limit: int = 2) -> ArrayFloat:
     scalar: ArrayFloat = _get_normalized_scalar(raw_signal=raw_signal)
     reshaped_scalar: ArrayFloat = scalar.reshape(-1, 1)
     normalized_signal: ArrayFloat = reshaped_scalar * raw_signal
@@ -86,6 +84,7 @@ def dynamic_signal(
 ) -> ArrayFloat:
     return where(comparator(metric, Float32(0.0)), -signal, signal)
 
+
 def _get_normalized_scalar(
     raw_signal: ArrayFloat, length: int = 500, target: int = 1
 ) -> ArrayFloat:
@@ -96,5 +95,19 @@ def _get_normalized_scalar(
     scalar: ArrayFloat = target / mean
     return _bfill(array=scalar)
 
+
 def _bfill(array: ArrayFloat) -> ArrayFloat:
     return nb.bfill(array, axis=0)  # type: ignore
+
+
+def limit_outliers(returns_array: ArrayFloat, limit: float) -> ArrayFloat:
+    lower_threshold: ArrayFloat = quantile(a=returns_array, q=limit, axis=0)
+    upper_threshold: ArrayFloat = quantile(a=returns_array, q=1 - limit, axis=0)
+
+    limited_returns_array: ArrayFloat = where(
+        (returns_array >= lower_threshold) & (returns_array <= upper_threshold),
+        returns_array,
+        nan,
+    )
+
+    return limited_returns_array

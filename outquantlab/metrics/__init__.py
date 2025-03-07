@@ -20,7 +20,8 @@ from outquantlab.metrics.normalization import (
     calculate_indicator_on_trend_signal,
     get_rolling_median_normalisation,
     dynamic_signal,
-    rolling_scalar_normalisation
+    rolling_scalar_normalisation,
+    limit_outliers
 )
 from outquantlab.metrics.distribution import rolling_kurtosis, rolling_skewness
 
@@ -96,5 +97,6 @@ __all__: list[str] = [
     "get_rolling_median_normalisation",
     "dynamic_signal",
     "rolling_scalar_normalisation",
-    "calculate_overall_average_drawdown"
+    "calculate_overall_average_drawdown",
+    "limit_outliers",
 ]
