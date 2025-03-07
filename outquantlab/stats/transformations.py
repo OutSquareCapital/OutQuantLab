@@ -1,6 +1,4 @@
 from numpy import (
-    fill_diagonal,
-    nan,
     nanmax,
     nanmin,
     zeros_like,
@@ -11,10 +9,6 @@ from outquantlab.typing_conventions import (
     Float32,
 )
 
-
-def fill_correlation_matrix(corr_matrix: ArrayFloat) -> ArrayFloat:
-    fill_diagonal(a=corr_matrix, val=nan)
-    return corr_matrix
 
 def prepare_sunburst_data(
     cluster_dict: dict[str, list[str]],
@@ -48,6 +42,7 @@ def prepare_sunburst_data(
             parents.append("")
 
     return labels, parents
+
 
 def normalize_data_for_colormap(data: ArrayFloat):
     z_min: Float32 = nanmin(data)

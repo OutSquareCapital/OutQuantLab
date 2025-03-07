@@ -1,4 +1,4 @@
-from numpy import corrcoef, sqrt, sum
+from numpy import corrcoef, sqrt, sum, fill_diagonal, nan
 from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
 from scipy.spatial.distance import squareform
 
@@ -26,3 +26,9 @@ def get_corr_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]
     distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
     linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")  # type: ignore
     return fcluster(linkage_matrix, max_clusters, criterion="maxclust")  # type: ignore
+
+
+def get_filled_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:
+    corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)
+    fill_diagonal(a=corr_matrix, val=nan)
+    return corr_matrix
