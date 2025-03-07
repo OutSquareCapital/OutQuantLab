@@ -1,15 +1,15 @@
-from collections.abc import Callable
-
 import outquantlab.metrics as mt
-from outquantlab.config_classes import generate_dynamic_clusters
-from outquantlab.stats.transformations import (
-    fill_correlation_matrix,
-    format_returns,
-    normalize_data_for_colormap,
-    prepare_sunburst_data,
-    sort_dataframe,
+from outquantlab.config_classes import assign_clusters
+from outquantlab.stats.interfaces import (
+    get_df_stats_interface,
+    get_series_stats_interface,
 )
-from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
+from outquantlab.typing_conventions import (
+    ArrayFloat,
+    DataFrameFloat,
+    SeriesFloat,
+    StatFunc,
+)
 
 
 def _format_metric_name(name: str) -> str:
@@ -24,7 +24,7 @@ def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
         print("Metrics can only be calculated for a single asset")
         return {}
     else:
-        metric_functions: list[Callable[..., ArrayFloat]] = [
+        metric_functions: list[StatFunc] = [
             mt.calculate_total_returns,
             mt.overall_sharpe_ratio,
             mt.calculate_max_drawdown,
@@ -42,196 +42,139 @@ def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
         }
 
 
-def get_raw_data_formatted(returns_df: DataFrameFloat) -> DataFrameFloat:
-    formatted_returns_df = DataFrameFloat(
-        data=returns_df.get_array(),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
-    )
-    return sort_dataframe(df=formatted_returns_df, ascending=True)
-
-
 def get_stats_equity(returns_df: DataFrameFloat) -> DataFrameFloat:
-    equity_curves_df = DataFrameFloat(
-        data=mt.calculate_equity_curves(returns_array=returns_df.get_array()),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+    return get_df_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.calculate_equity_curves,
+        ascending=True,
     )
-
-    return sort_dataframe(df=equity_curves_df, ascending=True)
 
 
 def get_rolling_volatility(returns_df: DataFrameFloat) -> DataFrameFloat:
-    rolling_volatility_df = DataFrameFloat(
-        data=mt.hv_composite(returns_array=returns_df.get_array()),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+    return get_df_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.rolling_volatility,
+        ascending=False,
     )
-
-    return sort_dataframe(df=rolling_volatility_df, ascending=False)
 
 
 def get_rolling_drawdown(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
-    drawdowns_df = DataFrameFloat(
-        data=mt.calculate_rolling_drawdown(
-            returns_array=returns_df.get_array(),
-            length=length,
-        ),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+    return get_df_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.calculate_rolling_drawdown,
+        ascending=False,
+        length=length,
     )
-
-    return sort_dataframe(df=drawdowns_df, ascending=True)
 
 
 def get_rolling_sharpe_ratio(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
-    rolling_sharpe_ratio_df = DataFrameFloat(
-        data=mt.rolling_sharpe_ratios(
-            returns_array=returns_df.get_array(),
-            length=length,
-            min_length=length,
-        ),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+    return get_df_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.rolling_sharpe_ratio,
+        ascending=False,
+        length=length,
+        min_length=length,
     )
-
-    return sort_dataframe(df=rolling_sharpe_ratio_df, ascending=True)
 
 
 def get_rolling_smoothed_skewness(
     returns_df: DataFrameFloat, length: int
 ) -> DataFrameFloat:
-    rolling_skewness_df = DataFrameFloat(
-        data=mt.rolling_skewness(
-            array=returns_df.get_array(),
-            length=length,
-            min_length=length,
-        ),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+    return get_df_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.rolling_skewness,
+        ascending=True,
+        length=length,
+        min_length=length,
     )
-
-    return sort_dataframe(df=rolling_skewness_df, ascending=True)
 
 
 def get_overall_returns(returns_df: DataFrameFloat) -> SeriesFloat:
-    total_returns_series = SeriesFloat(
-        data=mt.calculate_total_returns(returns_array=returns_df.get_array()),
-        index=returns_df.convert_multiindex_to_labels(),
+    return get_series_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.calculate_total_returns,
+        ascending=True,
     )
-    total_returns_series.sort_data(ascending=True)
-    return total_returns_series
 
 
 def get_overall_sharpe_ratio(returns_df: DataFrameFloat) -> SeriesFloat:
-    sharpes_series = SeriesFloat(
-        data=mt.overall_sharpe_ratio(returns_array=returns_df.get_array()),
-        index=returns_df.convert_multiindex_to_labels(),
+    return get_series_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.overall_sharpe_ratio,
+        ascending=False,
     )
-    sharpes_series.sort_data(ascending=True)
-    return sharpes_series
 
 
 def get_overall_volatility(returns_df: DataFrameFloat) -> SeriesFloat:
-    overall_vol_series = SeriesFloat(
-        data=mt.overall_volatility_annualized(returns_array=returns_df.get_array()),
-        index=returns_df.convert_multiindex_to_labels(),
+    return get_series_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.overall_volatility_annualized,
+        ascending=True,
     )
-    overall_vol_series.sort_data(ascending=True)
-    return overall_vol_series
 
 
 def get_overall_average_drawdown(returns_df: DataFrameFloat) -> SeriesFloat:
-    rolling_dd: ArrayFloat = mt.calculate_rolling_drawdown(
-        returns_array=returns_df.get_array(),
-        length=returns_df.shape[0],
+    return get_series_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.calculate_overall_average_drawdown,
+        ascending=True,
     )
-
-    drawdowns_series = SeriesFloat(
-        data=mt.get_overall_mean(array=rolling_dd),
-        index=returns_df.convert_multiindex_to_labels(),
-    )
-
-    drawdowns_series.sort_data(ascending=True)
-    return drawdowns_series
 
 
 def get_overall_average_correlation(returns_df: DataFrameFloat) -> SeriesFloat:
-    overall_average_corr = SeriesFloat(
-        data=mt.calculate_overall_average_correlation(
-            returns_array=returns_df.get_array()
-        ),
-        index=returns_df.convert_multiindex_to_labels(),
+    return get_series_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.calculate_overall_average_correlation,
+        ascending=True,
     )
-
-    overall_average_corr.sort_data(ascending=True)
-    return overall_average_corr
 
 
 def get_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
-    skew_series: SeriesFloat = SeriesFloat(
-        data=mt.calculate_overall_monthly_skewness(
-            returns_array=returns_df.get_array()
-        ),
-        index=returns_df.convert_multiindex_to_labels(),
+    return get_series_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.calculate_overall_monthly_skewness,
+        ascending=True,
     )
-
-    skew_series.sort_data(ascending=True)
-    return skew_series
 
 
 def get_stats_distribution_violin(
     returns_df: DataFrameFloat, returns_limit: float
 ) -> DataFrameFloat:
-    return DataFrameFloat(
-        data=format_returns(
-            returns_array=returns_df.get_array(),
-            limit=returns_limit,
-        ),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+    return get_df_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.limit_outliers,
+        ascending=True,
+        limit=returns_limit,
     )
 
 
 def get_stats_distribution_histogram(
     returns_df: DataFrameFloat, returns_limit: float
 ) -> DataFrameFloat:
-    return DataFrameFloat(
-        data=format_returns(
-            returns_array=returns_df.get_array(),
-            limit=returns_limit,
-        ),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+    return get_df_stats_interface(
+        returns_df=returns_df,
+        stats_func=mt.limit_outliers,
+        ascending=True,
+        limit=returns_limit,
     )
 
 
 def get_correlation_heatmap(
     returns_df: DataFrameFloat,
-) -> tuple[ArrayFloat, list[str], ArrayFloat]:
-    correlation_matrix: ArrayFloat = mt.calculate_correlation_matrix(
-        returns_array=returns_df.get_array()
+) -> DataFrameFloat:
+    return DataFrameFloat(
+        data=mt.get_filled_correlation_matrix(returns_array=returns_df.get_array()),
+        columns=returns_df.convert_multiindex_to_labels(),
     )
-    filled_correlation_matrix: ArrayFloat = fill_correlation_matrix(
-        corr_matrix=correlation_matrix
-    )
-    labels_list: list[str] = returns_df.convert_multiindex_to_labels()
-    corr_matrix_normalised = normalize_data_for_colormap(data=filled_correlation_matrix)
-
-    return filled_correlation_matrix, labels_list, corr_matrix_normalised
 
 
 def get_correlation_clusters_icicle(
     returns_df: DataFrameFloat, max_clusters: int
-) -> tuple[list[str], list[str]]:
-    renamed_returns_df = DataFrameFloat(
-        data=returns_df.get_array(),
-        index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+) -> dict[str, list[str]]:
+    return assign_clusters(
+        max_clusters=max_clusters,
+        asset_names=returns_df.convert_multiindex_to_labels(),
+        flat_clusters=mt.get_corr_clusters(
+            returns_array=returns_df.get_array(), max_clusters=max_clusters
+        ),
     )
-    clusters_dict: dict[str, list[str]] = generate_dynamic_clusters(
-        returns_df=renamed_returns_df, max_clusters=max_clusters
-    )
-    labels, parents = prepare_sunburst_data(cluster_dict=clusters_dict)
-
-    return labels, parents
