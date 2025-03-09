@@ -130,7 +130,7 @@ def remove_skewness_contribution(
 
 
 @njit
-def rolling_skewness(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
+def rolling_skewness(array: ArrayFloat, length: int, min_length: int = 4) -> ArrayFloat:
     num_rows, num_cols = array.shape
     output: ArrayFloat = empty((num_rows, num_cols), dtype=Float32)
     output.fill(nan)
@@ -245,13 +245,13 @@ def rolling_skewness(array: ArrayFloat, length: int, min_length: int) -> ArrayFl
 
 @njit
 def calculate_kurtosis(
-    min_length: int,
     observation_count: int,
     sum_values: float,
     sum_values_squared: float,
     sum_values_cubed: float,
     sum_values_fourth: float,
     consecutive_equal_count: int,
+    min_length: int = 4,
 ) -> float | Float32:
     if observation_count >= min_length:
         if observation_count < 4:
@@ -520,13 +520,13 @@ def rolling_kurtosis(array: ArrayFloat, length: int, min_length: int) -> ArrayFl
                 )
 
             output[row, col] = calculate_kurtosis(
-                min_length,
-                observation_count,
-                sum_values,
-                sum_values_squared,
-                sum_values_cubed,
-                sum_values_fourth,
-                consecutive_equal_count,
+                observation_count=observation_count,
+                sum_values=sum_values,
+                sum_values_squared=sum_values_squared,
+                sum_values_cubed=sum_values_cubed,
+                sum_values_fourth=sum_values_fourth,
+                consecutive_equal_count=consecutive_equal_count,
+                min_length=min_length
             )
 
     return output

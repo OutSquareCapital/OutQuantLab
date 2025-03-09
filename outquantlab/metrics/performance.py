@@ -20,11 +20,18 @@ def reduce_array(prices_array: ArrayFloat, frequency: int) -> ArrayFloat:
     return prices_array[indices]
 
 
-def calculate_equity_curves(returns_array: ArrayFloat) -> ArrayFloat:
+def calculate_equity_curves(returns_array: ArrayFloat, length: int) -> ArrayFloat:
+    start: int = returns_array.shape[0] - length
     temp_array: ArrayFloat = returns_array.copy()
     mask: ArrayFloat = isnan(temp_array)
     temp_array[mask] = 0
-    cumulative_returns: ArrayFloat = cumprod(a=1 + temp_array, axis=0)
+
+    cumulative_returns: ArrayFloat = empty_like(prototype=temp_array)
+
+    cumulative_returns[:start] = nan
+
+    cumulative_returns[start:] = cumprod(a=1 + temp_array[start:], axis=0)
+
     cumulative_returns[mask] = nan
 
     return cumulative_returns * PERCENTAGE_FACTOR
@@ -46,12 +53,16 @@ def pct_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
 
 
 def calculate_total_returns(returns_array: ArrayFloat) -> ArrayFloat:
-    equity_curves: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
+    equity_curves: ArrayFloat = calculate_equity_curves(
+        returns_array=returns_array, length=returns_array.shape[0]
+    )
     return equity_curves[-1] - 100
 
 
 def calculate_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayFloat:
-    equity_curves: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
+    equity_curves: ArrayFloat = calculate_equity_curves(
+        returns_array=returns_array, length=returns_array.shape[0]
+    )
     period_max: ArrayFloat = get_rolling_max(
         array=equity_curves, length=length, min_length=1
     )
@@ -77,16 +88,16 @@ def calculate_overall_average_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
 def expanding_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     length: int = returns_array.shape[0]
     expanding_mean: ArrayFloat = get_rolling_mean(
-        returns_array, length=length, min_length=125
+        array=returns_array, length=length, min_length=125
     )
     expanding_std: ArrayFloat = rolling_volatility(
-        returns_array, length=length, min_length=125
+        array=returns_array, length=length, min_length=125
     )
     return expanding_mean / expanding_std * ANNUALIZATION_FACTOR
 
 
 def rolling_sharpe_ratio(
-    returns_array: ArrayFloat, length: int, min_length: int
+    returns_array: ArrayFloat, length: int, min_length: int = 20
 ) -> ArrayFloat:
     mean: ArrayFloat = get_rolling_mean(
         array=returns_array, length=length, min_length=min_length
@@ -104,7 +115,9 @@ def overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
 
 
 def calculate_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:
-    prices_array: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
+    prices_array: ArrayFloat = calculate_equity_curves(
+        returns_array=returns_array, length=returns_array.shape[0]
+    )
     monthly_prices: ArrayFloat = reduce_array(prices_array=prices_array, frequency=21)
     monthly_returns: ArrayFloat = pct_returns_np(prices_array=monthly_prices)
     length_to_use: int = monthly_returns.shape[0]

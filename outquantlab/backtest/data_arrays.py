@@ -14,7 +14,9 @@ class DataArrays(NamedTuple):
 
 
 def create_data_arrays(returns_array: ArrayFloat) -> DataArrays:
-    prices: ArrayFloat = calculate_equity_curves(returns_array=returns_array)
+    prices: ArrayFloat = calculate_equity_curves(
+        returns_array=returns_array, length=returns_array.shape[0]
+    )
     returns: ArrayFloat = log_returns_np(prices_array=prices)
     hv: ArrayFloat = hv_composite(returns_array=returns_array)
     adjusted_returns: ArrayFloat = calculate_volatility_adjusted_returns(

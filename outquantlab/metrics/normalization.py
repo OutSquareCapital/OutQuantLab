@@ -100,9 +100,10 @@ def _bfill(array: ArrayFloat) -> ArrayFloat:
     return nb.bfill(array, axis=0)  # type: ignore
 
 
-def limit_outliers(returns_array: ArrayFloat, limit: float) -> ArrayFloat:
-    lower_threshold: ArrayFloat = quantile(a=returns_array, q=limit, axis=0)
-    upper_threshold: ArrayFloat = quantile(a=returns_array, q=1 - limit, axis=0)
+def limit_outliers(returns_array: ArrayFloat, limit: int) -> ArrayFloat:
+    treshold: float = limit/100
+    lower_threshold: ArrayFloat = quantile(a=returns_array, q=treshold, axis=0)
+    upper_threshold: ArrayFloat = quantile(a=returns_array, q=1 - treshold, axis=0)
 
     limited_returns_array: ArrayFloat = where(
         (returns_array >= lower_threshold) & (returns_array <= upper_threshold),
