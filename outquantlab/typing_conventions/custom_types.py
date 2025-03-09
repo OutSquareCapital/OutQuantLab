@@ -7,4 +7,5 @@ Float32: TypeAlias = float32
 Int32: TypeAlias = int32
 ArrayFloat: TypeAlias = NDArray[Float32]
 ArrayInt: TypeAlias = NDArray[Int32]
-StatFunc: TypeAlias = Callable[..., ArrayFloat]
+RollingStatFunc: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
+OverallStatFunc: TypeAlias = Callable[[ArrayFloat], ArrayFloat]

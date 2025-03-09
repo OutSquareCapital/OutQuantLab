@@ -7,7 +7,7 @@ from outquantlab.typing_conventions import (
     ArrayFloat,
     DataFrameFloat,
     SeriesFloat,
-    StatFunc,
+    OverallStatFunc,
 )
 
 
@@ -23,7 +23,7 @@ def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
         print("Metrics can only be calculated for a single asset")
         return {}
     else:
-        metric_functions: list[StatFunc] = [
+        metric_functions: list[OverallStatFunc] = [
             mt.calculate_total_returns,
             mt.overall_sharpe_ratio,
             mt.calculate_max_drawdown,
@@ -41,19 +41,21 @@ def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
         }
 
 
-def get_stats_equity(returns_df: DataFrameFloat) -> DataFrameFloat:
+def get_stats_equity(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
     return get_df_stats_interface(
         returns_df=returns_df,
         stats_func=mt.calculate_equity_curves,
         ascending=True,
+        length=length,
     )
 
 
-def get_rolling_volatility(returns_df: DataFrameFloat) -> DataFrameFloat:
+def get_rolling_volatility(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
     return get_df_stats_interface(
         returns_df=returns_df,
         stats_func=mt.rolling_volatility,
         ascending=False,
+        length=length,
     )
 
 
@@ -72,7 +74,6 @@ def get_rolling_sharpe_ratio(returns_df: DataFrameFloat, length: int) -> DataFra
         stats_func=mt.rolling_sharpe_ratio,
         ascending=False,
         length=length,
-        min_length=length,
     )
 
 
@@ -84,7 +85,6 @@ def get_rolling_smoothed_skewness(
         stats_func=mt.rolling_skewness,
         ascending=True,
         length=length,
-        min_length=length,
     )
 
 
@@ -137,24 +137,24 @@ def get_overall_monthly_skew(returns_df: DataFrameFloat) -> SeriesFloat:
 
 
 def get_stats_distribution_violin(
-    returns_df: DataFrameFloat, returns_limit: float
+    returns_df: DataFrameFloat, returns_limit: int
 ) -> DataFrameFloat:
     return get_df_stats_interface(
         returns_df=returns_df,
         stats_func=mt.limit_outliers,
         ascending=True,
-        limit=returns_limit,
+        length=returns_limit,
     )
 
 
 def get_stats_distribution_histogram(
-    returns_df: DataFrameFloat, returns_limit: float
+    returns_df: DataFrameFloat, returns_limit: int
 ) -> DataFrameFloat:
     return get_df_stats_interface(
         returns_df=returns_df,
         stats_func=mt.limit_outliers,
         ascending=True,
-        limit=returns_limit,
+        length=returns_limit,
     )
 
 
