@@ -25,10 +25,6 @@ class SeriesFloat(Series):  # type: ignore
 
         super().__init__(data=data, index=index, dtype=dtype)  # type: ignore
 
-    @property
-    def names(self) -> list[str]:  # type: ignore
-        return super().index  # type: ignore
-
     def get_array(
         self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = nan
     ) -> ArrayFloat:
@@ -43,7 +39,7 @@ class SeriesFloat(Series):  # type: ignore
         if not ascending:
             sorted_indices = sorted_indices[::-1]
         sorted_array: ArrayFloat = array[sorted_indices]
-        sorted_index: list[str] = [self.names[i] for i in sorted_indices]
+        sorted_index: list[str] = [self.get_names()[i] for i in sorted_indices]
         return SeriesFloat(data=sorted_array, index=sorted_index)
 
 
@@ -79,7 +75,7 @@ class DataFrameFloat(DataFrame):
     ) -> ArrayFloat:
         return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
 
-    def convert_multiindex_to_labels(self) -> list[str]:
+    def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
             labels: list[str] = [
                 "_".join(col).replace(" ", "_") for col in self.columns.to_list()

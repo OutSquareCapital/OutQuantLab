@@ -163,7 +163,7 @@ def get_correlation_heatmap(
 ) -> DataFrameFloat:
     return DataFrameFloat(
         data=mt.get_filled_correlation_matrix(returns_array=returns_df.get_array()),
-        columns=returns_df.convert_multiindex_to_labels(),
+        columns=returns_df.get_names(),
     )
 
 
@@ -172,6 +172,6 @@ def get_correlation_clusters_icicle(
 ) -> dict[str, list[str]]:
     return mt.get_clusters(
         returns_array=returns_df.get_array(),
-        asset_names=returns_df.convert_multiindex_to_labels(),
+        asset_names=returns_df.get_names(),
         max_clusters=max_clusters,
     )

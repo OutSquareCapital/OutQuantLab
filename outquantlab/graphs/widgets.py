@@ -51,10 +51,10 @@ def curves(
 
 
 def bars(series: SeriesFloat, title: str, show_legend: bool) -> go.Figure:
-    color_map: dict[str, str] = get_color_map(assets=series.names)
+    color_map: dict[str, str] = get_color_map(assets=series.get_names())
 
     fig = go.Figure()
-    for label, value in zip(series.names, series.get_array()):
+    for label, value in zip(series.get_names(), series.get_array()):
         fig.add_trace(  # type: ignore
             trace=go.Bar(
                 x=[label],

@@ -10,7 +10,7 @@ def get_df_stats_interface(
     return DataFrameFloat(
         data=stats_func(returns_df.get_array(), **kwargs),
         index=returns_df.dates,
-        columns=returns_df.convert_multiindex_to_labels(),
+        columns=returns_df.get_names(),
     ).sort_data(ascending=ascending)
 
 
@@ -22,5 +22,5 @@ def get_series_stats_interface(
 ) -> SeriesFloat:
     return SeriesFloat(
         data=stats_func(returns_df.get_array(), **kwargs),
-        index=returns_df.convert_multiindex_to_labels(),
+        index=returns_df.get_names(),
     ).sort_data(ascending=ascending)
