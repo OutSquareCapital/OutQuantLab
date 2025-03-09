@@ -14,7 +14,7 @@ class DataBaseProvider:
 
     def refresh_assets_data(self, assets: list[str]) -> None:
         prices_data, returns_data = get_yf_data(assets=assets)
-        self._save_assets_data(prices_data=prices_data, returns_data=returns_data)
+        self.save_assets_data(prices_data=prices_data, returns_data=returns_data)
 
     def get_returns_data(self, names: list[str]) -> DataFrameFloat:
         return DataFrameFloat(
@@ -61,14 +61,17 @@ class DataBaseProvider:
             data=config.indics_clusters.clusters
         )
 
-    def _save_assets_data(
+    def save_assets_data(
         self, prices_data: DataFrameFloat, returns_data: DataFrameFloat
     ) -> None:
-        assets_names: list[str] = prices_data.columns.to_list()
+        assets_names: list[str] = prices_data.get_names()
 
-        self.dbq.select(file_name=FileNames.PRICES_DATA.value).save(data=prices_data)
-        self.dbq.select(file_name=FileNames.RETURNS_DATA.value).save(data=returns_data)
-        self.dbq.select(file_name=FileNames.ASSETS_NAMES.value).save(data=assets_names)
+        self.dbq.select(file_name=FileNames.PRICES_DATA).save(data=prices_data)
+        self.dbq.select(file_name=FileNames.RETURNS_DATA).save(data=returns_data)
+        self.dbq.select(file_name=FileNames.ASSETS_NAMES).save(data=assets_names)
+
+    def save_backtest_results(self, result: DataFrameFloat) -> None:
+        raise NotImplementedError("Method not implemented yet.")
 
 
 def _instanciate_assets_config(
