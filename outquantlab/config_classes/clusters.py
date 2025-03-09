@@ -34,24 +34,3 @@ class IndicsClusters(BaseClustersTree):
             for indic in entities
             for combo in indic.param_combos
         ]
-
-def assign_clusters(
-    max_clusters: int, asset_names: list[str], flat_clusters: list[int]
-) -> dict[str, list[str]]:
-    print(flat_clusters)
-    return {
-        str(object=cluster_id): _get_assets_in_cluster(
-            cluster_id=cluster_id, asset_names=asset_names, flat_clusters=flat_clusters
-        )
-        for cluster_id in range(1, max_clusters + 1)
-    }
-
-
-def _get_assets_in_cluster(
-    cluster_id: int, asset_names: list[str], flat_clusters: list[int]
-) -> list[str]:
-    return [
-        asset
-        for asset, cluster in zip(asset_names, flat_clusters)
-        if cluster == cluster_id
-    ]

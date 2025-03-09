@@ -99,10 +99,10 @@ def heatmap(
     show_legend: bool,
 ) -> go.Figure:
     colorscale: list[list[float | str]] = get_heatmap_colorscale()
-    corr_matrix_normalised = _normalize_data_for_colormap(data=returns_df.get_array())
+    normalised_data: ArrayFloat = _normalize_data_for_colormap(data=returns_df.get_array())
     fig = go.Figure(
         data=go.Heatmap(
-            z=corr_matrix_normalised,
+            z=normalised_data,
             x=returns_df.columns,
             y=returns_df.columns,
             colorscale=colorscale,

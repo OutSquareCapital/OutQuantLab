@@ -1,5 +1,4 @@
 import outquantlab.metrics as mt
-from outquantlab.config_classes import assign_clusters
 from outquantlab.stats.interfaces import (
     get_df_stats_interface,
     get_series_stats_interface,
@@ -171,10 +170,8 @@ def get_correlation_heatmap(
 def get_correlation_clusters_icicle(
     returns_df: DataFrameFloat, max_clusters: int
 ) -> dict[str, list[str]]:
-    return assign_clusters(
-        max_clusters=max_clusters,
+    return mt.get_clusters(
+        returns_array=returns_df.get_array(),
         asset_names=returns_df.convert_multiindex_to_labels(),
-        flat_clusters=mt.get_corr_clusters(
-            returns_array=returns_df.get_array(), max_clusters=max_clusters
-        ),
+        max_clusters=max_clusters,
     )

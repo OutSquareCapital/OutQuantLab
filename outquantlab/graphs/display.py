@@ -172,14 +172,12 @@ def plot_correlation_heatmap(
 
 
 def plot_correlation_clusters_icicle(
-    returns_df: DataFrameFloat, max_clusters: int = 4, show_legend: bool = True
+    returns_df: DataFrameFloat, show_legend: bool = True, max_clusters: int = 4,
 ) -> go.Figure:
-    clusters_dict: dict[str, list[str]] = stats.get_correlation_clusters_icicle(
-        returns_df=returns_df, max_clusters=max_clusters
-    )
-
     return widgets.icicle(
-        clusters_dict=clusters_dict,
+        clusters_dict=stats.get_correlation_clusters_icicle(
+            returns_df=returns_df, max_clusters=max_clusters
+        ),
         title=_format_plot_name(name=plot_correlation_clusters_icicle.__name__),
         show_legend=show_legend,
     )

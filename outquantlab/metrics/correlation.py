@@ -21,14 +21,47 @@ def calculate_overall_average_correlation(returns_array: ArrayFloat) -> ArrayFlo
     return sum_without_diagonal / (corr_matrix.shape[1] - 1)
 
 
-def get_corr_clusters(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
-    distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
-    distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
-    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")  # type: ignore
-    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")  # type: ignore
-
-
 def get_filled_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:
     corr_matrix: ArrayFloat = calculate_correlation_matrix(returns_array=returns_array)
     fill_diagonal(a=corr_matrix, val=nan)
     return corr_matrix
+
+
+def get_clusters(
+    returns_array: ArrayFloat, asset_names: list[str], max_clusters: int
+) -> dict[str, list[str]]:
+    clusters_structure: list[int] = _get_cluster_structure(
+        returns_array=returns_array, max_clusters=max_clusters
+    )
+
+    return _get_clusters_dict(
+        max_clusters=max_clusters, asset_names=asset_names, clusters_structure=clusters_structure
+    )
+
+
+def _get_clusters_dict(
+    max_clusters: int, asset_names: list[str], clusters_structure: list[int]
+) -> dict[str, list[str]]:
+    return {
+        str(object=cluster_id): _get_cluster_names(
+            cluster_id=cluster_id, asset_names=asset_names, clusters_structure=clusters_structure
+        )
+        for cluster_id in range(1, max_clusters + 1)
+    }
+
+
+def _get_cluster_names(
+    cluster_id: int, asset_names: list[str], clusters_structure: list[int]
+) -> list[str]:
+    return [
+        asset
+        for asset, cluster in zip(asset_names, clusters_structure)
+        if cluster == cluster_id
+    ]
+
+
+def _get_cluster_structure(returns_array: ArrayFloat, max_clusters: int) -> list[int]:
+    distance_matrix: ArrayFloat = calculate_distance_matrix(returns_array=returns_array)
+    distance_condensed: ArrayFloat = squareform(distance_matrix, checks=False)
+    linkage_matrix: ArrayFloat = linkage(distance_condensed, method="ward")  # type: ignore
+    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")  # type: ignore

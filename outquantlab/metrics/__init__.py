@@ -51,7 +51,7 @@ from outquantlab.metrics.correlation import (
     calculate_correlation_matrix,
     calculate_distance_matrix,
     calculate_overall_average_correlation,
-    get_corr_clusters,
+    get_clusters,
     get_filled_correlation_matrix
 )
 
@@ -101,6 +101,6 @@ __all__: list[str] = [
     "rolling_scalar_normalisation",
     "calculate_overall_average_drawdown",
     "limit_outliers",
-    "get_corr_clusters",
-    "get_filled_correlation_matrix",
+    "get_clusters",
+    'get_filled_correlation_matrix'
 ]
