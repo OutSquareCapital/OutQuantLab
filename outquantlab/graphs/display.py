@@ -23,10 +23,10 @@ def plot_raw_data(returns_df: DataFrameFloat, show_legend: bool = True) -> go.Fi
 
 
 def plot_stats_equity(
-    returns_df: DataFrameFloat, show_legend: bool = True
+    returns_df: DataFrameFloat, length: int, show_legend: bool = True
 ) -> go.Figure:
     return widgets.curves(
-        returns_df=stats.get_stats_equity(returns_df=returns_df),
+        returns_df=stats.get_stats_equity(returns_df=returns_df, length=length),
         title=_format_plot_name(name=plot_stats_equity.__name__),
         log_scale=True,
         show_legend=show_legend,
@@ -34,10 +34,10 @@ def plot_stats_equity(
 
 
 def plot_rolling_volatility(
-    returns_df: DataFrameFloat, show_legend: bool = True
+    returns_df: DataFrameFloat, length: int, show_legend: bool = True
 ) -> go.Figure:
     return widgets.curves(
-        returns_df=stats.get_rolling_volatility(returns_df=returns_df),
+        returns_df=stats.get_rolling_volatility(returns_df=returns_df, length=length),
         title=_format_plot_name(name=plot_rolling_volatility.__name__),
         show_legend=show_legend,
     )
@@ -149,7 +149,7 @@ def plot_stats_distribution_violin(
 
 
 def plot_stats_distribution_histogram(
-    returns_df: DataFrameFloat, returns_limit: float, show_legend: bool = True
+    returns_df: DataFrameFloat, returns_limit: int, show_legend: bool = True
 ) -> go.Figure:
     return widgets.histogram(
         data=stats.get_stats_distribution_histogram(
