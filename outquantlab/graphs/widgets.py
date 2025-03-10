@@ -1,5 +1,4 @@
 import plotly.graph_objects as go  # type: ignore
-from pandas import DatetimeIndex
 from numpy import nanmax, nanmin, zeros_like
 from outquantlab.graphs.design import (
     get_color_map,
@@ -24,17 +23,15 @@ def curves(
     show_legend: bool,
     log_scale: bool = False,
 ) -> go.Figure:
-    x_values: DatetimeIndex = returns_df.dates
-    y_values: DataFrameFloat = returns_df
     fig = go.Figure()
 
-    color_map: dict[str, str] = get_color_map(assets=y_values.columns.tolist())
+    color_map: dict[str, str] = get_color_map(assets=returns_df.get_names())
 
-    for column in y_values.columns:
+    for column in returns_df.get_names():
         fig.add_trace(  # type: ignore
             trace=go.Scatter(
-                x=x_values,
-                y=y_values[column],
+                x=returns_df.dates,
+                y=returns_df[column],
                 mode="lines",
                 name=column,
                 line=dict(width=2, color=color_map[column]),
@@ -71,27 +68,6 @@ def bars(series: SeriesFloat, title: str, show_legend: bool) -> go.Figure:
     setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
     setup_custom_hover(fig=fig)
     return fig
-
-
-def table(
-    metrics_array: ArrayFloat,
-    columns: list[str],
-    rows: list[str],
-    title: str,
-    show_legend: bool,
-) -> go.Figure:
-    fig = go.Figure(
-        data=go.Table(
-            header=dict(values=["metrics"] + columns, fill_color="black"),
-            cells=dict(
-                values=[[rows[i] for i in range(len(rows))]] + metrics_array.T.tolist(),
-                fill_color=[["darkblue", "darkorange"] * (len(rows) // 2 + 1)],
-            ),
-        )
-    )
-    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
-    return fig
-
 
 def heatmap(
     returns_df: DataFrameFloat,
@@ -131,7 +107,7 @@ def heatmap(
 def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
     fig = go.Figure()
 
-    color_map: dict[str, str] = get_color_map(assets=data.columns.tolist())
+    color_map: dict[str, str] = get_color_map(assets=data.get_names())
 
     for column in data.columns:
         fig.add_trace(  # type: ignore
@@ -168,7 +144,7 @@ def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
 def histogram(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
     fig = go.Figure()
 
-    color_map: dict[str, str] = get_color_map(assets=data.columns.tolist())
+    color_map: dict[str, str] = get_color_map(assets=data.get_names())
 
     for column in data.columns:
         fig.add_trace(  # type: ignore

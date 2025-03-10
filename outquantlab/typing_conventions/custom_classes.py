@@ -31,7 +31,7 @@ class SeriesFloat(Series):  # type: ignore
         return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
 
     def get_names(self) -> list[str]:
-        return self.index.to_list()  # type: ignore
+        return self.index.tolist() # type: ignore
 
     def sort_data(self, ascending: bool) -> "SeriesFloat":
         array: ArrayFloat = self.get_array()
@@ -78,10 +78,10 @@ class DataFrameFloat(DataFrame):
     def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
             labels: list[str] = [
-                "_".join(col).replace(" ", "_") for col in self.columns.to_list()
+                "_".join(col).replace(" ", "_") for col in self.columns.to_list() # type: ignore
             ]
         else:
-            labels: list[str] = self.columns.to_list()
+            labels: list[str] = self.columns.to_list()  # type: ignore
         return labels
 
     def sort_data(self, ascending: bool) -> "DataFrameFloat":
