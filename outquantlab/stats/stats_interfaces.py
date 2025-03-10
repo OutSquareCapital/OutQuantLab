@@ -17,12 +17,12 @@ class MetricFuncs(Enum):
 
 def get_df_stats_interface(
     returns_df: DataFrameFloat,
-    stats_func: RollingMetricFunc,
+    metric_func: RollingMetricFunc,
     ascending: bool,
     length: int,
 ) -> DataFrameFloat:
     return DataFrameFloat(
-        data=stats_func(returns_df.get_array(), length),
+        data=metric_func(returns_df.get_array(), length),
         index=returns_df.dates,
         columns=returns_df.get_names(),
     ).sort_data(ascending=ascending)
@@ -30,10 +30,10 @@ def get_df_stats_interface(
 
 def get_series_stats_interface(
     returns_df: DataFrameFloat,
-    stats_func: OverallMetricFunc,
+    metric_func: OverallMetricFunc,
     ascending: bool,
 ) -> SeriesFloat:
     return SeriesFloat(
-        data=stats_func(returns_df.get_array()),
+        data=metric_func(returns_df.get_array()),
         index=returns_df.get_names(),
     ).sort_data(ascending=ascending)
