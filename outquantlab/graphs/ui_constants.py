@@ -1,14 +1,29 @@
-from enum import Enum
-class Colors(Enum):
-    BASE_COLORS= ["brown", "red", "orange", "yellow", "green", "lime", "blue", "cyan"]
+from enum import Enum, StrEnum
+
+BASE_COLORS: list[str] = [
+    "brown",
+    "red",
+    "orange",
+    "yellow",
+    "green",
+    "lime",
+    "blue",
+    "cyan",
+]
+
+
+class Colors(StrEnum):
     WHITE = "white"
     BLACK = "#2A2A2A"
-    PLOT_UNIQUE = '#ff6600'
+    PLOT_UNIQUE = "#ff6600"
 
 
-class TextFont(Enum):
+class TextFont(StrEnum):
     FAMILY = "Arial"
-    TEXT_SIZE = 12
-    TITLE_SIZE = 17
-    LEGEND_SIZE = 14
     TYPE = "bold"
+
+
+class TextSize(Enum):
+    STANDARD = 12
+    TITLE = 17
+    LEGEND = 14

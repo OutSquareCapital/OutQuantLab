@@ -2,19 +2,19 @@ import matplotlib.colors as mcolors
 import plotly.graph_objects as go  # type: ignore
 from matplotlib.colors import LinearSegmentedColormap
 
-from outquantlab.graphs.ui_constants import Colors, TextFont
+from outquantlab.graphs.ui_constants import BASE_COLORS, Colors, TextFont, TextSize
 
 
 def generate_colormap(n_colors: int) -> LinearSegmentedColormap:
     cmap_name = "custom_colormap"
 
-    if n_colors <= len(Colors.BASE_COLORS.value):
+    if n_colors <= len(BASE_COLORS):
         return LinearSegmentedColormap.from_list(
-            name=cmap_name, colors=Colors.BASE_COLORS.value[:n_colors], N=n_colors
+            name=cmap_name, colors=BASE_COLORS[:n_colors], N=n_colors
         )
     else:
         return LinearSegmentedColormap.from_list(
-            name=cmap_name, colors=Colors.BASE_COLORS.value, N=n_colors
+            name=cmap_name, colors=BASE_COLORS, N=n_colors
         )
 
 
@@ -26,7 +26,7 @@ def get_color_map(assets: list[str]) -> dict[str, str]:
 
 def map_colors_to_columns(n_colors: int) -> list[str]:
     if n_colors == 1:
-        return [mcolors.to_hex(Colors.PLOT_UNIQUE.value)]
+        return [mcolors.to_hex(Colors.PLOT_UNIQUE)]
     cmap: LinearSegmentedColormap = generate_colormap(n_colors=n_colors)
     return [mcolors.to_hex(cmap(i / (n_colors - 1))) for i in range(n_colors)]
 
@@ -48,28 +48,28 @@ def setup_figure_layout(
 ) -> None:
     fig.update_layout(  # type: ignore
         font={
-            "family": TextFont.FAMILY.value,
-            "color": Colors.WHITE.value,
-            "size": TextFont.TEXT_SIZE.value,
-            "weight": TextFont.TYPE.value,
+            "family": TextFont.FAMILY,
+            "color": Colors.WHITE,
+            "size": TextSize.STANDARD,
+            "weight": TextFont.TYPE,
         },
         title={
             "text": figtitle,
             "font": {
-                "size": TextFont.TITLE_SIZE.value,
-                "family": TextFont.FAMILY.value,
-                "weight": TextFont.TYPE.value,
+                "size": TextSize.TITLE,
+                "family": TextFont.FAMILY,
+                "weight": TextFont.TYPE,
             },
         },
         autosize=True,
         margin=dict(l=30, r=30, t=40, b=30),
-        paper_bgcolor=Colors.BLACK.value,
-        plot_bgcolor=Colors.BLACK.value,
+        paper_bgcolor=Colors.BLACK,
+        plot_bgcolor=Colors.BLACK,
         legend={
             "title_font": {
-                "size": TextFont.LEGEND_SIZE.value,
-                "family": TextFont.FAMILY.value,
-                "weight": TextFont.TYPE.value,
+                "size": TextSize.LEGEND,
+                "family": TextFont.FAMILY,
+                "weight": TextFont.TYPE,
             },
         },
     )
@@ -84,9 +84,9 @@ def setup_figure_layout(
 
 
 def get_marker_config(color: str):
-    return dict(color=color, line=dict(color=Colors.WHITE.value, width=1))
+    return dict(color=color, line=dict(color=Colors.WHITE, width=1))
 
 
 def setup_custom_hover(fig: go.Figure, hover_data: str = "y") -> None:
     for trace in fig.data:  # type: ignore
-        trace.hovertemplate = f"<span style='color:{Colors.WHITE.value}'><b>%{{{hover_data}}}</b></span><extra><b>%{{fullData.name}}</b></extra>"  # type: ignore
+        trace.hovertemplate = f"<span style='color:{Colors.WHITE}'><b>%{{{hover_data}}}</b></span><extra><b>%{{fullData.name}}</b></extra>"  # type: ignore
