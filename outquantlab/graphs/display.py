@@ -20,21 +20,21 @@ def plot_metrics(returns_df: DataFrameFloat) -> None:
 
 def plot_raw_data(returns_df: DataFrameFloat) -> go.Figure:
     return widgets.curves(
-        returns_df=returns_df,
+        df=returns_df,
         title=_format_plot_name(name=plot_raw_data.__name__),
     )
 
 
 def plot_stats_equity(returns_df: DataFrameFloat, length: int) -> go.Figure:
     return widgets.curves(
-        returns_df=stats.get_stats_equity(returns_df=returns_df, length=length),
+        df=stats.get_stats_equity(returns_df=returns_df, length=length),
         title=_format_plot_name(name=plot_stats_equity.__name__),
         log_scale=True,
     )
 
 def plot_correlation_heatmap(returns_df: DataFrameFloat) -> go.Figure:
     return widgets.heatmap(
-        returns_df=stats.get_correlation_heatmap(returns_df=returns_df),
+        df=stats.get_correlation_heatmap(returns_df=returns_df),
         title=_format_plot_name(name=plot_correlation_heatmap.__name__),
     )
 

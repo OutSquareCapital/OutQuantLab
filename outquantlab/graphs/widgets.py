@@ -18,19 +18,19 @@ from outquantlab.typing_conventions import (
 
 
 def curves(
-    returns_df: DataFrameFloat,
+    df: DataFrameFloat,
     title: str,
     log_scale: bool = False,
 ) -> go.Figure:
     fig = go.Figure()
 
-    color_map: dict[str, str] = get_color_map(assets=returns_df.get_names())
+    color_map: dict[str, str] = get_color_map(assets=df.get_names())
 
-    for column in returns_df.get_names():
+    for column in df.get_names():
         fig.add_trace(  # type: ignore
             trace=go.Scatter(
-                x=returns_df.dates,
-                y=returns_df[column],
+                x=df.dates,
+                y=df[column],
                 mode="lines",
                 name=column,
                 line=dict(width=2, color=color_map[column]),
@@ -70,23 +70,21 @@ def bars(series: SeriesFloat, title: str) -> go.Figure:
 
 
 def heatmap(
-    returns_df: DataFrameFloat,
+    df: DataFrameFloat,
     title: str,
 ) -> go.Figure:
     colorscale: list[list[float | str]] = get_heatmap_colorscale()
-    normalised_data: ArrayFloat = _normalize_data_for_colormap(
-        data=returns_df.get_array()
-    )
+    normalised_data: ArrayFloat = _normalize_data_for_colormap(data=df.get_array())
     fig = go.Figure(
         data=go.Heatmap(
             z=normalised_data,
-            x=returns_df.columns,
-            y=returns_df.columns,
+            x=df.columns,
+            y=df.columns,
             colorscale=colorscale,
             showscale=False,
             zmin=0,
             zmax=1,
-            customdata=returns_df.get_array(),
+            customdata=df.get_array(),
             hovertemplate=(
                 "X: %{x}<br>"
                 "Y: %{y}<br>"
@@ -105,15 +103,15 @@ def heatmap(
     return fig
 
 
-def violin(data: DataFrameFloat, title: str) -> go.Figure:
+def violin(df: DataFrameFloat, title: str) -> go.Figure:
     fig = go.Figure()
 
-    color_map: dict[str, str] = get_color_map(assets=data.get_names())
+    color_map: dict[str, str] = get_color_map(assets=df.get_names())
 
-    for column in data.columns:
+    for column in df.columns:
         fig.add_trace(  # type: ignore
             trace=go.Violin(
-                y=data[column],
+                y=df[column],
                 name=column,
                 box_visible=True,
                 points=False,
@@ -124,10 +122,10 @@ def violin(data: DataFrameFloat, title: str) -> go.Figure:
             )
         )
 
-    min_by_column: ArrayFloat = get_overall_min(array=data.get_array())
+    min_by_column: ArrayFloat = get_overall_min(array=df.get_array())
     y_min: ArrayFloat = get_overall_min(array=min_by_column)
 
-    max_by_column: ArrayFloat = get_overall_max(array=data.get_array())
+    max_by_column: ArrayFloat = get_overall_max(array=df.get_array())
     y_max: ArrayFloat = get_overall_max(array=max_by_column)
 
     fig.update_layout(  # type: ignore
