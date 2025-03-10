@@ -20,7 +20,6 @@ from outquantlab.typing_conventions import (
 def curves(
     returns_df: DataFrameFloat,
     title: str,
-    show_legend: bool,
     log_scale: bool = False,
 ) -> go.Figure:
     fig = go.Figure()
@@ -41,13 +40,13 @@ def curves(
     if log_scale:
         fig.update_layout(yaxis=dict(type="log"))  # type: ignore
 
-    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_figure_layout(fig=fig, figtitle=title)
     setup_custom_hover(fig=fig)
 
     return fig
 
 
-def bars(series: SeriesFloat, title: str, show_legend: bool) -> go.Figure:
+def bars(series: SeriesFloat, title: str) -> go.Figure:
     color_map: dict[str, str] = get_color_map(assets=series.get_names())
 
     fig = go.Figure()
@@ -65,17 +64,19 @@ def bars(series: SeriesFloat, title: str, show_legend: bool) -> go.Figure:
         xaxis=dict(showticklabels=False)
     )
 
-    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_figure_layout(fig=fig, figtitle=title)
     setup_custom_hover(fig=fig)
     return fig
+
 
 def heatmap(
     returns_df: DataFrameFloat,
     title: str,
-    show_legend: bool,
 ) -> go.Figure:
     colorscale: list[list[float | str]] = get_heatmap_colorscale()
-    normalised_data: ArrayFloat = _normalize_data_for_colormap(data=returns_df.get_array())
+    normalised_data: ArrayFloat = _normalize_data_for_colormap(
+        data=returns_df.get_array()
+    )
     fig = go.Figure(
         data=go.Heatmap(
             z=normalised_data,
@@ -99,12 +100,12 @@ def heatmap(
         yaxis=dict(showgrid=False, autorange="reversed")
     )
 
-    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_figure_layout(fig=fig, figtitle=title)
 
     return fig
 
 
-def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
+def violin(data: DataFrameFloat, title: str) -> go.Figure:
     fig = go.Figure()
 
     color_map: dict[str, str] = get_color_map(assets=data.get_names())
@@ -136,12 +137,12 @@ def violin(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
         ),
     )
 
-    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_figure_layout(fig=fig, figtitle=title)
     setup_custom_hover(fig=fig)
     return fig
 
 
-def histogram(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
+def histogram(data: DataFrameFloat, title: str) -> go.Figure:
     fig = go.Figure()
 
     color_map: dict[str, str] = get_color_map(assets=data.get_names())
@@ -157,14 +158,12 @@ def histogram(data: DataFrameFloat, title: str, show_legend: bool) -> go.Figure:
     fig.update_layout(  # type: ignore
         barmode="overlay"
     )
-    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_figure_layout(fig=fig, figtitle=title)
     setup_custom_hover(fig=fig, hover_data="x")
     return fig
 
 
-def icicle(
-    clusters_dict: dict[str, list[str]], title: str, show_legend: bool
-) -> go.Figure:
+def icicle(clusters_dict: dict[str, list[str]], title: str) -> go.Figure:
     labels, parents = _prepare_sunburst_data(cluster_dict=clusters_dict)
     fig = go.Figure(
         data=go.Icicle(
@@ -173,7 +172,7 @@ def icicle(
             tiling=dict(orientation="h"),
         )
     )
-    setup_figure_layout(fig=fig, figtitle=title, show_legend=show_legend)
+    setup_figure_layout(fig=fig, figtitle=title)
 
     return fig
 

@@ -45,7 +45,6 @@ def get_heatmap_colorscale(n_colors: int = 100):
 def setup_figure_layout(
     fig: go.Figure,
     figtitle: str,
-    show_legend: bool = True,
 ) -> None:
     fig.update_layout(  # type: ignore
         font={
@@ -82,9 +81,6 @@ def setup_figure_layout(
     fig.update_xaxes(  # type: ignore
         showgrid=False, automargin=True
     )
-
-    if not show_legend:
-        fig.update_layout(showlegend=False)  # type: ignore
 
 
 def get_marker_config(color: str):
