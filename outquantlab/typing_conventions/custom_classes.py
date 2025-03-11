@@ -1,4 +1,4 @@
-from numpy import nan, argsort, nanmean
+from numpy import nan, argsort, nanmean, array, concatenate
 from numpy.typing import DTypeLike
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
@@ -16,13 +16,10 @@ class SeriesFloat(Series):  # type: ignore
 
     def __init__(
         self,
-        data: ArrayFloat | Series,  # type: ignore
+        data: ArrayFloat | Series | list[float], # type: ignore
         index: MultiIndex | Index | list[str] | None = None,  # type: ignore
         dtype: type = Float32,
     ) -> None:
-        if isinstance(data, Series):
-            data = data.astype(dtype=Float32)  # type: ignore
-
         super().__init__(data=data, index=index, dtype=dtype)  # type: ignore
 
     def get_array(
@@ -34,15 +31,24 @@ class SeriesFloat(Series):  # type: ignore
         return self.index.tolist() # type: ignore
 
     def sort_data(self, ascending: bool) -> "SeriesFloat":
-        array: ArrayFloat = self.get_array()
-        sorted_indices: ArrayInt = argsort(array)
+        data_array: ArrayFloat = self.get_array()
+        sorted_indices: ArrayInt = argsort(data_array)
         if not ascending:
             sorted_indices = sorted_indices[::-1]
-        sorted_array: ArrayFloat = array[sorted_indices]
+        sorted_array: ArrayFloat = data_array[sorted_indices]
         sorted_index: list[str] = [self.get_names()[i] for i in sorted_indices]
         return SeriesFloat(data=sorted_array, index=sorted_index)
 
+    @classmethod
+    def from_float_list(cls, data: list[float], index: list[str]) -> "SeriesFloat":
+        array_data: ArrayFloat = array(data, dtype=Float32)
+        return cls(data=array_data, index=index)
 
+    @classmethod
+    def from_array_list(cls, data: list[ArrayFloat], index: list[str]) -> "SeriesFloat":
+        combined_array: ArrayFloat = concatenate([r.reshape(1) for r in data])
+        return cls(data=combined_array, index=index)
+    
 class DataFrameFloat(DataFrame):
     """
     Strictly typed DataFrame for managing floating-point data.
@@ -62,8 +68,6 @@ class DataFrameFloat(DataFrame):
     ) -> None:
         if data is None:
             data = DataFrame(dtype=Float32)
-        if isinstance(data, DataFrame):
-            data = data.astype(dtype=Float32)  # type: ignore
         super().__init__(data=data, index=index, columns=columns, dtype=dtype)  # type: ignore
 
     @property
