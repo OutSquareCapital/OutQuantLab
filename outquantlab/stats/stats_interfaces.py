@@ -1,19 +1,9 @@
 from collections.abc import Callable
 from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat, ArrayFloat
 from typing import TypeAlias
-import outquantlab.metrics as mt
-from enum import Enum
 
 RollingMetricFunc: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
 OverallMetricFunc: TypeAlias = Callable[[ArrayFloat], ArrayFloat]
-
-
-class MetricFuncs(Enum):
-    total_returns: OverallMetricFunc = mt.calculate_total_returns
-    sharpe_ratio: OverallMetricFunc = mt.overall_sharpe_ratio
-    max_drawdown: OverallMetricFunc = mt.calculate_max_drawdown
-    volatility: OverallMetricFunc = mt.overall_volatility_annualized
-
 
 def get_df_stats_interface(
     returns_df: DataFrameFloat,

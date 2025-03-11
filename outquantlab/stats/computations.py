@@ -3,44 +3,8 @@ from outquantlab.stats.stats_interfaces import (
     get_df_stats_interface,
     get_series_stats_interface,
 )
-from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat, ArrayFloat
-from outquantlab.stats.stats_interfaces import MetricFuncs
+from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat
 
-
-def _format_metric_name(name: str) -> str:
-    return name.replace("_", " ").title()
-
-
-def get_metrics(returns_df: DataFrameFloat) -> dict[str, float]:
-    array: ArrayFloat = returns_df.get_array()
-    if array.shape[1] > 1:
-        print("Metrics can only be calculated for a single asset")
-        return {}
-    else:
-        results: list[ArrayFloat] = [func.value(array) for func in MetricFuncs]
-        names: list[str] = [_format_metric_name(name=func.name) for func in MetricFuncs]
-        return {
-            name: round(number=result.item(), ndigits=2)
-            for name, result in zip(names, results)
-        }
-
-def get_correlation_heatmap(
-    returns_df: DataFrameFloat,
-) -> DataFrameFloat:
-    return DataFrameFloat(
-        data=mt.get_filled_correlation_matrix(returns_array=returns_df.get_array()),
-        columns=returns_df.get_names(),
-    )
-
-
-def get_correlation_clusters_icicle(
-    returns_df: DataFrameFloat, max_clusters: int
-) -> dict[str, list[str]]:
-    return mt.get_clusters(
-        returns_array=returns_df.get_array(),
-        asset_names=returns_df.get_names(),
-        max_clusters=max_clusters,
-    )
 
 def get_stats_equity(returns_df: DataFrameFloat, length: int) -> DataFrameFloat:
     return get_df_stats_interface(
