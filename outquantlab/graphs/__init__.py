@@ -1,6 +1,4 @@
 from outquantlab.graphs.display import (
-    plot_correlation_clusters_icicle,
-    plot_correlation_heatmap,
     plot_metrics,
     plot_overall_average_correlation,
     plot_overall_average_drawdown,
@@ -15,13 +13,10 @@ from outquantlab.graphs.display import (
     plot_stats_distribution_histogram,
     plot_stats_distribution_violin,
     plot_stats_equity,
-    plot_raw_data
 )
 
 __all__: list[str] = [
     "plot_metrics",
-    "plot_correlation_clusters_icicle",
-    "plot_correlation_heatmap",
     "plot_stats_distribution_histogram",
     "plot_stats_distribution_violin",
     "plot_overall_average_correlation",
@@ -35,5 +30,4 @@ __all__: list[str] = [
     "plot_rolling_volatility",
     "plot_rolling_smoothed_skewness",
     "plot_stats_equity",
-    "plot_raw_data",
 ]
