@@ -1,4 +1,4 @@
-from outquantlab.graphs.display import (
+from outquantlab.graphs.plots_funcs import (
     plot_metrics,
     plot_overall_average_correlation,
     plot_overall_average_drawdown,

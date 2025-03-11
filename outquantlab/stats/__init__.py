@@ -1,4 +1,4 @@
-from outquantlab.stats.computations import (
+from outquantlab.stats.stats_computations import (
     get_overall_average_correlation,
     get_overall_average_drawdown,
     get_overall_monthly_skew,
@@ -13,7 +13,7 @@ from outquantlab.stats.computations import (
     get_stats_distribution_violin,
     get_stats_equity,
 )
-from outquantlab.stats.metrics import get_metrics
+from outquantlab.stats.stats_overall import get_metrics
 
 __all__: list[str] = [
     "get_metrics",
