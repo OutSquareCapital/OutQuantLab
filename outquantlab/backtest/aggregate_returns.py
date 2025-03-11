@@ -26,7 +26,7 @@ def aggregate_raw_returns(returns_df: DataFrameFloat) -> BacktestResults:
             grouping_levels=returns_df.columns.names[:lvl],
         )
 
-        returns_df.dropna(axis=0, how="all", inplace=True)  # type: ignore
+        returns_df.dropna(axis=0, how="any", inplace=True)  # type: ignore
         key_name: str = returns_df.columns.names[lvl - 1]
         portfolio_dict[key_name] = returns_df
     portfolio_dict[_PORTFOLIO] = _get_global_portfolio_returns(
