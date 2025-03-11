@@ -8,47 +8,22 @@ from outquantlab.graphs.graphs_interfaces import (
 )
 
 
-def _format_plot_name(name: str) -> str:
-    return name.replace("plot", "").replace("_", " ").title()
-
-
-def plot_metrics(returns_df: DataFrameFloat) -> None:
-    metrics: dict[str, float] = stats.get_metrics(returns_df=returns_df)
-    for key, value in metrics.items():
-        print(f"{key}: {value}")
-
-
-def plot_raw_data(returns_df: DataFrameFloat) -> go.Figure:
-    return widgets.curves(
-        df=returns_df,
-        title=_format_plot_name(name=plot_raw_data.__name__),
+def plot_metrics(returns_df: DataFrameFloat) -> go.Figure:
+    return get_serie_plot_interface(
+        returns_df=returns_df,
+        widget_func=widgets.table,
+        stats_func=stats.get_metrics,
     )
 
 
 def plot_stats_equity(returns_df: DataFrameFloat, length: int) -> go.Figure:
-    return widgets.curves(
-        df=stats.get_stats_equity(returns_df=returns_df, length=length),
-        title=_format_plot_name(name=plot_stats_equity.__name__),
-        log_scale=True,
+    return get_df_plot_interface(
+        returns_df=returns_df,
+        widget_func=widgets.curves,
+        stats_func=stats.get_stats_equity,
+        length=length,
     )
 
-def plot_correlation_heatmap(returns_df: DataFrameFloat) -> go.Figure:
-    return widgets.heatmap(
-        df=stats.get_correlation_heatmap(returns_df=returns_df),
-        title=_format_plot_name(name=plot_correlation_heatmap.__name__),
-    )
-
-
-def plot_correlation_clusters_icicle(
-    returns_df: DataFrameFloat,
-    max_clusters: int,
-) -> go.Figure:
-    return widgets.icicle(
-        clusters_dict=stats.get_correlation_clusters_icicle(
-            returns_df=returns_df, max_clusters=max_clusters
-        ),
-        title=_format_plot_name(name=plot_correlation_clusters_icicle.__name__),
-    )
 
 def plot_rolling_volatility(returns_df: DataFrameFloat, length: int) -> go.Figure:
     return get_df_plot_interface(
