@@ -10,7 +10,7 @@ DataframeWidget: TypeAlias = Callable[[DataFrameFloat, str], go.Figure]
 
 
 def _format_plot_name(name: str) -> str:
-    return name.replace("plot", "").replace("_", " ").title()
+    return name.replace("get", "").replace("_", " ").title()
 
 
 def get_df_plot_interface(
