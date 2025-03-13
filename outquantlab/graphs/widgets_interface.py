@@ -23,7 +23,7 @@ def widget_df_interface(
     setup: SetupDF,
     custom_hover: str | None = None,
 ) -> go.Figure:
-    fig: go.Figure = setup(data, _get_color_map(assets=data.get_names()))
+    fig: go.Figure = setup(data, get_color_map(assets=data.get_names()))
     _setup_figure_layout(fig=fig, figtitle=title)
     if custom_hover:
         _setup_custom_hover(fig=fig, hover_data=custom_hover)
@@ -36,7 +36,7 @@ def widget_serie_interface(
     setup: SetupSeries,
     custom_hover: str | None = None,
 ) -> go.Figure:
-    fig: go.Figure = setup(data, _get_color_map(assets=data.get_names()))
+    fig: go.Figure = setup(data, get_color_map(assets=data.get_names()))
     _setup_figure_layout(fig=fig, figtitle=title)
     if custom_hover:
         _setup_custom_hover(fig=fig, hover_data=custom_hover)
@@ -76,7 +76,7 @@ def _setup_figure_layout(
     )
 
 
-def _get_color_map(assets: list[str]) -> dict[str, str]:
+def get_color_map(assets: list[str]) -> dict[str, str]:
     n_colors: int = len(assets)
     colors: list[str] = _map_colors_to_columns(n_colors=n_colors)
     return dict(zip(assets, colors))

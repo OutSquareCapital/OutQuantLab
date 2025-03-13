@@ -6,7 +6,7 @@ def launch_app() -> None:
     oql.run()
     end: float = time.perf_counter()
     print(f"Backtest completed in {end - start:.2f} seconds.")
-    oql.graphs.plot_stats_distribution_histogram(returns_df=oql.data['assets'], returns_limit=0).show()
+    oql.graphs.plot_stats_equity(returns_df=oql.data['assets'], length=2500).show()
     oql.graphs.plot_stats_distribution_violin(returns_df=oql.data['assets'], returns_limit=0).show()
     oql.save()
 
