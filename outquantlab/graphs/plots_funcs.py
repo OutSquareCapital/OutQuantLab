@@ -1,5 +1,6 @@
 import plotly.graph_objects as go  # type: ignore
 import outquantlab.graphs.widgets_funcs as widgets_funcs
+from outquantlab.graphs.widget_implementations import Curves, Violins
 import outquantlab.stats as stats
 from outquantlab.typing_conventions import DataFrameFloat
 from outquantlab.graphs.plots_interfaces import (
@@ -17,11 +18,8 @@ def plot_metrics(returns_df: DataFrameFloat) -> go.Figure:
 
 
 def plot_stats_equity(returns_df: DataFrameFloat, length: int) -> go.Figure:
-    return get_df_plot_interface(
-        returns_df=returns_df,
-        widget_func=widgets_funcs.curves,
-        stats_func=stats.get_stats_equity,
-        length=length,
+    return Curves().get_fig(
+        data=returns_df, length=length, stats_func=stats.get_stats_equity
     )
 
 
@@ -114,11 +112,10 @@ def plot_overall_monthly_skew(returns_df: DataFrameFloat) -> go.Figure:
 def plot_stats_distribution_violin(
     returns_df: DataFrameFloat, returns_limit: int
 ) -> go.Figure:
-    return get_df_plot_interface(
-        returns_df=returns_df,
-        widget_func=widgets_funcs.violin,
-        stats_func=stats.get_stats_distribution_violin,
+    return Violins().get_fig(
+        data=returns_df,
         length=returns_limit,
+        stats_func=stats.get_stats_distribution_violin,
     )
 
 
