@@ -108,6 +108,34 @@ from module import public_func
 ]
 ```
 
+### 5. if / else statements
+
+Conditionnal statements must be used sparsely. Dictionary are preferred when handling different behavioral possiblities:
+```python
+_HANDLER_REGISTRY = {
+    Extension.JSON.value: JSONHandler,
+    Extension.PARQUET.value: ParquetHandler,
+}
+
+
+def _create_handler(ext: str) -> FileHandler:
+    handler_class = _HANDLER_REGISTRY.get(ext)
+    if handler_class is None:
+        raise ValueError(f"Unsupported extension: {ext}")
+    return handler_class()
+
+
+@dataclass(frozen=True, slots=True)
+class DataFile:
+    ext: str
+    path: str
+    handler: FileHandler = field(init=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "handler", _create_handler(self.ext))
+
+```
+
 ---
 
 ## 📝 Documentation
