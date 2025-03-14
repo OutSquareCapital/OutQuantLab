@@ -1,17 +1,24 @@
-from outquantlab.graphs.widget_class import WidgetDataFrame
-from outquantlab.typing_conventions import DataFrameFloat, ArrayFloat
-from outquantlab.graphs.ui_constants import CustomHovers, Colors
-from outquantlab.metrics import get_overall_max, get_overall_min
 import plotly.graph_objects as go  # type: ignore
 
+from outquantlab.graphs.ui_constants import Colors, CustomHovers
+from outquantlab.graphs.widget_class import BaseWidget
+from outquantlab.metrics import get_overall_max, get_overall_min
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
-class Curves(WidgetDataFrame):
+
+def _get_marker_config(color: str) -> dict[str, str | dict[str, Colors | int]]:
+    return dict(color=color, line=dict(color=Colors.WHITE, width=1))
+
+
+class Curves(BaseWidget[DataFrameFloat]):
     def __init__(self) -> None:
         super().__init__(custom_hover=CustomHovers.Y.value)
 
-    def setup_figure_type(self, data: DataFrameFloat, color_map: dict[str, str]) -> None:
+    def setup_figure_type(
+        self, data: DataFrameFloat, color_map: dict[str, str]
+    ) -> None:
         for column in data.get_names():
-            self.figure.add_trace(  # type: ignore
+            self.graph.figure.add_trace(  # type: ignore
                 trace=go.Scatter(
                     x=data.dates,
                     y=data[column],
@@ -21,13 +28,16 @@ class Curves(WidgetDataFrame):
                 )
             )
 
-class Violins(WidgetDataFrame):
+
+class Violins(BaseWidget[DataFrameFloat]):
     def __init__(self) -> None:
         super().__init__(custom_hover=CustomHovers.Y.value)
 
-    def setup_figure_type(self, data: DataFrameFloat, color_map: dict[str, str]) -> None:
+    def setup_figure_type(
+        self, data: DataFrameFloat, color_map: dict[str, str]
+    ) -> None:
         for column in data.columns:
-            self.figure.add_trace(  # type: ignore
+            self.graph.figure.add_trace(  # type: ignore
                 trace=go.Violin(
                     y=data[column],
                     name=column,
@@ -46,12 +56,65 @@ class Violins(WidgetDataFrame):
         max_by_column: ArrayFloat = get_overall_max(array=data.get_array())
         y_max: ArrayFloat = get_overall_max(array=max_by_column)
 
-        self.figure.update_layout(  # type: ignore
+        self.graph.figure.update_layout(  # type: ignore
             yaxis=dict(range=[y_min, y_max], showgrid=False),
             xaxis=dict(
                 showticklabels=False,
             ),
         )
 
-def _get_marker_config(color: str) -> dict[str, str | dict[str, Colors | int]]:
-    return dict(color=color, line=dict(color=Colors.WHITE, width=1))
+
+class Histogram(BaseWidget[DataFrameFloat]):
+    def __init__(self) -> None:
+        super().__init__(custom_hover=CustomHovers.X.value)
+
+    def setup_figure_type(
+        self, data: DataFrameFloat, color_map: dict[str, str]
+    ) -> None:
+        for column in data.columns:
+            self.graph.figure.add_trace(  # type: ignore
+                trace=go.Histogram(
+                    x=data[column],
+                    name=column,
+                    marker=_get_marker_config(color=color_map[column]),
+                )
+            )
+        self.graph.figure.update_layout(  # type: ignore
+            barmode="overlay"
+        )
+
+
+class Bars(BaseWidget[SeriesFloat]):
+    def __init__(self) -> None:
+        super().__init__(custom_hover=CustomHovers.Y.value)
+
+    def setup_figure_type(self, data: SeriesFloat, color_map: dict[str, str]) -> None:
+        for label, value in zip(data.get_names(), data.get_array()):
+            self.graph.figure.add_trace(  # type: ignore
+                trace=go.Bar(
+                    x=[label],
+                    y=[value],
+                    name=label,
+                    marker=_get_marker_config(color=color_map[label]),
+                )
+            )
+
+        self.graph.figure.update_layout(  # type: ignore
+            xaxis=dict(showticklabels=False)
+        )
+
+
+class Table(BaseWidget[SeriesFloat]):
+    def __init__(self) -> None:
+        super().__init__(custom_hover=None)
+
+    def setup_figure_type(self, data: SeriesFloat, color_map: dict[str, str]) -> None:
+        self.graph.figure.add_trace(  # type: ignore
+            trace=go.Table(
+                header=dict(values=["Metric", "Value"], fill_color=Colors.BLACK),
+                cells=dict(
+                    values=[data.get_names(), data.get_array()],
+                    fill_color=[color_map[name] for name in data.get_names()],
+                ),
+            )
+        )

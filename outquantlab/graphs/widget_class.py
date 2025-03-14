@@ -1,46 +1,32 @@
 from abc import ABC, abstractmethod
-from collections.abc import Callable
-from typing import TypeAlias
 
 import plotly.graph_objects as go  # type: ignore
 
 from outquantlab.graphs.widgets_interface import get_color_map
 from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat
 from outquantlab.graphs.ui_constants import Colors, FigureSetup
+from dataclasses import dataclass
+from typing import TypeVar, Generic
 
-StatSerieInterface: TypeAlias = Callable[[DataFrameFloat], SeriesFloat]
-StatDataFrameInterface: TypeAlias = Callable[[DataFrameFloat, int], DataFrameFloat]
+
+T = TypeVar("T", bound=DataFrameFloat | SeriesFloat)
 
 
-class WidgetDataFrame(ABC):
-    def __init__(self, custom_hover: str|None) -> None:
-        self.custom_hover: str | None = custom_hover
-        self.figure: go.Figure = go.Figure()
+@dataclass
+class Graph:
+    custom_hover: str | None
+    figure: go.Figure = go.Figure()
 
-    def get_fig(
-        self, data: DataFrameFloat, length: int, stats_func: StatDataFrameInterface
-    ) -> go.Figure:
-        formatted_data: DataFrameFloat = stats_func(data, length)
-        title: str = _format_plot_name(name=stats_func.__name__)
-        self.format_fig(data=formatted_data, title=title)
-        return self.figure
+    def show(self) -> None:
+        self.figure.show()  # type: ignore
 
-    def format_fig(
-        self,
-        data: DataFrameFloat,
-        title: str,
-    ) -> None:
-        color_map: dict[str, str] = get_color_map(assets=data.get_names())
-        self.setup_figure_type(data=data, color_map=color_map)
-        self.setup_figure_layout(title=title)
-        if self.custom_hover is not None:
-            self.setup_custom_hover()
+    def setup_style(self, title: str) -> None:
+        self._setup_design(title=title)
+        self._setup_axes()
+        if self.custom_hover:
+            self._setup_custom_hover()
 
-    @abstractmethod
-    def setup_figure_type(self, data: DataFrameFloat, color_map: dict[str, str]) -> None:
-        pass
-
-    def setup_figure_layout(
+    def _setup_design(
         self,
         title: str,
     ) -> None:
@@ -59,6 +45,7 @@ class WidgetDataFrame(ABC):
             },
         )
 
+    def _setup_axes(self) -> None:
         self.figure.update_yaxes(  # type: ignore
             showgrid=False, automargin=True
         )
@@ -67,10 +54,21 @@ class WidgetDataFrame(ABC):
             showgrid=False, automargin=True
         )
 
-    def setup_custom_hover(self) -> None:
+    def _setup_custom_hover(self) -> None:
         for trace in self.figure.data:  # type: ignore
             trace.hovertemplate = self.custom_hover  # type: ignore
 
 
-def _format_plot_name(name: str) -> str:
-    return name.replace("get", "").replace("_", " ").title()
+class BaseWidget(ABC, Generic[T]):
+    def __init__(self, custom_hover: str | None) -> None:
+        self.graph = Graph(custom_hover=custom_hover)
+
+    @abstractmethod
+    def setup_figure_type(self, data: T, color_map: dict[str, str]) -> None:
+        pass
+
+    def get_fig(self, data: T, title: str) -> Graph:
+        color_map: dict[str, str] = get_color_map(assets=data.get_names())
+        self.setup_figure_type(data=data, color_map=color_map)
+        self.graph.setup_style(title=title)
+        return self.graph
