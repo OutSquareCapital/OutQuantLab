@@ -12,11 +12,11 @@ def get_overall_median(array: ArrayFloat, axis: None | int = 0) -> ArrayFloat:
     return bn.nanmedian(array, axis)  # type: ignore
 
 
-def get_rolling_mean(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
+def get_rolling_mean(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_mean(array, window=length, min_count=min_length, axis=0)  # type: ignore
 
 
-def get_rolling_median(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
+def get_rolling_median(array: ArrayFloat, length: int, min_length: int = 1) -> ArrayFloat:
     return bn.move_median(array, window=length, min_count=min_length, axis=0)  # type: ignore
 
 

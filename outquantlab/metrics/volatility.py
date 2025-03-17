@@ -15,7 +15,7 @@ def overall_volatility_annualized(returns_array: ArrayFloat) -> ArrayFloat:
     )
 
 
-def rolling_volatility(
+def get_rolling_volatility(
     array: ArrayFloat, length: int, min_length: int = 1
 ) -> ArrayFloat:
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof=1)  # type: ignore
@@ -27,7 +27,7 @@ def hv_composite(
     long_term_lengths: int = 1024,
     st_weight: float = 0.6,
 ) -> ArrayFloat:
-    st_vol: ArrayFloat = rolling_volatility(
+    st_vol: ArrayFloat = get_rolling_volatility(
         array=returns_array, length=short_term_lengths, min_length=short_term_lengths
     )
     lt_vol: ArrayFloat = get_lt_vol(
@@ -50,7 +50,7 @@ def get_lt_vol(returns_array: ArrayFloat, long_term_lengths: int) -> ArrayFloat:
         long_term_lengths if long_term_lengths < max_length else max_length
     )
 
-    return rolling_volatility(array=returns_array, length=adjusted_length, min_length=1)
+    return get_rolling_volatility(array=returns_array, length=adjusted_length, min_length=1)
 
 
 def get_composite_vol_raw(
@@ -72,10 +72,10 @@ def separate_volatility(
     positive_returns = where(isnan(array), nan, where(array > 0, array, 0))
     negative_returns = where(isnan(array), nan, where(array < 0, array, 0))
 
-    vol_positive: ArrayFloat = rolling_volatility(
+    vol_positive: ArrayFloat = get_rolling_volatility(
         positive_returns, length=len_vol, min_length=1
     )
-    vol_negative: ArrayFloat = rolling_volatility(
+    vol_negative: ArrayFloat = get_rolling_volatility(
         negative_returns, length=len_vol, min_length=1
     )
 

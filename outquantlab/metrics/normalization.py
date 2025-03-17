@@ -11,7 +11,8 @@ from outquantlab.metrics.aggregation import (
     get_rolling_median,
     get_rolling_min,
 )
-from outquantlab.metrics.volatility import rolling_volatility
+from outquantlab.metrics.volatility import get_rolling_volatility
+from outquantlab.metrics.maths_constants import PERCENTAGE_FACTOR
 from outquantlab.typing_conventions import (
     ArrayFloat,
     Float32,
@@ -35,7 +36,7 @@ def relative_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
 def z_score_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
     return relative_normalization(
         signal_array=signal_array, length=length
-    ) / rolling_volatility(array=signal_array, length=length, min_length=1)
+    ) / get_rolling_volatility(array=signal_array, length=length, min_length=1)
 
 
 def limit_normalization(signal_array: ArrayFloat, limit: int = 1) -> ArrayFloat:
@@ -100,7 +101,7 @@ def _bfill(array: ArrayFloat) -> ArrayFloat:
     return nb.bfill(array, axis=0)  # type: ignore
 
 
-def limit_outliers(returns_array: ArrayFloat, limit: int) -> ArrayFloat:
+def get_returns_distribution(returns_array: ArrayFloat, limit: int) -> ArrayFloat:
     treshold: float = limit/100
     lower_threshold: ArrayFloat = quantile(a=returns_array, q=treshold, axis=0)
     upper_threshold: ArrayFloat = quantile(a=returns_array, q=1 - treshold, axis=0)
@@ -111,4 +112,4 @@ def limit_outliers(returns_array: ArrayFloat, limit: int) -> ArrayFloat:
         nan,
     )
 
-    return limited_returns_array
+    return limited_returns_array * PERCENTAGE_FACTOR

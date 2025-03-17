@@ -6,7 +6,7 @@ from outquantlab.metrics.aggregation import (
     get_rolling_max,
     get_overall_min,
 )
-from outquantlab.metrics.volatility import rolling_volatility, overall_volatility
+from outquantlab.metrics.volatility import get_rolling_volatility, overall_volatility
 from outquantlab.metrics.distribution import rolling_skewness
 from numpy import log, nan, cumprod, arange, append, empty_like, isnan
 
@@ -90,7 +90,7 @@ def expanding_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     expanding_mean: ArrayFloat = get_rolling_mean(
         array=returns_array, length=length, min_length=125
     )
-    expanding_std: ArrayFloat = rolling_volatility(
+    expanding_std: ArrayFloat = get_rolling_volatility(
         array=returns_array, length=length, min_length=125
     )
     return expanding_mean / expanding_std * ANNUALIZATION_FACTOR
@@ -102,7 +102,7 @@ def rolling_sharpe_ratio(
     mean: ArrayFloat = get_rolling_mean(
         array=returns_array, length=length, min_length=min_length
     )
-    volatility: ArrayFloat = rolling_volatility(
+    volatility: ArrayFloat = get_rolling_volatility(
         array=returns_array, length=length, min_length=min_length
     )
     return mean / volatility * ANNUALIZATION_FACTOR

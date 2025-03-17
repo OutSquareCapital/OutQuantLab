@@ -21,12 +21,12 @@ from outquantlab.metrics.normalization import (
     get_rolling_median_normalisation,
     dynamic_signal,
     rolling_scalar_normalisation,
-    limit_outliers
+    get_returns_distribution
 )
 from outquantlab.metrics.distribution import rolling_kurtosis, rolling_skewness
 
 from outquantlab.metrics.volatility import (
-    rolling_volatility,
+    get_rolling_volatility,
     hv_composite,
     separate_volatility,
     overall_volatility,
@@ -71,7 +71,7 @@ __all__: list[str] = [
     "get_rolling_quantile_ratio",
     "rolling_kurtosis",
     "rolling_skewness",
-    "rolling_volatility",
+    "get_rolling_volatility",
     "hv_composite",
     "separate_volatility",
     "rolling_sharpe_ratio",
@@ -100,7 +100,7 @@ __all__: list[str] = [
     "dynamic_signal",
     "rolling_scalar_normalisation",
     "get_overall_average_drawdown",
-    "limit_outliers",
+    "get_returns_distribution",
     "get_clusters",
     'get_filled_correlation_matrix'
 ]
