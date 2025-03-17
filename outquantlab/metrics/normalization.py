@@ -42,7 +42,7 @@ def limit_normalization(signal_array: ArrayFloat, limit: int = 1) -> ArrayFloat:
     return clip(signal_array, -limit, limit)
 
 
-def calculate_indicator_on_trend_signal(
+def get_indicator_on_trend_signal(
     trend_signal: ArrayFloat, indicator_signal: ArrayFloat
 ) -> ArrayFloat:
     limit: Float32 = Float32(0.0)

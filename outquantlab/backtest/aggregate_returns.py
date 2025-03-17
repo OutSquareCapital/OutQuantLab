@@ -1,4 +1,4 @@
-from outquantlab.backtest.data_arrays import calculate_volatility_adjusted_returns
+from outquantlab.backtest.data_arrays import get_volatility_adjusted_returns
 from outquantlab.metrics import get_overall_mean, hv_composite
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
 from typing import TypedDict
@@ -21,7 +21,7 @@ def aggregate_raw_returns(returns_df: DataFrameFloat) -> BacktestResults:
     portfolio_dict = BacktestResults()
     clusters_depth: int = len(returns_df.columns.names)
     for lvl in range(clusters_depth, 0, -1):
-        returns_df = _calculate_portfolio_returns(
+        returns_df = _get_portfolio_returns(
             returns_df=returns_df,
             grouping_levels=returns_df.columns.names[:lvl],
         )
@@ -37,7 +37,7 @@ def aggregate_raw_returns(returns_df: DataFrameFloat) -> BacktestResults:
 
 def _adjust_portfolio(returns_df: DataFrameFloat) -> DataFrameFloat:
     array: ArrayFloat = returns_df.get_array()
-    adjusted_returns: ArrayFloat = calculate_volatility_adjusted_returns(
+    adjusted_returns: ArrayFloat = get_volatility_adjusted_returns(
         pct_returns_array=array,
         hv_array=hv_composite(returns_array=array, st_weight=0.1),
     )
@@ -46,7 +46,7 @@ def _adjust_portfolio(returns_df: DataFrameFloat) -> DataFrameFloat:
     )
 
 
-def _calculate_portfolio_returns(
+def _get_portfolio_returns(
     returns_df: DataFrameFloat, grouping_levels: list[str]
 ) -> DataFrameFloat:
     return DataFrameFloat(

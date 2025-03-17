@@ -4,7 +4,7 @@ from numba import prange, njit  # type: ignore
 
 
 @njit
-def calculate_skewness(
+def get_skewness(
     min_length: int,
     observation_count: float,
     sum_values: float,
@@ -231,7 +231,7 @@ def rolling_skewness(array: ArrayFloat, length: int, min_length: int = 4) -> Arr
                     previous_value,
                 )
 
-            output[row, col] = calculate_skewness(
+            output[row, col] = get_skewness(
                 min_length,
                 observation_count,
                 sum_values,
@@ -244,7 +244,7 @@ def rolling_skewness(array: ArrayFloat, length: int, min_length: int = 4) -> Arr
 
 
 @njit
-def calculate_kurtosis(
+def get_kurtosis(
     observation_count: int,
     sum_values: float,
     sum_values_squared: float,
@@ -519,7 +519,7 @@ def rolling_kurtosis(array: ArrayFloat, length: int, min_length: int) -> ArrayFl
                     previous_value,
                 )
 
-            output[row, col] = calculate_kurtosis(
+            output[row, col] = get_kurtosis(
                 observation_count=observation_count,
                 sum_values=sum_values,
                 sum_values_squared=sum_values_squared,

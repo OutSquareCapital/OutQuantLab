@@ -5,7 +5,7 @@ from numpy import full
 def get_fixed_bias(prices_array: ArrayFloat, Bias: float) -> ArrayFloat:
     return full(prices_array.shape, Bias, dtype=Float32)
     
-def calculate_mean_price_ratio_raw(
+def get_mean_price_ratio_raw(
     prices_array: ArrayFloat, len_st: int, len_lt: int
 ) -> ArrayFloat:
     mean_price_ST: ArrayFloat = mt.get_rolling_mean(
@@ -18,7 +18,7 @@ def calculate_mean_price_ratio_raw(
     return mt.ratio_normalization(nominator=mean_price_ST, denominator=mean_price_LT)
 
 
-def calculate_median_price_ratio_raw(
+def get_median_price_ratio_raw(
     prices_array: ArrayFloat, len_st: int, len_lt: int
 ) -> ArrayFloat:
     median_price_ST: ArrayFloat = mt.get_rolling_median(
@@ -33,7 +33,7 @@ def calculate_median_price_ratio_raw(
     )
 
 
-def calculate_central_price_ratio_raw(
+def get_central_price_ratio_raw(
     prices_array: ArrayFloat, len_st: int, len_lt: int
 ) -> ArrayFloat:
     central_price_ST: ArrayFloat = mt.get_rolling_central(
@@ -48,7 +48,7 @@ def calculate_central_price_ratio_raw(
     )
 
 
-def calculate_mean_rate_of_change_raw(
+def get_mean_rate_of_change_raw(
     log_returns_array: ArrayFloat, len_st: int, len_lt: int
 ) -> ArrayFloat:
     mean_returns: ArrayFloat = mt.get_rolling_mean(
@@ -58,7 +58,7 @@ def calculate_mean_rate_of_change_raw(
     return mt.get_rolling_sum(array=mean_returns, length=len_lt, min_length=len_lt)
 
 
-def calculate_median_rate_of_change_raw(
+def get_median_rate_of_change_raw(
     log_returns_array: ArrayFloat, len_st: int, len_lt: int
 ) -> ArrayFloat:
     median_returns: ArrayFloat = mt.get_rolling_median(
@@ -68,7 +68,7 @@ def calculate_median_rate_of_change_raw(
     return mt.get_rolling_sum(array=median_returns, length=len_lt, min_length=len_lt)
 
 
-def calculate_central_rate_of_change_raw(
+def get_central_rate_of_change_raw(
     log_returns_array: ArrayFloat, len_st: int, len_lt: int
 ) -> ArrayFloat:
     central_returns: ArrayFloat = mt.get_rolling_quantile_ratio(
@@ -78,10 +78,10 @@ def calculate_central_rate_of_change_raw(
     return mt.get_rolling_sum(array=central_returns, length=len_lt, min_length=len_lt)
 
 
-def calculate_mean_price_macd_raw(
+def get_mean_price_macd_raw(
     prices_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
 ) -> ArrayFloat:
-    mean_price_ratio_raw: ArrayFloat = calculate_mean_price_ratio_raw(
+    mean_price_ratio_raw: ArrayFloat = get_mean_price_ratio_raw(
         prices_array=prices_array, len_st=len_st, len_lt=len_lt
     )
     mean_price_ratio_raw_sma: ArrayFloat = mt.get_rolling_mean(
@@ -91,10 +91,10 @@ def calculate_mean_price_macd_raw(
     return mean_price_ratio_raw - mean_price_ratio_raw_sma
 
 
-def calculate_median_price_macd_raw(
+def get_median_price_macd_raw(
     prices_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
 ) -> ArrayFloat:
-    median_price_ratio_raw: ArrayFloat = calculate_median_price_ratio_raw(
+    median_price_ratio_raw: ArrayFloat = get_median_price_ratio_raw(
         prices_array=prices_array, len_st=len_st, len_lt=len_lt
     )
     median_price_ratio_raw_sma: ArrayFloat = mt.get_rolling_mean(
@@ -104,10 +104,10 @@ def calculate_median_price_macd_raw(
     return median_price_ratio_raw - median_price_ratio_raw_sma
 
 
-def calculate_central_price_macd_raw(
+def get_central_price_macd_raw(
     prices_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
 ) -> ArrayFloat:
-    central_price_ratio_raw: ArrayFloat = calculate_central_price_ratio_raw(
+    central_price_ratio_raw: ArrayFloat = get_central_price_ratio_raw(
         prices_array=prices_array, len_st=len_st, len_lt=len_lt
     )
     central_price_ratio_raw_sma: ArrayFloat = mt.get_rolling_mean(
@@ -117,10 +117,10 @@ def calculate_central_price_macd_raw(
     return central_price_ratio_raw - central_price_ratio_raw_sma
 
 
-def calculate_mean_rate_of_change_macd_raw(
+def get_mean_rate_of_change_macd_raw(
     returns_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
 ) -> ArrayFloat:
-    mean_roc_raw: ArrayFloat = calculate_mean_rate_of_change_raw(
+    mean_roc_raw: ArrayFloat = get_mean_rate_of_change_raw(
         log_returns_array=returns_array, len_st=len_st, len_lt=len_lt
     )
     mean_roc_raw_sma: ArrayFloat = mt.get_rolling_mean(
@@ -130,10 +130,10 @@ def calculate_mean_rate_of_change_macd_raw(
     return mean_roc_raw - mean_roc_raw_sma
 
 
-def calculate_median_rate_of_change_macd_raw(
+def get_median_rate_of_change_macd_raw(
     returns_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
 ) -> ArrayFloat:
-    median_roc_raw: ArrayFloat = calculate_median_rate_of_change_raw(
+    median_roc_raw: ArrayFloat = get_median_rate_of_change_raw(
         log_returns_array=returns_array, len_st=len_st, len_lt=len_lt
     )
     median_roc_raw_sma: ArrayFloat = mt.get_rolling_mean(
@@ -143,10 +143,10 @@ def calculate_median_rate_of_change_macd_raw(
     return median_roc_raw - median_roc_raw_sma
 
 
-def calculate_central_rate_of_change_macd_raw(
+def get_central_rate_of_change_macd_raw(
     returns_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
 ) -> ArrayFloat:
-    central_roc_raw: ArrayFloat = calculate_central_rate_of_change_raw(
+    central_roc_raw: ArrayFloat = get_central_rate_of_change_raw(
         log_returns_array=returns_array, len_st=len_st, len_lt=len_lt
     )
     central_roc_raw_sma: ArrayFloat = mt.get_rolling_mean(
@@ -156,10 +156,10 @@ def calculate_central_rate_of_change_macd_raw(
     return central_roc_raw - central_roc_raw_sma
 
 
-def calculate_normalised_mean_price_ratio_raw(
+def get_normalised_mean_price_ratio_raw(
     prices_array: ArrayFloat, len_signal: int, len_norm: int
 ) -> ArrayFloat:
-    mean_roc: ArrayFloat = calculate_mean_price_ratio_raw(
+    mean_roc: ArrayFloat = get_mean_price_ratio_raw(
         prices_array=prices_array, len_st=1, len_lt=len_signal
     )
     return mt.get_rolling_median_normalisation(
@@ -167,10 +167,10 @@ def calculate_normalised_mean_price_ratio_raw(
     )
 
 
-def calculate_normalised_mean_rate_of_change_raw(
+def get_normalised_mean_rate_of_change_raw(
     log_returns_array: ArrayFloat, len_signal: int, len_norm: int
 ) -> ArrayFloat:
-    mean_roc: ArrayFloat = calculate_mean_rate_of_change_raw(
+    mean_roc: ArrayFloat = get_mean_rate_of_change_raw(
         log_returns_array=log_returns_array, len_st=1, len_lt=len_signal
     )
     return mt.get_rolling_median_normalisation(
@@ -201,7 +201,7 @@ def smoothed_kurtosis(
     )
 
 
-def calculate_relative_skewness(
+def get_relative_skewness(
     log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
 ) -> ArrayFloat:
     skewness_array: ArrayFloat = smoothed_skewness(
@@ -212,7 +212,7 @@ def calculate_relative_skewness(
     return mt.relative_normalization(signal_array=skewness_array, length=len_skew * 4)
 
 
-def calculate_relative_kurt(
+def get_relative_kurt(
     log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
 ) -> ArrayFloat:
     kurtosis_array: ArrayFloat = smoothed_kurtosis(
@@ -223,7 +223,7 @@ def calculate_relative_kurt(
     return mt.relative_normalization(signal_array=kurtosis_array, length=2500)
 
 
-def calculate_skew_on_kurtosis(
+def get_skew_on_kurtosis(
     log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
 ) -> ArrayFloat:
     skew: ArrayFloat = smoothed_skewness(
@@ -244,15 +244,15 @@ def calculate_skew_on_kurtosis(
     return skew_on_kurt_signal
 
 
-def calculate_relative_skew_on_kurtosis(
+def get_relative_skew_on_kurtosis(
     log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
 ) -> ArrayFloat:
-    relative_skew: ArrayFloat = calculate_relative_skewness(
+    relative_skew: ArrayFloat = get_relative_skewness(
         log_returns_array=log_returns_array,
         len_smooth=len_smooth,
         len_skew=len_skew,
     )
-    relative_kurt: ArrayFloat = calculate_relative_kurt(
+    relative_kurt: ArrayFloat = get_relative_kurt(
         log_returns_array=log_returns_array,
         len_smooth=len_smooth,
         len_skew=len_skew,

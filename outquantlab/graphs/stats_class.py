@@ -7,9 +7,9 @@ from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFlo
 RollingMetricFunc: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
 OverallMetricFunc: TypeAlias = Callable[[ArrayFloat], ArrayFloat]
 metrics_func: list[OverallMetricFunc] = [
-    mt.calculate_total_returns,
+    mt.get_total_returns,
     mt.overall_sharpe_ratio,
-    mt.calculate_max_drawdown,
+    mt.get_max_drawdown,
     mt.overall_volatility_annualized,
 ]
 

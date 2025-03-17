@@ -22,7 +22,7 @@ class MeanPriceRatio(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int
     ) -> ArrayFloat:
-        mean_price_ratio_raw: ArrayFloat = raw.calculate_mean_price_ratio_raw(
+        mean_price_ratio_raw: ArrayFloat = raw.get_mean_price_ratio_raw(
             prices_array=data_arrays.prices,
             len_st=len_st,
             len_lt=len_lt,
@@ -34,7 +34,7 @@ class MedianPriceRatio(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int
     ) -> ArrayFloat:
-        median_price_ratio_raw: ArrayFloat = raw.calculate_median_price_ratio_raw(
+        median_price_ratio_raw: ArrayFloat = raw.get_median_price_ratio_raw(
             prices_array=data_arrays.prices,
             len_st=len_st,
             len_lt=len_lt,
@@ -46,7 +46,7 @@ class CentralPriceRatio(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int
     ) -> ArrayFloat:
-        central_price_ratio_raw: ArrayFloat = raw.calculate_central_price_ratio_raw(
+        central_price_ratio_raw: ArrayFloat = raw.get_central_price_ratio_raw(
             prices_array=data_arrays.prices,
             len_st=len_st,
             len_lt=len_lt,
@@ -58,7 +58,7 @@ class MeanRateOfChange(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int
     ) -> ArrayFloat:
-        mean_roc_raw: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        mean_roc_raw: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_st,
             len_lt=len_lt,
@@ -69,7 +69,7 @@ class MedianRateOfChange(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int
     ) -> ArrayFloat:
-        median_roc_raw: ArrayFloat = raw.calculate_median_rate_of_change_raw(
+        median_roc_raw: ArrayFloat = raw.get_median_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_st,
             len_lt=len_lt,
@@ -81,7 +81,7 @@ class CentralRateOfChange(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int
     ) -> ArrayFloat:
-        central_roc_raw: ArrayFloat = raw.calculate_central_rate_of_change_raw(
+        central_roc_raw: ArrayFloat = raw.get_central_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_st,
             len_lt=len_lt,
@@ -93,7 +93,7 @@ class MeanPriceMacd(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
     ) -> ArrayFloat:
-        mean_price_ratio_macd_raw: ArrayFloat = raw.calculate_mean_price_macd_raw(
+        mean_price_ratio_macd_raw: ArrayFloat = raw.get_mean_price_macd_raw(
             prices_array=data_arrays.prices,
             len_st=len_st,
             len_lt=len_lt,
@@ -107,7 +107,7 @@ class MedianPriceMacd(BaseIndic):
         self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
     ) -> ArrayFloat:
         median_price_ratio_macd_raw: ArrayFloat = (
-            raw.calculate_median_price_macd_raw(
+            raw.get_median_price_macd_raw(
                 prices_array=data_arrays.prices,
                 len_st=len_st,
                 len_lt=len_lt,
@@ -122,7 +122,7 @@ class CentralPriceMacd(BaseIndic):
         self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
     ) -> ArrayFloat:
         central_price_ratio_macd_raw: ArrayFloat = (
-            raw.calculate_central_price_macd_raw(
+            raw.get_central_price_macd_raw(
                 prices_array=data_arrays.prices,
                 len_st=len_st,
                 len_lt=len_lt,
@@ -136,7 +136,7 @@ class MeanRateOfChangeMacd(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
     ) -> ArrayFloat:
-        mean_roc_macd_raw: ArrayFloat = raw.calculate_mean_rate_of_change_macd_raw(
+        mean_roc_macd_raw: ArrayFloat = raw.get_mean_rate_of_change_macd_raw(
             returns_array=data_arrays.log_returns,
             len_st=len_st,
             len_lt=len_lt,
@@ -150,7 +150,7 @@ class MedianRateOfChangeMacd(BaseIndic):
         self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
     ) -> ArrayFloat:
         median_roc_macd_raw: ArrayFloat = (
-            raw.calculate_median_rate_of_change_macd_raw(
+            raw.get_median_rate_of_change_macd_raw(
                 returns_array=data_arrays.log_returns,
                 len_st=len_st,
                 len_lt=len_lt,
@@ -165,7 +165,7 @@ class CentralRateOfChangeMacd(BaseIndic):
         self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
     ) -> ArrayFloat:
         central_roc_macd_raw: ArrayFloat = (
-            raw.calculate_central_rate_of_change_macd_raw(
+            raw.get_central_rate_of_change_macd_raw(
                 returns_array=data_arrays.log_returns,
                 len_st=len_st,
                 len_lt=len_lt,
@@ -185,19 +185,19 @@ class MeanPriceMacdTrend(BaseIndic):
         len_trend_st: int,
         len_trend_lt: int,
     ) -> ArrayFloat:
-        mean_price_ratio_signal: ArrayFloat = raw.calculate_mean_price_ratio_raw(
+        mean_price_ratio_signal: ArrayFloat = raw.get_mean_price_ratio_raw(
             prices_array=data_arrays.prices,
             len_st=len_trend_st,
             len_lt=len_trend_lt,
         )
-        mean_price_macd_signal: ArrayFloat = raw.calculate_mean_price_macd_raw(
+        mean_price_macd_signal: ArrayFloat = raw.get_mean_price_macd_raw(
             prices_array=data_arrays.prices,
             len_st=len_st,
             len_lt=len_lt,
             len_macd=len_macd,
         )
 
-        return norm.calculate_indicator_on_trend_signal(
+        return norm.get_indicator_on_trend_signal(
             trend_signal=mean_price_ratio_signal,
             indicator_signal=mean_price_macd_signal,
         )
@@ -214,19 +214,19 @@ class MedianPriceMacdTrend(BaseIndic):
         len_trend_lt: int,
     ) -> ArrayFloat:
         median_price_ratio_signal: ArrayFloat = (
-            raw.calculate_median_price_ratio_raw(
+            raw.get_median_price_ratio_raw(
                 prices_array=data_arrays.prices,
                 len_st=len_trend_st,
                 len_lt=len_trend_lt,
             )
         )
-        median_price_macd_signal: ArrayFloat = raw.calculate_median_price_macd_raw(
+        median_price_macd_signal: ArrayFloat = raw.get_median_price_macd_raw(
             prices_array=data_arrays.prices,
             len_st=len_st,
             len_lt=len_lt,
             len_macd=len_macd,
         )
-        return norm.calculate_indicator_on_trend_signal(
+        return norm.get_indicator_on_trend_signal(
             trend_signal=median_price_ratio_signal,
             indicator_signal=median_price_macd_signal,
         )
@@ -243,21 +243,21 @@ class CentralPriceMacdTrend(BaseIndic):
         len_trend_lt: int,
     ) -> ArrayFloat:
         central_price_ratio_signal: ArrayFloat = (
-            raw.calculate_central_price_ratio_raw(
+            raw.get_central_price_ratio_raw(
                 prices_array=data_arrays.prices,
                 len_st=len_trend_st,
                 len_lt=len_trend_lt,
             )
         )
         central_price_macd_signal: ArrayFloat = (
-            raw.calculate_central_price_macd_raw(
+            raw.get_central_price_macd_raw(
                 prices_array=data_arrays.prices,
                 len_st=len_st,
                 len_lt=len_lt,
                 len_macd=len_macd,
             )
         )
-        return norm.calculate_indicator_on_trend_signal(
+        return norm.get_indicator_on_trend_signal(
             trend_signal=central_price_ratio_signal,
             indicator_signal=central_price_macd_signal,
         )
@@ -273,20 +273,20 @@ class MeanRateOfChangeMacdTrend(BaseIndic):
         len_trend_st: int,
         len_trend_lt: int,
     ) -> ArrayFloat:
-        mean_roc_trend_signal: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        mean_roc_trend_signal: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_trend_st,
             len_lt=len_trend_lt,
         )
         mean_roc_macd_signal: ArrayFloat = (
-            raw.calculate_mean_rate_of_change_macd_raw(
+            raw.get_mean_rate_of_change_macd_raw(
                 returns_array=data_arrays.log_returns,
                 len_st=len_st,
                 len_lt=len_lt,
                 len_macd=len_macd,
             )
         )
-        return norm.calculate_indicator_on_trend_signal(
+        return norm.get_indicator_on_trend_signal(
             trend_signal=mean_roc_trend_signal,
             indicator_signal=mean_roc_macd_signal,
         )
@@ -303,21 +303,21 @@ class MedianRateOfChangeMacdTrend(BaseIndic):
         len_trend_lt: int,
     ) -> ArrayFloat:
         median_roc_trend_signal: ArrayFloat = (
-            raw.calculate_median_rate_of_change_raw(
+            raw.get_median_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns,
                 len_st=len_trend_st,
                 len_lt=len_trend_lt,
             )
         )
         median_roc_macd_signal: ArrayFloat = (
-            raw.calculate_median_rate_of_change_macd_raw(
+            raw.get_median_rate_of_change_macd_raw(
                 returns_array=data_arrays.log_returns,
                 len_st=len_st,
                 len_lt=len_lt,
                 len_macd=len_macd,
             )
         )
-        return norm.calculate_indicator_on_trend_signal(
+        return norm.get_indicator_on_trend_signal(
             trend_signal=median_roc_trend_signal,
             indicator_signal=median_roc_macd_signal,
         )
@@ -334,21 +334,21 @@ class CentralRateOfChangeMacdTrend(BaseIndic):
         len_trend_lt: int,
     ) -> ArrayFloat:
         central_roc_trend_signal: ArrayFloat = (
-            raw.calculate_central_rate_of_change_raw(
+            raw.get_central_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns,
                 len_st=len_trend_st,
                 len_lt=len_trend_lt,
             )
         )
         central_roc_macd_signal: ArrayFloat = (
-            raw.calculate_central_rate_of_change_macd_raw(
+            raw.get_central_rate_of_change_macd_raw(
                 returns_array=data_arrays.log_returns,
                 len_st=len_st,
                 len_lt=len_lt,
                 len_macd=len_macd,
             )
         )
-        return norm.calculate_indicator_on_trend_signal(
+        return norm.get_indicator_on_trend_signal(
             trend_signal=central_roc_trend_signal,
             indicator_signal=central_roc_macd_signal,
         )
@@ -364,7 +364,7 @@ class MeanPriceRatioNormalised(BaseIndic):
         self, data_arrays: AssetsData, len_signal: int, len_norm: int
     ) -> ArrayFloat:
         normalised_price_ratio: ArrayFloat = (
-            raw.calculate_normalised_mean_price_ratio_raw(
+            raw.get_normalised_mean_price_ratio_raw(
                 prices_array=data_arrays.prices,
                 len_signal=len_signal,
                 len_norm=len_norm,
@@ -378,7 +378,7 @@ class MeanRateOfChangeNormalised(BaseIndic):
         self, data_arrays: AssetsData, len_signal: int, len_norm: int
     ) -> ArrayFloat:
         normalised_roc: ArrayFloat = (
-            raw.calculate_normalised_mean_rate_of_change_raw(
+            raw.get_normalised_mean_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns,
                 len_signal=len_signal,
                 len_norm=len_norm,
@@ -398,19 +398,19 @@ class MeanRateOfChangeNormalisedTrend(BaseIndic):
         len_lt: int,
     ) -> ArrayFloat:
         normalised_roc: ArrayFloat = (
-            raw.calculate_normalised_mean_rate_of_change_raw(
+            raw.get_normalised_mean_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns,
                 len_signal=len_signal,
                 len_norm=len_norm,
             )
         )
-        trend_signal: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        trend_signal: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_st,
             len_lt=len_lt,
         )
         normalised_on_trend_signal: ArrayFloat = (
-            norm.calculate_indicator_on_trend_signal(
+            norm.get_indicator_on_trend_signal(
                 trend_signal=trend_signal, indicator_signal=normalised_roc
             )
         )
@@ -427,19 +427,19 @@ class MeanPriceRatioNormalisedTrend(BaseIndic):
         len_lt: int,
     ) -> ArrayFloat:
         normalised_ratio: ArrayFloat = (
-            raw.calculate_normalised_mean_rate_of_change_raw(
+            raw.get_normalised_mean_rate_of_change_raw(
                 log_returns_array=data_arrays.log_returns,
                 len_signal=len_signal,
                 len_norm=len_norm,
             )
         )
-        trend_signal = raw.calculate_mean_rate_of_change_raw(
+        trend_signal = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_st,
             len_lt=len_lt,
         )
         normalised_on_trend_signal: ArrayFloat = (
-            norm.calculate_indicator_on_trend_signal(
+            norm.get_indicator_on_trend_signal(
                 trend_signal=trend_signal, indicator_signal=normalised_ratio
             )
         )
@@ -462,7 +462,7 @@ class RelativeSkewness(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_smooth: int, len_skew: int
     ) -> ArrayFloat:
-        relative_skew: ArrayFloat = raw.calculate_relative_skewness(
+        relative_skew: ArrayFloat = raw.get_relative_skewness(
             log_returns_array=data_arrays.log_returns,
             len_smooth=len_smooth,
             len_skew=len_skew,
@@ -474,7 +474,7 @@ class SkewnessOnKurtosis(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_smooth: int, len_skew: int
     ) -> ArrayFloat:
-        skew_on_kurt_signal: ArrayFloat = raw.calculate_skew_on_kurtosis(
+        skew_on_kurt_signal: ArrayFloat = raw.get_skew_on_kurtosis(
             log_returns_array=data_arrays.log_returns,
             len_smooth=len_smooth,
             len_skew=len_skew,
@@ -487,7 +487,7 @@ class RelativeSkewnessOnKurtosis(BaseIndic):
         self, data_arrays: AssetsData, len_smooth: int, len_skew: int
     ) -> ArrayFloat:
         relative_skew_on_kurt_signal: ArrayFloat = (
-            raw.calculate_relative_skew_on_kurtosis(
+            raw.get_relative_skew_on_kurtosis(
                 log_returns_array=data_arrays.log_returns,
                 len_smooth=len_smooth,
                 len_skew=len_skew,
@@ -510,12 +510,12 @@ class SkewnessTrend(BaseIndic):
             len_smooth=len_smooth,
             len_skew=len_skew,
         )
-        trend_signal: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        trend_signal: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_trend_st,
             len_lt=len_trend_lt,
         )
-        skew_on_trend_signal: ArrayFloat = norm.calculate_indicator_on_trend_signal(
+        skew_on_trend_signal: ArrayFloat = norm.get_indicator_on_trend_signal(
             trend_signal=trend_signal, indicator_signal=skewness_signal
         )
         return norm.sign_normalization(signal_array=skew_on_trend_signal)
@@ -530,18 +530,18 @@ class RelativeSkewnessTrend(BaseIndic):
         len_trend_st: int,
         len_trend_lt: int,
     ) -> ArrayFloat:
-        relative_skewness_signal: ArrayFloat = raw.calculate_relative_skewness(
+        relative_skewness_signal: ArrayFloat = raw.get_relative_skewness(
             log_returns_array=data_arrays.log_returns,
             len_smooth=len_smooth,
             len_skew=len_skew,
         )
-        trend_signal: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        trend_signal: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_trend_st,
             len_lt=len_trend_lt,
         )
         relative_skew_on_trend: ArrayFloat = (
-            norm.calculate_indicator_on_trend_signal(
+            norm.get_indicator_on_trend_signal(
                 trend_signal=trend_signal, indicator_signal=relative_skewness_signal
             )
         )
@@ -558,17 +558,17 @@ class SkewnessOnKurtosisTrend(BaseIndic):
         len_trend_st: int,
         len_trend_lt: int,
     ) -> ArrayFloat:
-        skew_on_kurt_signal: ArrayFloat = raw.calculate_skew_on_kurtosis(
+        skew_on_kurt_signal: ArrayFloat = raw.get_skew_on_kurtosis(
             log_returns_array=data_arrays.log_returns,
             len_smooth=len_smooth,
             len_skew=len_skew,
         )
-        trend_signal: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        trend_signal: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_trend_st,
             len_lt=len_trend_lt,
         )
-        return norm.calculate_indicator_on_trend_signal(
+        return norm.get_indicator_on_trend_signal(
             trend_signal=trend_signal, indicator_signal=skew_on_kurt_signal
         )
 
@@ -583,19 +583,19 @@ class RelativeSkewnessOnKurtosisTrend(BaseIndic):
         len_trend_lt: int,
     ) -> ArrayFloat:
         relative_skew_on_kurt_signal: ArrayFloat = (
-            raw.calculate_relative_skew_on_kurtosis(
+            raw.get_relative_skew_on_kurtosis(
                 log_returns_array=data_arrays.log_returns,
                 len_smooth=len_smooth,
                 len_skew=len_skew,
             )
         )
-        trend_signal: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        trend_signal: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_trend_st,
             len_lt=len_trend_lt,
         )
         relative_skew_on_kurt_on_trend: ArrayFloat = (
-            norm.calculate_indicator_on_trend_signal(
+            norm.get_indicator_on_trend_signal(
                 trend_signal=trend_signal,
                 indicator_signal=relative_skew_on_kurt_signal,
             )
@@ -668,14 +668,14 @@ class RelativeDirectionalVolatilityTrend(BaseIndic):
                 len_relative=len_relative,
             )
         )
-        trend_signal: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        trend_signal: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_trend_st,
             len_lt=len_trend_lt,
         )
 
         relative_directional_vol_on_trend: ArrayFloat = (
-            norm.calculate_indicator_on_trend_signal(
+            norm.get_indicator_on_trend_signal(
                 trend_signal=trend_signal,
                 indicator_signal=relative_directional_vol_signal,
             )
@@ -703,13 +703,13 @@ class NormalisedDirectionalVolatilityTrend(BaseIndic):
                 len_norm=len_norm,
             )
         )
-        trend_signal: ArrayFloat = raw.calculate_mean_rate_of_change_raw(
+        trend_signal: ArrayFloat = raw.get_mean_rate_of_change_raw(
             log_returns_array=data_arrays.log_returns,
             len_st=len_trend_st,
             len_lt=len_trend_lt,
         )
         normalised_directional_vol_on_trend: ArrayFloat = (
-            norm.calculate_indicator_on_trend_signal(
+            norm.get_indicator_on_trend_signal(
                 trend_signal=trend_signal,
                 indicator_signal=normalised_directional_vol,
             )

@@ -25,7 +25,7 @@ class Plots:
 
     def plot_stats_equity(self, returns_df: DataFrameFloat, length: int) -> Graph:
         processor = StatsDF(
-            func=mt.calculate_equity_curves, ascending=True, title="Equity Curves"
+            func=mt.get_equity_curves, ascending=True, title="Equity Curves"
         )
         data: DataFrameFloat = processor.get_data(data=returns_df, length=length)
         return self.curves.get_fig(data=data, title=processor.title)
@@ -39,7 +39,7 @@ class Plots:
 
     def plot_rolling_drawdown(self, returns_df: DataFrameFloat, length: int) -> Graph:
         processor = StatsDF(
-            func=mt.calculate_rolling_drawdown,
+            func=mt.get_rolling_drawdown,
             ascending=False,
             title="Rolling Drawdown",
         )
@@ -88,7 +88,7 @@ class Plots:
 
     def plot_overall_returns(self, returns_df: DataFrameFloat) -> Graph:
         processor = StatsSeries(
-            func=mt.calculate_total_returns, ascending=True, title="Overall Returns"
+            func=mt.get_total_returns, ascending=True, title="Overall Returns"
         )
         data: SeriesFloat = processor.get_data(data=returns_df)
         return self.bars.get_fig(data=data, title=processor.title)
@@ -111,7 +111,7 @@ class Plots:
 
     def plot_overall_average_drawdown(self, returns_df: DataFrameFloat) -> Graph:
         processor = StatsSeries(
-            func=mt.calculate_overall_average_drawdown,
+            func=mt.get_overall_average_drawdown,
             ascending=True,
             title="Overall Average Drawdown",
         )
@@ -120,7 +120,7 @@ class Plots:
 
     def plot_overall_average_correlation(self, returns_df: DataFrameFloat) -> Graph:
         processor = StatsSeries(
-            func=mt.calculate_overall_average_correlation,
+            func=mt.get_overall_average_correlation,
             ascending=True,
             title="Overall Average Correlation",
         )
@@ -129,7 +129,7 @@ class Plots:
 
     def plot_overall_monthly_skew(self, returns_df: DataFrameFloat) -> Graph:
         processor = StatsSeries(
-            func=mt.calculate_overall_monthly_skewness,
+            func=mt.get_overall_monthly_skewness,
             ascending=True,
             title="Overall Monthly Skew",
         )
