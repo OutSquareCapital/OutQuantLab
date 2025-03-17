@@ -1,20 +1,15 @@
 import plotly.graph_objects as go  # type: ignore
-
 from outquantlab.graphs.ui_constants import Colors, CustomHovers
 from outquantlab.graphs.widget_class import BaseWidget
-from outquantlab.metrics import get_overall_max, get_overall_min
+import outquantlab.metrics as mt
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
-
-
-def _get_marker_config(color: str) -> dict[str, str | dict[str, Colors | int]]:
-    return dict(color=color, line=dict(color=Colors.WHITE, width=1))
 
 
 class Curves(BaseWidget[DataFrameFloat]):
     def __init__(self) -> None:
         super().__init__(custom_hover=CustomHovers.Y.value)
 
-    def setup_figure_type(
+    def _setup_figure_type(
         self, data: DataFrameFloat, color_map: dict[str, str]
     ) -> None:
         for column in data.get_names():
@@ -33,7 +28,7 @@ class Violins(BaseWidget[DataFrameFloat]):
     def __init__(self) -> None:
         super().__init__(custom_hover=CustomHovers.Y.value)
 
-    def setup_figure_type(
+    def _setup_figure_type(
         self, data: DataFrameFloat, color_map: dict[str, str]
     ) -> None:
         for column in data.columns:
@@ -43,18 +38,18 @@ class Violins(BaseWidget[DataFrameFloat]):
                     name=column,
                     box_visible=True,
                     points=False,
-                    marker=_get_marker_config(color=color_map[column]),
+                    marker=self._get_marker_config(color=color_map[column]),
                     box_line_color=Colors.WHITE,
                     hoveron="violins",
                     hoverinfo="y",
                 )
             )
 
-        min_by_column: ArrayFloat = get_overall_min(array=data.get_array())
-        y_min: ArrayFloat = get_overall_min(array=min_by_column)
+        min_by_column: ArrayFloat = mt.get_overall_min(array=data.get_array())
+        y_min: ArrayFloat = mt.get_overall_min(array=min_by_column)
 
-        max_by_column: ArrayFloat = get_overall_max(array=data.get_array())
-        y_max: ArrayFloat = get_overall_max(array=max_by_column)
+        max_by_column: ArrayFloat = mt.get_overall_max(array=data.get_array())
+        y_max: ArrayFloat = mt.get_overall_max(array=max_by_column)
 
         self.graph.figure.update_layout(  # type: ignore
             yaxis=dict(range=[y_min, y_max], showgrid=False),
@@ -68,7 +63,7 @@ class Histogram(BaseWidget[DataFrameFloat]):
     def __init__(self) -> None:
         super().__init__(custom_hover=CustomHovers.X.value)
 
-    def setup_figure_type(
+    def _setup_figure_type(
         self, data: DataFrameFloat, color_map: dict[str, str]
     ) -> None:
         for column in data.columns:
@@ -76,7 +71,7 @@ class Histogram(BaseWidget[DataFrameFloat]):
                 trace=go.Histogram(
                     x=data[column],
                     name=column,
-                    marker=_get_marker_config(color=color_map[column]),
+                    marker=self._get_marker_config(color=color_map[column]),
                 )
             )
         self.graph.figure.update_layout(  # type: ignore
@@ -88,14 +83,14 @@ class Bars(BaseWidget[SeriesFloat]):
     def __init__(self) -> None:
         super().__init__(custom_hover=CustomHovers.Y.value)
 
-    def setup_figure_type(self, data: SeriesFloat, color_map: dict[str, str]) -> None:
+    def _setup_figure_type(self, data: SeriesFloat, color_map: dict[str, str]) -> None:
         for label, value in zip(data.get_names(), data.get_array()):
             self.graph.figure.add_trace(  # type: ignore
                 trace=go.Bar(
                     x=[label],
                     y=[value],
                     name=label,
-                    marker=_get_marker_config(color=color_map[label]),
+                    marker=self._get_marker_config(color=color_map[label]),
                 )
             )
 
@@ -108,7 +103,7 @@ class Table(BaseWidget[SeriesFloat]):
     def __init__(self) -> None:
         super().__init__(custom_hover=None)
 
-    def setup_figure_type(self, data: SeriesFloat, color_map: dict[str, str]) -> None:
+    def _setup_figure_type(self, data: SeriesFloat, color_map: dict[str, str]) -> None:
         self.graph.figure.add_trace(  # type: ignore
             trace=go.Table(
                 header=dict(values=["Metric", "Value"], fill_color=Colors.BLACK),

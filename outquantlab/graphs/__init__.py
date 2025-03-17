@@ -1,33 +1,5 @@
-from outquantlab.graphs.plots_funcs import (
-    plot_metrics,
-    plot_overall_average_correlation,
-    plot_overall_average_drawdown,
-    plot_overall_monthly_skew,
-    plot_overall_returns,
-    plot_overall_sharpe_ratio,
-    plot_overall_volatility,
-    plot_rolling_drawdown,
-    plot_rolling_sharpe_ratio,
-    plot_rolling_smoothed_skewness,
-    plot_rolling_volatility,
-    plot_stats_distribution_histogram,
-    plot_stats_distribution_violin,
-    plot_stats_equity,
-)
+from outquantlab.graphs.plot_class import Plots
 
 __all__: list[str] = [
-    "plot_metrics",
-    "plot_stats_distribution_histogram",
-    "plot_stats_distribution_violin",
-    "plot_overall_average_correlation",
-    "plot_overall_average_drawdown",
-    "plot_overall_monthly_skew",
-    "plot_overall_returns",
-    "plot_overall_sharpe_ratio",
-    "plot_overall_volatility",
-    "plot_rolling_drawdown",
-    "plot_rolling_sharpe_ratio",
-    "plot_rolling_volatility",
-    "plot_rolling_smoothed_skewness",
-    "plot_stats_equity",
+    "Plots",
 ]

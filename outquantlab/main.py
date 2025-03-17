@@ -1,4 +1,4 @@
-import outquantlab.graphs as graphs
+from outquantlab.graphs import Plots
 from outquantlab.backtest import BacktestResults, execute_backtest
 from outquantlab.config_classes import AppConfig
 from outquantlab.database import DataBaseProvider
@@ -8,7 +8,7 @@ class OutQuantLab:
     def __init__(self) -> None:
         self._dbp = DataBaseProvider()
         self.app_config: AppConfig = self._dbp.get_app_config()
-        self.graphs = graphs
+        self.graphs = Plots()
 
     def run(self) -> None:
         self.data: BacktestResults = execute_backtest(

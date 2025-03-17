@@ -1,5 +1,6 @@
 from enum import Enum, StrEnum
 
+
 BASE_COLORS: list[str] = [
     "brown",
     "red",
