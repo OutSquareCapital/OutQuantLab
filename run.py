@@ -8,10 +8,8 @@ def launch_app() -> None:
     oql.run()
     end: float = time.perf_counter()
     print(f"Backtest completed in {end - start:.2f} seconds.")
-    oql.save()
-    test = oql.graphs.return_data(returns_df=oql.data['assets'])
-    oql._dbp.save_backtest_results(result=test.data)
-
+    oql.save_config()
+    oql.save_results()
 
 if __name__ == "__main__":
     print("initializing OutQuantLab...")
