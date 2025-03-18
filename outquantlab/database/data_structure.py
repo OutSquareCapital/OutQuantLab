@@ -15,3 +15,4 @@ class FileNames(StrEnum):
     INDICS_CLUSTERS = "indics_clusters"
     RETURNS_DATA = "returns_data"
     PRICES_DATA = "prices_data"
+    BACKTEST_RESULTS = "backtest_results"

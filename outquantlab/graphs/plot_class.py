@@ -23,6 +23,13 @@ class Plots:
         self.bars = Bars()
         self.histogram = Histogram()
 
+    def return_data(self, returns_df: DataFrameFloat) -> StatsSeries:
+        return StatsSeries(
+            data=returns_df,
+            func=mt.get_total_returns,
+            ascending=True,
+        )
+    
     def plot_stats_equity(self, returns_df: DataFrameFloat, length: int) -> Graph:
         processor = StatsDF(
             data=returns_df,

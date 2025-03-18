@@ -5,7 +5,7 @@ from outquantlab.database.data_file import DataFile
 from outquantlab.database.data_queries import DataQueries
 from outquantlab.database.data_refresher import get_yf_data
 from outquantlab.database.data_structure import FileNames
-from outquantlab.typing_conventions import DataFrameFloat
+from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat
 
 
 class DataBaseProvider:
@@ -70,8 +70,10 @@ class DataBaseProvider:
         self.dbq.select(file_name=FileNames.RETURNS_DATA).save(data=returns_data)
         self.dbq.select(file_name=FileNames.ASSETS_NAMES).save(data=assets_names)
 
-    def save_backtest_results(self, result: DataFrameFloat) -> None:
-        raise NotImplementedError("Method not implemented yet.")
+    def save_backtest_results(self, result: DataFrameFloat|SeriesFloat) -> None:
+        result_dict: dict[str, list[str]] = result.convert_to_json()
+
+        self.dbq.select(file_name=FileNames.BACKTEST_RESULTS).save(data=result_dict)
 
 
 def _instanciate_assets_config(
