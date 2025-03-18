@@ -20,6 +20,9 @@ def process_data(data: ArrayFloat) -> ArrayFloat:
     return data * 1.5
 ```
 
+In general, avoid any implementation that rely on strings typing for argument specification, or implementation. The error handling should be minimal, and the IDE autocompletion must be leveraged as much as possible.
+Readable, concise code is a priority. This also means that lambdas functions must be avoided for strong type hinting.
+
 ### 2. Data Structures 🏗️
 
 -**Dataclasses**: Use dataclasses (without methods) when you need a simple data structure to hold related variables. 🧱
