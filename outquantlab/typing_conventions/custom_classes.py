@@ -16,7 +16,7 @@ class SeriesFloat(Series):  # type: ignore
 
     def __init__(
         self,
-        data: ArrayFloat | Series | list[float], # type: ignore
+        data: ArrayFloat | Series | list[float],  # type: ignore
         index: MultiIndex | Index | list[str] | None = None,  # type: ignore
         dtype: type = Float32,
     ) -> None:
@@ -28,7 +28,7 @@ class SeriesFloat(Series):  # type: ignore
         return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
 
     def get_names(self) -> list[str]:
-        return self.index.tolist() # type: ignore
+        return self.index.tolist()  # type: ignore
 
     def sort_data(self, ascending: bool) -> "SeriesFloat":
         data_array: ArrayFloat = self.get_array()
@@ -48,7 +48,16 @@ class SeriesFloat(Series):  # type: ignore
     def from_array_list(cls, data: list[ArrayFloat], index: list[str]) -> "SeriesFloat":
         combined_array: ArrayFloat = concatenate([r.reshape(1) for r in data])
         return cls(data=combined_array, index=index)
-    
+
+    def convert_to_json(self) -> dict[str, list[str]]:
+        data: list[str] = self.values.tolist() # type: ignore
+        index: list[str] = [str(idx) for idx in self.index] # type: ignore
+        result_dict: dict[str, list[str]] = {
+            "data": data,
+            "index": index
+        }
+        return result_dict
+
 class DataFrameFloat(DataFrame):
     """
     Strictly typed DataFrame for managing floating-point data.
@@ -82,7 +91,8 @@ class DataFrameFloat(DataFrame):
     def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
             labels: list[str] = [
-                "_".join(col).replace(" ", "_") for col in self.columns.to_list() # type: ignore
+                "_".join(col).replace(" ", "_")
+                for col in self.columns.to_list()  # type: ignore
             ]
         else:
             labels: list[str] = self.columns.to_list()  # type: ignore
@@ -100,3 +110,16 @@ class DataFrameFloat(DataFrame):
         return DataFrameFloat(
             data=sorted_data, columns=sorted_columns, index=self.dates
         )
+
+    def convert_to_json(self) -> dict[str, list[str]]:
+        column_data: list[str] = []
+        for col_name in self.columns:
+            values: list[str] = self[col_name].values.tolist()  # type: ignore
+            column_data.append(values)  # type: ignore
+
+        result_dict: dict[str, list[str]] = {
+            "data": column_data,
+            "index": [str(idx) for idx in self.dates],
+            "columns": self.columns.tolist(),
+        }
+        return result_dict
