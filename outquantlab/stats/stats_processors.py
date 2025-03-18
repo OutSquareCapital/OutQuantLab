@@ -15,9 +15,9 @@ class StatsOverall:
     def __init__(self, data: DataFrameFloat) -> None:
         self.metrics_func: list[OverallMetricFunc] = [
             mt.get_total_returns,
-            mt.overall_sharpe_ratio,
+            mt.get_overall_sharpe_ratio,
             mt.get_max_drawdown,
-            mt.overall_volatility_annualized,
+            mt.get_overall_volatility_annualized,
         ]
         self.data: SeriesFloat = self.get_data(returns_df=data)
         self.title: str = "Overall Stats"

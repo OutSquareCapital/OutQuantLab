@@ -1,11 +1,11 @@
 import outquantlab.metrics as mt
-from outquantlab.graphs.graph_class import Graph
-from outquantlab.graphs.stats_class import (
+from outquantlab.local_ploty.graph_class import Graph
+from outquantlab.stats import (
     StatsDF,
     StatsOverall,
     StatsSeries,
 )
-from outquantlab.graphs.widgets import (
+from outquantlab.local_ploty.widgets import (
     Bars,
     Curves,
     Histogram,
@@ -23,13 +23,6 @@ class Plots:
         self.bars = Bars()
         self.histogram = Histogram()
 
-    def return_data(self, returns_df: DataFrameFloat) -> StatsSeries:
-        return StatsSeries(
-            data=returns_df,
-            func=mt.get_total_returns,
-            ascending=True,
-        )
-    
     def plot_stats_equity(self, returns_df: DataFrameFloat, length: int) -> Graph:
         processor = StatsDF(
             data=returns_df,
@@ -112,7 +105,7 @@ class Plots:
     def plot_overall_sharpe_ratio(self, returns_df: DataFrameFloat) -> Graph:
         processor = StatsSeries(
             data=returns_df,
-            func=mt.overall_sharpe_ratio,
+            func=mt.get_overall_sharpe_ratio,
             ascending=True,
         )
         return self.bars.get_fig(data=processor.data, title=processor.title)
@@ -120,7 +113,7 @@ class Plots:
     def plot_overall_volatility(self, returns_df: DataFrameFloat) -> Graph:
         processor = StatsSeries(
             data=returns_df,
-            func=mt.overall_volatility_annualized,
+            func=mt.get_overall_volatility_annualized,
             ascending=False,
         )
         return self.bars.get_fig(data=processor.data, title=processor.title)

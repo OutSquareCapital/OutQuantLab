@@ -1,6 +1,6 @@
 import plotly.graph_objects as go  # type: ignore
 
-from outquantlab.graphs.ui_constants import Colors, FigureSetup, BASE_COLORS
+from outquantlab.local_ploty.ui_constants import Colors, FigureSetup, BASE_COLORS
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 

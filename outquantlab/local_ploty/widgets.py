@@ -4,8 +4,8 @@ from typing import Generic, TypeVar
 import plotly.graph_objects as go  # type: ignore
 
 import outquantlab.metrics as mt
-from outquantlab.graphs.graph_class import Graph
-from outquantlab.graphs.ui_constants import Colors, CustomHovers
+from outquantlab.local_ploty.graph_class import Graph
+from outquantlab.local_ploty.ui_constants import Colors, CustomHovers
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
 T = TypeVar("T", bound=DataFrameFloat | SeriesFloat)
