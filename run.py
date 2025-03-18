@@ -6,7 +6,8 @@ def launch_app() -> None:
     oql.run()
     end: float = time.perf_counter()
     print(f"Backtest completed in {end - start:.2f} seconds.")
-    oql.graphs.plot_stats_equity(returns_df=oql.data['assets'], length=2500).show()
+    oql.graphs.plot_overall_stats(returns_df=oql.data['portfolio']).show()
+    oql.graphs.plot_rolling_sharpe_ratio(returns_df=oql.data['assets'], length=2000).show()
     oql.save()
 
 
