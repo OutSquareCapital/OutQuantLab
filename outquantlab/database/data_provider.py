@@ -70,10 +70,11 @@ class DataBaseProvider:
         self.dbq.select(file_name=FileNames.RETURNS_DATA).save(data=returns_data)
         self.dbq.select(file_name=FileNames.ASSETS_NAMES).save(data=assets_names)
 
-    def save_backtest_results(self, result: DataFrameFloat|SeriesFloat) -> None:
-        result_dict: dict[str, list[str]] = result.convert_to_json()
-
-        self.dbq.select(file_name=FileNames.BACKTEST_RESULTS).save(data=result_dict)
+    def save_backtest_results(self, portfolio_curves: DataFrameFloat, assets_sharpes: SeriesFloat) -> None:
+        portfolio_dict: dict[str, list[str]] = portfolio_curves.convert_to_json()
+        assets_dict: dict[str, list[str]] = assets_sharpes.convert_to_json()
+        self.dbq.select(file_name=FileNames.PORTFOLIO_CURVES).save(data=portfolio_dict)
+        self.dbq.select(file_name=FileNames.ASSETS_SHARPES).save(data=assets_dict)
 
 
 def _instanciate_assets_config(
