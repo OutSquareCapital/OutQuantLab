@@ -9,7 +9,7 @@ def overall_volatility(returns_array: ArrayFloat) -> ArrayFloat:
     return bn.nanstd(returns_array, axis=0, ddof=1)  # type: ignore
 
 
-def overall_volatility_annualized(returns_array: ArrayFloat) -> ArrayFloat:
+def get_overall_volatility_annualized(returns_array: ArrayFloat) -> ArrayFloat:
     return (
         overall_volatility(returns_array=returns_array) * ANNUALIZED_PERCENTAGE_FACTOR
     )

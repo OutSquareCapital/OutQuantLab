@@ -108,7 +108,7 @@ def rolling_sharpe_ratio(
     return mean / volatility * ANNUALIZATION_FACTOR
 
 
-def overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
+def get_overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     mean: ArrayFloat = get_overall_mean(array=returns_array)
     volatility: ArrayFloat = overall_volatility(returns_array=returns_array)
     return mean / volatility * ANNUALIZATION_FACTOR

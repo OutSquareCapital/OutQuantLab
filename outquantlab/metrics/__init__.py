@@ -30,13 +30,13 @@ from outquantlab.metrics.volatility import (
     hv_composite,
     separate_volatility,
     overall_volatility,
-    overall_volatility_annualized,
+    get_overall_volatility_annualized,
 )
 
 from outquantlab.metrics.performance import (
     rolling_sharpe_ratio,
     expanding_sharpe_ratio,
-    overall_sharpe_ratio,
+    get_overall_sharpe_ratio,
     get_equity_curves,
     get_rolling_drawdown,
     log_returns_np,
@@ -77,8 +77,8 @@ __all__: list[str] = [
     "rolling_sharpe_ratio",
     "expanding_sharpe_ratio",
     "overall_volatility",
-    "overall_volatility_annualized",
-    "overall_sharpe_ratio",
+    "get_overall_volatility_annualized",
+    "get_overall_sharpe_ratio",
     "get_equity_curves",
     "get_rolling_drawdown",
     "log_returns_np",
