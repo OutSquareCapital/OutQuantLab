@@ -70,6 +70,6 @@ class StatsSeries:
 
     def get_data(self, data: DataFrameFloat, ascending: bool) -> SeriesFloat:
         array: ArrayFloat = self.func(data.get_array())
-        return SeriesFloat(data=array, index=self.data.get_names()).sort_data(
+        return SeriesFloat(data=array, index=data.get_names()).sort_data(
             ascending=ascending
         )
