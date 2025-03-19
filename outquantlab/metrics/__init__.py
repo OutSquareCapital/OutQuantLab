@@ -20,8 +20,7 @@ from outquantlab.metrics.normalization import (
     get_indicator_on_trend_signal,
     get_rolling_median_normalisation,
     dynamic_signal,
-    rolling_scalar_normalisation,
-    get_returns_distribution
+    rolling_scalar_normalisation
 )
 from outquantlab.metrics.distribution import rolling_kurtosis, rolling_skewness
 
@@ -44,7 +43,8 @@ from outquantlab.metrics.performance import (
     get_max_drawdown,
     get_total_returns,
     get_overall_monthly_skewness,
-    get_overall_average_drawdown
+    get_overall_average_drawdown,
+    get_returns_distribution
 )
 
 from outquantlab.metrics.correlation import (
@@ -55,9 +55,9 @@ from outquantlab.metrics.correlation import (
     get_filled_correlation_matrix
 )
 
-from outquantlab.metrics.maths_constants import PERCENTAGE_FACTOR
 
 __all__: list[str] = [
+    "get_returns_distribution",
     "get_overall_monthly_skewness",
     "get_overall_min",
     "get_overall_max",
@@ -89,7 +89,6 @@ __all__: list[str] = [
     "get_correlation_matrix",
     "get_distance_matrix",
     "get_total_returns",
-    "PERCENTAGE_FACTOR",
     "ratio_normalization",
     "sign_normalization",
     "relative_normalization",
@@ -100,7 +99,6 @@ __all__: list[str] = [
     "dynamic_signal",
     "rolling_scalar_normalisation",
     "get_overall_average_drawdown",
-    "get_returns_distribution",
     "get_clusters",
     'get_filled_correlation_matrix'
 ]

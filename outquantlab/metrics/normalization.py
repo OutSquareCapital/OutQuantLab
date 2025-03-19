@@ -2,7 +2,7 @@ from collections.abc import Callable
 from operator import gt
 
 import numbagg as nb
-from numpy import clip, sign, where, quantile, nan
+from numpy import clip, sign, where
 
 from outquantlab.metrics.aggregation import (
     get_overall_median,
@@ -12,7 +12,7 @@ from outquantlab.metrics.aggregation import (
     get_rolling_min,
 )
 from outquantlab.metrics.volatility import get_rolling_volatility
-from outquantlab.metrics.maths_constants import PERCENTAGE_FACTOR
+from outquantlab.metrics.maths_constants import TimePeriod
 from outquantlab.typing_conventions import (
     ArrayFloat,
     Float32,
@@ -87,7 +87,7 @@ def dynamic_signal(
 
 
 def _get_normalized_scalar(
-    raw_signal: ArrayFloat, length: int = 500, target: int = 1
+    raw_signal: ArrayFloat, length: int = TimePeriod.YEAR.value, target: int = 1
 ) -> ArrayFloat:
     median: ArrayFloat = get_overall_median(array=abs(raw_signal), axis=1)
     mean: ArrayFloat = get_rolling_mean(
@@ -99,17 +99,3 @@ def _get_normalized_scalar(
 
 def _bfill(array: ArrayFloat) -> ArrayFloat:
     return nb.bfill(array, axis=0)  # type: ignore
-
-
-def get_returns_distribution(returns_array: ArrayFloat, limit: int) -> ArrayFloat:
-    treshold: float = limit/100
-    lower_threshold: ArrayFloat = quantile(a=returns_array, q=treshold, axis=0)
-    upper_threshold: ArrayFloat = quantile(a=returns_array, q=1 - treshold, axis=0)
-
-    limited_returns_array: ArrayFloat = where(
-        (returns_array >= lower_threshold) & (returns_array <= upper_threshold),
-        returns_array,
-        nan,
-    )
-
-    return limited_returns_array * PERCENTAGE_FACTOR

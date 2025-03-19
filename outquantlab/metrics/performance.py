@@ -1,5 +1,5 @@
 from outquantlab.typing_conventions import ArrayFloat, ArrayInt
-from outquantlab.metrics.maths_constants import ANNUALIZATION_FACTOR, PERCENTAGE_FACTOR
+from outquantlab.metrics.maths_constants import Standardization, TimePeriod
 from outquantlab.metrics.aggregation import (
     get_rolling_mean,
     get_overall_mean,
@@ -34,7 +34,7 @@ def get_equity_curves(returns_array: ArrayFloat, length: int) -> ArrayFloat:
 
     cumulative_returns[mask] = nan
 
-    return cumulative_returns * PERCENTAGE_FACTOR
+    return cumulative_returns * Standardization.PERCENTAGE.value
 
 
 def log_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
@@ -56,7 +56,7 @@ def get_total_returns(returns_array: ArrayFloat) -> ArrayFloat:
     equity_curves: ArrayFloat = get_equity_curves(
         returns_array=returns_array, length=returns_array.shape[0]
     )
-    return equity_curves[-1] - 100
+    return equity_curves[-1] - Standardization.PERCENTAGE.value
 
 
 def get_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayFloat:
@@ -66,7 +66,7 @@ def get_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayFloat:
     period_max: ArrayFloat = get_rolling_max(
         array=equity_curves, length=length, min_length=1
     )
-    return (equity_curves - period_max) / period_max * PERCENTAGE_FACTOR
+    return (equity_curves - period_max) / period_max * Standardization.PERCENTAGE.value
 
 
 def get_max_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
@@ -88,40 +88,46 @@ def get_overall_average_drawdown(returns_array: ArrayFloat) -> ArrayFloat:
 def expanding_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     length: int = returns_array.shape[0]
     expanding_mean: ArrayFloat = get_rolling_mean(
-        array=returns_array, length=length, min_length=125
+        array=returns_array, length=length, min_length=TimePeriod.HALF_YEAR.value
     )
     expanding_std: ArrayFloat = get_rolling_volatility(
-        array=returns_array, length=length, min_length=125
+        array=returns_array, length=length, min_length=TimePeriod.HALF_YEAR.value
     )
-    return expanding_mean / expanding_std * ANNUALIZATION_FACTOR
+    return expanding_mean / expanding_std * Standardization.ANNUALIZATION.value
 
 
-def rolling_sharpe_ratio(
-    returns_array: ArrayFloat, length: int, min_length: int = 20
-) -> ArrayFloat:
+def rolling_sharpe_ratio(returns_array: ArrayFloat, length: int) -> ArrayFloat:
     mean: ArrayFloat = get_rolling_mean(
-        array=returns_array, length=length, min_length=min_length
+        array=returns_array, length=length, min_length=length
     )
     volatility: ArrayFloat = get_rolling_volatility(
-        array=returns_array, length=length, min_length=min_length
+        array=returns_array, length=length, min_length=length
     )
-    return mean / volatility * ANNUALIZATION_FACTOR
+    return mean / volatility * Standardization.ANNUALIZATION.value
 
 
 def get_overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     mean: ArrayFloat = get_overall_mean(array=returns_array)
     volatility: ArrayFloat = overall_volatility(returns_array=returns_array)
-    return mean / volatility * ANNUALIZATION_FACTOR
+    return mean / volatility * Standardization.ANNUALIZATION.value
 
 
 def get_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:
     prices_array: ArrayFloat = get_equity_curves(
         returns_array=returns_array, length=returns_array.shape[0]
     )
-    monthly_prices: ArrayFloat = reduce_array(prices_array=prices_array, frequency=21)
+    monthly_prices: ArrayFloat = reduce_array(
+        prices_array=prices_array, frequency=TimePeriod.MONTH.value
+    )
     monthly_returns: ArrayFloat = pct_returns_np(prices_array=monthly_prices)
     length_to_use: int = monthly_returns.shape[0]
     expanding_skew: ArrayFloat = rolling_skewness(
         array=monthly_returns, length=length_to_use, min_length=4
     )
     return get_overall_mean(array=expanding_skew)
+
+def get_returns_distribution(returns_array: ArrayFloat, frequency: int) -> ArrayFloat:
+    resampled_returns: ArrayFloat = reduce_array(
+        prices_array=returns_array, frequency=frequency
+    )
+    return resampled_returns * Standardization.PERCENTAGE.value

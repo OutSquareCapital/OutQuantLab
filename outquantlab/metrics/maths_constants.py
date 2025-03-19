@@ -1,6 +1,16 @@
-from typing import Final
 from outquantlab.typing_conventions.custom_types import Float32
+from enum import Enum
 
-ANNUALIZATION_FACTOR: Final = Float32(16)
-PERCENTAGE_FACTOR: Final = Float32(100)
-ANNUALIZED_PERCENTAGE_FACTOR: Final = Float32(ANNUALIZATION_FACTOR * PERCENTAGE_FACTOR)
+class Standardization(Enum):
+    ANNUALIZATION = Float32(16)
+    PERCENTAGE = Float32(100)
+    ANNUALIZED_PERCENTAGE = Float32(ANNUALIZATION * PERCENTAGE)
+
+class TimePeriod(Enum):
+    WEEK = 5
+    MONTH = 21
+    QUARTER = 63
+    HALF_YEAR = 126
+    YEAR = 252
+    HALF_DECADE = 1260
+    DECADE = 2520

@@ -1,6 +1,6 @@
 import bottleneck as bn  # type: ignore
 from numpy import isnan, nan, where
-from outquantlab.metrics.maths_constants import ANNUALIZED_PERCENTAGE_FACTOR
+from outquantlab.metrics.maths_constants import Standardization, TimePeriod
 from outquantlab.typing_conventions import ArrayFloat
 from outquantlab.metrics.aggregation import get_overall_mean
 
@@ -11,7 +11,8 @@ def overall_volatility(returns_array: ArrayFloat) -> ArrayFloat:
 
 def get_overall_volatility_annualized(returns_array: ArrayFloat) -> ArrayFloat:
     return (
-        overall_volatility(returns_array=returns_array) * ANNUALIZED_PERCENTAGE_FACTOR
+        overall_volatility(returns_array=returns_array)
+        * Standardization.ANNUALIZED_PERCENTAGE.value
     )
 
 
@@ -23,8 +24,8 @@ def get_rolling_volatility(
 
 def hv_composite(
     returns_array: ArrayFloat,
-    short_term_lengths: int = 32,
-    long_term_lengths: int = 1024,
+    short_term_lengths: int = TimePeriod.MONTH.value,
+    long_term_lengths: int = TimePeriod.HALF_DECADE.value,
     st_weight: float = 0.6,
 ) -> ArrayFloat:
     st_vol: ArrayFloat = get_rolling_volatility(
@@ -40,7 +41,7 @@ def hv_composite(
     )
     return (
         get_composite_vol_filled(composite_vol=composite_vol)
-        * ANNUALIZED_PERCENTAGE_FACTOR
+        * Standardization.ANNUALIZED_PERCENTAGE.value
     )
 
 
@@ -50,7 +51,9 @@ def get_lt_vol(returns_array: ArrayFloat, long_term_lengths: int) -> ArrayFloat:
         long_term_lengths if long_term_lengths < max_length else max_length
     )
 
-    return get_rolling_volatility(array=returns_array, length=adjusted_length, min_length=1)
+    return get_rolling_volatility(
+        array=returns_array, length=adjusted_length, min_length=1
+    )
 
 
 def get_composite_vol_raw(
