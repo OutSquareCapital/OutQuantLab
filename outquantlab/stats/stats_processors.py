@@ -1,6 +1,5 @@
 from collections.abc import Callable
 from typing import TypeAlias
-import outquantlab.metrics as mt
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
 CurveMetric: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
@@ -13,13 +12,8 @@ def _format_name(name: str) -> str:
 
 
 class StatsOverall:
-    def __init__(self, data: DataFrameFloat) -> None:
-        self.metrics_func: OverallMetrics = [
-            mt.get_total_returns,
-            mt.get_overall_sharpe_ratio,
-            mt.get_max_drawdown,
-            mt.get_overall_volatility_annualized,
-        ]
+    def __init__(self, data: DataFrameFloat, overall_metrics: OverallMetrics) -> None:
+        self.metrics_func: OverallMetrics = overall_metrics
         self.data: SeriesFloat = self.get_data(returns_df=data)
         self.title: str = "Overall Stats"
 
@@ -62,10 +56,11 @@ class StatsDistribution:
     def __init__(
         self,
         data: DataFrameFloat,
+        func: DistributionMetricFunc,
         ascending: bool,
         frequency: int,
     ) -> None:
-        self.func: DistributionMetricFunc = mt.get_returns_distribution
+        self.func: DistributionMetricFunc = func
         self.data: DataFrameFloat = self.get_data(data=data, ascending=ascending, frequency=frequency)
         self.title: str = _format_name(name=self.func.__name__)
 

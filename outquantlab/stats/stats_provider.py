@@ -68,6 +68,7 @@ class StatsProvider:
     ) -> StatsDistribution:
         return StatsDistribution(
             data=returns_df,
+            func=mt.get_returns_distribution,
             ascending=True,
             frequency=frequency,
         )
@@ -122,4 +123,12 @@ class StatsProvider:
 
     @staticmethod
     def process_overall_stats(returns_df: DataFrameFloat) -> StatsOverall:
-        return StatsOverall(data=returns_df)
+        return StatsOverall(
+            data=returns_df,
+            overall_metrics=[
+                mt.get_total_returns,
+                mt.get_overall_sharpe_ratio,
+                mt.get_max_drawdown,
+                mt.get_overall_volatility_annualized,
+            ],
+        )
