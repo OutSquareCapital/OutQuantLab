@@ -1,5 +1,5 @@
 import outquantlab.metrics as mt
-from outquantlab.stats.stats_processors import StatsDF, StatsSeries, StatsOverall
+from outquantlab.stats.stats_processors import StatsDF, StatsSeries, StatsOverall, StatsDistribution
 from outquantlab.typing_conventions import DataFrameFloat
 
 
@@ -56,23 +56,23 @@ class StatsProvider:
     @staticmethod
     def process_stats_distribution_violin(
         returns_df: DataFrameFloat, returns_limit: int
-    ) -> StatsDF:
-        return StatsDF(
+    ) -> StatsDistribution:
+        return StatsDistribution(
             data=returns_df,
             func=mt.get_returns_distribution,
             ascending=True,
-            length=returns_limit,
+            returns_limit=returns_limit,
         )
 
     @staticmethod
     def process_stats_distribution_histogram(
         returns_df: DataFrameFloat, returns_limit: int
-    ) -> StatsDF:
-        return StatsDF(
+    ) -> StatsDistribution:
+        return StatsDistribution(
             data=returns_df,
             func=mt.get_returns_distribution,
             ascending=True,
-            length=returns_limit,
+            returns_limit=returns_limit,
         )
 
     @staticmethod

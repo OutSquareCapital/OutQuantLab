@@ -6,12 +6,13 @@ from outquantlab.stats import StatsProvider
 
 
 class OutQuantLab:
-    def __init__(self) -> None:
+    def __init__(self, local: bool=True) -> None:
         self._dbp = DataBaseProvider()
         self.app_config: AppConfig = self._dbp.get_app_config()
-        self.plots = Plots()
         self.stats = StatsProvider()
         self.data: BacktestResults
+        if local:
+            self.plots = Plots()
 
     def run(self) -> None:
         self.data = execute_backtest(
@@ -22,11 +23,11 @@ class OutQuantLab:
         )
 
     def save_results(self) -> None:
-        portfolio_curves = self.stats.get_portfolio_curves(
+        portfolio_curves = self.stats.process_stats_equity(
             returns_df=self.data["portfolio"],  # type: ignore
             length=2500,
         )
-        assets_sharpes = self.stats.get_assets_sharpes(
+        assets_sharpes = self.stats.process_overall_sharpe_ratio(
             returns_df=self.data["assets"]  # type: ignore
         )
         self._dbp.save_backtest_results(

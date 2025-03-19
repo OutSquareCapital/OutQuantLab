@@ -1,4 +1,4 @@
-from outquantlab.stats.stats_processors import StatsDF, StatsOverall, StatsSeries
+from outquantlab.stats.stats_processors import StatsDF, StatsOverall, StatsSeries, StatsDistribution
 from outquantlab.stats.stats_provider import StatsProvider
 
 __all__: list[str] = [
@@ -6,4 +6,5 @@ __all__: list[str] = [
     "StatsOverall",
     "StatsSeries",
     "StatsProvider",
+    "StatsDistribution",
 ]

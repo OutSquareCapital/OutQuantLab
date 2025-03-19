@@ -1,9 +1,9 @@
-import outquantlab.metrics as mt
 from outquantlab.local_ploty.graph_class import Graph
 from outquantlab.stats import (
     StatsDF,
     StatsOverall,
     StatsSeries,
+    StatsDistribution,
 )
 from outquantlab.local_ploty.widgets import (
     Bars,
@@ -13,6 +13,13 @@ from outquantlab.local_ploty.widgets import (
     Violins,
 )
 from outquantlab.typing_conventions import DataFrameFloat
+from collections.abc import Callable
+from typing import TypeAlias
+
+DFMethod: TypeAlias = Callable[[DataFrameFloat, int], StatsDF]
+SeriesMethod: TypeAlias = Callable[[DataFrameFloat], StatsSeries]
+OverallMethod: TypeAlias = Callable[[DataFrameFloat], StatsOverall]
+DistributionMethod: TypeAlias = Callable[[DataFrameFloat, int], StatsDistribution]
 
 
 class Plots:
@@ -23,125 +30,38 @@ class Plots:
         self.bars = Bars()
         self.histogram = Histogram()
 
-    def plot_stats_equity(self, returns_df: DataFrameFloat, length: int) -> Graph:
-        processor = StatsDF(
-            data=returns_df,
-            func=mt.get_equity_curves,
-            ascending=True,
-            length=length,
-        )
-        return self.curves.get_fig(data=processor.data, title=processor.title)
-
-    def plot_rolling_volatility(self, returns_df: DataFrameFloat, length: int) -> Graph:
-        processor = StatsDF(
-            data=returns_df,
-            func=mt.get_rolling_volatility,
-            ascending=False,
-            length=length,
-        )
-        return self.curves.get_fig(data=processor.data, title=processor.title)
-
-    def plot_rolling_drawdown(self, returns_df: DataFrameFloat, length: int) -> Graph:
-        processor = StatsDF(
-            data=returns_df,
-            func=mt.get_rolling_drawdown,
-            ascending=False,
-            length=length,
-        )
-        return self.curves.get_fig(data=processor.data, title=processor.title)
-
-    def plot_rolling_sharpe_ratio(
-        self, returns_df: DataFrameFloat, length: int
+    def plot_curves(
+        self, returns_df: DataFrameFloat, length: int, stats_method: DFMethod
     ) -> Graph:
-        processor = StatsDF(
-            data=returns_df,
-            func=mt.rolling_sharpe_ratio,
-            ascending=True,
-            length=length,
-        )
+        processor: StatsDF = stats_method(returns_df, length)
         return self.curves.get_fig(data=processor.data, title=processor.title)
 
-    def plot_rolling_smoothed_skewness(
-        self, returns_df: DataFrameFloat, length: int
+    def plot_bars(
+        self, returns_df: DataFrameFloat, stats_method: SeriesMethod
     ) -> Graph:
-        processor = StatsDF(
-            data=returns_df,
-            func=mt.rolling_skewness,
-            ascending=True,
-            length=length,
-        )
-        return self.curves.get_fig(data=processor.data, title=processor.title)
+        processor: StatsSeries = stats_method(returns_df)
+        return self.bars.get_fig(data=processor.data, title=processor.title)
 
-    def plot_stats_distribution_violin(
-        self, returns_df: DataFrameFloat, returns_limit: int
+    def plot_table(
+        self, returns_df: DataFrameFloat, stats_method: OverallMethod
     ) -> Graph:
-        processor = StatsDF(
-            data=returns_df,
-            func=mt.get_returns_distribution,
-            ascending=True,
-            length=returns_limit,
-        )
+        processor: StatsOverall = stats_method(returns_df)
+        return self.table.get_fig(data=processor.data, title=processor.title)
+
+    def plot_violins(
+        self,
+        returns_df: DataFrameFloat,
+        returns_limit: int,
+        stats_method: DistributionMethod,
+    ) -> Graph:
+        processor: StatsDistribution = stats_method(returns_df, returns_limit)
         return self.violins.get_fig(data=processor.data, title=processor.title)
 
-    def plot_stats_distribution_histogram(
-        self, returns_df: DataFrameFloat, returns_limit: int
+    def plot_histogram(
+        self,
+        returns_df: DataFrameFloat,
+        returns_limit: int,
+        stats_method: DistributionMethod,
     ) -> Graph:
-        processor = StatsDF(
-            data=returns_df,
-            func=mt.get_returns_distribution,
-            ascending=True,
-            length=returns_limit,
-        )
+        processor: StatsDistribution = stats_method(returns_df, returns_limit)
         return self.histogram.get_fig(data=processor.data, title=processor.title)
-
-    def plot_overall_returns(self, returns_df: DataFrameFloat) -> Graph:
-        processor = StatsSeries(
-            data=returns_df,
-            func=mt.get_total_returns,
-            ascending=True,
-        )
-        return self.bars.get_fig(data=processor.data, title=processor.title)
-
-    def plot_overall_sharpe_ratio(self, returns_df: DataFrameFloat) -> Graph:
-        processor = StatsSeries(
-            data=returns_df,
-            func=mt.get_overall_sharpe_ratio,
-            ascending=True,
-        )
-        return self.bars.get_fig(data=processor.data, title=processor.title)
-
-    def plot_overall_volatility(self, returns_df: DataFrameFloat) -> Graph:
-        processor = StatsSeries(
-            data=returns_df,
-            func=mt.get_overall_volatility_annualized,
-            ascending=False,
-        )
-        return self.bars.get_fig(data=processor.data, title=processor.title)
-
-    def plot_overall_average_drawdown(self, returns_df: DataFrameFloat) -> Graph:
-        processor = StatsSeries(
-            data=returns_df,
-            func=mt.get_overall_average_drawdown,
-            ascending=False,
-        )
-        return self.bars.get_fig(data=processor.data, title=processor.title)
-
-    def plot_overall_average_correlation(self, returns_df: DataFrameFloat) -> Graph:
-        processor = StatsSeries(
-            data=returns_df,
-            func=mt.get_overall_average_correlation,
-            ascending=False,
-        )
-        return self.bars.get_fig(data=processor.data, title=processor.title)
-
-    def plot_overall_monthly_skew(self, returns_df: DataFrameFloat) -> Graph:
-        processor = StatsSeries(
-            data=returns_df,
-            func=mt.get_overall_monthly_skewness,
-            ascending=True,
-        )
-        return self.bars.get_fig(data=processor.data, title=processor.title)
-
-    def plot_overall_stats(self, returns_df: DataFrameFloat) -> Graph:
-        processor = StatsOverall(data=returns_df)
-        return self.table.get_fig(data=processor.data, title=processor.title)

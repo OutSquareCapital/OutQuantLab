@@ -56,6 +56,30 @@ class StatsDF:
             columns=data.get_names(),
         ).sort_data(ascending=ascending)
 
+class StatsDistribution:
+    def __init__(
+        self,
+        data: DataFrameFloat,
+        func: RollingMetricFunc,
+        ascending: bool,
+        returns_limit: int,
+    ) -> None:
+        self.func: RollingMetricFunc = func
+        self.data: DataFrameFloat = self.get_data(
+            data=data, ascending=ascending, returns_limit=returns_limit
+        )
+        self.title: str = _format_name(name=func.__name__)
+
+    def get_data(
+        self, data: DataFrameFloat, ascending: bool, returns_limit: int
+    ) -> DataFrameFloat:
+        array: ArrayFloat = self.func(data.get_array(), returns_limit)
+        return DataFrameFloat(
+            data=array,
+            index=data.dates,
+            columns=data.get_names(),
+        ).sort_data(ascending=ascending)
+
 
 class StatsSeries:
     def __init__(
