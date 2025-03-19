@@ -5,10 +5,9 @@ def launch_app() -> None:
     oql.run()
     end: float = time.perf_counter()
     print(f"Backtest completed in {end - start:.2f} seconds.")
-    oql.plots.plot_histogram(
-        returns_df=oql.data["assets"], # type: ignore
-        stats_method=oql.stats.process_stats_distribution,
-        frequency=21,
+    oql.plots.plot_heatmap(
+        returns_df=oql.data["indics_clusters"], # type: ignore
+        stats_method=oql.stats.process_correlation_matrix,
     )
 
 
