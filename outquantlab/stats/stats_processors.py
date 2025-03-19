@@ -92,3 +92,17 @@ class StatsBars:
         return SeriesFloat(data=array, index=data.get_names()).sort_data(
             ascending=ascending
         )
+
+
+class StatsHeatMap:
+    def __init__(self, data: DataFrameFloat, func: AggregateMetric) -> None:
+        self.func: AggregateMetric = func
+        self.data: DataFrameFloat = self.get_data(data=data)
+        self.title: str = "Correlation Matrix"
+
+    def get_data(self, data: DataFrameFloat) -> DataFrameFloat:
+        array: ArrayFloat = self.func(data.get_array())
+        return DataFrameFloat(
+            data=array,
+            columns=data.get_names(),
+        )

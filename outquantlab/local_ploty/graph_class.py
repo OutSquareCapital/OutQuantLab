@@ -4,6 +4,7 @@ from outquantlab.local_ploty.ui_constants import Colors, FigureSetup, BASE_COLOR
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.colors as mcolors
 
+
 class Graph:
     def __init__(self, custom_hover: str | None, title: str, assets: list[str]) -> None:
         self.custom_hover: str | None = custom_hover
@@ -51,10 +52,24 @@ class Graph:
         for trace in self.figure.data:  # type: ignore
             trace.hovertemplate = self.custom_hover  # type: ignore
 
+
 def _get_color_map(assets: list[str]) -> dict[str, str]:
     n_colors: int = len(assets)
     colors: list[str] = _map_colors_to_columns(n_colors=n_colors)
     return dict(zip(assets, colors))
+
+
+def get_heatmap_colorscale(n_colors: int = 100):
+    colormap: LinearSegmentedColormap = _generate_colormap(n_colors=n_colors)
+
+    colors: list[tuple[float, float, float, float]] = [
+        colormap(i / (n_colors - 1)) for i in range(n_colors)
+    ]
+
+    return [
+        [i / (n_colors - 1), mcolors.to_hex(c=color)]
+        for i, color in enumerate(iterable=colors)
+    ]
 
 
 def _map_colors_to_columns(n_colors: int) -> list[str]:

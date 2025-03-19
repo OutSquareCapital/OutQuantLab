@@ -4,7 +4,7 @@ from typing import Generic, TypeVar
 import plotly.graph_objects as go  # type: ignore
 
 import outquantlab.metrics as mt
-from outquantlab.local_ploty.graph_class import Graph
+from outquantlab.local_ploty.graph_class import Graph, get_heatmap_colorscale
 from outquantlab.local_ploty.ui_constants import Colors, CustomHovers
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
@@ -139,9 +139,29 @@ class Table(BaseWidget[SeriesFloat]):
                         data.get_names(),
                         data.get_array(),
                     ],
-                    fill_color=[
-                        Colors.PLOT_UNIQUE
-                    ],
+                    fill_color=[Colors.PLOT_UNIQUE],
                 ),
             )
+        )
+
+
+class HeatMap(BaseWidget[DataFrameFloat]):
+    def __init__(self) -> None:
+        super().__init__(custom_hover=None)
+
+    def _setup_figure_type(self, graph: Graph, data: DataFrameFloat) -> None:
+        color_scale: list[list[float | str]]  = get_heatmap_colorscale()
+        graph.figure = go.Figure(
+            data=go.Heatmap(
+                z=data.get_array(),
+                x=data.columns,
+                y=data.columns,
+                showscale=False,
+                colorscale=color_scale,
+                hovertemplate=CustomHovers.HEATMAP.value,
+            )
+        )
+
+        graph.figure.update_layout(  # type: ignore
+            yaxis=dict(showgrid=False, autorange="reversed")
         )

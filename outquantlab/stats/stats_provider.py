@@ -4,11 +4,19 @@ from outquantlab.stats.stats_processors import (
     StatsBars,
     StatsOverall,
     StatsDistribution,
+    StatsHeatMap,
 )
 from outquantlab.typing_conventions import DataFrameFloat
 
 
 class StatsProvider:
+    @staticmethod
+    def process_correlation_matrix(returns_df: DataFrameFloat) -> StatsHeatMap:
+        return StatsHeatMap(
+            data=returns_df,
+            func=mt.get_filled_correlation_matrix,
+        )
+
     @staticmethod
     def process_stats_equity(returns_df: DataFrameFloat, length: int) -> StatsCurves:
         return StatsCurves(
