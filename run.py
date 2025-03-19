@@ -1,6 +1,3 @@
-# type: ignore
-
-
 def launch_app() -> None:
     print("running backtest...")
     start: float = time.perf_counter()
@@ -9,10 +6,10 @@ def launch_app() -> None:
     end: float = time.perf_counter()
     print(f"Backtest completed in {end - start:.2f} seconds.")
     oql.plots.plot_histogram(
-        returns_df=oql.data["assets"],
-        returns_limit=1,
-        stats_method=oql.stats.process_overall_returns,
-    ).show()
+        returns_df=oql.data["assets"], # type: ignore
+        stats_method=oql.stats.process_stats_distribution,
+        frequency=21,
+    )
 
 
 if __name__ == "__main__":
