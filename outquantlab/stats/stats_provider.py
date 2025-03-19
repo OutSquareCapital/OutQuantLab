@@ -1,12 +1,17 @@
 import outquantlab.metrics as mt
-from outquantlab.stats.stats_processors import StatsDF, StatsSeries, StatsOverall, StatsDistribution
+from outquantlab.stats.stats_processors import (
+    StatsCurves,
+    StatsBars,
+    StatsOverall,
+    StatsDistribution,
+)
 from outquantlab.typing_conventions import DataFrameFloat
 
 
 class StatsProvider:
     @staticmethod
-    def process_stats_equity(returns_df: DataFrameFloat, length: int) -> StatsDF:
-        return StatsDF(
+    def process_stats_equity(returns_df: DataFrameFloat, length: int) -> StatsCurves:
+        return StatsCurves(
             data=returns_df,
             func=mt.get_equity_curves,
             ascending=True,
@@ -14,8 +19,10 @@ class StatsProvider:
         )
 
     @staticmethod
-    def process_rolling_volatility(returns_df: DataFrameFloat, length: int) -> StatsDF:
-        return StatsDF(
+    def process_rolling_volatility(
+        returns_df: DataFrameFloat, length: int
+    ) -> StatsCurves:
+        return StatsCurves(
             data=returns_df,
             func=mt.get_rolling_volatility,
             ascending=False,
@@ -23,8 +30,10 @@ class StatsProvider:
         )
 
     @staticmethod
-    def process_rolling_drawdown(returns_df: DataFrameFloat, length: int) -> StatsDF:
-        return StatsDF(
+    def process_rolling_drawdown(
+        returns_df: DataFrameFloat, length: int
+    ) -> StatsCurves:
+        return StatsCurves(
             data=returns_df,
             func=mt.get_rolling_drawdown,
             ascending=False,
@@ -34,8 +43,8 @@ class StatsProvider:
     @staticmethod
     def process_rolling_sharpe_ratio(
         returns_df: DataFrameFloat, length: int
-    ) -> StatsDF:
-        return StatsDF(
+    ) -> StatsCurves:
+        return StatsCurves(
             data=returns_df,
             func=mt.rolling_sharpe_ratio,
             ascending=True,
@@ -45,8 +54,8 @@ class StatsProvider:
     @staticmethod
     def process_rolling_smoothed_skewness(
         returns_df: DataFrameFloat, length: int
-    ) -> StatsDF:
-        return StatsDF(
+    ) -> StatsCurves:
+        return StatsCurves(
             data=returns_df,
             func=mt.rolling_skewness,
             ascending=True,
@@ -54,70 +63,58 @@ class StatsProvider:
         )
 
     @staticmethod
-    def process_stats_distribution_violin(
-        returns_df: DataFrameFloat, returns_limit: int
+    def process_stats_distribution(
+        returns_df: DataFrameFloat, frequency: int
     ) -> StatsDistribution:
         return StatsDistribution(
             data=returns_df,
-            func=mt.get_returns_distribution,
             ascending=True,
-            returns_limit=returns_limit,
+            frequency=frequency,
         )
 
     @staticmethod
-    def process_stats_distribution_histogram(
-        returns_df: DataFrameFloat, returns_limit: int
-    ) -> StatsDistribution:
-        return StatsDistribution(
-            data=returns_df,
-            func=mt.get_returns_distribution,
-            ascending=True,
-            returns_limit=returns_limit,
-        )
-
-    @staticmethod
-    def process_overall_returns(returns_df: DataFrameFloat) -> StatsSeries:
-        return StatsSeries(
+    def process_overall_returns(returns_df: DataFrameFloat) -> StatsBars:
+        return StatsBars(
             data=returns_df,
             func=mt.get_total_returns,
             ascending=True,
         )
 
     @staticmethod
-    def process_overall_sharpe_ratio(returns_df: DataFrameFloat) -> StatsSeries:
-        return StatsSeries(
+    def process_overall_sharpe_ratio(returns_df: DataFrameFloat) -> StatsBars:
+        return StatsBars(
             data=returns_df,
             func=mt.get_overall_sharpe_ratio,
             ascending=True,
         )
 
     @staticmethod
-    def process_overall_volatility(returns_df: DataFrameFloat) -> StatsSeries:
-        return StatsSeries(
+    def process_overall_volatility(returns_df: DataFrameFloat) -> StatsBars:
+        return StatsBars(
             data=returns_df,
             func=mt.get_overall_volatility_annualized,
             ascending=False,
         )
 
     @staticmethod
-    def process_overall_average_drawdown(returns_df: DataFrameFloat) -> StatsSeries:
-        return StatsSeries(
+    def process_overall_average_drawdown(returns_df: DataFrameFloat) -> StatsBars:
+        return StatsBars(
             data=returns_df,
             func=mt.get_overall_average_drawdown,
             ascending=False,
         )
 
     @staticmethod
-    def process_overall_average_correlation(returns_df: DataFrameFloat) -> StatsSeries:
-        return StatsSeries(
+    def process_overall_average_correlation(returns_df: DataFrameFloat) -> StatsBars:
+        return StatsBars(
             data=returns_df,
             func=mt.get_overall_average_correlation,
             ascending=False,
         )
 
     @staticmethod
-    def process_overall_monthly_skew(returns_df: DataFrameFloat) -> StatsSeries:
-        return StatsSeries(
+    def process_overall_monthly_skew(returns_df: DataFrameFloat) -> StatsBars:
+        return StatsBars(
             data=returns_df,
             func=mt.get_overall_monthly_skewness,
             ascending=True,

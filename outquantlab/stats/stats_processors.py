@@ -3,9 +3,10 @@ from typing import TypeAlias
 import outquantlab.metrics as mt
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
-RollingMetricFunc: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
-OverallMetricFunc: TypeAlias = Callable[[ArrayFloat], ArrayFloat]
-
+CurveMetric: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
+BarsMetric: TypeAlias = Callable[[ArrayFloat], ArrayFloat]
+DistributionMetricFunc: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
+OverallMetrics: TypeAlias = list[BarsMetric]
 
 def _format_name(name: str) -> str:
     return name.replace("get", "").replace("_", " ").title()
@@ -13,7 +14,7 @@ def _format_name(name: str) -> str:
 
 class StatsOverall:
     def __init__(self, data: DataFrameFloat) -> None:
-        self.metrics_func: list[OverallMetricFunc] = [
+        self.metrics_func: OverallMetrics = [
             mt.get_total_returns,
             mt.get_overall_sharpe_ratio,
             mt.get_max_drawdown,
@@ -32,19 +33,19 @@ class StatsOverall:
         return SeriesFloat.from_float_list(data=results_list, index=names)
 
 
-class StatsDF:
+class StatsCurves:
     def __init__(
         self,
         data: DataFrameFloat,
-        func: RollingMetricFunc,
+        func: CurveMetric,
         ascending: bool,
         length: int,
     ) -> None:
-        self.func: RollingMetricFunc = func
+        self.func: CurveMetric = func
         self.data: DataFrameFloat = self.get_data(
             data=data, ascending=ascending, length=length
         )
-        self.title: str = _format_name(name=func.__name__)
+        self.title: str = _format_name(name=self.func.__name__)
 
     def get_data(
         self, data: DataFrameFloat, ascending: bool, length: int
@@ -56,41 +57,36 @@ class StatsDF:
             columns=data.get_names(),
         ).sort_data(ascending=ascending)
 
+
 class StatsDistribution:
     def __init__(
         self,
         data: DataFrameFloat,
-        func: RollingMetricFunc,
         ascending: bool,
-        returns_limit: int,
+        frequency: int,
     ) -> None:
-        self.func: RollingMetricFunc = func
-        self.data: DataFrameFloat = self.get_data(
-            data=data, ascending=ascending, returns_limit=returns_limit
-        )
-        self.title: str = _format_name(name=func.__name__)
+        self.func: DistributionMetricFunc = mt.get_returns_distribution
+        self.data: DataFrameFloat = self.get_data(data=data, ascending=ascending, frequency=frequency)
+        self.title: str = _format_name(name=self.func.__name__)
 
-    def get_data(
-        self, data: DataFrameFloat, ascending: bool, returns_limit: int
-    ) -> DataFrameFloat:
-        array: ArrayFloat = self.func(data.get_array(), returns_limit)
+    def get_data(self, data: DataFrameFloat, ascending: bool, frequency: int) -> DataFrameFloat:
+        array: ArrayFloat = self.func(data.get_array(), frequency)
         return DataFrameFloat(
             data=array,
-            index=data.dates,
             columns=data.get_names(),
         ).sort_data(ascending=ascending)
 
 
-class StatsSeries:
+class StatsBars:
     def __init__(
         self,
         data: DataFrameFloat,
-        func: OverallMetricFunc,
+        func: BarsMetric,
         ascending: bool,
     ) -> None:
-        self.func: OverallMetricFunc = func
+        self.func: BarsMetric = func
         self.data: SeriesFloat = self.get_data(data=data, ascending=ascending)
-        self.title: str = _format_name(name=func.__name__)
+        self.title: str = _format_name(name=self.func.__name__)
 
     def get_data(self, data: DataFrameFloat, ascending: bool) -> SeriesFloat:
         array: ArrayFloat = self.func(data.get_array())
