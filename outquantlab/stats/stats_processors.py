@@ -2,10 +2,10 @@ from collections.abc import Callable
 from typing import TypeAlias
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
-CurveMetric: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
-BarsMetric: TypeAlias = Callable[[ArrayFloat], ArrayFloat]
-DistributionMetricFunc: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
-OverallMetrics: TypeAlias = list[BarsMetric]
+ParametrableMetric: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
+AggregateMetric: TypeAlias = Callable[[ArrayFloat], ArrayFloat]
+OverallMetrics: TypeAlias = list[AggregateMetric]
+
 
 def _format_name(name: str) -> str:
     return name.replace("get", "").replace("_", " ").title()
@@ -31,11 +31,11 @@ class StatsCurves:
     def __init__(
         self,
         data: DataFrameFloat,
-        func: CurveMetric,
+        func: ParametrableMetric,
         ascending: bool,
         length: int,
     ) -> None:
-        self.func: CurveMetric = func
+        self.func: ParametrableMetric = func
         self.data: DataFrameFloat = self.get_data(
             data=data, ascending=ascending, length=length
         )
@@ -56,15 +56,19 @@ class StatsDistribution:
     def __init__(
         self,
         data: DataFrameFloat,
-        func: DistributionMetricFunc,
+        func: ParametrableMetric,
         ascending: bool,
         frequency: int,
     ) -> None:
-        self.func: DistributionMetricFunc = func
-        self.data: DataFrameFloat = self.get_data(data=data, ascending=ascending, frequency=frequency)
+        self.func: ParametrableMetric = func
+        self.data: DataFrameFloat = self.get_data(
+            data=data, ascending=ascending, frequency=frequency
+        )
         self.title: str = _format_name(name=self.func.__name__)
 
-    def get_data(self, data: DataFrameFloat, ascending: bool, frequency: int) -> DataFrameFloat:
+    def get_data(
+        self, data: DataFrameFloat, ascending: bool, frequency: int
+    ) -> DataFrameFloat:
         array: ArrayFloat = self.func(data.get_array(), frequency)
         return DataFrameFloat(
             data=array,
@@ -76,10 +80,10 @@ class StatsBars:
     def __init__(
         self,
         data: DataFrameFloat,
-        func: BarsMetric,
+        func: AggregateMetric,
         ascending: bool,
     ) -> None:
-        self.func: BarsMetric = func
+        self.func: AggregateMetric = func
         self.data: SeriesFloat = self.get_data(data=data, ascending=ascending)
         self.title: str = _format_name(name=self.func.__name__)
 
