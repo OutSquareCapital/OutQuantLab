@@ -130,7 +130,7 @@ def remove_skewness_contribution(
 
 
 @njit
-def rolling_skewness(array: ArrayFloat, length: int, min_length: int = 4) -> ArrayFloat:
+def get_rolling_skewness(array: ArrayFloat, length: int, min_length: int = 4) -> ArrayFloat:
     num_rows, num_cols = array.shape
     output: ArrayFloat = empty((num_rows, num_cols), dtype=Float32)
     output.fill(nan)

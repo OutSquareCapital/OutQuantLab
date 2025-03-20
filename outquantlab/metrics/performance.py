@@ -7,7 +7,7 @@ from outquantlab.metrics.aggregation import (
     get_overall_min,
 )
 from outquantlab.metrics.volatility import get_rolling_volatility, overall_volatility
-from outquantlab.metrics.distribution import rolling_skewness
+from outquantlab.metrics.distribution import get_rolling_skewness
 from numpy import log, nan, cumprod, arange, append, empty_like, isnan
 
 
@@ -96,7 +96,7 @@ def expanding_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
     return expanding_mean / expanding_std * Standardization.ANNUALIZATION.value
 
 
-def rolling_sharpe_ratio(returns_array: ArrayFloat, length: int) -> ArrayFloat:
+def get_rolling_sharpe_ratio(returns_array: ArrayFloat, length: int) -> ArrayFloat:
     mean: ArrayFloat = get_rolling_mean(
         array=returns_array, length=length, min_length=length
     )
@@ -121,7 +121,7 @@ def get_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:
     )
     monthly_returns: ArrayFloat = pct_returns_np(prices_array=monthly_prices)
     length_to_use: int = monthly_returns.shape[0]
-    expanding_skew: ArrayFloat = rolling_skewness(
+    expanding_skew: ArrayFloat = get_rolling_skewness(
         array=monthly_returns, length=length_to_use, min_length=4
     )
     return get_overall_mean(array=expanding_skew)

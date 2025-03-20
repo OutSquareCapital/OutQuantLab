@@ -1,4 +1,4 @@
-from outquantlab.stats.stats_processors import StatsCurves, StatsOverall, StatsBars, StatsDistribution, StatsHeatMap
+from outquantlab.stats.stats_processors import StatsCurves, StatsOverall, StatsBars, StatsHistograms, StatsHeatMap
 from outquantlab.stats.stats_provider import StatsProvider
 
 __all__: list[str] = [
@@ -6,6 +6,6 @@ __all__: list[str] = [
     "StatsOverall",
     "StatsBars",
     "StatsProvider",
-    "StatsDistribution",
+    "StatsHistograms",
     "StatsHeatMap",
 ]

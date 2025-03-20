@@ -184,7 +184,7 @@ def smoothed_skewness(
     smoothed_array: ArrayFloat = mt.get_rolling_mean(
         array=log_returns_array, length=len_smooth, min_length=len_smooth
     )
-    return mt.rolling_skewness(
+    return mt.get_rolling_skewness(
         array=smoothed_array, length=len_skew, min_length=len_skew
     )
 

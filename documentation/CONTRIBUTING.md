@@ -114,6 +114,7 @@ from module import public_func
 ### 5. if / else statements
 
 Conditionnal statements must be used sparsely. Dictionary are preferred when handling different behavioral possiblities:
+
 ```python
 _HANDLER_REGISTRY = {
     Extension.JSON.value: JSONHandler,
