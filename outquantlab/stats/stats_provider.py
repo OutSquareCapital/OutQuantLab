@@ -6,8 +6,26 @@ from outquantlab.stats.stats_processors import (
     StatsDistribution,
     StatsHeatMap,
 )
-from outquantlab.typing_conventions import DataFrameFloat
+from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat
+from typing import NamedTuple
 
+# TODO: baisser responsibility des stats processors. stats provider s'occupera de renvoyer des FormattedDF, FormattedSeries. ceux ci seront directement exploités par la plot class ainsi que les Widgets, 
+# et fastAPI(donc potentiellement methode avec tout le Serializing).
+# dans l'ideal je lie mieux chaque Widget avec son processor, et chaque metric avec son processor.
+# en résumé: data brut -> stats_provider((metric -> processor)) -> data formatted
+# si web -> serializer -> data formatted serialized
+# si local ploty -> plot_class((widget) -> graph)) -> show
+# un processor a une liste de metrics, un widget a un processor et génère un widget
+
+
+class FormattedDF(NamedTuple):
+    data: DataFrameFloat
+    title: str
+
+
+class FormattedSeries(NamedTuple):
+    data: SeriesFloat
+    title: str
 
 class StatsProvider:
     @staticmethod
