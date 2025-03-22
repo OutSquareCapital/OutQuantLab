@@ -19,7 +19,7 @@ class Curves(Graph[DataFrameFloat]):
                     mode="lines",
                     name=column,
                     line=dict(width=2, color=color_map[column]),
-                    hovertemplate=CustomHovers.Y.value,
+                    hovertemplate=CustomHovers.VERTICAL_DATA.value,
                 )
             )
 
@@ -38,7 +38,7 @@ class Violins(Graph[DataFrameFloat]):
                     box_line_color=Colors.WHITE,
                     hoveron="violins",
                     hoverinfo="y",
-                    hovertemplate=CustomHovers.Y.value,
+                    hovertemplate=CustomHovers.VERTICAL_DATA.value,
                 )
             )
 
@@ -65,7 +65,7 @@ class Histogram(Graph[DataFrameFloat]):
                     x=formatted_data[column],
                     name=column,
                     marker=_get_marker_config(color=color_map[column]),
-                    hovertemplate=CustomHovers.X.value,
+                    hovertemplate=CustomHovers.HORIZONTAL_DATA.value,
                 )
             )
         self.figure.update_layout(  # type: ignore
@@ -86,7 +86,7 @@ class Bars(Graph[SeriesFloat]):
                     y=[value],
                     name=label,
                     marker=_get_marker_config(color=color_map[label]),
-                    hovertemplate=CustomHovers.Y.value,
+                    hovertemplate=CustomHovers.VERTICAL_DATA.value,
                 )
             )
 
