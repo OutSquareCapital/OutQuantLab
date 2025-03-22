@@ -4,70 +4,53 @@ from outquantlab.local_ploty.widgets import (
     Histogram,
     Table,
     Violins,
-    HeatMap
+    HeatMap,
+)
+from outquantlab.stats import (
+    CurvesMetric,
+    HistogramMetric,
+    HeatMapMetric,
+    BarsMetric,
+    OverallMetrics,
 )
 from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat
-from collections.abc import Callable
-from typing import TypeAlias, Protocol
-
-class DFProcessor(Protocol):
-    data: DataFrameFloat
-    title: str
-
-class SeriesProcessor(Protocol):
-    data: SeriesFloat
-    title: str
-
-ParametrableDF: TypeAlias = Callable[[DataFrameFloat, int], DFProcessor]
-AggregateSeries: TypeAlias = Callable[[DataFrameFloat], SeriesProcessor]
-AggregateDF: TypeAlias = Callable[[DataFrameFloat], DFProcessor]
 
 
 class Plots:
-    def __init__(self) -> None:
-        self.curves = Curves()
-        self.violins = Violins()
-        self.table = Table()
-        self.bars = Bars()
-        self.histogram = Histogram()
-        self.heatmap = HeatMap()
-
     def plot_curves(
-        self, returns_df: DataFrameFloat, length: int, stats_method: ParametrableDF
+        self, returns_df: DataFrameFloat, length: int, metric: CurvesMetric
     ) -> None:
-        processor: DFProcessor = stats_method(returns_df, length)
-        return self.curves.get_fig(data=processor.data, title=processor.title).show()
-
-    def plot_bars(
-        self, returns_df: DataFrameFloat, stats_method: AggregateSeries
-    ) -> None:
-        processor: SeriesProcessor = stats_method(returns_df)
-        return self.bars.get_fig(data=processor.data, title=processor.title).show()
-
-    def plot_table(
-        self, returns_df: DataFrameFloat, stats_method: AggregateSeries
-    ) -> None:
-        processor: SeriesProcessor = stats_method(returns_df)
-        return self.table.get_fig(data=processor.data, title=processor.title).show()
-
-    def plot_violins(
-        self,
-        returns_df: DataFrameFloat,
-        stats_method: ParametrableDF,
-        frequency: int,
-    ) -> None:
-        processor: DFProcessor = stats_method(returns_df, frequency)
-        return self.violins.get_fig(data=processor.data, title=processor.title).show()
+        formatted_data: DataFrameFloat = metric.get_data(
+            returns_df=returns_df, length=length
+        )
+        Curves(formatted_data=formatted_data, title=metric.title)
 
     def plot_histogram(
-        self,
-        returns_df: DataFrameFloat,
-        stats_method: ParametrableDF,
-        frequency: int,
+        self, returns_df: DataFrameFloat, frequency: int, metric: HistogramMetric
     ) -> None:
-        processor: DFProcessor = stats_method(returns_df, frequency)
-        return self.histogram.get_fig(data=processor.data, title=processor.title).show()
+        formatted_data: DataFrameFloat = metric.get_data(
+            returns_df=returns_df, frequency=frequency
+        )
+        Histogram(formatted_data=formatted_data, title=metric.title)
 
-    def plot_heatmap(self, returns_df: DataFrameFloat, stats_method: AggregateDF) -> None:
-        processor: DFProcessor = stats_method(returns_df)
-        return self.heatmap.get_fig(data=processor.data, title=processor.title).show()
+    def plot_violins(
+        self, returns_df: DataFrameFloat, frequency: int, metric: HistogramMetric
+    ) -> None:
+        formatted_data: DataFrameFloat = metric.get_data(
+            returns_df=returns_df, frequency=frequency
+        )
+        Violins(formatted_data=formatted_data, title=metric.title)
+
+    def plot_bars(self, returns_df: DataFrameFloat, metric: BarsMetric) -> None:
+        formatted_data: SeriesFloat = metric.get_data(returns_df=returns_df)
+        Bars(formatted_data=formatted_data, title=metric.title)
+
+    def plot_heatmap(self, returns_df: DataFrameFloat, metric: HeatMapMetric) -> None:
+        formatted_data: DataFrameFloat = metric.get_data(returns_df=returns_df)
+        HeatMap(formatted_data=formatted_data, title=metric.title)
+
+    def plot_overall_metrics(
+        self, returns_df: DataFrameFloat, metric: OverallMetrics
+    ) -> None:
+        formatted_data: SeriesFloat = metric.get_data(returns_df=returns_df)
+        Table(formatted_data=formatted_data, title=metric.title)
