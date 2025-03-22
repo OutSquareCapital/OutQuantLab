@@ -11,7 +11,7 @@ from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFlo
 class Curves(Graph[DataFrameFloat]):
     def _setup_figure_type(self, formatted_data: DataFrameFloat) -> None:
         color_map: dict[str, str] = _get_color_map(assets=formatted_data.get_names())
-        for column in formatted_data.get_names():
+        for column in formatted_data.columns:
             self.figure.add_trace(  # type: ignore
                 trace=go.Scatter(
                     x=formatted_data.dates,
@@ -114,8 +114,8 @@ class Table(Graph[SeriesFloat]):
 class HeatMap(Graph[DataFrameFloat]):
     def _setup_figure_type(self, formatted_data: DataFrameFloat) -> None:
         color_scale: list[list[float | str]] = get_heatmap_colorscale()
-        self.figure = go.Figure(
-            data=go.Heatmap(
+        self.figure.add_trace( # type: ignore
+            trace=go.Heatmap(
                 z=formatted_data.get_array(),
                 x=formatted_data.columns,
                 y=formatted_data.columns,

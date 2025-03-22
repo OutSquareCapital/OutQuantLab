@@ -5,6 +5,9 @@ def launch_app() -> None:
     oql.run()
     end: float = time.perf_counter()
     print(f"Backtest completed in {end - start:.2f} seconds.")
+    oql.plots.plot_curves(
+        returns_df=oql.data["portfolio"], length=2500, metric=oql.stats.equity_curves # type: ignore
+    )
 
 
 if __name__ == "__main__":
