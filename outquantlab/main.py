@@ -6,7 +6,7 @@ from outquantlab.stats import StatsProvider
 
 
 class OutQuantLab:
-    def __init__(self, local: bool=True) -> None:
+    def __init__(self, local: bool = True) -> None:
         self._dbp = DataBaseProvider()
         self.app_config: AppConfig = self._dbp.get_app_config()
         self.stats = StatsProvider()
@@ -23,16 +23,19 @@ class OutQuantLab:
         )
 
     def save_results(self) -> None:
-        portfolio_curves = self.stats.process_stats_equity(
-            returns_df=self.data["portfolio"],  # type: ignore
-            length=2500,
+        portfolio_curves: dict[str, dict[str, list[str]]] = (
+            self.stats.equity_curves.get_data(
+                returns_df=self.data["portfolio"],  # type: ignore
+                length=2500,
+            ).convert_to_json(title=self.stats.equity_curves.title)
         )
-        assets_sharpes = self.stats.process_overall_sharpe_ratio(
-            returns_df=self.data["assets"]  # type: ignore
+        assets_sharpes: dict[str, dict[str, list[str]]] = (
+            self.stats.overall_sharpe.get_data(
+                returns_df=self.data["assets"]  # type: ignore
+            ).convert_to_json(title=self.stats.overall_sharpe.title)
         )
-        self._dbp.save_backtest_results(
-            portfolio_curves=portfolio_curves.data, assets_sharpes=assets_sharpes.data
-        )
+
+        self._dbp.save_backtest_results(results=[portfolio_curves, assets_sharpes])
 
     def save_config(self) -> None:
         self._dbp.save_app_config(config=self.app_config)

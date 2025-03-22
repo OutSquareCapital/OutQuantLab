@@ -49,14 +49,14 @@ class SeriesFloat(Series):  # type: ignore
         combined_array: ArrayFloat = concatenate([r.reshape(1) for r in data])
         return cls(data=combined_array, index=index)
 
-    def convert_to_json(self) -> dict[str, list[str]]:
+    def convert_to_json(self, title: str) -> dict[str, dict[str, list[str]]]:
         data: list[str] = self.values.tolist() # type: ignore
         index: list[str] = [str(idx) for idx in self.index] # type: ignore
         result_dict: dict[str, list[str]] = {
             "data": data,
             "index": index
         }
-        return result_dict
+        return {title: result_dict}
 
 class DataFrameFloat(DataFrame):
     """
@@ -111,7 +111,7 @@ class DataFrameFloat(DataFrame):
             data=sorted_data, columns=sorted_columns, index=self.dates
         )
 
-    def convert_to_json(self) -> dict[str, list[str]]:
+    def convert_to_json(self, title: str) -> dict[str, dict[str, list[str]]]:
         column_data: list[str] = []
         for col_name in self.columns:
             values: list[str] = self[col_name].values.tolist()  # type: ignore
@@ -122,4 +122,4 @@ class DataFrameFloat(DataFrame):
             "index": [str(idx) for idx in self.dates],
             "columns": self.columns.tolist(),
         }
-        return result_dict
+        return {title: result_dict}

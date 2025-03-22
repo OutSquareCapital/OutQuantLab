@@ -5,7 +5,7 @@ from outquantlab.database.data_file import DataFile
 from outquantlab.database.data_queries import DataQueries
 from outquantlab.database.data_refresher import get_yf_data
 from outquantlab.database.data_structure import FileNames
-from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat
+from outquantlab.typing_conventions import DataFrameFloat
 
 
 class DataBaseProvider:
@@ -70,11 +70,8 @@ class DataBaseProvider:
         self.dbq.select(file_name=FileNames.RETURNS_DATA).save(data=returns_data)
         self.dbq.select(file_name=FileNames.ASSETS_NAMES).save(data=assets_names)
 
-    def save_backtest_results(self, portfolio_curves: DataFrameFloat, assets_sharpes: SeriesFloat) -> None:
-        portfolio_dict: dict[str, list[str]] = portfolio_curves.convert_to_json()
-        assets_dict: dict[str, list[str]] = assets_sharpes.convert_to_json()
-        self.dbq.select(file_name=FileNames.PORTFOLIO_CURVES).save(data=portfolio_dict)
-        self.dbq.select(file_name=FileNames.ASSETS_SHARPES).save(data=assets_dict)
+    def save_backtest_results(self, results: list[dict[str, dict[str, list[str]]]]) -> None:
+        self.dbq.select(file_name=FileNames.BACKTEST_RESULTS).save(data=results)
 
 
 def _instanciate_assets_config(
