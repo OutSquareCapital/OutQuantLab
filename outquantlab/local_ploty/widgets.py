@@ -1,83 +1,54 @@
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
-
+import matplotlib.colors as mcolors
 import plotly.graph_objects as go  # type: ignore
+from matplotlib.colors import LinearSegmentedColormap
 
 import outquantlab.metrics as mt
-from outquantlab.local_ploty.graph_class import Graph, get_heatmap_colorscale
-from outquantlab.local_ploty.ui_constants import Colors, CustomHovers
+from outquantlab.local_ploty.graph_class import Graph
+from outquantlab.local_ploty.ui_constants import BASE_COLORS, Colors, CustomHovers
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
-T = TypeVar("T", bound=DataFrameFloat | SeriesFloat)
 
-
-class BaseWidget(ABC, Generic[T]):
-    def __init__(self, custom_hover: str | None) -> None:
-        self.custom_hover: str | None = custom_hover
-
-    @abstractmethod
-    def _setup_figure_type(self, graph: Graph, data: T) -> None:
-        pass
-
-    def get_fig(self, data: T, title: str) -> Graph:
-        graph = Graph(
-            custom_hover=self.custom_hover,
-            title=title,
-            assets=data.get_names(),
-        )
-        self._setup_figure_type(graph=graph, data=data)
-        graph.setup_style()
-        return graph
-
-    def _get_marker_config(
-        self, color: str
-    ) -> dict[str, str | dict[str, Colors | int]]:
-        return dict(color=color, line=dict(color=Colors.WHITE, width=1))
-
-
-class Curves(BaseWidget[DataFrameFloat]):
-    def __init__(self) -> None:
-        super().__init__(custom_hover=CustomHovers.Y.value)
-
-    def _setup_figure_type(self, graph: Graph, data: DataFrameFloat) -> None:
-        for column in data.get_names():
-            graph.figure.add_trace(  # type: ignore
+class Curves(Graph[DataFrameFloat]):
+    def _setup_figure_type(self, formatted_data: DataFrameFloat) -> None:
+        color_map: dict[str, str] = _get_color_map(assets=formatted_data.get_names())
+        for column in formatted_data.get_names():
+            self.figure.add_trace(  # type: ignore
                 trace=go.Scatter(
-                    x=data.dates,
-                    y=data[column],
+                    x=formatted_data.dates,
+                    y=formatted_data[column],
                     mode="lines",
                     name=column,
-                    line=dict(width=2, color=graph.color_map[column]),
+                    line=dict(width=2, color=color_map[column]),
+                    hovertemplate=CustomHovers.Y.value,
                 )
             )
 
 
-class Violins(BaseWidget[DataFrameFloat]):
-    def __init__(self) -> None:
-        super().__init__(custom_hover=CustomHovers.Y.value)
-
-    def _setup_figure_type(self, graph: Graph, data: DataFrameFloat) -> None:
-        for column in data.columns:
-            graph.figure.add_trace(  # type: ignore
+class Violins(Graph[DataFrameFloat]):
+    def _setup_figure_type(self, formatted_data: DataFrameFloat) -> None:
+        color_map: dict[str, str] = _get_color_map(assets=formatted_data.get_names())
+        for column in formatted_data.columns:
+            self.figure.add_trace(  # type: ignore
                 trace=go.Violin(
-                    y=data[column],
+                    y=formatted_data[column],
                     name=column,
                     box_visible=True,
                     points=False,
-                    marker=self._get_marker_config(color=graph.color_map[column]),
+                    marker=_get_marker_config(color=color_map[column]),
                     box_line_color=Colors.WHITE,
                     hoveron="violins",
                     hoverinfo="y",
+                    hovertemplate=CustomHovers.Y.value,
                 )
             )
 
-        min_by_column: ArrayFloat = mt.get_overall_min(array=data.get_array())
+        min_by_column: ArrayFloat = mt.get_overall_min(array=formatted_data.get_array())
         y_min: ArrayFloat = mt.get_overall_min(array=min_by_column)
 
-        max_by_column: ArrayFloat = mt.get_overall_max(array=data.get_array())
+        max_by_column: ArrayFloat = mt.get_overall_max(array=formatted_data.get_array())
         y_max: ArrayFloat = mt.get_overall_max(array=max_by_column)
 
-        graph.figure.update_layout(  # type: ignore
+        self.figure.update_layout(  # type: ignore
             yaxis=dict(range=[y_min, y_max], showgrid=False),
             xaxis=dict(
                 showticklabels=False,
@@ -85,59 +56,54 @@ class Violins(BaseWidget[DataFrameFloat]):
         )
 
 
-class Histogram(BaseWidget[DataFrameFloat]):
-    def __init__(self) -> None:
-        super().__init__(custom_hover=CustomHovers.X.value)
-
-    def _setup_figure_type(self, graph: Graph, data: DataFrameFloat) -> None:
-        for column in data.columns:
-            graph.figure.add_trace(  # type: ignore
+class Histogram(Graph[DataFrameFloat]):
+    def _setup_figure_type(self, formatted_data: DataFrameFloat) -> None:
+        color_map: dict[str, str] = _get_color_map(assets=formatted_data.get_names())
+        for column in formatted_data.columns:
+            self.figure.add_trace(  # type: ignore
                 trace=go.Histogram(
-                    x=data[column],
+                    x=formatted_data[column],
                     name=column,
-                    marker=self._get_marker_config(color=graph.color_map[column]),
+                    marker=_get_marker_config(color=color_map[column]),
+                    hovertemplate=CustomHovers.X.value,
                 )
             )
-        graph.figure.update_layout(  # type: ignore
+        self.figure.update_layout(  # type: ignore
             barmode="overlay"
         )
 
 
-class Bars(BaseWidget[SeriesFloat]):
-    def __init__(self) -> None:
-        super().__init__(custom_hover=CustomHovers.Y.value)
-
-    def _setup_figure_type(self, graph: Graph, data: SeriesFloat) -> None:
+class Bars(Graph[SeriesFloat]):
+    def _setup_figure_type(self, formatted_data: SeriesFloat) -> None:
+        color_map: dict[str, str] = _get_color_map(assets=formatted_data.get_names())
         for label, value in zip(
-            data.get_names(),
-            data.get_array(),
+            formatted_data.get_names(),
+            formatted_data.get_array(),
         ):
-            graph.figure.add_trace(  # type: ignore
+            self.figure.add_trace(  # type: ignore
                 trace=go.Bar(
                     x=[label],
                     y=[value],
                     name=label,
-                    marker=self._get_marker_config(color=graph.color_map[label]),
+                    marker=_get_marker_config(color=color_map[label]),
+                    hovertemplate=CustomHovers.Y.value,
                 )
             )
 
-        graph.figure.update_layout(  # type: ignore
+        self.figure.update_layout(  # type: ignore
             xaxis=dict(showticklabels=False)
         )
 
 
-class Table(BaseWidget[SeriesFloat]):
-    def __init__(self) -> None:
-        super().__init__(custom_hover=None)
-
-    def _setup_figure_type(self, graph: Graph, data: SeriesFloat) -> None:
-        graph.figure.add_trace(  # type: ignore
+class Table(Graph[SeriesFloat]):
+    def _setup_figure_type(self, formatted_data: SeriesFloat) -> None:
+        self.figure.add_trace(  # type: ignore
             trace=go.Table(
                 header=dict(values=["Metric", "Value"], fill_color=Colors.BLACK),
                 cells=dict(
                     values=[
-                        data.get_names(),
-                        data.get_array(),
+                        formatted_data.get_names(),
+                        formatted_data.get_array(),
                     ],
                     fill_color=[Colors.PLOT_UNIQUE],
                 ),
@@ -145,23 +111,63 @@ class Table(BaseWidget[SeriesFloat]):
         )
 
 
-class HeatMap(BaseWidget[DataFrameFloat]):
-    def __init__(self) -> None:
-        super().__init__(custom_hover=None)
-
-    def _setup_figure_type(self, graph: Graph, data: DataFrameFloat) -> None:
-        color_scale: list[list[float | str]]  = get_heatmap_colorscale()
-        graph.figure = go.Figure(
+class HeatMap(Graph[DataFrameFloat]):
+    def _setup_figure_type(self, formatted_data: DataFrameFloat) -> None:
+        color_scale: list[list[float | str]] = get_heatmap_colorscale()
+        self.figure = go.Figure(
             data=go.Heatmap(
-                z=data.get_array(),
-                x=data.columns,
-                y=data.columns,
+                z=formatted_data.get_array(),
+                x=formatted_data.columns,
+                y=formatted_data.columns,
                 showscale=False,
                 colorscale=color_scale,
                 hovertemplate=CustomHovers.HEATMAP.value,
             )
         )
 
-        graph.figure.update_layout(  # type: ignore
+        self.figure.update_layout(  # type: ignore
             yaxis=dict(showgrid=False, autorange="reversed")
+        )
+
+
+def _get_marker_config(color: str) -> dict[str, str | dict[str, Colors | int]]:
+    return dict(color=color, line=dict(color=Colors.WHITE, width=1))
+
+
+def _get_color_map(assets: list[str]) -> dict[str, str]:
+    n_colors: int = len(assets)
+    colors: list[str] = _map_colors_to_columns(n_colors=n_colors)
+    return dict(zip(assets, colors))
+
+
+def get_heatmap_colorscale(n_colors: int = 100):
+    colormap: LinearSegmentedColormap = _generate_colormap(n_colors=n_colors)
+
+    colors: list[tuple[float, float, float, float]] = [
+        colormap(i / (n_colors - 1)) for i in range(n_colors)
+    ]
+
+    return [
+        [i / (n_colors - 1), mcolors.to_hex(c=color)]
+        for i, color in enumerate(iterable=colors)
+    ]
+
+
+def _map_colors_to_columns(n_colors: int) -> list[str]:
+    if n_colors == 1:
+        return [mcolors.to_hex(Colors.PLOT_UNIQUE.value)]
+    cmap: LinearSegmentedColormap = _generate_colormap(n_colors=n_colors)
+    return [mcolors.to_hex(cmap(i / (n_colors - 1))) for i in range(n_colors)]
+
+
+def _generate_colormap(n_colors: int) -> LinearSegmentedColormap:
+    cmap_name = "custom_colormap"
+
+    if n_colors <= len(BASE_COLORS):
+        return LinearSegmentedColormap.from_list(
+            name=cmap_name, colors=BASE_COLORS[:n_colors], N=n_colors
+        )
+    else:
+        return LinearSegmentedColormap.from_list(
+            name=cmap_name, colors=BASE_COLORS, N=n_colors
         )

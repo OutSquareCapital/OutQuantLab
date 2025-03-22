@@ -1,33 +1,32 @@
 import plotly.graph_objects as go  # type: ignore
 
-from outquantlab.local_ploty.ui_constants import Colors, FigureSetup, BASE_COLORS
-from matplotlib.colors import LinearSegmentedColormap
-import matplotlib.colors as mcolors
+from outquantlab.local_ploty.ui_constants import Colors, FigureSetup
+from abc import ABC, abstractmethod
+from typing import Generic, TypeVar
+from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat
 
+T = TypeVar("T", bound=DataFrameFloat | SeriesFloat)
 
-class Graph:
-    def __init__(self, custom_hover: str | None, title: str, assets: list[str]) -> None:
-        self.custom_hover: str | None = custom_hover
-        self.title: str = title
-        self.color_map: dict[str, str] = _get_color_map(assets=assets)
+class Graph(ABC, Generic[T]):
+    def __init__(self, formatted_data: T, title: str) -> None:
         self.figure: go.Figure = go.Figure()
-
-    def show(self) -> None:
+        self._setup_figure_type(formatted_data=formatted_data)
+        self._setup_general_design(title=title)
+        self._setup_axes()
         self.figure.show()  # type: ignore
 
-    def setup_style(self) -> None:
-        self._setup_design()
-        self._setup_axes()
-        if self.custom_hover:
-            self._setup_custom_hover()
+    @abstractmethod
+    def _setup_figure_type(self, formatted_data: T) -> None:
+        raise NotImplementedError
 
-    def _setup_design(
+    def _setup_general_design(
         self,
+        title: str
     ) -> None:
         self.figure.update_layout(  # type: ignore
             font=FigureSetup.TEXT_FONT.value,
             title={
-                "text": self.title,
+                "text": title,
                 "font": FigureSetup.TITLE_FONT.value,
             },
             autosize=True,
@@ -46,47 +45,4 @@ class Graph:
 
         self.figure.update_xaxes(  # type: ignore
             showgrid=False, automargin=True
-        )
-
-    def _setup_custom_hover(self) -> None:
-        for trace in self.figure.data:  # type: ignore
-            trace.hovertemplate = self.custom_hover  # type: ignore
-
-
-def _get_color_map(assets: list[str]) -> dict[str, str]:
-    n_colors: int = len(assets)
-    colors: list[str] = _map_colors_to_columns(n_colors=n_colors)
-    return dict(zip(assets, colors))
-
-
-def get_heatmap_colorscale(n_colors: int = 100):
-    colormap: LinearSegmentedColormap = _generate_colormap(n_colors=n_colors)
-
-    colors: list[tuple[float, float, float, float]] = [
-        colormap(i / (n_colors - 1)) for i in range(n_colors)
-    ]
-
-    return [
-        [i / (n_colors - 1), mcolors.to_hex(c=color)]
-        for i, color in enumerate(iterable=colors)
-    ]
-
-
-def _map_colors_to_columns(n_colors: int) -> list[str]:
-    if n_colors == 1:
-        return [mcolors.to_hex(Colors.PLOT_UNIQUE.value)]
-    cmap: LinearSegmentedColormap = _generate_colormap(n_colors=n_colors)
-    return [mcolors.to_hex(cmap(i / (n_colors - 1))) for i in range(n_colors)]
-
-
-def _generate_colormap(n_colors: int) -> LinearSegmentedColormap:
-    cmap_name = "custom_colormap"
-
-    if n_colors <= len(BASE_COLORS):
-        return LinearSegmentedColormap.from_list(
-            name=cmap_name, colors=BASE_COLORS[:n_colors], N=n_colors
-        )
-    else:
-        return LinearSegmentedColormap.from_list(
-            name=cmap_name, colors=BASE_COLORS, N=n_colors
         )
