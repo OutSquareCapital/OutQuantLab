@@ -10,12 +10,11 @@ class OutQuantLab:
         self._dbp = DataBaseProvider()
         self.app_config: AppConfig = self._dbp.get_app_config()
         self.stats = StatsProvider()
-        self.data: BacktestResults
         if local:
             self.plots = Plots()
 
-    def run(self) -> None:
-        self.data = execute_backtest(
+    def run(self) -> BacktestResults:
+        return execute_backtest(
             returns_df=self._dbp.get_returns_data(
                 names=self.app_config.assets_config.get_all_active_entities_names()
             ),
@@ -39,10 +38,6 @@ class OutQuantLab:
 
     def save_config(self) -> None:
         self._dbp.save_app_config(config=self.app_config)
-
-    def check_data(self) -> None:
-        for name, value in self.data.items():
-            print(f"{name}:\n {value}")
 
     def refresh_data(self) -> None:
         self._dbp.refresh_assets_data(

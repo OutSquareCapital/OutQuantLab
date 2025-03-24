@@ -1,21 +1,28 @@
 from outquantlab.backtest.data_arrays import get_volatility_adjusted_returns
 from outquantlab.metrics import get_overall_mean, hv_composite
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat
-from typing import TypedDict
+from dataclasses import dataclass, field
 
-_PORTFOLIO = "portfolio"
+@dataclass
+class BacktestResults:
+    portfolio: DataFrameFloat = field(init=False)
+    assets_clusters: DataFrameFloat = field(init=False)
+    assets_subclusters: DataFrameFloat = field(init=False)
+    assets: DataFrameFloat = field(init=False)
+    indics_clusters: DataFrameFloat = field(init=False)
+    indics_subclusters: DataFrameFloat = field(init=False)
+    indics: DataFrameFloat = field(init=False)
+    params: DataFrameFloat = field(init=False)
 
+    def check_data(self) -> None:
+        for name, value in self.__dict__.items():
+            print(f"{name}:\n {value}")
 
-class BacktestResults(TypedDict, total=False):
-    portfolio: DataFrameFloat
-    assets_clusters: DataFrameFloat
-    assets_subclusters: DataFrameFloat
-    assets: DataFrameFloat
-    indics_clusters: DataFrameFloat
-    indics_subclusters: DataFrameFloat
-    indics: DataFrameFloat
-    params: DataFrameFloat
+    def __getitem__(self, key: str) -> DataFrameFloat:
+        return self.__dict__[key]
 
+    def __setitem__(self, key: str, value: DataFrameFloat) -> None:
+        self.__dict__[key] = value
 
 def aggregate_raw_returns(returns_df: DataFrameFloat) -> BacktestResults:
     portfolio_dict = BacktestResults()
@@ -29,7 +36,7 @@ def aggregate_raw_returns(returns_df: DataFrameFloat) -> BacktestResults:
         returns_df.dropna(axis=0, how="any", inplace=True)  # type: ignore
         key_name: str = returns_df.columns.names[lvl - 1]
         portfolio_dict[key_name] = returns_df
-    portfolio_dict[_PORTFOLIO] = _get_global_portfolio_returns(
+    portfolio_dict.portfolio = _get_global_portfolio_returns(
         returns_df=_adjust_portfolio(returns_df=returns_df)
     )
     return portfolio_dict
@@ -62,5 +69,5 @@ def _get_global_portfolio_returns(returns_df: DataFrameFloat) -> DataFrameFloat:
     return DataFrameFloat(
         data=get_overall_mean(array=returns_df.get_array(), axis=1),
         index=returns_df.dates,
-        columns=[_PORTFOLIO],
+        columns=["portfolio"],
     )
