@@ -1,5 +1,4 @@
 from numpy import nan, argsort, nanmean, array, concatenate
-from numpy.typing import DTypeLike
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
 from outquantlab.typing_conventions.custom_types import ArrayFloat, Float32, ArrayInt
@@ -18,14 +17,11 @@ class SeriesFloat(Series):  # type: ignore
         self,
         data: ArrayFloat | Series | list[float],  # type: ignore
         index: MultiIndex | Index | list[str] | None = None,  # type: ignore
-        dtype: type = Float32,
     ) -> None:
-        super().__init__(data=data, index=index, dtype=dtype)  # type: ignore
+        super().__init__(data=data, index=index, dtype=Float32)  # type: ignore
 
-    def get_array(
-        self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = nan
-    ) -> ArrayFloat:
-        return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
+    def get_array(self) -> ArrayFloat:
+        return self.to_numpy(dtype=Float32, copy=False, na_value=nan)  # type: ignore
 
     def get_names(self) -> list[str]:
         return self.index.tolist()  # type: ignore
@@ -50,13 +46,11 @@ class SeriesFloat(Series):  # type: ignore
         return cls(data=combined_array, index=index)
 
     def convert_to_json(self, title: str) -> dict[str, dict[str, list[str]]]:
-        data: list[str] = self.values.tolist() # type: ignore
-        index: list[str] = [str(idx) for idx in self.index] # type: ignore
-        result_dict: dict[str, list[str]] = {
-            "data": data,
-            "index": index
-        }
+        data: list[str] = self.values.tolist()  # type: ignore
+        index: list[str] = [str(idx) for idx in self.index]  # type: ignore
+        result_dict: dict[str, list[str]] = {"data": data, "index": index}
         return {title: result_dict}
+
 
 class DataFrameFloat(DataFrame):
     """
@@ -73,20 +67,17 @@ class DataFrameFloat(DataFrame):
         data: ArrayFloat | DataFrame | None = None,
         index: DatetimeIndex | None = None,
         columns: list[str] | MultiIndex | Index | None = None,  # type: ignore
-        dtype: type = Float32,
     ) -> None:
         if data is None:
             data = DataFrame(dtype=Float32)
-        super().__init__(data=data, index=index, columns=columns, dtype=dtype)  # type: ignore
+        super().__init__(data=data, index=index, columns=columns, dtype=Float32)  # type: ignore
 
     @property
     def dates(self) -> DatetimeIndex:
-        return super().index  # type: ignore
+        return self.index  # type: ignore
 
-    def get_array(
-        self, dtype: DTypeLike = Float32, copy: bool = False, na_value: float = nan
-    ) -> ArrayFloat:
-        return super().to_numpy(dtype=dtype, copy=copy, na_value=na_value)  # type: ignore
+    def get_array(self) -> ArrayFloat:
+        return self.to_numpy(dtype=Float32, copy=False, na_value=nan)  # type: ignore
 
     def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
