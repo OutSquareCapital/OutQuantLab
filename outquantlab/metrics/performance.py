@@ -20,17 +20,16 @@ def reduce_array(prices_array: ArrayFloat, frequency: int) -> ArrayFloat:
     return prices_array[indices]
 
 
-def get_equity_curves(returns_array: ArrayFloat, length: int) -> ArrayFloat:
-    start: int = returns_array.shape[0] - length
+def get_equity_curves(returns_array: ArrayFloat) -> ArrayFloat:
     temp_array: ArrayFloat = returns_array.copy()
     mask: ArrayFloat = isnan(temp_array)
     temp_array[mask] = 0
 
     cumulative_returns: ArrayFloat = empty_like(prototype=temp_array)
 
-    cumulative_returns[:start] = nan
+    cumulative_returns[:0] = nan
 
-    cumulative_returns[start:] = cumprod(a=1 + temp_array[start:], axis=0)
+    cumulative_returns[0:] = cumprod(a=1 + temp_array[0:], axis=0)
 
     cumulative_returns[mask] = nan
 
@@ -54,14 +53,14 @@ def pct_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
 
 def get_total_returns(returns_array: ArrayFloat) -> ArrayFloat:
     equity_curves: ArrayFloat = get_equity_curves(
-        returns_array=returns_array, length=returns_array.shape[0]
+        returns_array=returns_array
     )
     return equity_curves[-1] - Standardization.PERCENTAGE.value
 
 
 def get_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayFloat:
     equity_curves: ArrayFloat = get_equity_curves(
-        returns_array=returns_array, length=returns_array.shape[0]
+        returns_array=returns_array
     )
     period_max: ArrayFloat = get_rolling_max(
         array=equity_curves, length=length, min_length=1
@@ -114,7 +113,7 @@ def get_overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
 
 def get_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:
     prices_array: ArrayFloat = get_equity_curves(
-        returns_array=returns_array, length=returns_array.shape[0]
+        returns_array=returns_array
     )
     monthly_prices: ArrayFloat = reduce_array(
         prices_array=prices_array, frequency=TimePeriod.MONTH.value
