@@ -14,7 +14,6 @@ class BaseIndic(ABC):
         self.active: bool = active
         self.params_values: dict[str, list[int]] = param_values
         self.param_combos: list[tuple[int, ...]] = []
-        self.strategies_nb: int = 0
 
     @abstractmethod
     def execute(*args: Any, **kwargs: Any) -> ArrayFloat: ...
@@ -27,4 +26,6 @@ class BaseIndic(ABC):
                 f"Aucune combinaison valide trouvée pour l'indicateur {self.name}"
             )
 
-        self.strategies_nb = len(self.param_combos)
+    @property
+    def params_nb(self) -> int:
+        return len(self.param_combos)
