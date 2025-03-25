@@ -40,7 +40,7 @@ class DataBaseProvider:
         self.dbq.indics_active.save(data=config.indics_config.get_all_entities_dict())
         self.dbq.indics_params.save(data=config.indics_config.prepare_indic_params())
         self.dbq.assets_clusters.save(data=config.assets_clusters.clusters)
-        self.dbq.indics_clusters.save(data=config.assets_clusters.clusters)
+        self.dbq.indics_clusters.save(data=config.indics_clusters.clusters)
 
     def save_assets_data(
         self, prices_data: DataFrameFloat, returns_data: DataFrameFloat
