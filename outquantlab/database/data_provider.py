@@ -1,10 +1,6 @@
-import pandas as pd
-
 import outquantlab.config_classes as cfg
-from outquantlab.database.data_file import DataFile
 from outquantlab.database.data_queries import DataQueries
 from outquantlab.database.data_refresher import get_yf_data
-from outquantlab.database.data_structure import FileNames
 from outquantlab.typing_conventions import DataFrameFloat
 
 
@@ -17,27 +13,22 @@ class DataBaseProvider:
         self.save_assets_data(prices_data=prices_data, returns_data=returns_data)
 
     def get_returns_data(self, names: list[str]) -> DataFrameFloat:
-        return DataFrameFloat(
-            data=self.dbq.select(file_name=FileNames.RETURNS_DATA).load(
-                default_value=pd.DataFrame(), names=names
-            )
-        )
+        return DataFrameFloat(data=self.dbq.returns_data.load(names=names))
 
     def get_app_config(self) -> cfg.AppConfig:
         return cfg.AppConfig(
-            indics_config=_instanciate_indics_config(
-                indics_active_file=self.dbq.select(file_name=FileNames.INDICS_ACTIVE),
-                indics_params_file=self.dbq.select(file_name=FileNames.INDICS_PARAMS),
+            indics_config=cfg.IndicsConfig(
+                indics_active=self.dbq.indics_active.load(),
+                params_config=self.dbq.indics_params.load(),
             ),
-            assets_config=_instanciate_assets_config(
-                assets_active_file=self.dbq.select(file_name=FileNames.ASSETS_ACTIVE),
-                assets_names_file=self.dbq.select(file_name=FileNames.ASSETS_NAMES),
+            assets_config=cfg.AssetsConfig(
+                assets_active=self.dbq.assets_active.load(),
             ),
-            assets_clusters=_instanciate_assets_clusters_tree(
-                file=self.dbq.select(file_name=FileNames.ASSETS_CLUSTERS)
+            assets_clusters=cfg.AssetsClusters(
+                clusters=self.dbq.assets_clusters.load(),
             ),
-            indics_clusters=_instanciate_indics_clusters_tree(
-                file=self.dbq.select(file_name=FileNames.INDICS_CLUSTERS)
+            indics_clusters=cfg.IndicsClusters(
+                clusters=self.dbq.indics_clusters.load(),
             ),
         )
 
@@ -45,56 +36,19 @@ class DataBaseProvider:
         self,
         config: cfg.AppConfig,
     ) -> None:
-        self.dbq.select(file_name=FileNames.ASSETS_ACTIVE).save(
-            data=config.assets_config.get_all_entities_dict()
-        )
-        self.dbq.select(file_name=FileNames.INDICS_ACTIVE).save(
-            data=config.indics_config.get_all_entities_dict()
-        )
-        self.dbq.select(file_name=FileNames.INDICS_PARAMS).save(
-            data=config.indics_config.prepare_indic_params()
-        )
-        self.dbq.select(file_name=FileNames.ASSETS_CLUSTERS).save(
-            data=config.assets_clusters.clusters
-        )
-        self.dbq.select(file_name=FileNames.INDICS_CLUSTERS).save(
-            data=config.indics_clusters.clusters
-        )
+        self.dbq.assets_active.save(data=config.assets_config.get_all_entities_dict())
+        self.dbq.indics_active.save(data=config.indics_config.get_all_entities_dict())
+        self.dbq.indics_params.save(data=config.indics_config.prepare_indic_params())
+        self.dbq.assets_clusters.save(data=config.assets_clusters.clusters)
+        self.dbq.indics_clusters.save(data=config.assets_clusters.clusters)
 
     def save_assets_data(
         self, prices_data: DataFrameFloat, returns_data: DataFrameFloat
     ) -> None:
-        assets_names: list[str] = prices_data.get_names()
+        self.dbq.prices_data.save(data=prices_data)
+        self.dbq.returns_data.save(data=returns_data)
 
-        self.dbq.select(file_name=FileNames.PRICES_DATA).save(data=prices_data)
-        self.dbq.select(file_name=FileNames.RETURNS_DATA).save(data=returns_data)
-        self.dbq.select(file_name=FileNames.ASSETS_NAMES).save(data=assets_names)
-
-    def save_backtest_results(self, results: list[dict[str, dict[str, list[str]]]]) -> None:
-        self.dbq.select(file_name=FileNames.BACKTEST_RESULTS).save(data=results)
-
-
-def _instanciate_assets_config(
-    assets_active_file: DataFile, assets_names_file: DataFile
-) -> cfg.AssetsConfig:
-    return cfg.AssetsConfig(
-        assets_active=assets_active_file.load(default_value={}),
-        asset_names=assets_names_file.load(default_value=[]),
-    )
-
-
-def _instanciate_indics_config(
-    indics_active_file: DataFile, indics_params_file: DataFile
-) -> cfg.IndicsConfig:
-    return cfg.IndicsConfig(
-        indics_active=indics_active_file.load(default_value={}),
-        params_config=indics_params_file.load(default_value={}),
-    )
-
-
-def _instanciate_assets_clusters_tree(file: DataFile) -> cfg.AssetsClusters:
-    return cfg.AssetsClusters(clusters=file.load(default_value={}))
-
-
-def _instanciate_indics_clusters_tree(file: DataFile) -> cfg.IndicsClusters:
-    return cfg.IndicsClusters(clusters=file.load(default_value={}))
+    def save_backtest_results(
+        self, results: dict[str, dict[str, dict[str, list[str]]]]
+    ) -> None:
+        self.dbq.backtest_results.save(data=results)

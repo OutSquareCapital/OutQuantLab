@@ -1,84 +1,45 @@
 import os
 
-from outquantlab.database.data_file import DataFile
-from outquantlab.database.data_structure import DB_NAME, FileNames
+from outquantlab.database.data_file import ParquetFile, JSONFile
+from dataclasses import dataclass, field
+
+DB_NAME = "data"
 
 
+@dataclass
 class DataQueries:
-    def __init__(self) -> None:
-        self.data_files: dict[str, DataFile] = _generate_datafiles(db_name=DB_NAME)
+    assets_active: JSONFile = field(default_factory=JSONFile)
+    assets_clusters: JSONFile = field(default_factory=JSONFile)
+    indics_active: JSONFile = field(default_factory=JSONFile)
+    indics_params: JSONFile = field(default_factory=JSONFile)
+    indics_clusters: JSONFile = field(default_factory=JSONFile)
+    returns_data: ParquetFile = field(default_factory=ParquetFile)
+    prices_data: ParquetFile = field(default_factory=ParquetFile)
+    backtest_results: JSONFile = field(default_factory=JSONFile)
 
-    def select(self, file_name: str) -> DataFile:
+    def __post_init__(self) -> None:
+        current_file_path: str = os.path.abspath(__file__)
+        current_dir: str = os.path.dirname(current_file_path)
+        db_path: str = os.path.join(current_dir, DB_NAME)
+
+        for root, _, files in os.walk(db_path):
+            for file in files:
+                file_path: str = os.path.join(root, file)
+                file_name, _ = os.path.splitext(file)
+                self._assign_path(path=file_path, file_name=file_name)
+
+    def _assign_path(self, path: str, file_name: str) -> None:
         try:
-            return self.data_files[file_name]
+            self[file_name].path = path
         except KeyError:
-            raise KeyError(f"Data file not found: {file_name}")
+            raise ValueError(f"File {file_name} at \n {path} \n not found in DataQueries list")
 
-    def print_file_validation(self) -> None:
-        validation: dict[str, list[str]] = _validate_file_names(
-            actual_files=list(self.data_files.keys())
-        )
-        print("\nData files structure:")
-        _display_data_structure(data_files=self.data_files)
-        print("File validation results:")
+    def check_data(self) -> None:
+        for name, value in self.__dict__.items():
+            print(f"{name}:\n {value}")
 
-        if not validation["missing"] and not validation["extra"]:
-            print("✓ Perfect match!")
+    def __getitem__(self, key: str) -> ParquetFile | JSONFile:
+        return self.__dict__[key]
 
-            return
-
-        if validation["missing"]:
-            _display_missing_files(validation=validation)
-        if validation["extra"]:
-            _display_extra_files(validation=validation)
-
-
-def _generate_datafiles(db_name: str) -> dict[str, DataFile]:
-    data_files: dict[str, DataFile] = {}
-    base_dir: str = _get_db_path(db_name=db_name)
-
-    for root, _, files in os.walk(base_dir):
-        for file in files:
-            file_path: str = os.path.join(root, file)
-            file_name, file_ext = os.path.splitext(file)
-            datafile = DataFile(ext=file_ext, path=file_path)
-
-            data_files[file_name] = datafile
-    return data_files
-
-
-def _get_db_path(db_name: str) -> str:
-    current_file_path: str = os.path.abspath(__file__)
-    current_dir: str = os.path.dirname(current_file_path)
-    return os.path.join(current_dir, db_name)
-
-
-def _display_data_structure(data_files: dict[str, DataFile]) -> None:
-    for key, value in data_files.items():
-        print(
-            f"{key}:\n  ext: {value.ext}\n  path: {value.path}\n  handler: {value.handler_name}\n"
-        )
-
-
-def _display_missing_files(validation: dict[str, list[str]]) -> None:
-    print("\nMissing files (in enum but not found):")
-    for file in validation["missing"]:
-        print(f"  - {file}")
-
-
-def _display_extra_files(validation: dict[str, list[str]]) -> None:
-    print("\nExtra files (found but not in enum):")
-    for file in validation["extra"]:
-        print(f"  - {file}")
-
-
-def _validate_file_names(actual_files: list[str]) -> dict[str, list[str]]:
-    enum_values: list[str] = [name.value for name in FileNames]
-
-    missing_files: list[str] = [
-        name for name in enum_values if name not in actual_files
-    ]
-
-    extra_files: list[str] = [file for file in actual_files if file not in enum_values]
-
-    return {"missing": missing_files, "extra": extra_files}
+    def __setitem__(self, key: str, value: ParquetFile | JSONFile) -> None:
+        self.__dict__[key] = value
