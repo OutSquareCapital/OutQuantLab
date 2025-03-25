@@ -9,7 +9,8 @@ def check_time() -> None:
 def test_app() -> None:
     oql = OutQuantLab(local=False)
     results = oql.run()
-    print(results.portfolio)
+    print(results.indics)
+    oql.save_config()
 
 if __name__ == "__main__":
     print("initializing OutQuantLab...")

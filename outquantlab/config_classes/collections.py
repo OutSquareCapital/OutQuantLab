@@ -29,8 +29,8 @@ class IndicsConfig(BaseConfig[BaseIndic]):
         params_config: dict[str, dict[str, list[int]]],
     ) -> None:
         for name, cls in INDICATOR_REGISTRY.items():
-            param_names: list[str] = _get_params_names(cls=cls)
-            params_values: dict[str, list[int]] = _get_params_values(
+            param_names: list[str] = self._get_params_names(cls=cls)
+            params_values: dict[str, list[int]] = self._get_params_values(
                 param_names=param_names, name=name, params_config=params_config
             )
 
@@ -40,17 +40,29 @@ class IndicsConfig(BaseConfig[BaseIndic]):
                 param_values=params_values,
             )
 
+    def _get_params_names(self, cls: type[BaseIndic]) -> list[str]:
+        return list(signature(cls.execute).parameters.keys())[2:]
+
+
+    def _get_params_values(
+        self, param_names: list[str], name: str, params_config: dict[str, dict[str, list[int]]]
+    ) -> dict[str, list[int]]:
+        params_values: dict[str, list[int]] = {
+            param: params_config.get(name, {}).get(param, []) for param in param_names
+        }
+        return params_values
+
     def get_indics_params(self) -> list[BaseIndic]:
         active_indics: list[BaseIndic] = self.get_all_active_entities()
 
         for indic in active_indics:
-            indic.get_valid_pairs()
+            indic.params.get_valid_pairs()
         return active_indics
 
     def prepare_indic_params(self) -> dict[str, dict[str, list[int]]]:
         data: dict[str, dict[str, list[int]]] = {}
-        for name, indicator in self.entities.items():
-            data[name] = indicator.params_values
+        for name, indic in self.entities.items():
+            data[name] = indic.params.values
         return data
 
 
@@ -70,16 +82,3 @@ class AssetsConfig(BaseConfig[Asset]):
 
 def _get_active_statut(entity: dict[str, bool], name: str) -> bool:
     return entity.get(name, False)
-
-
-def _get_params_names(cls: type[BaseIndic]) -> list[str]:
-    return list(signature(cls.execute).parameters.keys())[2:]
-
-
-def _get_params_values(
-    param_names: list[str], name: str, params_config: dict[str, dict[str, list[int]]]
-) -> dict[str, list[int]]:
-    params_values: dict[str, list[int]] = {
-        param: params_config.get(name, {}).get(param, []) for param in param_names
-    }
-    return params_values
