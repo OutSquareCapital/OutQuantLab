@@ -1,6 +1,5 @@
-from outquantlab.backtest.execute_backtest import execute_backtest, BacktestResults
+from outquantlab.backtest.processor import process_backtest
 
 __all__: list[str] = [
-    "execute_backtest",
-    "BacktestResults",
+    "process_backtest",
 ]
