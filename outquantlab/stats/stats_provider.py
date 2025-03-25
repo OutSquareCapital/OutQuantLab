@@ -16,7 +16,6 @@ class StatsProvider:
                 mt.get_overall_average_drawdown,
             ]
         )
-        self.equity_curves = CurvesMetric(func=mt.get_equity_curves, ascending=True)
         self.rolling_sharpe_ratio = CurvesMetric(
             func=mt.get_rolling_sharpe_ratio, ascending=True
         )

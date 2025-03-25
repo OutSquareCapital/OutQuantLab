@@ -1,15 +1,14 @@
 from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 from collections.abc import Callable
-from typing import Generic, TypeVar, TypeAlias, Any
+from typing import Generic, TypeVar, Any
 from abc import ABC, abstractmethod
 
-ParametrableFunc: TypeAlias = Callable[[ArrayFloat, int], ArrayFloat]
-DefinedFunc: TypeAlias = Callable[[ArrayFloat], ArrayFloat]
-OverallFuncs: TypeAlias = list[DefinedFunc]
+type ParametrableFunc = Callable[[ArrayFloat, int], ArrayFloat]
+type DefinedFunc = Callable[[ArrayFloat], ArrayFloat]
+type OverallFuncs = list[DefinedFunc]
 
 T = TypeVar("T", bound=ParametrableFunc | DefinedFunc)
 D = TypeVar("D", bound=DataFrameFloat | SeriesFloat)
-
 
 class Metric(ABC, Generic[T, D]):
     def __init__(self, func: T, ascending: bool) -> None:
@@ -19,7 +18,6 @@ class Metric(ABC, Generic[T, D]):
 
     @abstractmethod
     def get_data(self, *args: Any, **kwargs: Any) -> D: ...
-
 
 class CurvesMetric(Metric[ParametrableFunc, DataFrameFloat]):
     def get_data(
