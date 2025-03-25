@@ -1,8 +1,34 @@
 from collections.abc import Callable
 from itertools import product
+from dataclasses import dataclass, field
 
 ParamsValidator = Callable[[dict[str, int]], bool]
 ValidationProcess = tuple[ParamsValidator, ParamsValidator]
+
+@dataclass(slots=True)
+class IndicParams:
+    values: dict[str, list[int]]
+    combos: list[tuple[int, ...]] = field(default_factory=list)
+    
+    def __repr__(self) -> str:
+        return f"values: \n {self.values} \n combos: \n {self.combos}"
+    @property
+    def quantity(self) -> int:
+        return len(self.combos)
+
+    def get_valid_pairs(self) -> None:
+        parameter_names = list(self.values.keys())
+        parameter_values_combinations = product(*self.values.values())
+
+        for combination in parameter_values_combinations:
+            combination_dict = dict(zip(parameter_names, combination))
+            if _validate_combination(parameters_dict=combination_dict):
+                self.combos.append(combination)
+
+        if not self.combos:
+            raise ValueError(
+                f"Aucune combinaison valide trouvée pour l'indicateur {self}"
+            )
 
 def _check_trend(params: dict[str, int]) -> bool:
     return bool(next((k for k in params if "st" in k), None)) and bool(
@@ -36,17 +62,3 @@ def _validate_combination(parameters_dict: dict[str, int]) -> bool:
             if not validate(parameters_dict):
                 return False
     return True
-
-
-def filter_valid_pairs(params_values: dict[str, list[int]]) -> list[tuple[int, ...]]:
-    parameter_names = list(params_values.keys())
-    parameter_values_combinations = product(*params_values.values())
-
-    valid_combinations: list[tuple[int, ...]] = []
-
-    for combination in parameter_values_combinations:
-        combination_dict = dict(zip(parameter_names, combination))
-        if _validate_combination(parameters_dict=combination_dict):
-            valid_combinations.append(combination)
-
-    return valid_combinations
