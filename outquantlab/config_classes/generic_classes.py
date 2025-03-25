@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Protocol, TypeVar
+from typing import Any, Protocol
 
 
 class StrategyComponent(Protocol):
@@ -7,10 +7,7 @@ class StrategyComponent(Protocol):
     active: bool
 
 
-T = TypeVar("T", bound=StrategyComponent)
-
-
-class BaseConfig(ABC, Generic[T]):
+class BaseConfig[T: StrategyComponent](ABC):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.entities: dict[str, T] = {}
         self._load_entities(*args, **kwargs)
@@ -34,10 +31,9 @@ class BaseConfig(ABC, Generic[T]):
         self.entities[name].active = active
 
 
-class BaseClustersTree(ABC):
-    def __init__(self, clusters: dict[str, dict[str, list[str]]], prefix: str) -> None:
+class BaseClustersTree[T: StrategyComponent](ABC):
+    def __init__(self, clusters: dict[str, dict[str, list[str]]]) -> None:
         self.clusters: dict[str, dict[str, list[str]]] = clusters
-        self.prefix: str = prefix
 
     def update_clusters_structure(
         self, new_structure: dict[str, dict[str, list[str]]]

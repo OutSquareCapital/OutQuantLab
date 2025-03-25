@@ -1,11 +1,9 @@
 import json
 from abc import ABC, abstractmethod
 from pandas import DataFrame, read_parquet
-from typing import Any, TypeVar, Generic
+from typing import Any
 
-T = TypeVar("T", bound=dict[str, Any] | DataFrame)
-
-class DataFile(ABC, Generic[T]):
+class DataFile[T:dict[str, Any] | DataFrame](ABC):
 
     def __init__(self) -> None:
         self.path: str = "default"
