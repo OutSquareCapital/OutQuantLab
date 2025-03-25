@@ -55,14 +55,14 @@ class IndicsConfig(BaseConfig[BaseIndic]):
 
 
 class AssetsConfig(BaseConfig[Asset]):
-    def __init__(self, assets_active: dict[str, bool], asset_names: list[str]) -> None:
+    def __init__(self, assets_active: dict[str, bool]) -> None:
         self.entities: dict[str, Asset] = {}
-        self._load_entities(assets_active=assets_active, asset_names=asset_names)
+        self._load_entities(assets_active=assets_active)
 
     def _load_entities(
-        self, assets_active: dict[str, bool], asset_names: list[str]
+        self, assets_active: dict[str, bool]
     ) -> None:
-        for name in asset_names:
+        for name in assets_active.keys():
             self.entities[name] = Asset(
                 name=name, active=_get_active_statut(entity=assets_active, name=name)
             )
