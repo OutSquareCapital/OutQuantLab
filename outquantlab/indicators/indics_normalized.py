@@ -30,6 +30,17 @@ class MeanPriceRatio(BaseIndic):
         return norm.sign_normalization(signal_array=mean_price_ratio_raw)
 
 @_register_indicator
+class MeanPriceRatioVolNormalized(BaseIndic):
+    def execute(
+        self, data_arrays: AssetsData, len_st: int, len_lt: int
+    ) -> ArrayFloat:
+        return raw.get_mean_price_ratio_raw(
+            prices_array=data_arrays.prices,
+            len_st=len_st,
+            len_lt=len_lt,
+        )
+    
+@_register_indicator
 class MedianPriceRatio(BaseIndic):
     def execute(
         self, data_arrays: AssetsData, len_st: int, len_lt: int
