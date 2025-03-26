@@ -1,7 +1,7 @@
 from outquantlab.config_classes import AppConfig, BacktestResults
 from outquantlab.backtest import process_backtest
 from outquantlab.database import DataBaseProvider
-from outquantlab.local_ploty import Stats
+from outquantlab.stats import Stats
 
 class OutQuantLab:
     def __init__(self) -> None:

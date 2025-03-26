@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import plotly.graph_objects as go  # type: ignore
 
-from outquantlab.local_ploty.ui_constants import (
+from outquantlab.stats.design import (
     Colors,
     CustomHovers,
     FigureSetup,

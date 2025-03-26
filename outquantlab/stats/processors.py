@@ -1,25 +1,25 @@
-from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from outquantlab.local_ploty.graph_class import (
+from typing import Any
+
+from outquantlab.stats.graphs import (
     Bars,
     Curves,
     HeatMap,
     Histograms,
     Violins,
 )
-from collections.abc import Callable
-from typing import Any
+from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
 
 type DefinedFunc = Callable[[ArrayFloat], ArrayFloat]
 type ParametrableFunc = Callable[[ArrayFloat, int], ArrayFloat]
 
 
 @dataclass(slots=True)
-class Statistic[D: DataFrameFloat | SeriesFloat, F: Callable[..., ArrayFloat]](ABC):
+class StatProcessor[D: DataFrameFloat | SeriesFloat, F: Callable[..., ArrayFloat]](ABC):
     _func: F
     _ascending: bool = field(default=True)
-
 
     @property
     def _name(self) -> str:
@@ -36,8 +36,7 @@ class Statistic[D: DataFrameFloat | SeriesFloat, F: Callable[..., ArrayFloat]](A
         raise NotImplementedError
 
 
-
-class RollingStat(Statistic[DataFrameFloat, ParametrableFunc]):
+class RollingProcessor(StatProcessor[DataFrameFloat, ParametrableFunc]):
     def get_formatted_data(self, data: DataFrameFloat, length: int) -> DataFrameFloat:
         stats_array: ArrayFloat = self._func(data.get_array(), length)
         return DataFrameFloat(
@@ -60,7 +59,7 @@ class RollingStat(Statistic[DataFrameFloat, ParametrableFunc]):
         )
 
 
-class SamplingStat(Statistic[DataFrameFloat, ParametrableFunc]):
+class SamplingProcessor(StatProcessor[DataFrameFloat, ParametrableFunc]):
     def get_formatted_data(
         self, data: DataFrameFloat, frequency: int
     ) -> DataFrameFloat:
@@ -90,7 +89,7 @@ class SamplingStat(Statistic[DataFrameFloat, ParametrableFunc]):
         )
 
 
-class TableStat(Statistic[DataFrameFloat, DefinedFunc]):
+class TableProcessor(StatProcessor[DataFrameFloat, DefinedFunc]):
     def get_formatted_data(self, data: DataFrameFloat) -> DataFrameFloat:
         stats_array: ArrayFloat = self._func(data.get_array())
         return DataFrameFloat(
@@ -107,7 +106,7 @@ class TableStat(Statistic[DataFrameFloat, DefinedFunc]):
         HeatMap(formatted_data=self.get_formatted_data(data=data), title=self._name)
 
 
-class AggregateStat(Statistic[SeriesFloat, DefinedFunc]):
+class AggregateProcessor(StatProcessor[SeriesFloat, DefinedFunc]):
     def get_formatted_data(self, data: DataFrameFloat) -> SeriesFloat:
         stats_array: ArrayFloat = self._func(data.get_array())
         return SeriesFloat(data=stats_array, index=data.get_names()).sort_data(
