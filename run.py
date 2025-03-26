@@ -7,9 +7,11 @@ def check_time() -> None:
     print(f"Backtest completed in {end - start:.2f} seconds.")
 
 def test_app() -> None:
-    oql = OutQuantLab(local=False)
+    oql = OutQuantLab()
     results = oql.run()
-    print(results.indics)
+    oql.stats.correlation.plot(data=results.assets)
+    oql.stats.rolling.drawdown.plot(data=results.portfolio, length=1250)
+    oql.stats.overall.sharpe_ratio.plot(data=results.assets)
     oql.save_config()
 
 if __name__ == "__main__":
