@@ -15,6 +15,9 @@ class BaseConfig[T: StrategyComponent](ABC):
     @abstractmethod
     def _load_entities(self, *args: Any, **kwargs: Any) -> None: ...
 
+    def get_all_entities_names(self) -> list[str]:
+        return [entity.name for entity in self.entities.values()]
+
     def get_all_active_entities_names(self) -> list[str]:
         return [entity.name for entity in self.entities.values() if entity.active]
 
