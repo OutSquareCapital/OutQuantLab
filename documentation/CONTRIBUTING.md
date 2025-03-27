@@ -4,6 +4,99 @@ Welcome to this project! This guide outlines the conventions to follow to mainta
 
 ## ✅ Writing Code
 
+### Python Native libraries
+
+Always use Python 3.10+ native type syntax:
+
+````python
+
+def process(items: list[str]) -> dict[str, int]:
+````
+
+Not:
+
+````python
+
+from typing import List, Dict
+def process(items: List[str]) -> Dict[str, int]:
+````
+
+#### Type Aliases
+
+Use simple assignment syntax:
+
+````python
+
+type Matrix = list[list[float]]
+````
+
+Not:
+
+````python
+
+from typing import TypeAlias
+Matrix: TypeAlias = list[list[float]]
+````
+
+#### Modern generics
+
+Use modern class generics:
+
+````python
+
+class Container[T]:
+def __init__(self, value: T):
+    self.value = T
+````
+
+Not:
+
+````python
+
+from typing import TypeVar, Generic
+T = TypeVar('T')
+class Container(Generic[T]):
+...
+````
+
+#### Callables
+
+Import from collections.abc:
+
+````python
+
+from collections.abc import Callable
+
+Processor = Callable[[str, int], float]
+````
+
+Not:
+
+````python
+
+from typing import Callable
+````
+
+#### File Paths
+
+Use pathlib exclusively:
+
+````python
+
+from pathlib import Path
+
+config_path = Path('config') / 'settings.yaml'
+````
+
+Not:
+
+````python
+
+import os
+
+config_path = os.path.join('config', 'settings.yaml')
+````
+
 ### 1. Strict Typing for Robust Code
 
 #### Core Philosophy
@@ -14,8 +107,6 @@ Absolute Requirements
 Total Coverage: Every variable, argument, and return value must have a type annotation.
 
 No Any Escapes: The Any type is banned except in one narrowly defined case (see Abstract Methods section).
-
-Modern Syntax Only: Use Python 3.10+ native type syntax (list[str]) not legacy typing module constructs.
 
 #### Type Annotation Deep Dive
 
