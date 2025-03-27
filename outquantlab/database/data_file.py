@@ -1,11 +1,9 @@
 import json
 from abc import ABC, abstractmethod
 from pandas import DataFrame, read_parquet
-from typing import Any
 from pathlib import Path
 
-
-class DataFile[T: dict[str, Any] | DataFrame](ABC):
+class DataFile[T](ABC):
     extension: str
 
     def __init__(self, db_path: Path, file_name: str) -> None:
@@ -32,23 +30,21 @@ class DataFile[T: dict[str, Any] | DataFrame](ABC):
         raise NotImplementedError
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__} path: \n {self.path}"
+        return f"{self.__class__.__name__} path: \n {self.path}\n"
 
 
-class JSONFile(DataFile[dict[str, Any]]):
+class JSONFile[K, V](DataFile[dict[K, V]]):
     extension = ".json"
 
-    def _load_implementation(self, names: list[str] | None = None) -> dict[str, Any]:
+    def _load_implementation(self, names: list[str] | None = None) -> dict[K, V]:
         with open(self.path, "r") as file:
-            data = json.load(file)
-        if names:
-            return {key: data[key] for key in names if key in data}
+            data: dict[K, V] = json.load(file)
         return data
 
-    def _handle_missing_file(self) -> dict[str, Any]:
+    def _handle_missing_file(self) -> dict[K, V]:
         return {}
 
-    def save(self, data: dict[str, Any]) -> None:
+    def save(self, data: dict[K, V]) -> None:
         with open(self.path, "w") as file:
             json.dump(data, file, indent=3)
 
