@@ -11,11 +11,11 @@ class AssetsData(NamedTuple):
 
 def fetch_data(assets: list[str]) -> AssetsData:
     test_connection(asset=assets[0])
-    return get_yf_data(assets=assets)
+    return _get_yf_data(assets=assets)
 
 
         
-def get_yf_data(assets: list[str]) -> AssetsData:
+def _get_yf_data(assets: list[str]) -> AssetsData:
     prices: DataFrameFloat = _get_prices_data(assets=assets)
     return AssetsData(
         prices=prices,
