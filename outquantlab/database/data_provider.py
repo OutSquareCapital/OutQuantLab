@@ -10,10 +10,12 @@ class DataBaseProvider:
 
     def refresh_assets_data(self, assets: list[str]) -> None:
         prices_data, returns_data = get_yf_data(assets=assets)
-        self.save_assets_data(prices_data=prices_data, returns_data=returns_data)
+        self._save_assets_data(prices_data=prices_data, returns_data=returns_data)
 
-    def get_returns_data(self, names: list[str]) -> DataFrameFloat:
-        return DataFrameFloat(data=self.dbq.returns_data.load(names=names))
+    def get_returns_data(self, names: list[str]|None = None) -> DataFrameFloat:
+        if names is not None:
+            return DataFrameFloat(data=self.dbq.returns_data.load(names=names))
+        return DataFrameFloat(data=self.dbq.returns_data.load())
 
     def get_app_config(self) -> cfg.AppConfig:
         return cfg.AppConfig(
@@ -42,9 +44,14 @@ class DataBaseProvider:
         self.dbq.assets_clusters.save(data=config.assets_clusters.clusters)
         self.dbq.indics_clusters.save(data=config.indics_clusters.clusters)
 
-    def save_assets_data(
+    def _save_assets_active(self, assets_names: list[str]) -> None:
+        asset_active_dict: dict[str, bool] = {name: False for name in assets_names}
+        self.dbq.assets_active.save(data=asset_active_dict)
+
+    def _save_assets_data(
         self, prices_data: DataFrameFloat, returns_data: DataFrameFloat
     ) -> None:
+        self._save_assets_active(assets_names=prices_data.get_names())
         self.dbq.prices_data.save(data=prices_data)
         self.dbq.returns_data.save(data=returns_data)
 

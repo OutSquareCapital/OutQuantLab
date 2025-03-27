@@ -1,7 +1,7 @@
-from numpy import nan, argsort, nanmean, array, concatenate
+from numpy import argsort, array, concatenate, nan, nanmean
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
-from outquantlab.typing_conventions.custom_types import ArrayFloat, Float32, ArrayInt
+from outquantlab.typing_conventions.custom_types import ArrayFloat, ArrayInt, Float32
 
 
 class SeriesFloat(Series):  # type: ignore
@@ -81,13 +81,11 @@ class DataFrameFloat(DataFrame):
 
     def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
-            labels: list[str] = [
+            return [
                 "_".join(col).replace(" ", "_")
-                for col in self.columns.to_list()  # type: ignore
+                for col in self.columns.to_list()  
             ]
-        else:
-            labels: list[str] = self.columns.to_list()  # type: ignore
-        return labels
+        return self.columns.to_list() 
 
     def sort_data(self, ascending: bool) -> "DataFrameFloat":
         mean_values: ArrayFloat = nanmean(self.get_array(), axis=0)
