@@ -1,16 +1,32 @@
 import yfinance as yf  # type: ignore
 from pandas import DataFrame
-
+from typing import NamedTuple
 from outquantlab.metrics import pct_returns_np
 from outquantlab.typing_conventions import DataFrameFloat
 
+class AssetsData(NamedTuple):
+    prices: DataFrameFloat
+    returns: DataFrameFloat
 
-def get_yf_data(assets: list[str]) -> tuple[DataFrameFloat, DataFrameFloat]:
-    prices_data: DataFrameFloat = _get_prices_data(assets=assets)
-    returns_data: DataFrameFloat = _get_returns_data(prices_data=prices_data)
 
-    return prices_data, returns_data
+def fetch_data(assets: list[str]) -> AssetsData:
+    test_connection(asset=assets[0])
+    return get_yf_data(assets=assets)
 
+
+        
+def get_yf_data(assets: list[str]) -> AssetsData:
+    prices: DataFrameFloat = _get_prices_data(assets=assets)
+    return AssetsData(
+        prices=prices,
+        returns=_get_returns_data(data=prices)
+    )
+
+def test_connection(asset: str) -> None:
+    try:
+        yf.Ticker(ticker=asset).history(period="1d")  # type: ignore
+    except Exception as e:
+        raise ConnectionError("Failed to connect to Yahoo Finance") from e
 
 def _get_prices_data(assets: list[str]) -> DataFrameFloat:
     data: DataFrame | None = yf.download(  # type: ignore
@@ -19,15 +35,12 @@ def _get_prices_data(assets: list[str]) -> DataFrameFloat:
         auto_adjust=True,
         progress=False,
     )
-    if data is None:
-        raise ValueError("Yahoo Finance Data Not Available")
-    else:
-        return DataFrameFloat(data=data["Close"])  # type: ignore
+    return DataFrameFloat(data=data["Close"])  # type: ignore
 
 
-def _get_returns_data(prices_data: DataFrameFloat) -> DataFrameFloat:
+def _get_returns_data(data: DataFrameFloat) -> DataFrameFloat:
     return DataFrameFloat(
-        data=pct_returns_np(prices_array=prices_data.get_array()),
-        columns=prices_data.columns,
-        index=prices_data.dates,
+        data=pct_returns_np(prices_array=data.get_array()),
+        columns=data.columns,
+        index=data.dates,
     )
