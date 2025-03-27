@@ -1,21 +1,12 @@
-def check_time() -> None:
-    import time
-    start: float = time.perf_counter()
-    oql = OutQuantLab()
-    oql.run()
-    end: float = time.perf_counter()
-    print(f"Backtest completed in {end - start:.2f} seconds.")
+from outquantlab import OutQuantLab
 
-def test_app() -> None:
-    oql = OutQuantLab()
+def use_example() -> None:
+    oql = OutQuantLab(refresh_data=False)
     results = oql.run()
-    oql.stats.correlation.plot(data=results.assets)
-    oql.stats.rolling.drawdown.plot(data=results.portfolio, length=1250)
     oql.stats.overall.sharpe_ratio.plot(data=results.assets)
+    oql.stats.rolling.drawdown.plot(data=results.portfolio, length=1250)
     oql.save_config()
+    oql.save_results(results=results)
 
 if __name__ == "__main__":
-    print("initializing OutQuantLab...")
-    from outquantlab import OutQuantLab
-    print("OutQuantLab initialized")
-    test_app()
+    use_example()
