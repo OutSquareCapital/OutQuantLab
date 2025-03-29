@@ -45,11 +45,10 @@ class SeriesFloat(Series):  # type: ignore
         combined_array: ArrayFloat = concatenate([r.reshape(1) for r in data])
         return cls(data=combined_array, index=index)
 
-    def convert_to_json(self, title: str) -> dict[str, dict[str, list[str]]]:
+    def convert_to_json(self) -> dict[str, list[str]]:
         data: list[str] = self.values.tolist()  # type: ignore
         index: list[str] = [str(idx) for idx in self.index]  # type: ignore
-        result_dict: dict[str, list[str]] = {"data": data, "index": index}
-        return {title: result_dict}
+        return {"data": data, "index": index}
 
 
 class DataFrameFloat(DataFrame):
@@ -81,11 +80,8 @@ class DataFrameFloat(DataFrame):
 
     def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
-            return [
-                "_".join(col).replace(" ", "_")
-                for col in self.columns.to_list()  
-            ]
-        return self.columns.to_list() 
+            return ["_".join(col).replace(" ", "_") for col in self.columns.to_list()]
+        return self.columns.to_list()
 
     def sort_data(self, ascending: bool) -> "DataFrameFloat":
         mean_values: ArrayFloat = nanmean(self.get_array(), axis=0)
@@ -100,15 +96,14 @@ class DataFrameFloat(DataFrame):
             data=sorted_data, columns=sorted_columns, index=self.dates
         )
 
-    def convert_to_json(self, title: str) -> dict[str, dict[str, list[str]]]:
+    def convert_to_json(self) -> dict[str, list[str]]:
         column_data: list[str] = []
         for col_name in self.columns:
             values: list[str] = self[col_name].values.tolist()  # type: ignore
             column_data.append(values)  # type: ignore
 
-        result_dict: dict[str, list[str]] = {
+        return {
             "data": column_data,
             "index": [str(idx) for idx in self.dates],
             "columns": self.columns.tolist(),
         }
-        return {title: result_dict}

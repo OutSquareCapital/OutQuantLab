@@ -29,12 +29,6 @@ class StatProcessor[D: DataFrameFloat | SeriesFloat, F: Callable[..., ArrayFloat
     def get_formatted_data(self, data: DataFrameFloat, *args: Any, **kwargs: Any) -> D:
         raise NotImplementedError
 
-    @abstractmethod
-    def get_serialized_data(
-        self, data: DataFrameFloat, *args: Any, **kwargs: Any
-    ) -> dict[str, dict[str, list[str]]]:
-        raise NotImplementedError
-
 
 class RollingProcessor(StatProcessor[DataFrameFloat, ParametrableFunc]):
     def get_formatted_data(self, data: DataFrameFloat, length: int) -> DataFrameFloat:
@@ -44,13 +38,6 @@ class RollingProcessor(StatProcessor[DataFrameFloat, ParametrableFunc]):
             index=data.dates,
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
-
-    def get_serialized_data(
-        self, data: DataFrameFloat, length: int
-    ) -> dict[str, dict[str, list[str]]]:
-        return self.get_formatted_data(data=data, length=length).convert_to_json(
-            title=self._name
-        )
 
     def plot(self, data: DataFrameFloat, length: int) -> None:
         Curves(
@@ -68,13 +55,6 @@ class SamplingProcessor(StatProcessor[DataFrameFloat, ParametrableFunc]):
             data=stats_array,
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
-
-    def get_serialized_data(
-        self, data: DataFrameFloat, frequency: int
-    ) -> dict[str, dict[str, list[str]]]:
-        return self.get_formatted_data(data=data, frequency=frequency).convert_to_json(
-            title=self._name
-        )
 
     def plot_violins(self, data: DataFrameFloat, frequency: int) -> None:
         Violins(
@@ -97,11 +77,6 @@ class TableProcessor(StatProcessor[DataFrameFloat, DefinedFunc]):
             columns=data.get_names(),
         )
 
-    def get_serialized_data(
-        self, data: DataFrameFloat
-    ) -> dict[str, dict[str, list[str]]]:
-        return self.get_formatted_data(data=data).convert_to_json(title=self._name)
-
     def plot(self, data: DataFrameFloat) -> None:
         HeatMap(formatted_data=self.get_formatted_data(data=data), title=self._name)
 
@@ -112,11 +87,6 @@ class AggregateProcessor(StatProcessor[SeriesFloat, DefinedFunc]):
         return SeriesFloat(data=stats_array, index=data.get_names()).sort_data(
             ascending=self._ascending
         )
-
-    def get_serialized_data(
-        self, data: DataFrameFloat
-    ) -> dict[str, dict[str, list[str]]]:
-        return self.get_formatted_data(data=data).convert_to_json(title=self._name)
 
     def plot(self, data: DataFrameFloat) -> None:
         Bars(formatted_data=self.get_formatted_data(data=data), title=self._name)
