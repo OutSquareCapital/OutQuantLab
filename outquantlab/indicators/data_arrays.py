@@ -20,7 +20,7 @@ class DataArrays:
         self.adjusted_returns: ArrayFloat = get_volatility_adjusted_returns(
             pct_returns_array=self.pct_returns, hv_array=self.hv
         )
-
+        self.pct_returns = _shift_array(original_array=self.pct_returns)
         self.prices = _shift_array(original_array=prices)
         self.log_returns = _shift_array(original_array=returns)
 
@@ -29,7 +29,7 @@ def get_volatility_adjusted_returns(
     pct_returns_array: ArrayFloat, hv_array: ArrayFloat, target_volatility: int = 25
 ) -> ArrayFloat:
     vol_adj_position_size_shifted: ArrayFloat = _shift_array(
-        original_array=target_volatility / hv_array
+        original_array=target_volatility / (hv_array + 1e-10)
     )
     return pct_returns_array * vol_adj_position_size_shifted
 
