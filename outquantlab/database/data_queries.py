@@ -1,62 +1,86 @@
-from pathlib import Path
-from outquantlab.database.data_file import JSONFile, ParquetFile
-from typing import NamedTuple
+from dataclasses import dataclass
 
+from outquantlab.config_classes import (
+    AssetsClusters,
+    AssetsConfig,
+    IndicsClusters,
+    IndicsConfig,
+)
+from outquantlab.database.data_file import FilesObject, JSONFile, ParquetFile
+from outquantlab.web_api import AssetsData, fetch_data
+from outquantlab.typing_conventions import DataFrameFloat
 
-class AssetFiles(NamedTuple):
-    active: JSONFile[str, bool]
+@dataclass
+class AssetsClustersFiles(FilesObject[AssetsClusters]):
     clusters: JSONFile[str, dict[str, list[str]]]
 
+    def get(self) -> AssetsClusters:
+        return AssetsClusters(
+            clusters=self.clusters.load(),
+        )
 
-class IndicFiles(NamedTuple):
+    def save(self, data: AssetsClusters) -> None:
+        self.clusters.save(data=data.clusters)
+
+
+@dataclass
+class IndicsClustersFiles(FilesObject[IndicsClusters]):
+    clusters: JSONFile[str, dict[str, list[str]]]
+
+    def get(self) -> IndicsClusters:
+        return IndicsClusters(
+            clusters=self.clusters.load(),
+        )
+
+    def save(self, data: IndicsClusters) -> None:
+        self.clusters.save(data=data.clusters)
+
+
+@dataclass
+class AssetFiles(FilesObject[AssetsConfig]):
+    active: JSONFile[str, bool]
+
+    def get(self) -> AssetsConfig:
+        return AssetsConfig(
+            assets_active=self.active.load(),
+        )
+
+    def save(self, data: AssetsConfig) -> None:
+        self.active.save(data=data.get_all_entities_dict())
+
+
+@dataclass
+class IndicFiles(FilesObject[IndicsConfig]):
     active: JSONFile[str, bool]
     params: JSONFile[str, dict[str, list[int]]]
-    clusters: JSONFile[str, dict[str, list[str]]]
+
+    def get(self) -> IndicsConfig:
+        return IndicsConfig(
+            indics_active=self.active.load(),
+            params_config=self.params.load(),
+        )
+
+    def save(self, data: IndicsConfig) -> None:
+        self.active.save(data=data.get_all_entities_dict())
+        self.params.save(data=data.prepare_indic_params())
 
 
-class BacktestFiles(NamedTuple):
+@dataclass
+class TickersData(FilesObject[AssetsData]):
     returns: ParquetFile
     prices: ParquetFile
-    
-class DataBase(NamedTuple):
-    assets: AssetFiles
-    indics: IndicFiles
-    backtest: BacktestFiles
 
-DB = "data"
+    def get(self, assets: list[str]) -> AssetsData:
+        return fetch_data(assets=assets)
 
+    def save(self, data: AssetsData) -> None:
+        self.prices.save(data=data.prices)
+        self.returns.save(data=data.returns)
 
-def get_db() -> DataBase:
-    db_path: Path = _get_db_path(db_name=DB)
-    return DataBase(
-        assets=_get_asset_files(db_path=db_path),
-        indics=_get_indic_files(db_path=db_path),
-        backtest=_get_backtest_files(db_path=db_path),
-    )
+    def refresh(self, assets: list[str]) -> None:
+        data: AssetsData = self.get(assets=assets)
+        self.save(data=data)
 
-def _get_db_path(db_name: str) -> Path:
-    current_file_path: Path = Path(__file__).resolve()
-    current_dir: Path = current_file_path.parent
-    return current_dir / db_name
-
-
-def _get_asset_files(db_path: Path) -> AssetFiles:
-    return AssetFiles(
-        active=JSONFile(db_path=db_path, file_name="assets_active"),
-        clusters=JSONFile(db_path=db_path, file_name="assets_clusters"),
-    )
-
-
-def _get_indic_files(db_path: Path) -> IndicFiles:
-    return IndicFiles(
-        active=JSONFile(db_path=db_path, file_name="indics_active"),
-        params=JSONFile(db_path=db_path, file_name="indics_params"),
-        clusters=JSONFile(db_path=db_path, file_name="indics_clusters"),
-    )
-
-
-def _get_backtest_files(db_path: Path) -> BacktestFiles:
-    return BacktestFiles(
-        returns=ParquetFile(db_path=db_path, file_name="returns_data"),
-        prices=ParquetFile(db_path=db_path, file_name="prices_data"),
-    )
+    def get_returns_data(self, assets: list[str]) -> DataFrameFloat:
+        data: AssetsData = self.get(assets=assets)
+        return data.returns
