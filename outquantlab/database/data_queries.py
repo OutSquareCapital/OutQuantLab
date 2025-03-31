@@ -15,7 +15,6 @@ class IndicFiles(NamedTuple):
 
 
 class BacktestFiles(NamedTuple):
-    results: JSONFile[str, dict[str, list[str]]]
     returns: ParquetFile
     prices: ParquetFile
     
@@ -58,7 +57,6 @@ def _get_indic_files(db_path: Path) -> IndicFiles:
 
 def _get_backtest_files(db_path: Path) -> BacktestFiles:
     return BacktestFiles(
-        results=JSONFile(db_path=db_path, file_name="backtest_results"),
         returns=ParquetFile(db_path=db_path, file_name="returns_data"),
         prices=ParquetFile(db_path=db_path, file_name="prices_data"),
     )
