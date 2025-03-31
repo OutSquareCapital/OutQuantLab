@@ -157,7 +157,8 @@ class HeatMap(Graph[DataFrameFloat]):
                 hovertemplate=CustomHovers.HEATMAP.value,
             )
         )
-
         self.figure.update_layout(  # type: ignore
             yaxis=dict(showgrid=False, autorange="reversed")
         )
+        self.figure.update_yaxes(showticklabels=False) # type: ignore
+        self.figure.update_xaxes(showticklabels=False) # type: ignore
