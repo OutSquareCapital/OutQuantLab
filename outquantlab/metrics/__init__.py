@@ -46,6 +46,7 @@ from outquantlab.metrics.performance import (
 from outquantlab.metrics.volatility import (
     get_overall_volatility_annualized,
     get_rolling_volatility,
+    get_rolling_volatility_annualized,
     hv_composite,
     overall_volatility,
     separate_volatility,
@@ -96,4 +97,5 @@ __all__: list[str] = [
     "get_overall_average_drawdown",
     "get_clusters",
     "get_filled_correlation_matrix",
+    "get_rolling_volatility_annualized"
 ]

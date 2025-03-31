@@ -21,6 +21,13 @@ def get_rolling_volatility(
 ) -> ArrayFloat:
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof=1)  # type: ignore
 
+def get_rolling_volatility_annualized(
+    array: ArrayFloat, length: int, min_length: int = 1
+) -> ArrayFloat:
+    return (
+        get_rolling_volatility(array=array, length=length, min_length=min_length)
+        * Standardization.ANNUALIZED_PERCENTAGE.value
+    )
 
 def hv_composite(
     returns_array: ArrayFloat,

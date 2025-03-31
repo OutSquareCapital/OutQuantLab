@@ -50,7 +50,7 @@ class Stats:
             sharpe_ratio=RollingProcessor(
                 _func=mt.get_rolling_sharpe_ratio, _ascending=False
             ),
-            volatility=RollingProcessor(_func=mt.get_rolling_volatility),
+            volatility=RollingProcessor(_func=mt.get_rolling_volatility_annualized),
             drawdown=RollingProcessor(_func=mt.get_rolling_drawdown),
             skewness=RollingProcessor(_func=mt.get_rolling_skewness, _ascending=False),
         )
@@ -61,5 +61,5 @@ class Stats:
             _func=mt.get_filled_correlation_matrix, _ascending=False
         )
         self.equity = EquityProcessor(
-            _func=mt.get_equity_curves, _ascending=False
+            _func=mt.get_equity_curves, _ascending=True
         )
