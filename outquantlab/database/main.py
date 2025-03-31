@@ -1,15 +1,16 @@
 from pathlib import Path
 
 from outquantlab.config_classes import AppConfig
-from outquantlab.database.interfaces import JSONFile, ParquetFile
 from outquantlab.database.implementations import (
     AssetFiles,
-    TickersData,
-    IndicFiles,
     AssetsClustersFiles,
+    IndicFiles,
     IndicsClustersFiles,
+    TickersData,
 )
+from outquantlab.database.interfaces import JSONFile, ParquetFile
 from outquantlab.typing_conventions import DataFrameFloat
+
 
 class DataBaseProvider:
     def __init__(self) -> None:
@@ -23,8 +24,7 @@ class DataBaseProvider:
             params=JSONFile(db_path=db_path, file_name="indics_params"),
         )
         self.tickers = TickersData(
-            returns=ParquetFile(db_path=db_path, file_name="returns_data"),
-            prices=ParquetFile(db_path=db_path, file_name="prices_data"),
+            returns=ParquetFile(db_path=db_path, file_name="foort_strategies"),
         )
         self.assets_clusters = AssetsClustersFiles(
             clusters=JSONFile(db_path=db_path, file_name="assets_clusters"),
@@ -39,14 +39,13 @@ class DataBaseProvider:
         return current_dir / db_name
 
     def get_returns_data(self, app_config: AppConfig) -> DataFrameFloat:
-        return self.tickers.get_returns_data(
+        return self.tickers.get(
             assets=app_config.assets_config.get_all_active_entities_names()
         )
 
     def refresh_data(self, app_config: AppConfig) -> None:
-        self.tickers.refresh(
-            assets=app_config.assets_config.get_all_entities_names()
-        )
+        self.tickers.refresh(assets=app_config.assets_config.get_all_entities_names())
+
     def get_app_config(self) -> AppConfig:
         return AppConfig(
             assets_config=self.assets.get(),

@@ -7,8 +7,9 @@ from outquantlab.config_classes import (
     IndicsConfig,
 )
 from outquantlab.database.interfaces import FilesObject, JSONFile, ParquetFile
-from outquantlab.web_api import AssetsData, fetch_data
 from outquantlab.typing_conventions import DataFrameFloat
+from outquantlab.web_api import fetch_data
+
 
 @dataclass
 class AssetsClustersFiles(FilesObject[AssetsClusters]):
@@ -66,21 +67,15 @@ class IndicFiles(FilesObject[IndicsConfig]):
 
 
 @dataclass
-class TickersData(FilesObject[AssetsData]):
+class TickersData(FilesObject[DataFrameFloat]):
     returns: ParquetFile
-    prices: ParquetFile
 
-    def get(self, assets: list[str]) -> AssetsData:
-        return fetch_data(assets=assets)
+    def get(self, assets: list[str] | None) -> DataFrameFloat:
+        return DataFrameFloat(self.returns.load(names=assets))
 
-    def save(self, data: AssetsData) -> None:
-        self.prices.save(data=data.prices)
-        self.returns.save(data=data.returns)
+    def save(self, data: DataFrameFloat) -> None:
+        self.returns.save(data=data)
 
     def refresh(self, assets: list[str]) -> None:
-        data: AssetsData = self.get(assets=assets)
+        data: DataFrameFloat = fetch_data(assets=assets)
         self.save(data=data)
-
-    def get_returns_data(self, assets: list[str]) -> DataFrameFloat:
-        data: AssetsData = self.get(assets=assets)
-        return data.returns

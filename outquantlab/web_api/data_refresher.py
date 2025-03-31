@@ -1,25 +1,20 @@
 import yfinance as yf  # type: ignore
 from pandas import DataFrame
-from typing import NamedTuple
 from outquantlab.metrics import pct_returns_np
 from outquantlab.typing_conventions import DataFrameFloat
 
-class AssetsData(NamedTuple):
-    prices: DataFrameFloat
-    returns: DataFrameFloat
-
-
-def fetch_data(assets: list[str]) -> AssetsData:
+def fetch_data(assets: list[str]) -> DataFrameFloat:
     test_connection(asset=assets[0])
     return _get_yf_data(assets=assets)
 
 
         
-def _get_yf_data(assets: list[str]) -> AssetsData:
+def _get_yf_data(assets: list[str]) -> DataFrameFloat:
     prices: DataFrameFloat = _get_prices_data(assets=assets)
-    return AssetsData(
-        prices=prices,
-        returns=_get_returns_data(data=prices)
+    return DataFrameFloat(
+        data=pct_returns_np(prices_array=prices.get_array()),
+        columns=prices.columns,
+        index=prices.dates,
     )
 
 def test_connection(asset: str) -> None:
@@ -36,11 +31,3 @@ def _get_prices_data(assets: list[str]) -> DataFrameFloat:
         progress=False,
     )
     return DataFrameFloat(data=data["Close"])  # type: ignore
-
-
-def _get_returns_data(data: DataFrameFloat) -> DataFrameFloat:
-    return DataFrameFloat(
-        data=pct_returns_np(prices_array=data.get_array()),
-        columns=data.columns,
-        index=data.dates,
-    )
