@@ -1,27 +1,23 @@
+from typing import TypedDict
+
 from numpy import argsort, array, concatenate, nan, nanmean
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
 from outquantlab.typing_conventions.custom_types import ArrayFloat, ArrayInt, Float32
-from typing import TypedDict
+
 
 class SeriesDict(TypedDict):
     data: list[float]
     index: list[str]
+
 
 class DataFrameDict(TypedDict):
     data: list[list[float]]
     index: list[str]
     columns: list[str]
 
+
 class SeriesFloat(Series):  # type: ignore
-    """
-    Strictly typed Series for managing floating-point data.
-
-    This class enforces:
-    - Data of type Float32.
-    - Index of type list[str], Index, or MultiIndex.
-    """
-
     def __init__(
         self,
         data: ArrayFloat | Series | list[float],  # type: ignore
@@ -61,15 +57,6 @@ class SeriesFloat(Series):  # type: ignore
 
 
 class DataFrameFloat(DataFrame):
-    """
-    Strictly typed DataFrame for managing floating-point data.
-
-    This class enforces:
-    - Data of type Float32.
-    - Index of type DatetimeIndex.
-    - Columns of type list[str], Index, or MultiIndex.
-    """
-
     def __init__(
         self,
         data: ArrayFloat | DataFrame | None = None,
@@ -115,5 +102,5 @@ class DataFrameFloat(DataFrame):
         return DataFrameDict(
             data=column_data,
             index=[str(idx) for idx in self.dates],  # type: ignore
-            columns=self.get_names()
+            columns=self.get_names(),
         )
