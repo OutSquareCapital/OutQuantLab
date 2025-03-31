@@ -6,7 +6,7 @@ from outquantlab.config_classes import (
     IndicsClusters,
     IndicsConfig,
 )
-from outquantlab.database.data_file import FilesObject, JSONFile, ParquetFile
+from outquantlab.database.interfaces import FilesObject, JSONFile, ParquetFile
 from outquantlab.web_api import AssetsData, fetch_data
 from outquantlab.typing_conventions import DataFrameFloat
 

@@ -1,4 +1,4 @@
-from outquantlab.database.data_provider import DataBaseProvider
+from outquantlab.database.main import DataBaseProvider
 
 __all__: list[str] = [
     'DataBaseProvider',

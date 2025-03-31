@@ -1,8 +1,8 @@
 from pathlib import Path
 
 from outquantlab.config_classes import AppConfig
-from outquantlab.database.data_file import JSONFile, ParquetFile
-from outquantlab.database.data_queries import (
+from outquantlab.database.interfaces import JSONFile, ParquetFile
+from outquantlab.database.implementations import (
     AssetFiles,
     TickersData,
     IndicFiles,
