@@ -1,66 +1,62 @@
-from outquantlab.config_classes import (
-    AppConfig,
-    AssetsClusters,
-    AssetsConfig,
-    IndicsClusters,
-    IndicsConfig,
-)
-from outquantlab.database.data_queries import DataBase, get_db
-from outquantlab.database.data_refresher import AssetsData, fetch_data
-from outquantlab.typing_conventions import DataFrameFloat
+from pathlib import Path
 
+from outquantlab.config_classes import AppConfig
+from outquantlab.database.data_file import JSONFile, ParquetFile
+from outquantlab.database.data_queries import (
+    AssetFiles,
+    TickersData,
+    IndicFiles,
+    AssetsClustersFiles,
+    IndicsClustersFiles,
+)
+from outquantlab.typing_conventions import DataFrameFloat
 
 class DataBaseProvider:
     def __init__(self) -> None:
-        self.db: DataBase = get_db()
+        db_path: Path = self._get_db_path(db_name="data")
+        self.assets = AssetFiles(
+            active=JSONFile(db_path=db_path, file_name="assets_active"),
+        )
 
-    def check_data(self) -> None:
-        for data in self.db:
-            print(data)
+        self.indics = IndicFiles(
+            active=JSONFile(db_path=db_path, file_name="indics_active"),
+            params=JSONFile(db_path=db_path, file_name="indics_params"),
+        )
+        self.tickers = TickersData(
+            returns=ParquetFile(db_path=db_path, file_name="returns_data"),
+            prices=ParquetFile(db_path=db_path, file_name="prices_data"),
+        )
+        self.assets_clusters = AssetsClustersFiles(
+            clusters=JSONFile(db_path=db_path, file_name="assets_clusters"),
+        )
+        self.indics_clusters = IndicsClustersFiles(
+            clusters=JSONFile(db_path=db_path, file_name="indics_clusters"),
+        )
 
+    def _get_db_path(self, db_name: str) -> Path:
+        current_file_path: Path = Path(__file__).resolve()
+        current_dir: Path = current_file_path.parent
+        return current_dir / db_name
+
+    def get_returns_data(self, app_config: AppConfig) -> DataFrameFloat:
+        return self.tickers.get_returns_data(
+            assets=app_config.assets_config.get_all_active_entities_names()
+        )
+
+    def refresh_data(self, app_config: AppConfig) -> None:
+        self.tickers.refresh(
+            assets=app_config.assets_config.get_all_entities_names()
+        )
     def get_app_config(self) -> AppConfig:
         return AppConfig(
-            assets_config=self._get_assets_config(),
-            assets_clusters=self._get_assets_clusters(),
-            indics_config=self._get_indics_config(),
-            indics_clusters=self._get_indics_clusters(),
+            assets_config=self.assets.get(),
+            assets_clusters=self.assets_clusters.get(),
+            indics_config=self.indics.get(),
+            indics_clusters=self.indics_clusters.get(),
         )
 
-    def refresh_assets_data(self, assets: list[str]) -> None:
-        data: AssetsData = fetch_data(assets=assets)
-        self.db.backtest.prices.save(data=data.prices)
-        self.db.backtest.returns.save(data=data.returns)
-
-    def get_returns_data(self, assets: list[str] | None = None) -> DataFrameFloat:
-        return DataFrameFloat(data=self.db.backtest.returns.load(names=assets))
-
-    def _get_indics_config(self) -> IndicsConfig:
-        return IndicsConfig(
-            indics_active=self.db.indics.active.load(),
-            params_config=self.db.indics.params.load(),
-        )
-
-    def _get_indics_clusters(self) -> IndicsClusters:
-        return IndicsClusters(
-            clusters=self.db.indics.clusters.load(),
-        )
-
-    def _get_assets_config(self) -> AssetsConfig:
-        return AssetsConfig(
-            assets_active=self.db.assets.active.load(),
-        )
-
-    def _get_assets_clusters(self) -> AssetsClusters:
-        return AssetsClusters(
-            clusters=self.db.assets.clusters.load(),
-        )
-
-    def save_backtest_results(self, results: dict[str, dict[str, list[str]]]) -> None:
-        self.db.backtest.results.save(data=results)
-
-    def save_config(self, config: AppConfig) -> None:
-        self.db.assets.active.save(data=config.assets_config.get_all_entities_dict())
-        self.db.assets.clusters.save(data=config.assets_clusters.clusters)
-        self.db.indics.active.save(data=config.indics_config.get_all_entities_dict())
-        self.db.indics.params.save(data=config.indics_config.prepare_indic_params())
-        self.db.indics.clusters.save(data=config.indics_clusters.clusters)
+    def save_app_config(self, app_config: AppConfig) -> None:
+        self.assets.save(data=app_config.assets_config)
+        self.indics.save(data=app_config.indics_config)
+        self.assets_clusters.save(data=app_config.assets_clusters)
+        self.indics_clusters.save(data=app_config.indics_clusters)
