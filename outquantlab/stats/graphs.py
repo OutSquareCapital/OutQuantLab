@@ -67,6 +67,25 @@ class Curves(Graph[DataFrameFloat]):
             )
 
 
+class LogCurves(Graph[DataFrameFloat]):
+    def setup_figure(self, formatted_data: DataFrameFloat) -> None:
+        color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
+        for column in formatted_data.columns:
+            self.figure.add_trace(  # type: ignore
+                trace=go.Scatter(
+                    x=formatted_data.dates,
+                    y=formatted_data[column],
+                    mode="lines",
+                    name=column,
+                    line=dict(width=2, color=color_map[column]),
+                    hovertemplate=CustomHovers.VERTICAL_DATA.value,
+                )
+            )
+        self.figure.update_yaxes(  # type: ignore
+            type="log"
+        )
+
+
 class Violins(Graph[DataFrameFloat]):
     def setup_figure(self, formatted_data: DataFrameFloat) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())

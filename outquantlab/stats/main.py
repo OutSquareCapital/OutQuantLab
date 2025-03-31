@@ -6,6 +6,7 @@ from outquantlab.stats.processors import (
     RollingProcessor,
     SamplingProcessor,
     TableProcessor,
+    EquityProcessor
 )
 
 
@@ -30,6 +31,7 @@ class Stats:
     rolling: RollingProcessorsRegistery = field(init=False)
     distribution: SamplingProcessor = field(init=False)
     correlation: TableProcessor = field(init=False)
+    equity: EquityProcessor = field(init=False)
 
     def __post_init__(self) -> None:
         self.overall = AggregateProcessorsRegistery(
@@ -57,4 +59,7 @@ class Stats:
         )
         self.correlation = TableProcessor(
             _func=mt.get_filled_correlation_matrix, _ascending=False
+        )
+        self.equity = EquityProcessor(
+            _func=mt.get_equity_curves, _ascending=False
         )
