@@ -5,6 +5,7 @@ OutQuantLab is a comprehensive Python-based quantitative analysis platform for b
 ## Key Features
 
 ### Trading Strategy Analysis
+
 - Multi-threaded backtesting engine
 - Extensive library of technical indicators:
   - Moving averages (mean, median, central)
@@ -14,12 +15,14 @@ OutQuantLab is a comprehensive Python-based quantitative analysis platform for b
 - Performance metrics and risk analysis
 
 ### Data Management
+
 - Integration with Yahoo Finance
 - Custom DataFrame types optimized for financial data
 - Local data storage in Parquet format
 - Efficient data processing with NumPy/Pandas
 
 ### Advanced Analytics
+
 - Dynamic asset clustering
 - Correlation analysis
 - Distribution analysis
@@ -27,6 +30,7 @@ OutQuantLab is a comprehensive Python-based quantitative analysis platform for b
 - Multi-level hierarchical organization
 
 ### Visualization
+
 - Interactive equity curves
 - Performance metrics dashboards
 - Distribution plots (violin, histogram)
@@ -35,6 +39,7 @@ OutQuantLab is a comprehensive Python-based quantitative analysis platform for b
 - Custom color schemes
 
 ### User Interface
+
 - Full-featured GUI built with PySide6
 - Command-line interface
 - Interactive parameter configuration
@@ -43,45 +48,45 @@ OutQuantLab is a comprehensive Python-based quantitative analysis platform for b
 ## Requirements
 
 ### Core Dependencies
+
 - Python 3.10+
 - NumPy
 - Pandas
 - Plotly
-- PySide6
 - SciPy
 - yfinance
 - bottleneck
 - polars
 - pyarrow
+- FastAPI
 
 ## Installation
 
-1. Clone the repository:
+### Clone the repository
+
 ```bash
 git clone https://github.com/OutSquareCapital/OutQuantLab.git
 cd OutQuantLab
 ```
 
-2. Install dependencies:
+### Install dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ## Project Structure
 
-```
 OutQuantLab/
-├── App/                 # Application core
-├── Backtest/           # Backtesting engine
-├── ConfigClasses/      # Configuration management
-├── DataBase/          # Data handling
-├── Graphs/            # Visualization tools
-├── Indicators/        # Technical indicators
-├── metrics/          # Performance metrics
-├── UI/               # User interface
-├── Utilitary/        # Utility functions
-└── Run.py           # Entry point
-```
+├── backtest/           # Backtesting process
+├── config_classes/      # Select assets and indicators
+├── database/          # Data handling, retrieval, and saving
+├── stats/            # Statistical analysis and vizualisation
+├── Indicators/        # Strategies indicators
+├── metrics/          # Math and stats funcs used in indicators and stats
+├── typing_conventions/ # General purposes data structures
+├── web_api/          # data retrieval with yfinance, frontend web communication
+└── run.py           # Entry point
 
 ## Development
 
@@ -91,8 +96,8 @@ OutQuantLab/
 2. Add normalized version in `Indicators/Indics_Normalized.py`
 3. Use the `@indic` decorator to register the indicator
 
-### Creating Visualization Widgets
+### Creating new statistic measure
 
-1. Define widget in `Graphs/Widgets.py`
-2. Add color scheme in `Graphs/Design.py`
-3. Implement data transformations in `Graphs/Transformations.py`
+1. Define widget in `stats/graphs.py`
+2. Implement data transformations in `stats/processors.py`
+3. Instanciate the processor in `stats/main.py`
