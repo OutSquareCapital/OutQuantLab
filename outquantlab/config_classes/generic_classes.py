@@ -15,6 +15,9 @@ class BaseConfig[T: StrategyComponent](ABC):
     @abstractmethod
     def _load_entities(self, *args: Any, **kwargs: Any) -> None: ...
 
+    def get_all_entities(self) -> list[T]:
+        return list(self.entities.values())
+
     def get_all_entities_names(self) -> list[str]:
         return [entity.name for entity in self.entities.values()]
 
@@ -36,17 +39,27 @@ class BaseConfig[T: StrategyComponent](ABC):
 
 class BaseClustersTree[T: StrategyComponent](ABC):
     def __init__(self, clusters: dict[str, dict[str, list[str]]]) -> None:
-        self.clusters: dict[str, dict[str, list[str]]] = clusters
+        self.structure: dict[str, dict[str, list[str]]] = clusters
+        self.mapping: dict[str, tuple[str, str]] = self.map_nested_clusters_to_entities()
 
+    def check_data_structure(self, entities: list[T]) -> None:
+        if 'default' not in self.structure:
+            self.structure['default'] = {'default': []}
+        for entity in entities:
+            if entity.name not in self.mapping:
+                self.structure['default']['default'].append(entity.name)
+                self.mapping[entity.name] = ('default', 'default')
+        
     def update_clusters_structure(
         self, new_structure: dict[str, dict[str, list[str]]]
     ) -> None:
-        self.clusters = new_structure
+        self.structure = new_structure
+        self.mapping = self.map_nested_clusters_to_entities()
 
     def map_nested_clusters_to_entities(self) -> dict[str, tuple[str, str]]:
         return {
             entity: (level1, level2)
-            for level1, subclusters in self.clusters.items()
+            for level1, subclusters in self.structure.items()
             for level2, entities in subclusters.items()
             for entity in entities
         }

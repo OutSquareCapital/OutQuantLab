@@ -96,14 +96,17 @@ class AppConfig:
     def get_backtest_config(
         self,
     ) -> BacktestConfig:
-        indics_params: list[BaseIndic] = self.indics_config.get_indics_params()
 
-        asset_tuples: list[tuple[str, ...]] = self.assets_clusters.get_clusters_tuples(
-            entities=self.assets_config.get_all_active_entities()
-        )
+        self.indics_clusters.check_data_structure(entities=self.indics_config.get_all_entities())
+        indics_params: list[BaseIndic] = self.indics_config.get_indics_params()
         indics_tuples: list[tuple[str, ...]] = self.indics_clusters.get_clusters_tuples(
             entities=indics_params
         )
+        self.assets_clusters.check_data_structure(entities=self.assets_config.get_all_entities())
+        asset_tuples: list[tuple[str, ...]] = self.assets_clusters.get_clusters_tuples(
+            entities=self.assets_config.get_all_active_entities()
+        )
+
         backtest_results: BacktestResults = BacktestResults()
         return BacktestConfig(
             backtest_results=backtest_results,

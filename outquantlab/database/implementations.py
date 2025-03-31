@@ -21,7 +21,7 @@ class AssetsClustersFiles(FilesObject[AssetsClusters]):
         )
 
     def save(self, data: AssetsClusters) -> None:
-        self.clusters.save(data=data.clusters)
+        self.clusters.save(data=data.structure)
 
 
 @dataclass
@@ -34,7 +34,7 @@ class IndicsClustersFiles(FilesObject[IndicsClusters]):
         )
 
     def save(self, data: IndicsClusters) -> None:
-        self.clusters.save(data=data.clusters)
+        self.clusters.save(data=data.structure)
 
 
 @dataclass
