@@ -106,6 +106,7 @@ class DataFrameFloat(DataFrame):
         )
 
     def convert_to_json(self) -> DataFrameDict:
+        self.dropna(axis=0, how="all", inplace=True)  # type: ignore
         column_data: list[list[float]] = []
         for col_name in self.columns:
             values: list[str] = self[col_name].values.tolist()  # type: ignore
