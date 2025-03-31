@@ -7,8 +7,8 @@ from outquantlab.web_api import start_server
 
 
 class OutQuantLab:
-    def __init__(self, refresh_data: bool = True) -> None:
-        self._dbp = DataBaseProvider()
+    def __init__(self, refresh_data: bool = True, db_name: str = "data") -> None:
+        self._dbp = DataBaseProvider(db_name=db_name)
         self.app_config: AppConfig = self._dbp.get_app_config()
         self.stats: Stats = Stats()
         if refresh_data:

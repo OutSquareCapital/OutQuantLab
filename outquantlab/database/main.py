@@ -11,10 +11,9 @@ from outquantlab.database.implementations import (
 from outquantlab.database.interfaces import JSONFile, ParquetFile
 from outquantlab.typing_conventions import DataFrameFloat
 
-
 class DataBaseProvider:
-    def __init__(self) -> None:
-        db_path: Path = self._get_db_path(db_name="data")
+    def __init__(self, db_name: str) -> None:
+        db_path: Path = self._get_db_path(db_name=db_name)
         self.assets = AssetFiles(
             active=JSONFile(db_path=db_path, file_name="assets_active"),
         )
@@ -24,7 +23,7 @@ class DataBaseProvider:
             params=JSONFile(db_path=db_path, file_name="indics_params"),
         )
         self.tickers = TickersData(
-            returns=ParquetFile(db_path=db_path, file_name="foort_strategies"),
+            returns=ParquetFile(db_path=db_path, file_name="returns_data"),
         )
         self.assets_clusters = AssetsClustersFiles(
             clusters=JSONFile(db_path=db_path, file_name="assets_clusters"),
