@@ -2,6 +2,18 @@ import json
 from abc import ABC, abstractmethod
 from pandas import DataFrame, read_parquet
 from pathlib import Path
+from typing import Any
+from dataclasses import dataclass
+
+@dataclass
+class FilesObject[T](ABC):
+    @abstractmethod
+    def get(self, *args: Any, **kwargs: Any) -> T:
+        raise NotImplementedError
+
+    @abstractmethod
+    def save(self, data: T) -> None:
+        raise NotImplementedError
 
 class DataFile[T](ABC):
     extension: str
