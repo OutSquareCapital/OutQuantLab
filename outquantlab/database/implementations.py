@@ -70,7 +70,7 @@ class IndicFiles(FilesObject[IndicsConfig]):
 class TickersData(FilesObject[DataFrameFloat]):
     returns: ParquetFile
 
-    def get(self, assets: list[str] | None) -> DataFrameFloat:
+    def get(self, assets: list[str] | None = None) -> DataFrameFloat:
         return DataFrameFloat(self.returns.load(names=assets))
 
     def save(self, data: DataFrameFloat) -> None:
