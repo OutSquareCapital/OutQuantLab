@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
-
+from outquantlab.web_api import send_data_to_server
 from outquantlab.stats.graphs import (
     Bars,
     Curves,
@@ -26,6 +26,10 @@ class StatProcessor[D: DataFrameFloat | SeriesFloat, F: Callable[..., ArrayFloat
         return self._func.__name__.replace("get", "").replace("_", " ").title()
 
     @abstractmethod
+    def send_to_api(self, data: DataFrameFloat, *args: Any, **kwargs: Any) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     def get_formatted_data(self, data: DataFrameFloat, *args: Any, **kwargs: Any) -> D:
         raise NotImplementedError
 
@@ -38,6 +42,12 @@ class RollingProcessor(StatProcessor[DataFrameFloat, ParametrableFunc]):
             index=data.dates,
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
+
+    def send_to_api(self, data: DataFrameFloat, length: int) -> None:
+        send_data_to_server(
+            id=self._name,
+            results=self.get_formatted_data(data=data, length=length).convert_to_json(),
+        )
 
     def plot(self, data: DataFrameFloat, length: int) -> None:
         Curves(
@@ -55,6 +65,14 @@ class SamplingProcessor(StatProcessor[DataFrameFloat, ParametrableFunc]):
             data=stats_array,
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
+
+    def send_to_api(self, data: DataFrameFloat, frequency: int) -> None:
+        send_data_to_server(
+            id=self._name,
+            results=self.get_formatted_data(
+                data=data, frequency=frequency
+            ).convert_to_json(),
+        )
 
     def plot_violins(self, data: DataFrameFloat, frequency: int) -> None:
         Violins(
@@ -77,6 +95,11 @@ class TableProcessor(StatProcessor[DataFrameFloat, DefinedFunc]):
             columns=data.get_names(),
         )
 
+    def send_to_api(self, data: DataFrameFloat) -> None:
+        send_data_to_server(
+            id=self._name, results=self.get_formatted_data(data=data).convert_to_json()
+        )
+
     def plot(self, data: DataFrameFloat) -> None:
         HeatMap(formatted_data=self.get_formatted_data(data=data), title=self._name)
 
@@ -86,6 +109,11 @@ class AggregateProcessor(StatProcessor[SeriesFloat, DefinedFunc]):
         stats_array: ArrayFloat = self._func(data.get_array())
         return SeriesFloat(data=stats_array, index=data.get_names()).sort_data(
             ascending=self._ascending
+        )
+
+    def send_to_api(self, data: DataFrameFloat) -> None:
+        send_data_to_server(
+            id=self._name, results=self.get_formatted_data(data=data).convert_to_json()
         )
 
     def plot(self, data: DataFrameFloat) -> None:
