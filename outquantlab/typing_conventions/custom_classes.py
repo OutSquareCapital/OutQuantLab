@@ -2,7 +2,16 @@ from numpy import argsort, array, concatenate, nan, nanmean
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
 from outquantlab.typing_conventions.custom_types import ArrayFloat, ArrayInt, Float32
+from typing import TypedDict
 
+class SeriesDict(TypedDict):
+    data: list[float]
+    index: list[str]
+
+class DataFrameDict(TypedDict):
+    data: list[list[float]]
+    index: list[str]
+    columns: list[str]
 
 class SeriesFloat(Series):  # type: ignore
     """
@@ -45,10 +54,10 @@ class SeriesFloat(Series):  # type: ignore
         combined_array: ArrayFloat = concatenate([r.reshape(1) for r in data])
         return cls(data=combined_array, index=index)
 
-    def convert_to_json(self) -> dict[str, list[str]]:
-        data: list[str] = self.values.tolist()  # type: ignore
+    def convert_to_json(self) -> SeriesDict:
+        data: list[float] = self.values.tolist()  # type: ignore
         index: list[str] = [str(idx) for idx in self.index]  # type: ignore
-        return {"data": data, "index": index}
+        return SeriesDict(data=data, index=index)
 
 
 class DataFrameFloat(DataFrame):
@@ -96,14 +105,14 @@ class DataFrameFloat(DataFrame):
             data=sorted_data, columns=sorted_columns, index=self.dates
         )
 
-    def convert_to_json(self) -> dict[str, list[str]]:
-        column_data: list[str] = []
+    def convert_to_json(self) -> DataFrameDict:
+        column_data: list[list[float]] = []
         for col_name in self.columns:
             values: list[str] = self[col_name].values.tolist()  # type: ignore
             column_data.append(values)  # type: ignore
 
-        return {
-            "data": column_data,
-            "index": [str(idx) for idx in self.dates],
-            "columns": self.columns.tolist(),
-        }
+        return DataFrameDict(
+            data=column_data,
+            index=[str(idx) for idx in self.dates],  # type: ignore
+            columns=self.get_names()
+        )

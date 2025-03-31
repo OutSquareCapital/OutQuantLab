@@ -1,4 +1,4 @@
-from outquantlab.typing_conventions.custom_classes import SeriesFloat, DataFrameFloat
+from outquantlab.typing_conventions.custom_classes import SeriesFloat, DataFrameFloat, DataFrameDict, SeriesDict
 
 from outquantlab.typing_conventions.custom_types import (
     Float32,
@@ -14,4 +14,6 @@ __all__: list[str] = [
     "ArrayInt",
     "SeriesFloat",
     "DataFrameFloat",
+    "DataFrameDict",
+    "SeriesDict",
 ]
