@@ -34,7 +34,8 @@ class BacktestResults:
         )
 
     def __getitem__(self, key: str) -> DataFrameFloat:
-        return self.__dict__[key]
+        value: DataFrameFloat = self.__dict__[key]
+        return value
 
     def __setitem__(self, key: str, value: DataFrameFloat) -> None:
         self.__dict__[key] = value

@@ -16,7 +16,8 @@ def reduce_array(prices_array: ArrayFloat, frequency: int) -> ArrayFloat:
     indices: ArrayInt = arange(start=0, stop=array_length, step=frequency)
 
     if array_length % frequency != 0:
-        indices: ArrayInt = append(arr=indices, values=array_length - 1)
+        selected_indices: ArrayInt = append(arr=indices, values=array_length - 1)
+        return prices_array[selected_indices]
     return prices_array[indices]
 
 
@@ -52,16 +53,13 @@ def pct_returns_np(prices_array: ArrayFloat) -> ArrayFloat:
 
 
 def get_total_returns(returns_array: ArrayFloat) -> ArrayFloat:
-    equity_curves: ArrayFloat = get_equity_curves(
-        returns_array=returns_array
-    )
-    return equity_curves[-1] - Standardization.PERCENTAGE.value
+    equity_curves: ArrayFloat = get_equity_curves(returns_array=returns_array)
+    total_returns: ArrayFloat = equity_curves[-1]
+    return total_returns - Standardization.PERCENTAGE.value
 
 
 def get_rolling_drawdown(returns_array: ArrayFloat, length: int) -> ArrayFloat:
-    equity_curves: ArrayFloat = get_equity_curves(
-        returns_array=returns_array
-    )
+    equity_curves: ArrayFloat = get_equity_curves(returns_array=returns_array)
     period_max: ArrayFloat = get_rolling_max(
         array=equity_curves, length=length, min_length=1
     )
@@ -112,9 +110,7 @@ def get_overall_sharpe_ratio(returns_array: ArrayFloat) -> ArrayFloat:
 
 
 def get_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:
-    prices_array: ArrayFloat = get_equity_curves(
-        returns_array=returns_array
-    )
+    prices_array: ArrayFloat = get_equity_curves(returns_array=returns_array)
     monthly_prices: ArrayFloat = reduce_array(
         prices_array=prices_array, frequency=TimePeriod.MONTH.value
     )
@@ -124,6 +120,7 @@ def get_overall_monthly_skewness(returns_array: ArrayFloat) -> ArrayFloat:
         array=monthly_returns, length=length_to_use, min_length=4
     )
     return get_overall_mean(array=expanding_skew)
+
 
 def get_returns_distribution(returns_array: ArrayFloat, frequency: int) -> ArrayFloat:
     resampled_returns: ArrayFloat = reduce_array(

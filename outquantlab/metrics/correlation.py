@@ -11,8 +11,8 @@ def get_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:
 
 def get_distance_matrix(returns_array: ArrayFloat) -> ArrayFloat:
     corr_matrix: ArrayFloat = get_correlation_matrix(returns_array=returns_array)
-    return sqrt(2 * (1 - corr_matrix))
-
+    distance_matrix: ArrayFloat = 2 * (1 - corr_matrix)
+    return sqrt(distance_matrix, out=corr_matrix, dtype=Float32)
 
 def get_overall_average_correlation(returns_array: ArrayFloat) -> ArrayFloat:
     corr_matrix: ArrayFloat = get_correlation_matrix(returns_array=returns_array)

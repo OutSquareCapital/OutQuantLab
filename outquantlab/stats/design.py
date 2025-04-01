@@ -69,7 +69,7 @@ def get_color_map(assets: list[str]) -> dict[str, str]:
     return dict(zip(assets, colors))
 
 
-def get_heatmap_colorscale(n_colors: int = 100):
+def get_heatmap_colorscale(n_colors: int = 100) -> list[list[float | str]]:
     colormap: LinearSegmentedColormap = _generate_colormap(n_colors=n_colors)
 
     colors: list[tuple[float, float, float, float]] = [

@@ -54,16 +54,16 @@ def get_rolling_quantile_ratio(
     df: pl.DataFrame = pl.DataFrame(data=returns_array).with_columns(
         [pl.all().fill_nan(value=None)]
     )
-    quantile_low_values = df.select(
+    quantile_low_values: pl.DataFrame = df.select(
         pl.all().rolling_quantile(
             quantile=quantile_low, window_size=window, min_periods=window
         )
     )
-    quantile_high_values = df.select(
+    quantile_high_values: pl.DataFrame = df.select(
         pl.all().rolling_quantile(
             quantile=quantile_high, window_size=window, min_periods=window
         )
     )
-    quantile_low_values_array = quantile_low_values.to_numpy()
-    quantile_high_values_array = quantile_high_values.to_numpy()
+    quantile_low_values_array: ArrayFloat = quantile_low_values.to_numpy()
+    quantile_high_values_array: ArrayFloat = quantile_high_values.to_numpy()
     return (quantile_high_values_array + quantile_low_values_array) / 2
