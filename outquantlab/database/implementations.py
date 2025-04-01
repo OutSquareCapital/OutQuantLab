@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from outquantlab.config_classes import (
+from outquantlab.core import (
     AssetsClusters,
     AssetsConfig,
     IndicsClusters,

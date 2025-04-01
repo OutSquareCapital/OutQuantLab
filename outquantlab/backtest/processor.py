@@ -3,7 +3,7 @@ from os import cpu_count
 
 from numpy import empty
 
-from outquantlab.config_classes import BacktestConfig, BacktestResults
+from outquantlab.core import BacktestConfig, BacktestResults
 from outquantlab.indicators import BaseIndic, DataArrays
 from outquantlab.structures import ArrayFloat, DataFrameFloat, Float32
 

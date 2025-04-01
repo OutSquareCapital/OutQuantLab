@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from outquantlab.config_classes import AppConfig
+from outquantlab.core import AppConfig
 from outquantlab.database.implementations import (
     AssetFiles,
     AssetsClustersFiles,

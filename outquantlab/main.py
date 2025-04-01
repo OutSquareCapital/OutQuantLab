@@ -1,5 +1,5 @@
 from outquantlab.backtest import process_backtest
-from outquantlab.config_classes import AppConfig, BacktestResults
+from outquantlab.core import AppConfig, BacktestResults
 from outquantlab.database import DataBaseProvider
 from outquantlab.stats import Stats
 from outquantlab.structures import DataFrameFloat

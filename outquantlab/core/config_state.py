@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from outquantlab.config_classes.clusters import AssetsClusters, IndicsClusters
-from outquantlab.config_classes.collections import AssetsConfig, IndicsConfig
+from outquantlab.core.clusters import AssetsClusters, IndicsClusters
+from outquantlab.core.collections import AssetsConfig, IndicsConfig
 from outquantlab.structures import DataFrameFloat
 from pandas import MultiIndex
 from outquantlab.indicators import BaseIndic
