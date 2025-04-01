@@ -21,4 +21,3 @@ OutQuantLab is a comprehensive Python-based quantitative analysis platform for b
 Install mypy, and always use those commands before commiting:
 
 mypy --strict outquantlab
-stubtest outquantlab
