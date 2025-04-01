@@ -1,7 +1,7 @@
 from numpy import empty_like, nan
 
 from outquantlab.metrics import get_equity_curves, hv_composite, log_returns_np
-from outquantlab.typing_conventions import ArrayFloat
+from outquantlab.structures import ArrayFloat
 from dataclasses import dataclass, field
 
 

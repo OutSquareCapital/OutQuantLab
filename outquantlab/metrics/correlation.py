@@ -2,7 +2,7 @@ from numpy import corrcoef, sqrt, sum, fill_diagonal, nan
 from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
 from scipy.spatial.distance import squareform
 
-from outquantlab.typing_conventions import ArrayFloat, Float32
+from outquantlab.structures import ArrayFloat, Float32
 
 
 def get_correlation_matrix(returns_array: ArrayFloat) -> ArrayFloat:

@@ -1,7 +1,7 @@
 import bottleneck as bn  # type: ignore
 from numpy import isnan, nan, where
 from outquantlab.metrics.maths_constants import Standardization, TimePeriod
-from outquantlab.typing_conventions import ArrayFloat
+from outquantlab.structures import ArrayFloat
 from outquantlab.metrics.aggregation import get_overall_mean
 
 

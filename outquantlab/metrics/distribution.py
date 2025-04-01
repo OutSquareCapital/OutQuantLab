@@ -1,5 +1,5 @@
 from numpy import sqrt, nan, empty
-from outquantlab.typing_conventions import ArrayFloat, Float32
+from outquantlab.structures import ArrayFloat, Float32
 from numba import prange, njit  # type: ignore
 
 

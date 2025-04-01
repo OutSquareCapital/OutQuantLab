@@ -2,7 +2,7 @@ from outquantlab.backtest import process_backtest
 from outquantlab.config_classes import AppConfig, BacktestResults
 from outquantlab.database import DataBaseProvider
 from outquantlab.stats import Stats
-from outquantlab.typing_conventions import DataFrameFloat
+from outquantlab.structures import DataFrameFloat
 from outquantlab.web_api import start_server
 
 

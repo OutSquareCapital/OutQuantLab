@@ -3,7 +3,7 @@ from typing import Protocol
 import outquantlab.indicators.indics_raw as raw
 import outquantlab.metrics as mt
 from outquantlab.indicators.indics_config import BaseIndic
-from outquantlab.typing_conventions import ArrayFloat
+from outquantlab.structures import ArrayFloat
 
 class AssetsData(Protocol):
     prices: ArrayFloat

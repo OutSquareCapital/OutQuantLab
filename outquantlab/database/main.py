@@ -9,7 +9,7 @@ from outquantlab.database.implementations import (
     TickersData,
 )
 from outquantlab.database.interfaces import JSONFile, ParquetFile
-from outquantlab.typing_conventions import DataFrameFloat
+from outquantlab.structures import DataFrameFloat
 
 class DataBaseProvider:
     def __init__(self, db_name: str) -> None:

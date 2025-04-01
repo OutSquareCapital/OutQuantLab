@@ -1,4 +1,4 @@
-from outquantlab.typing_conventions import ArrayFloat, ArrayInt
+from outquantlab.structures import ArrayFloat, ArrayInt
 from outquantlab.metrics.maths_constants import Standardization, TimePeriod
 from outquantlab.metrics.aggregation import (
     get_rolling_mean,

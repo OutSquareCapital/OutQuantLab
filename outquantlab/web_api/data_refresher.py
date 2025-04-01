@@ -1,7 +1,7 @@
 import yfinance as yf  # type: ignore
 from pandas import DataFrame
 from outquantlab.metrics import pct_returns_np
-from outquantlab.typing_conventions import DataFrameFloat
+from outquantlab.structures import DataFrameFloat
 
 def fetch_data(assets: list[str]) -> DataFrameFloat:
     test_connection(asset=assets[0])

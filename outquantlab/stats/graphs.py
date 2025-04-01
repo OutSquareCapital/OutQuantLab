@@ -10,7 +10,7 @@ from outquantlab.stats.design import (
     get_heatmap_colorscale,
     get_marker_config,
 )
-from outquantlab.typing_conventions import DataFrameFloat, SeriesFloat
+from outquantlab.structures import DataFrameFloat, SeriesFloat
 
 
 class Graph[D: DataFrameFloat | SeriesFloat](ABC):

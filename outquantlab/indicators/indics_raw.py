@@ -1,5 +1,5 @@
 import outquantlab.metrics as mt
-from outquantlab.typing_conventions import ArrayFloat, Float32
+from outquantlab.structures import ArrayFloat, Float32
 from numpy import full
 
 def get_fixed_bias(prices_array: ArrayFloat, Bias: float) -> ArrayFloat:

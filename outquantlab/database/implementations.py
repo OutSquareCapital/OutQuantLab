@@ -7,7 +7,7 @@ from outquantlab.config_classes import (
     IndicsConfig,
 )
 from outquantlab.database.interfaces import FilesObject, JSONFile, ParquetFile
-from outquantlab.typing_conventions import DataFrameFloat
+from outquantlab.structures import DataFrameFloat
 from outquantlab.web_api import fetch_data
 
 

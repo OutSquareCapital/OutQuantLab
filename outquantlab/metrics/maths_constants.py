@@ -1,4 +1,4 @@
-from outquantlab.typing_conventions import Float32
+from outquantlab.structures import Float32
 from enum import Enum
 
 class Standardization(Enum):

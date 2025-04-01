@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from outquantlab.typing_conventions import DataFrameDict, SeriesDict
+from outquantlab.structures import DataFrameDict, SeriesDict
 from enum import Enum
 
 class Server(Enum):

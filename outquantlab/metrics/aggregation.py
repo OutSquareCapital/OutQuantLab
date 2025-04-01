@@ -1,7 +1,7 @@
 import bottleneck as bn  # type: ignore
 import polars as pl
 
-from outquantlab.typing_conventions import ArrayFloat
+from outquantlab.structures import ArrayFloat
 
 
 def get_overall_mean(array: ArrayFloat, axis: None | int = 0) -> ArrayFloat:

@@ -5,7 +5,7 @@ from numpy import empty
 
 from outquantlab.config_classes import BacktestConfig, BacktestResults
 from outquantlab.indicators import BaseIndic, DataArrays
-from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, Float32
+from outquantlab.structures import ArrayFloat, DataFrameFloat, Float32
 
 
 def process_backtest(

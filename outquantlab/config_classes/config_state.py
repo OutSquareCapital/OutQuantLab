@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from outquantlab.config_classes.clusters import AssetsClusters, IndicsClusters
 from outquantlab.config_classes.collections import AssetsConfig, IndicsConfig
-from outquantlab.typing_conventions import DataFrameFloat
+from outquantlab.structures import DataFrameFloat
 from pandas import MultiIndex
 from outquantlab.indicators import BaseIndic
 from outquantlab.metrics import get_overall_mean

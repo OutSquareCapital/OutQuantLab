@@ -13,7 +13,7 @@ from outquantlab.metrics.aggregation import (
 )
 from outquantlab.metrics.volatility import get_rolling_volatility
 from outquantlab.metrics.maths_constants import TimePeriod
-from outquantlab.typing_conventions import (
+from outquantlab.structures import (
     ArrayFloat,
     Float32,
 )

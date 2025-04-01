@@ -11,7 +11,7 @@ from outquantlab.stats.graphs import (
     Violins,
     LogCurves
 )
-from outquantlab.typing_conventions import ArrayFloat, DataFrameFloat, SeriesFloat
+from outquantlab.structures import ArrayFloat, DataFrameFloat, SeriesFloat
 
 type DefinedFunc = Callable[[ArrayFloat], ArrayFloat]
 type ParametrableFunc = Callable[[ArrayFloat, int], ArrayFloat]
