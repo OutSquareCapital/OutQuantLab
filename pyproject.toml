@@ -1,0 +1,29 @@
+[project]
+name = "OutQuantLab"
+version = "0.1.0"
+description = "OutQuantLab: Quantitative financial analysis tools."
+authors = [
+    { name = "Thibaud", email = "outsquarecapital@gmail.com" }
+]
+dependencies = [
+    "bottleneck",
+    "numba",
+    "pandas",
+    "polars",
+    "numpy",
+    "scipy",
+    "yfinance",
+    "matplotlib",
+    "plotly",
+    "numexpr",
+    "pyarrow"
+]
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+enable_incomplete_feature = ["NewGenericSyntax"]
