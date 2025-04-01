@@ -1,10 +1,12 @@
-from outquantlab.typing_conventions import ArrayFloat
+from abc import ABC, abstractmethod
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any
+
 from outquantlab.indicators.data_arrays import DataArrays
 from outquantlab.indicators.params_validations import IndicParams
 from outquantlab.metrics import rolling_scalar_normalisation
-from abc import ABC, abstractmethod
-from typing import Any
-from concurrent.futures import ThreadPoolExecutor
+from outquantlab.structures import ArrayFloat
+
 
 class BaseIndic(ABC):
     def __init__(
@@ -33,7 +35,7 @@ class BaseIndic(ABC):
                 rolling_scalar_normalisation(
                     raw_signal=self.execute(data_arrays, *param_tuple)
                 )
-                * data_arrays.adjusted_returns
+                * data_arrays.pct_returns # temporary
             )
 
         return list(global_executor.map(process_single_param, self.params.combos))
