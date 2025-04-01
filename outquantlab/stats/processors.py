@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
-from outquantlab.web_api import send_data_to_server
+from outquantlab.apis import send_data_to_server
 from outquantlab.stats.graphs import (
     Bars,
     Curves,

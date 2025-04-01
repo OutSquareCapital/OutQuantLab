@@ -8,7 +8,7 @@ from outquantlab.config_classes import (
 )
 from outquantlab.database.interfaces import FilesObject, JSONFile, ParquetFile
 from outquantlab.structures import DataFrameFloat
-from outquantlab.web_api import fetch_data
+from outquantlab.apis import fetch_data
 
 
 @dataclass
