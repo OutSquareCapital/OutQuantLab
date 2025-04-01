@@ -1,6 +1,6 @@
-from outquantlab.typing_conventions.dataframes import SeriesFloat, DataFrameFloat, DataFrameDict, SeriesDict
+from outquantlab.structures.dataframes import SeriesFloat, DataFrameFloat, DataFrameDict, SeriesDict
 
-from outquantlab.typing_conventions.arrays import (
+from outquantlab.structures.arrays import (
     Float32,
     Int32,
     ArrayFloat,
