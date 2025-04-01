@@ -17,7 +17,7 @@ from outquantlab.metrics.correlation import (
     get_filled_correlation_matrix,
     get_overall_average_correlation,
 )
-from outquantlab.metrics.distribution import get_rolling_skewness, rolling_kurtosis
+from outquantlab.metrics.distribution import get_rolling_skewness, get_rolling_kurtosis
 from outquantlab.metrics.normalization import (
     dynamic_signal,
     get_indicator_on_trend_signal,
@@ -65,7 +65,7 @@ __all__: list[str] = [
     "get_rolling_central",
     "get_rolling_sum",
     "get_rolling_quantile_ratio",
-    "rolling_kurtosis",
+    "get_rolling_kurtosis",
     "get_rolling_skewness",
     "get_rolling_volatility",
     "hv_composite",

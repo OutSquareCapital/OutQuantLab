@@ -196,7 +196,7 @@ def smoothed_kurtosis(
         array=log_returns_array, length=len_smooth, min_length=len_smooth
     )
 
-    return mt.rolling_kurtosis(
+    return mt.get_rolling_kurtosis(
         array=smoothed_array, length=len_skew, min_length=len_skew
     )
 
