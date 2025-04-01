@@ -179,16 +179,16 @@ def get_rolling_skewness(
                         consecutive_equal_count,
                         previous_value,
                     ) = add_skewness_contribution(
-                        array[idx, col],
-                        observation_count,
-                        sum_values,
-                        sum_values_squared,
-                        sum_values_cubed,
-                        compensation_values,
-                        compensation_squared,
-                        compensation_cubed,
-                        consecutive_equal_count,
-                        previous_value,
+                        value=array[idx, col],
+                        observation_count=observation_count,
+                        sum_values=sum_values,
+                        sum_values_squared=sum_values_squared,
+                        sum_values_cubed=sum_values_cubed,
+                        compensation_values=compensation_values,
+                        compensation_squared=compensation_squared,
+                        compensation_cubed=compensation_cubed,
+                        consecutive_equal_count=consecutive_equal_count,
+                        previous_value=previous_value,
                     )
             else:
                 for idx in range(max(0, row - length), start_idx):
@@ -201,14 +201,14 @@ def get_rolling_skewness(
                         compensation_squared,
                         compensation_cubed,
                     ) = remove_skewness_contribution(
-                        array[idx, col],
-                        observation_count,
-                        sum_values,
-                        sum_values_squared,
-                        sum_values_cubed,
-                        compensation_values,
-                        compensation_squared,
-                        compensation_cubed,
+                        value=array[idx, col],
+                        observation_count=observation_count,
+                        sum_values=sum_values,
+                        sum_values_squared=sum_values_squared,
+                        sum_values_cubed=sum_values_cubed,
+                        compensation_values=compensation_values,
+                        compensation_squared=compensation_squared,
+                        compensation_cubed=compensation_cubed,
                     )
 
                 (
@@ -222,25 +222,25 @@ def get_rolling_skewness(
                     consecutive_equal_count,
                     previous_value,
                 ) = add_skewness_contribution(
-                    array[row, col],
-                    observation_count,
-                    sum_values,
-                    sum_values_squared,
-                    sum_values_cubed,
-                    compensation_values,
-                    compensation_squared,
-                    compensation_cubed,
-                    consecutive_equal_count,
-                    previous_value,
+                    value=array[row, col],
+                    observation_count=observation_count,
+                    sum_values=sum_values,
+                    sum_values_squared=sum_values_squared,
+                    sum_values_cubed=sum_values_cubed,
+                    compensation_values=compensation_values,
+                    compensation_squared=compensation_squared,
+                    compensation_cubed=compensation_cubed,
+                    consecutive_equal_count=consecutive_equal_count,
+                    previous_value=previous_value,
                 )
 
             output[row, col] = get_skewness(
-                min_length,
-                observation_count,
-                sum_values,
-                sum_values_squared,
-                sum_values_cubed,
-                consecutive_equal_count,
+                min_length=min_length,
+                observation_count=observation_count,
+                sum_values=sum_values,
+                sum_values_squared=sum_values_squared,
+                sum_values_cubed=sum_values_cubed,
+                consecutive_equal_count=consecutive_equal_count,
             )
 
     return output
