@@ -4,7 +4,9 @@ from typing import Any
 
 from outquantlab.indicators.data_arrays import DataArrays
 from outquantlab.indicators.params_validations import IndicParams
-from outquantlab.metrics import rolling_scalar_normalisation
+from outquantlab.metrics import (
+    rolling_scalar_normalisation,
+)  # , long_bias_normalization
 from outquantlab.structures import ArrayFloat
 
 
@@ -31,11 +33,10 @@ class BaseIndic(ABC):
         global_executor: ThreadPoolExecutor,
     ) -> list[ArrayFloat]:
         def process_single_param(param_tuple: tuple[int, ...]) -> ArrayFloat:
-            return (
-                rolling_scalar_normalisation(
-                    raw_signal=self.execute(data_arrays, *param_tuple)
-                )
-                * data_arrays.pct_returns # temporary
+            signal: ArrayFloat = rolling_scalar_normalisation(
+                raw_signal=self.execute(data_arrays, *param_tuple)
             )
+            # signal: ArrayFloat = long_bias_normalization(signal_array=signal)
+            return signal * data_arrays.pct_returns  # temporary
 
         return list(global_executor.map(process_single_param, self.params.combos))
