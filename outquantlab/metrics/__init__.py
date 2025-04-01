@@ -28,6 +28,7 @@ from outquantlab.metrics.normalization import (
     rolling_scalar_normalisation,
     sign_normalization,
     z_score_normalization,
+    long_bias_normalization
 )
 from outquantlab.metrics.performance import (
     expanding_sharpe_ratio,
@@ -97,5 +98,6 @@ __all__: list[str] = [
     "get_overall_average_drawdown",
     "get_clusters",
     "get_filled_correlation_matrix",
-    "get_rolling_volatility_annualized"
+    "get_rolling_volatility_annualized",
+    "long_bias_normalization"
 ]

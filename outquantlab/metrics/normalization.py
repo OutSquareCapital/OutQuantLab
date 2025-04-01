@@ -26,6 +26,9 @@ def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> Array
 def sign_normalization(signal_array: ArrayFloat) -> ArrayFloat:
     return sign(signal_array, out=signal_array)
 
+def long_bias_normalization(signal_array: ArrayFloat) -> ArrayFloat:
+    return where(signal_array >= Float32(0.0), signal_array, Float32(0.0))
+
 
 def relative_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
     return signal_array - get_rolling_mean(
