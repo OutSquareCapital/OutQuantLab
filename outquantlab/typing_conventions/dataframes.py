@@ -3,7 +3,7 @@ from typing import TypedDict
 from numpy import argsort, array, concatenate, nan, nanmean
 from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
 
-from outquantlab.typing_conventions.custom_types import ArrayFloat, ArrayInt, Float32
+from outquantlab.typing_conventions.arrays import ArrayFloat, ArrayInt, Float32
 
 
 class SeriesDict(TypedDict):
