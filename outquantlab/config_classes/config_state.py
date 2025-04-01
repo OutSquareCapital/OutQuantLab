@@ -46,7 +46,7 @@ class BacktestResults:
                 grouping_levels=returns_df.columns.names[:lvl],
             )
 
-            returns_df.dropna(axis=0, how="any", inplace=True)  # type: ignore
+            returns_df.clean_nans()
             key_name: str = returns_df.columns.names[lvl - 1]
             self[key_name] = returns_df
 

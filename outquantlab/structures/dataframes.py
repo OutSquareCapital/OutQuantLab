@@ -20,10 +20,10 @@ class DataFrameDict(TypedDict):
 class SeriesFloat(Series):  # type: ignore
     def __init__(
         self,
-        data: ArrayFloat | Series | list[float],  # type: ignore
-        index: MultiIndex | Index | list[str] | None = None,  # type: ignore
+        data: ArrayFloat | Series | list[float], # type: ignore
+        index: list[str] | None = None,
     ) -> None:
-        super().__init__(data=data, index=index, dtype=Float32)  # type: ignore
+        super().__init__(data=data, index=index, dtype=Float32) # type: ignore
 
     def get_array(self) -> ArrayFloat:
         return self.to_numpy(dtype=Float32, copy=False, na_value=nan)  # type: ignore
@@ -71,6 +71,9 @@ class DataFrameFloat(DataFrame):
     def dates(self) -> DatetimeIndex:
         return self.index  # type: ignore
 
+    def clean_nans(self) -> None:
+        self.dropna(axis=0, how="all", inplace=True) # type: ignore
+
     def get_array(self) -> ArrayFloat:
         return self.to_numpy(dtype=Float32, copy=False, na_value=nan)  # type: ignore
 
@@ -93,7 +96,7 @@ class DataFrameFloat(DataFrame):
         )
 
     def convert_to_json(self) -> DataFrameDict:
-        self.dropna(axis=0, how="all", inplace=True)  # type: ignore
+        self.clean_nans()
         column_data: list[list[float]] = []
         for col_name in self.columns:
             values: list[str] = self[col_name].values.tolist()  # type: ignore
