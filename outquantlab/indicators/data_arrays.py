@@ -2,27 +2,28 @@ from numpy import empty_like, nan
 
 from outquantlab.metrics import get_equity_curves, hv_composite, log_returns_np
 from outquantlab.structures import ArrayFloat
-from dataclasses import dataclass, field
+from typing import NamedTuple
 
 
-@dataclass(slots=True)
-class DataArrays:
+class DataArrays(NamedTuple):
     pct_returns: ArrayFloat
-    prices: ArrayFloat = field(init=False)
-    log_returns: ArrayFloat = field(init=False)
-    adjusted_returns: ArrayFloat = field(init=False)
-    hv: ArrayFloat = field(init=False)
+    prices: ArrayFloat
+    log_returns: ArrayFloat
+    adjusted_returns: ArrayFloat
 
-    def __post_init__(self) -> None:
-        prices: ArrayFloat = get_equity_curves(returns_array=self.pct_returns)
-        returns: ArrayFloat = log_returns_np(prices_array=prices)
-        self.hv: ArrayFloat = hv_composite(returns_array=self.pct_returns)
-        self.adjusted_returns: ArrayFloat = get_volatility_adjusted_returns(
-            pct_returns_array=self.pct_returns, hv_array=self.hv
+
+def get_data_arrays(pct_returns: ArrayFloat) -> DataArrays:
+    prices: ArrayFloat = get_equity_curves(returns_array=pct_returns)
+    log_returns: ArrayFloat = log_returns_np(prices_array=prices)
+    hv: ArrayFloat = hv_composite(returns_array=pct_returns)
+    return DataArrays(
+        pct_returns=pct_returns,
+        prices=_shift_array(original_array=prices),
+        log_returns=_shift_array(original_array=log_returns),
+        adjusted_returns=get_volatility_adjusted_returns(
+            pct_returns_array=pct_returns, hv_array=hv
         )
-        self.pct_returns = _shift_array(original_array=self.pct_returns)
-        self.prices = _shift_array(original_array=prices)
-        self.log_returns = _shift_array(original_array=returns)
+    )
 
 
 def get_volatility_adjusted_returns(

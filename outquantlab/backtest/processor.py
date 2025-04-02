@@ -4,7 +4,7 @@ from os import cpu_count
 from numpy import empty
 
 from outquantlab.core import BacktestConfig, BacktestResults
-from outquantlab.indicators import BaseIndic, DataArrays
+from outquantlab.indicators import BaseIndic, get_data_arrays, DataArrays
 from outquantlab.structures import ArrayFloat, DataFrameFloat, Float32
 
 
@@ -20,7 +20,7 @@ def process_backtest(
     returns_df = DataFrameFloat(
         data=processor.process_strategies(
             indics_params=config.indics_params,
-            data_arrays=DataArrays(pct_returns=returns_df.get_array()),
+            data_arrays=get_data_arrays(pct_returns=returns_df.get_array()),
         ),
         index=returns_df.dates,
         columns=config.multi_index,
