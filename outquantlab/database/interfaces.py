@@ -1,9 +1,10 @@
 import json
 from abc import ABC, abstractmethod
-from pandas import DataFrame, read_parquet
 from pathlib import Path
 from typing import Any
 from dataclasses import dataclass
+
+from outquantlab.structures import DataFrameFloat
 
 @dataclass
 class FilesObject[T](ABC):
@@ -61,16 +62,16 @@ class JSONFile[K, V](DataFile[dict[K, V]]):
             json.dump(data, file, indent=3)
 
 
-class ParquetFile(DataFile[DataFrame]):
+class ParquetFile(DataFile[DataFrameFloat]):
     extension = ".parquet"
 
-    def _load_implementation(self, names: list[str] | None = None) -> DataFrame:
+    def _load_implementation(self, names: list[str] | None = None) -> DataFrameFloat:
         if names:
-            return read_parquet(self.path, engine="pyarrow", columns=names)
-        return read_parquet(self.path, engine="pyarrow")
+            return DataFrameFloat.from_parquet(path=self.path, names=names)
+        return DataFrameFloat.from_parquet(path=self.path)
 
-    def _handle_missing_file(self) -> DataFrame:
-        return DataFrame()
+    def _handle_missing_file(self) -> DataFrameFloat:
+        return DataFrameFloat()
 
-    def save(self, data: DataFrame) -> None:
+    def save(self, data: DataFrameFloat) -> None:
         data.to_parquet(self.path, engine="pyarrow", index=True)

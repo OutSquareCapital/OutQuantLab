@@ -1,7 +1,8 @@
+from pathlib import Path
 from typing import TypedDict
 
 from numpy import argsort, array, concatenate, nan, nanmean
-from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series
+from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series, read_parquet
 
 from outquantlab.structures.arrays import ArrayFloat, ArrayInt, Float32
 
@@ -20,10 +21,10 @@ class DataFrameDict(TypedDict):
 class SeriesFloat(Series):  # type: ignore
     def __init__(
         self,
-        data: ArrayFloat | Series | list[float], # type: ignore
+        data: ArrayFloat | Series | list[float],  # type: ignore
         index: list[str] | None = None,
     ) -> None:
-        super().__init__(data=data, index=index, dtype=Float32) # type: ignore
+        super().__init__(data=data, index=index, dtype=Float32)  # type: ignore
 
     def get_array(self) -> ArrayFloat:
         return self.to_numpy(dtype=Float32, copy=False, na_value=nan)  # type: ignore
@@ -59,7 +60,7 @@ class SeriesFloat(Series):  # type: ignore
 class DataFrameFloat(DataFrame):
     def __init__(
         self,
-        data: ArrayFloat | DataFrame | None = None,
+        data: ArrayFloat | DataFrame | SeriesFloat | None = None,
         index: DatetimeIndex | None = None,
         columns: list[str] | MultiIndex | Index | None = None,  # type: ignore
     ) -> None:
@@ -71,8 +72,13 @@ class DataFrameFloat(DataFrame):
     def dates(self) -> DatetimeIndex:
         return self.index  # type: ignore
 
+    @classmethod
+    def from_parquet(cls, path: Path, names: list[str] | None = None) -> "DataFrameFloat":
+        data: DataFrame = read_parquet(path, engine="pyarrow", columns=names)
+        return cls(data=data)
+
     def clean_nans(self) -> None:
-        self.dropna(axis=0, how="all", inplace=True) # type: ignore
+        self.dropna(axis=0, how="all", inplace=True)  # type: ignore
 
     def get_array(self) -> ArrayFloat:
         return self.to_numpy(dtype=Float32, copy=False, na_value=nan)  # type: ignore
@@ -106,4 +112,15 @@ class DataFrameFloat(DataFrame):
             data=column_data,
             index=[str(idx) for idx in self.dates],  # type: ignore
             columns=self.get_names(),
+        )
+
+    def get_portfolio_returns(
+        self, grouping_levels: list[str]
+    ) -> "DataFrameFloat":
+        return DataFrameFloat(
+            data=self.T.groupby(  # type: ignore
+                level=grouping_levels, observed=True
+            )
+            .mean()
+            .T
         )
