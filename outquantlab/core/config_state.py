@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
+
+from pandas import MultiIndex
+
 from outquantlab.core.clusters import AssetsClusters, IndicsClusters
 from outquantlab.core.collections import AssetsConfig, IndicsConfig
-from outquantlab.structures import DataFrameFloat
-from pandas import MultiIndex
 from outquantlab.indicators import BaseIndic
 from outquantlab.metrics import get_overall_mean
+from outquantlab.structures import DataFrameFloat
 
 
 @dataclass
@@ -20,7 +22,7 @@ class BacktestResults:
     @property
     def clusters_levels(self) -> list[str]:
         return [name for name in self.__dict__.keys()]
-    
+
     @property
     def clusters_depth(self) -> int:
         return len(self.__dict__.keys())
@@ -42,25 +44,13 @@ class BacktestResults:
 
     def aggregate_raw_returns(self, returns_df: DataFrameFloat) -> None:
         for lvl in range(self.clusters_depth, 0, -1):
-            returns_df = self._get_portfolio_returns(
-                returns_df=returns_df,
+            returns_df = returns_df.get_portfolio_returns(
                 grouping_levels=returns_df.columns.names[:lvl],
             )
-
             returns_df.clean_nans()
+
             key_name: str = returns_df.columns.names[lvl - 1]
             self[key_name] = returns_df
-
-    def _get_portfolio_returns(
-        self, returns_df: DataFrameFloat, grouping_levels: list[str]
-    ) -> DataFrameFloat:
-        return DataFrameFloat(
-            data=returns_df.T.groupby(  # type: ignore
-                level=grouping_levels, observed=True
-            )
-            .mean()
-            .T
-        )
 
 
 @dataclass(slots=True)
@@ -97,13 +87,16 @@ class AppConfig:
     def get_backtest_config(
         self,
     ) -> BacktestConfig:
-
-        self.indics_clusters.check_data_structure(entities=self.indics_config.get_all_entities())
+        self.indics_clusters.check_data_structure(
+            entities=self.indics_config.get_all_entities()
+        )
         indics_params: list[BaseIndic] = self.indics_config.get_indics_params()
         indics_tuples: list[tuple[str, ...]] = self.indics_clusters.get_clusters_tuples(
             entities=indics_params
         )
-        self.assets_clusters.check_data_structure(entities=self.assets_config.get_all_entities())
+        self.assets_clusters.check_data_structure(
+            entities=self.assets_config.get_all_entities()
+        )
         asset_tuples: list[tuple[str, ...]] = self.assets_clusters.get_clusters_tuples(
             entities=self.assets_config.get_all_active_entities()
         )
