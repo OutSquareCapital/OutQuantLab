@@ -4,7 +4,7 @@ from os import cpu_count
 from numpy import empty
 
 from outquantlab.core import BacktestConfig, BacktestResults
-from outquantlab.indicators import BaseIndic, get_data_arrays, DataArrays
+from outquantlab.indicators import BaseIndic, DataArrays, get_data_arrays
 from outquantlab.structures import ArrayFloat, DataFrameFloat, Float32
 
 
@@ -25,9 +25,15 @@ def process_backtest(
         index=returns_df.dates,
         columns=config.multi_index,
     )
-    config.backtest_results.aggregate_raw_returns(returns_df=returns_df)
+    aggregate_raw_returns(returns_df=returns_df, results=config.backtest_results)
     return config.backtest_results
 
+def aggregate_raw_returns(returns_df: DataFrameFloat, results: BacktestResults) -> None:
+    for lvl in range(results.clusters_depth, 0, -1):
+        returns_df.get_portfolio_returns(grouping_levels=returns_df.columns.names[:lvl])
+        returns_df.clean_nans()
+        key_name: str = returns_df.columns.names[lvl - 1]
+        results[key_name] = returns_df
 
 class IndicatorsProcessor:
     def __init__(

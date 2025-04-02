@@ -42,16 +42,6 @@ class BacktestResults:
     def __setitem__(self, key: str, value: DataFrameFloat) -> None:
         self.__dict__[key] = value
 
-    def aggregate_raw_returns(self, returns_df: DataFrameFloat) -> None:
-        for lvl in range(self.clusters_depth, 0, -1):
-            returns_df = returns_df.get_portfolio_returns(
-                grouping_levels=returns_df.columns.names[:lvl],
-            )
-            returns_df.clean_nans()
-
-            key_name: str = returns_df.columns.names[lvl - 1]
-            self[key_name] = returns_df
-
 
 @dataclass(slots=True)
 class BacktestConfig:
