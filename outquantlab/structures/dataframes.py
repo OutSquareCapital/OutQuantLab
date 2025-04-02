@@ -1,94 +1,67 @@
+from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
 
-from numpy import argsort, array, concatenate, nan, nanmean
-from pandas import DataFrame, DatetimeIndex, Index, MultiIndex, Series, read_parquet
+from numpy import argsort, empty, nan, nanmean
+from pandas import (
+    DataFrame,
+    DatetimeIndex,
+    Index,
+    MultiIndex,
+    RangeIndex,
+    read_parquet,
+)
 
 from outquantlab.structures.arrays import ArrayFloat, ArrayInt, Float32
 
 
-class SeriesDict(TypedDict):
-    data: list[float]
-    index: list[str]
-
-
-class DataFrameDict(TypedDict):
+class DistributionDict(TypedDict):
     data: list[list[float]]
-    index: list[str]
     columns: list[str]
 
 
-class SeriesFloat(Series):  # type: ignore
+class DatedDict(TypedDict):
+    data: list[list[float]]
+    index: list[datetime]
+    columns: list[str]
+
+
+class DataFrameFloat[T: DatetimeIndex | None](DataFrame):
     def __init__(
         self,
-        data: ArrayFloat | Series | list[float],  # type: ignore
-        index: list[str] | None = None,
+        data: ArrayFloat | list[float],
+        index: T,
+        columns: list[str] | MultiIndex | Index,  # type: ignore
     ) -> None:
-        super().__init__(data=data, index=index, dtype=Float32)  # type: ignore
-
-    def get_array(self) -> ArrayFloat:
-        return self.to_numpy(dtype=Float32, copy=False, na_value=nan)  # type: ignore
-
-    def get_names(self) -> list[str]:
-        return self.index.tolist()  # type: ignore
-
-    def sort_data(self, ascending: bool) -> "SeriesFloat":
-        data_array: ArrayFloat = self.get_array()
-        sorted_indices: ArrayInt = argsort(data_array)
-        if not ascending:
-            sorted_indices = sorted_indices[::-1]
-        sorted_array: ArrayFloat = data_array[sorted_indices]
-        sorted_index: list[str] = [self.get_names()[i] for i in sorted_indices]
-        return SeriesFloat(data=sorted_array, index=sorted_index)
-
-    @classmethod
-    def from_float_list(cls, data: list[float], index: list[str]) -> "SeriesFloat":
-        array_data: ArrayFloat = array(data, dtype=Float32)
-        return cls(data=array_data, index=index)
-
-    @classmethod
-    def from_array_list(cls, data: list[ArrayFloat], index: list[str]) -> "SeriesFloat":
-        combined_array: ArrayFloat = concatenate([r.reshape(1) for r in data])
-        return cls(data=combined_array, index=index)
-
-    def convert_to_json(self) -> SeriesDict:
-        data: list[float] = self.values.tolist()  # type: ignore
-        index: list[str] = [str(idx) for idx in self.index]  # type: ignore
-        return SeriesDict(data=data, index=index)
-
-
-class DataFrameFloat(DataFrame):
-    def __init__(
-        self,
-        data: ArrayFloat | DataFrame | SeriesFloat | None = None,
-        index: DatetimeIndex | None = None,
-        columns: list[str] | MultiIndex | Index | None = None,  # type: ignore
-    ) -> None:
-        if data is None:
-            data = DataFrame(dtype=Float32)
         super().__init__(data=data, index=index, columns=columns, dtype=Float32)  # type: ignore
 
-    @property
-    def dates(self) -> DatetimeIndex:
-        return self.index  # type: ignore
-
-    @classmethod
-    def from_parquet(cls, path: Path, names: list[str] | None = None) -> "DataFrameFloat":
-        data: DataFrame = read_parquet(path, engine="pyarrow", columns=names)
-        return cls(data=data)
+    def select(self, column: str) -> list[float]:
+        return self[column].tolist()  # type: ignore
 
     def clean_nans(self) -> None:
         self.dropna(axis=0, how="all", inplace=True)  # type: ignore
 
     def get_array(self) -> ArrayFloat:
-        return self.to_numpy(dtype=Float32, copy=False, na_value=nan)  # type: ignore
+        return self.to_numpy(copy=False, na_value=nan)  # type: ignore
 
     def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
             return ["_".join(col).replace(" ", "_") for col in self.columns.to_list()]
         return self.columns.to_list()
 
-    def sort_data(self, ascending: bool) -> "DataFrameFloat":
+
+class DefaultDataFrameFloat(DataFrameFloat[None]):
+    def __init__(
+        self,
+        data: ArrayFloat | list[float],
+        columns: list[str] | MultiIndex | Index,  # type: ignore
+    ) -> None:
+        super().__init__(data=data, index=None, columns=columns)  # type: ignore
+
+    def get_index(self) -> RangeIndex:
+        return self.index  # type: ignore
+
+    def sort_data(self, ascending: bool) -> "DefaultDataFrameFloat":
         mean_values: ArrayFloat = nanmean(self.get_array(), axis=0)
         sorted_indices: ArrayInt = argsort(a=mean_values)
         if not ascending:
@@ -97,30 +70,73 @@ class DataFrameFloat(DataFrame):
         sorted_data: ArrayFloat = self.get_array()[:, sorted_indices]
         sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]
 
-        return DataFrameFloat(
-            data=sorted_data, columns=sorted_columns, index=self.dates
-        )
+        return DefaultDataFrameFloat(data=sorted_data, columns=sorted_columns)
 
-    def convert_to_json(self) -> DataFrameDict:
+    def get_index_list(self) -> list[int]:
+        return self.get_index().tolist()  # type: ignore
+
+    def convert_to_json(self) -> DistributionDict:
         self.clean_nans()
         column_data: list[list[float]] = []
         for col_name in self.columns:
-            values: list[str] = self[col_name].values.tolist()  # type: ignore
-            column_data.append(values)  # type: ignore
+            values: list[float] = self.select(column=col_name)
+            column_data.append(values)
 
-        return DataFrameDict(
-            data=column_data,
-            index=[str(idx) for idx in self.dates],  # type: ignore
-            columns=self.get_names(),
+        return DistributionDict(data=column_data, columns=self.get_names())
+
+
+class DatedDataFrameFloat(DataFrameFloat[DatetimeIndex]):
+    def get_index(self) -> DatetimeIndex:
+        return self.index  # type: ignore
+
+    @classmethod
+    def as_empty(cls) -> "DatedDataFrameFloat":
+        return cls(
+            data=empty(shape=(0, 0), dtype=Float32),
+            index=DatetimeIndex(data=[datetime.now()]),
+            columns=[],
         )
 
-    def get_portfolio_returns(
-        self, grouping_levels: list[str]
-    ) -> "DataFrameFloat":
-        return DataFrameFloat(
-            data=self.T.groupby(  # type: ignore
-                level=grouping_levels, observed=True
-            )
-            .mean()
-            .T
+    @classmethod
+    def from_pandas(cls, data: DataFrame) -> "DatedDataFrameFloat":
+        return cls(
+            data=data.to_numpy(dtype=Float32, copy=False, na_value=nan),  # type: ignore
+            index=data.index,  # type: ignore
+            columns=data.columns,
+        )
+
+    @classmethod
+    def from_parquet(
+        cls, path: Path, names: list[str] | None = None
+    ) -> "DatedDataFrameFloat":
+        data: DataFrame = read_parquet(path, engine="pyarrow", columns=names)
+        return cls.from_pandas(data=data)
+
+    def sort_data(self, ascending: bool) -> "DatedDataFrameFloat":
+        mean_values: ArrayFloat = nanmean(self.get_array(), axis=0)
+        sorted_indices: ArrayInt = argsort(a=mean_values)
+        if not ascending:
+            sorted_indices = sorted_indices[::-1]
+
+        sorted_data: ArrayFloat = self.get_array()[:, sorted_indices]
+        sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]
+
+        return DatedDataFrameFloat(
+            data=sorted_data, columns=sorted_columns, index=self.get_index()
+        )
+
+    def get_index_list(self) -> list[datetime]:
+        return self.get_index().to_pydatetime().tolist()
+
+    def convert_to_json(self) -> DatedDict:
+        self.clean_nans()
+        column_data: list[list[float]] = []
+        for col_name in self.columns:
+            values: list[float] = self.select(column=col_name)
+            column_data.append(values)
+
+        return DatedDict(
+            data=column_data,
+            index=self.get_index_list(),
+            columns=self.get_names(),
         )
