@@ -7,7 +7,7 @@ from outquantlab.core import (
     IndicsConfig,
 )
 from outquantlab.database.interfaces import FilesObject, JSONFile, ParquetFile
-from outquantlab.structures import DataFrameFloat
+from outquantlab.structures import DatedDataFrameFloat
 from outquantlab.apis import fetch_data
 
 
@@ -67,15 +67,15 @@ class IndicFiles(FilesObject[IndicsConfig]):
 
 
 @dataclass
-class TickersData(FilesObject[DataFrameFloat]):
+class TickersData(FilesObject[DatedDataFrameFloat]):
     returns: ParquetFile
 
-    def get(self, assets: list[str] | None = None) -> DataFrameFloat:
-        return DataFrameFloat(self.returns.load(names=assets))
+    def get(self, assets: list[str] | None = None) -> DatedDataFrameFloat:
+        return self.returns.load(names=assets)
 
-    def save(self, data: DataFrameFloat) -> None:
+    def save(self, data:DatedDataFrameFloat) -> None:
         self.returns.save(data=data)
 
     def refresh(self, assets: list[str]) -> None:
-        data: DataFrameFloat = fetch_data(assets=assets)
+        data:DatedDataFrameFloat = fetch_data(assets=assets)
         self.save(data=data)

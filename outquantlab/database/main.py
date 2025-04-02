@@ -9,7 +9,7 @@ from outquantlab.database.implementations import (
     TickersData,
 )
 from outquantlab.database.interfaces import JSONFile, ParquetFile
-from outquantlab.structures import DataFrameFloat
+from outquantlab.structures import DatedDataFrameFloat
 
 class DataBaseProvider:
     def __init__(self, db_name: str) -> None:
@@ -37,7 +37,7 @@ class DataBaseProvider:
         current_dir: Path = current_file_path.parent
         return current_dir / db_name
 
-    def get_returns_data(self, app_config: AppConfig) -> DataFrameFloat:
+    def get_returns_data(self, app_config: AppConfig) -> DatedDataFrameFloat:
         return self.tickers.get(
             assets=app_config.assets_config.get_all_active_entities_names()
         )
