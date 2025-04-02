@@ -14,6 +14,7 @@ _app = FastAPI()
 _data_store: dict[str, DataFrameDict | SeriesDict] = {}
 
 def start_server() -> None:
+    print(f"Server started at {Server.URL.value}")
     uvicorn.run(app=_app, host=Server.IP.value, port=Server.PORT.value)
 
 def send_data_to_server(id: str, results: DataFrameDict | SeriesDict) -> None:
