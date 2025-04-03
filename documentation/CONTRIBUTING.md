@@ -770,7 +770,7 @@ This class enforces:
 ...     dtype: DTypeLike = Float32,
 ```...    : bool = False,
 ...     na_value: float = np.nan
-... ) -> arrays.ArrayFloat:
+... ) -> arrays.Float2D:
 
 *Converts the Series to a NumPy array with specified dtype```,, and NA value.*
 """
