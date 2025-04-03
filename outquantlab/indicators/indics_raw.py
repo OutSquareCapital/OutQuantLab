@@ -1,9 +1,8 @@
 import outquantlab.metrics as mt
-from outquantlab.structures import ArrayFloat, Float32
-from numpy import full
+from outquantlab.structures import ArrayFloat, full_array_like
 
 def get_fixed_bias(prices_array: ArrayFloat, Bias: float) -> ArrayFloat:
-    return full(prices_array.shape, Bias, dtype=Float32)
+    return full_array_like(model=prices_array, fill_value=Bias)
     
 def get_mean_price_ratio_raw(
     prices_array: ArrayFloat, len_st: int, len_lt: int

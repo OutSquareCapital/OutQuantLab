@@ -1,7 +1,7 @@
 from numba import njit, prange  # type: ignore
-from numpy import empty, nan, sqrt
+from numpy import sqrt
 
-from outquantlab.structures import ArrayFloat, Float32
+from outquantlab.structures import ArrayFloat, Nan, nan_array
 
 
 @njit
@@ -24,11 +24,11 @@ def get_skewness(
         )
 
         if observation_count < 3:
-            return nan
+            return Nan
         elif consecutive_equal_count >= observation_count:
             return 0.0
         elif variance <= 1e-14:
-            return nan
+            return Nan
         else:
             std_dev = sqrt(variance)
             return (
@@ -37,7 +37,7 @@ def get_skewness(
                 / ((total_observations - 2) * std_dev * std_dev * std_dev)
             )
     else:
-        return nan
+        return Nan
 
 
 @njit
@@ -135,8 +135,7 @@ def get_rolling_skewness(
     array: ArrayFloat, length: int, min_length: int = 4
 ) -> ArrayFloat:
     num_rows, num_cols = array.shape
-    output: ArrayFloat = empty((num_rows, num_cols), dtype=Float32)
-    output.fill(nan)
+    output: ArrayFloat = nan_array(shape=(num_rows, num_cols))
 
     for col in prange(num_cols):
         observation_count, sum_values, sum_values_squared, sum_values_cubed = (

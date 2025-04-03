@@ -8,7 +8,7 @@ from outquantlab.stats.processors import (
     TableProcessor,
     EquityProcessor
 )
-
+from outquantlab.structures import get_prices_array
 
 class AggregateProcessorsRegistery(NamedTuple):
     returns: AggregateProcessor
@@ -61,5 +61,5 @@ class Stats:
             _func=mt.get_filled_correlation_matrix, _ascending=False
         )
         self.equity = EquityProcessor(
-            _func=mt.get_equity_curves, _ascending=True
+            _func=get_prices_array, _ascending=True
         )
