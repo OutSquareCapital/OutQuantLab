@@ -53,7 +53,7 @@ def add_skewness_contribution(
     consecutive_equal_count: int,
     previous_value: float,
 ) -> tuple[int, float, float, float, float, float, float, int, float]:
-    if value == value:  # Vérification NaN
+    if value == value:
         observation_count += 1
 
         temp: float = value - compensation_values
