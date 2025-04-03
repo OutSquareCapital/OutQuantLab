@@ -1,12 +1,13 @@
 from outquantlab.structures import Float32
-from enum import Enum
+from enum import IntEnum
 
-class Standardization(Enum):
-    ANNUALIZATION = Float32(16)
-    PERCENTAGE = Float32(100)
-    ANNUALIZED_PERCENTAGE = Float32(ANNUALIZATION * PERCENTAGE)
+ZERO = Float32(0.0)
+ONE = Float32(1.0)
+ANNUALIZATION = Float32(16)
+PERCENTAGE = Float32(100)
+ANNUALIZED_PERCENTAGE = Float32(ANNUALIZATION * PERCENTAGE)
 
-class TimePeriod(Enum):
+class TimePeriod(IntEnum):
     WEEK = 5
     MONTH = 21
     QUARTER = 63
