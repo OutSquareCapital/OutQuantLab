@@ -1,8 +1,9 @@
 import bottleneck as bn  # type: ignore
-from numpy import isnan, nan, where
-from outquantlab.metrics.maths_constants import Standardization, TimePeriod
-from outquantlab.structures import ArrayFloat
+from numpy import isnan, where
+
 from outquantlab.metrics.aggregation import get_overall_mean
+from outquantlab.metrics.maths_constants import ANNUALIZED_PERCENTAGE, TimePeriod
+from outquantlab.structures import ArrayFloat, Nan
 
 
 def overall_volatility(returns_array: ArrayFloat) -> ArrayFloat:
@@ -10,10 +11,7 @@ def overall_volatility(returns_array: ArrayFloat) -> ArrayFloat:
 
 
 def get_overall_volatility_annualized(returns_array: ArrayFloat) -> ArrayFloat:
-    return (
-        overall_volatility(returns_array=returns_array)
-        * Standardization.ANNUALIZED_PERCENTAGE.value
-    )
+    return overall_volatility(returns_array=returns_array) * ANNUALIZED_PERCENTAGE
 
 
 def get_rolling_volatility(
@@ -21,18 +19,20 @@ def get_rolling_volatility(
 ) -> ArrayFloat:
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof=1)  # type: ignore
 
+
 def get_rolling_volatility_annualized(
     array: ArrayFloat, length: int, min_length: int = 1
 ) -> ArrayFloat:
     return (
         get_rolling_volatility(array=array, length=length, min_length=min_length)
-        * Standardization.ANNUALIZED_PERCENTAGE.value
+        * ANNUALIZED_PERCENTAGE
     )
+
 
 def hv_composite(
     returns_array: ArrayFloat,
-    short_term_lengths: int = TimePeriod.MONTH.value,
-    long_term_lengths: int = TimePeriod.HALF_DECADE.value,
+    short_term_lengths: int = TimePeriod.MONTH,
+    long_term_lengths: int = TimePeriod.HALF_DECADE,
     st_weight: float = 0.6,
 ) -> ArrayFloat:
     st_vol: ArrayFloat = get_rolling_volatility(
@@ -46,10 +46,7 @@ def hv_composite(
         short_term_vol=st_vol,
         long_term_vol=lt_vol,
     )
-    return (
-        get_composite_vol_filled(composite_vol=composite_vol)
-        * Standardization.ANNUALIZED_PERCENTAGE.value
-    )
+    return get_composite_vol_filled(composite_vol=composite_vol) * ANNUALIZED_PERCENTAGE
 
 
 def get_lt_vol(returns_array: ArrayFloat, long_term_lengths: int) -> ArrayFloat:
@@ -79,8 +76,8 @@ def get_composite_vol_filled(composite_vol: ArrayFloat) -> ArrayFloat:
 def separate_volatility(
     array: ArrayFloat, len_vol: int
 ) -> tuple[ArrayFloat, ArrayFloat]:
-    positive_returns = where(isnan(array), nan, where(array > 0, array, 0))
-    negative_returns = where(isnan(array), nan, where(array < 0, array, 0))
+    positive_returns = where(isnan(array), Nan, where(array > 0, array, 0))
+    negative_returns = where(isnan(array), Nan, where(array < 0, array, 0))
 
     vol_positive: ArrayFloat = get_rolling_volatility(
         positive_returns, length=len_vol, min_length=1

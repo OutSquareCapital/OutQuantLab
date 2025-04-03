@@ -1,8 +1,7 @@
 from collections.abc import Callable
 from operator import gt
 
-import numbagg as nb
-from numpy import clip, sign, where
+from numpy import clip, sign, where, absolute
 
 from outquantlab.metrics.aggregation import (
     get_overall_median,
@@ -12,22 +11,23 @@ from outquantlab.metrics.aggregation import (
     get_rolling_min,
 )
 from outquantlab.metrics.volatility import get_rolling_volatility
-from outquantlab.metrics.maths_constants import TimePeriod
+from outquantlab.metrics.maths_constants import TimePeriod, ZERO, ONE
 from outquantlab.structures import (
     ArrayFloat,
     Float32,
+    backfill_array
 )
 
 
 def ratio_normalization(nominator: ArrayFloat, denominator: ArrayFloat) -> ArrayFloat:
-    return (nominator / denominator) - Float32(1.0)
+    return (nominator / denominator) - ONE
 
 
 def sign_normalization(signal_array: ArrayFloat) -> ArrayFloat:
     return sign(signal_array, out=signal_array)
 
 def long_bias_normalization(signal_array: ArrayFloat) -> ArrayFloat:
-    return where(signal_array >= Float32(0.0), signal_array, Float32(0.0))
+    return where(signal_array > ZERO, signal_array, ZERO)
 
 
 def relative_normalization(signal_array: ArrayFloat, length: int) -> ArrayFloat:
@@ -49,11 +49,10 @@ def limit_normalization(signal_array: ArrayFloat, limit: int = 1) -> ArrayFloat:
 def get_indicator_on_trend_signal(
     trend_signal: ArrayFloat, indicator_signal: ArrayFloat
 ) -> ArrayFloat:
-    limit: Float32 = Float32(0.0)
     return where(
-        ((trend_signal < limit) & (indicator_signal > limit))
-        | ((trend_signal > limit) & (indicator_signal < limit)),
-        limit,
+        ((trend_signal < ZERO) & (indicator_signal > ZERO))
+        | ((trend_signal > ZERO) & (indicator_signal < ZERO)),
+        ZERO,
         indicator_signal,
     )
 
@@ -86,19 +85,15 @@ def dynamic_signal(
     signal: ArrayFloat,
     comparator: Callable[[ArrayFloat, Float32], ArrayFloat] = gt,
 ) -> ArrayFloat:
-    return where(comparator(metric, Float32(0.0)), -signal, signal)
+    return where(comparator(metric, ZERO), -signal, signal)
 
 
 def _get_normalized_scalar(
-    raw_signal: ArrayFloat, length: int = TimePeriod.YEAR.value, target: int = 1
+    raw_signal: ArrayFloat, length: int = TimePeriod.YEAR, target: int = 1
 ) -> ArrayFloat:
-    median: ArrayFloat = get_overall_median(array=abs(raw_signal), axis=1)
+    median: ArrayFloat = get_overall_median(array=absolute(raw_signal), axis=1)
     mean: ArrayFloat = get_rolling_mean(
         array=median, length=raw_signal.shape[0], min_length=length
     )
     scalar: ArrayFloat = target / mean
-    return _bfill(array=scalar)
-
-
-def _bfill(array: ArrayFloat) -> ArrayFloat:
-    return nb.bfill(array, axis=0)  # type: ignore
+    return backfill_array(array=scalar)
