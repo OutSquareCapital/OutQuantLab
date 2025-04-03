@@ -135,7 +135,7 @@ def get_rolling_skewness(
     array: arrays.Float2D, length: int, min_length: int = 4
 ) -> arrays.Float2D:
     num_rows, num_cols = array.shape
-    output: arrays.Float2D = arrays.nan_array(shape=(num_rows, num_cols))
+    output: arrays.Float2D = arrays.create_nan(shape=(num_rows, num_cols))
 
     for col in prange(num_cols):
         observation_count, sum_values, sum_values_squared, sum_values_cubed = (

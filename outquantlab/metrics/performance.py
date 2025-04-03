@@ -10,8 +10,8 @@ from outquantlab.structures import arrays, consts
 
 
 def get_total_returns(returns_array: arrays.Float2D) -> arrays.Float2D:
-    equity_curves: arrays.Float2D = arrays.get_prices_array(
-        returns_array=returns_array
+    equity_curves: arrays.Float2D = arrays.get_prices(
+        returns=returns_array
     )
     total_returns: arrays.Float2D = equity_curves[-1]
     return total_returns - consts.PERCENTAGE
@@ -20,8 +20,8 @@ def get_total_returns(returns_array: arrays.Float2D) -> arrays.Float2D:
 def get_rolling_drawdown(
     returns_array: arrays.Float2D, length: int
 ) -> arrays.Float2D:
-    equity_curves: arrays.Float2D = arrays.get_prices_array(
-        returns_array=returns_array
+    equity_curves: arrays.Float2D = arrays.get_prices(
+        returns=returns_array
     )
     period_max: arrays.Float2D = get_rolling_max(
         array=equity_curves, length=length, min_length=1
@@ -75,14 +75,14 @@ def get_overall_sharpe_ratio(returns_array: arrays.Float2D) -> arrays.Float2D:
 
 
 def get_overall_monthly_skewness(returns_array: arrays.Float2D) -> arrays.Float2D:
-    prices_array: arrays.Float2D = arrays.get_prices_array(
-        returns_array=returns_array
+    prices_array: arrays.Float2D = arrays.get_prices(
+        returns=returns_array
     )
-    monthly_prices: arrays.Float2D = arrays.reduce_array(
+    monthly_prices: arrays.Float2D = arrays.reduce(
         array=prices_array, frequency=consts.MONTH
     )
-    monthly_returns: arrays.Float2D = arrays.pct_returns_array(
-        prices_array=monthly_prices
+    monthly_returns: arrays.Float2D = arrays.pct_returns(
+        prices=monthly_prices
     )
     length_to_use: int = monthly_returns.shape[0]
     expanding_skew: arrays.Float2D = get_rolling_skewness(
@@ -94,7 +94,7 @@ def get_overall_monthly_skewness(returns_array: arrays.Float2D) -> arrays.Float2
 def get_returns_distribution(
     returns_array: arrays.Float2D, frequency: int
 ) -> arrays.Float2D:
-    resampled_returns: arrays.Float2D = arrays.reduce_array(
+    resampled_returns: arrays.Float2D = arrays.reduce(
         array=returns_array, frequency=frequency
     )
     return resampled_returns * consts.PERCENTAGE

@@ -61,5 +61,5 @@ class Stats:
             _func=mt.get_filled_correlation_matrix, _ascending=False
         )
         self.equity = EquityProcessor(
-            _func=arrays.get_prices_array, _ascending=True
+            _func=arrays.get_prices, _ascending=True
         )

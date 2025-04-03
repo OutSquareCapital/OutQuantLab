@@ -91,4 +91,4 @@ def _get_normalized_scalar(
         array=median, length=raw_signal.shape[0], min_length=length
     )
     scalar: arrays.Float2D = target / mean
-    return arrays.backfill_array(array=scalar)
+    return arrays.backfill(array=scalar)
