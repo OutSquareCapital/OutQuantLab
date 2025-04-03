@@ -2,7 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
 
-from numpy import argsort, empty, nan, nanmean
+from numpy import nanmean
 from pandas import (
     DataFrame,
     DatetimeIndex,
@@ -12,7 +12,14 @@ from pandas import (
     read_parquet,
 )
 
-from outquantlab.structures.arrays import ArrayFloat, ArrayInt, Float32
+from outquantlab.structures.arrays import (
+    ArrayFloat,
+    ArrayInt,
+    Float32,
+    Nan,
+    empty_array,
+    get_sorted_indices,
+)
 
 
 class DistributionDict(TypedDict):
@@ -42,7 +49,7 @@ class DataFrameFloat[T: DatetimeIndex | None](DataFrame):
         self.dropna(axis=0, how="all", inplace=True)  # type: ignore
 
     def get_array(self) -> ArrayFloat:
-        return self.to_numpy(copy=False, na_value=nan)  # type: ignore
+        return self.to_numpy(copy=False, na_value=Nan)  # type: ignore
 
     def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
@@ -63,9 +70,9 @@ class DefaultDataFrameFloat(DataFrameFloat[None]):
 
     def sort_data(self, ascending: bool) -> "DefaultDataFrameFloat":
         mean_values: ArrayFloat = nanmean(self.get_array(), axis=0)
-        sorted_indices: ArrayInt = argsort(a=mean_values)
-        if not ascending:
-            sorted_indices = sorted_indices[::-1]
+        sorted_indices: ArrayInt = get_sorted_indices(
+            array=mean_values, ascending=ascending
+        )
 
         sorted_data: ArrayFloat = self.get_array()[:, sorted_indices]
         sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]
@@ -92,7 +99,7 @@ class DatedDataFrameFloat(DataFrameFloat[DatetimeIndex]):
     @classmethod
     def as_empty(cls) -> "DatedDataFrameFloat":
         return cls(
-            data=empty(shape=(0, 0), dtype=Float32),
+            data=empty_array(shape=(0, 0)),
             index=DatetimeIndex(data=[datetime.now()]),
             columns=[],
         )
@@ -100,7 +107,7 @@ class DatedDataFrameFloat(DataFrameFloat[DatetimeIndex]):
     @classmethod
     def from_pandas(cls, data: DataFrame) -> "DatedDataFrameFloat":
         return cls(
-            data=data.to_numpy(dtype=Float32, copy=False, na_value=nan),  # type: ignore
+            data=data.to_numpy(dtype=Float32, copy=False, na_value=Nan),  # type: ignore
             index=data.index,  # type: ignore
             columns=data.columns,
         )
@@ -114,9 +121,9 @@ class DatedDataFrameFloat(DataFrameFloat[DatetimeIndex]):
 
     def sort_data(self, ascending: bool) -> "DatedDataFrameFloat":
         mean_values: ArrayFloat = nanmean(self.get_array(), axis=0)
-        sorted_indices: ArrayInt = argsort(a=mean_values)
-        if not ascending:
-            sorted_indices = sorted_indices[::-1]
+        sorted_indices: ArrayInt = get_sorted_indices(
+            array=mean_values, ascending=ascending
+        )
 
         sorted_data: ArrayFloat = self.get_array()[:, sorted_indices]
         sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]

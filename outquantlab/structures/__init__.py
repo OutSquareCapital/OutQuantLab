@@ -4,6 +4,17 @@ from outquantlab.structures.arrays import (
     Int32,
     ArrayFloat,
     ArrayInt,
+    empty_array,
+    full_array,
+    empty_like_array,
+    Nan,
+    reduce_array,
+    log_returns_array,
+    pct_returns_array,
+    shift_array,
+    backfill_array,
+    get_prices_array
+    
 )
 from outquantlab.structures.series import SeriesFloat, SeriesDict
 __all__: list[str] = [
@@ -17,4 +28,14 @@ __all__: list[str] = [
     "DistributionDict",
     "SeriesDict",
     "DefaultDataFrameFloat",
+    "empty_array",
+    "full_array",
+    "empty_like_array",
+    "Nan",
+    "reduce_array",
+    "log_returns_array",
+    "pct_returns_array",
+    "shift_array",
+    "backfill_array",
+    "get_prices_array",
 ]
