@@ -1,16 +1,18 @@
 import outquantlab.metrics as mt
-from outquantlab.structures import ArrayFloat, full_array_like
+from outquantlab.structures import arrays
 
-def get_fixed_bias(prices_array: ArrayFloat, Bias: float) -> ArrayFloat:
-    return full_array_like(model=prices_array, fill_value=Bias)
-    
+
+def get_fixed_bias(prices_array: arrays.ArrayFloat, Bias: float) -> arrays.ArrayFloat:
+    return arrays.full_array_like(model=prices_array, fill_value=Bias)
+
+
 def get_mean_price_ratio_raw(
-    prices_array: ArrayFloat, len_st: int, len_lt: int
-) -> ArrayFloat:
-    mean_price_ST: ArrayFloat = mt.get_rolling_mean(
+    prices_array: arrays.ArrayFloat, len_st: int, len_lt: int
+) -> arrays.ArrayFloat:
+    mean_price_ST: arrays.ArrayFloat = mt.get_rolling_mean(
         array=prices_array, length=len_st, min_length=len_st
     )
-    mean_price_LT: ArrayFloat = mt.get_rolling_mean(
+    mean_price_LT: arrays.ArrayFloat = mt.get_rolling_mean(
         array=prices_array, length=len_lt, min_length=len_lt
     )
 
@@ -18,12 +20,12 @@ def get_mean_price_ratio_raw(
 
 
 def get_median_price_ratio_raw(
-    prices_array: ArrayFloat, len_st: int, len_lt: int
-) -> ArrayFloat:
-    median_price_ST: ArrayFloat = mt.get_rolling_median(
+    prices_array: arrays.ArrayFloat, len_st: int, len_lt: int
+) -> arrays.ArrayFloat:
+    median_price_ST: arrays.ArrayFloat = mt.get_rolling_median(
         array=prices_array, length=len_st, min_length=len_st
     )
-    median_price_LT: ArrayFloat = mt.get_rolling_median(
+    median_price_LT: arrays.ArrayFloat = mt.get_rolling_median(
         array=prices_array, length=len_lt, min_length=len_lt
     )
 
@@ -33,12 +35,12 @@ def get_median_price_ratio_raw(
 
 
 def get_central_price_ratio_raw(
-    prices_array: ArrayFloat, len_st: int, len_lt: int
-) -> ArrayFloat:
-    central_price_ST: ArrayFloat = mt.get_rolling_central(
+    prices_array: arrays.ArrayFloat, len_st: int, len_lt: int
+) -> arrays.ArrayFloat:
+    central_price_ST: arrays.ArrayFloat = mt.get_rolling_central(
         array=prices_array, length=len_st, min_length=len_st
     )
-    central_price_LT: ArrayFloat = mt.get_rolling_central(
+    central_price_LT: arrays.ArrayFloat = mt.get_rolling_central(
         array=prices_array, length=len_lt, min_length=len_lt
     )
 
@@ -48,9 +50,9 @@ def get_central_price_ratio_raw(
 
 
 def get_mean_rate_of_change_raw(
-    log_returns_array: ArrayFloat, len_st: int, len_lt: int
-) -> ArrayFloat:
-    mean_returns: ArrayFloat = mt.get_rolling_mean(
+    log_returns_array: arrays.ArrayFloat, len_st: int, len_lt: int
+) -> arrays.ArrayFloat:
+    mean_returns: arrays.ArrayFloat = mt.get_rolling_mean(
         array=log_returns_array, length=len_st, min_length=len_st
     )
 
@@ -58,9 +60,9 @@ def get_mean_rate_of_change_raw(
 
 
 def get_median_rate_of_change_raw(
-    log_returns_array: ArrayFloat, len_st: int, len_lt: int
-) -> ArrayFloat:
-    median_returns: ArrayFloat = mt.get_rolling_median(
+    log_returns_array: arrays.ArrayFloat, len_st: int, len_lt: int
+) -> arrays.ArrayFloat:
+    median_returns: arrays.ArrayFloat = mt.get_rolling_median(
         array=log_returns_array, length=len_st, min_length=len_st
     )
 
@@ -68,9 +70,9 @@ def get_median_rate_of_change_raw(
 
 
 def get_central_rate_of_change_raw(
-    log_returns_array: ArrayFloat, len_st: int, len_lt: int
-) -> ArrayFloat:
-    central_returns: ArrayFloat = mt.get_rolling_quantile_ratio(
+    log_returns_array: arrays.ArrayFloat, len_st: int, len_lt: int
+) -> arrays.ArrayFloat:
+    central_returns: arrays.ArrayFloat = mt.get_rolling_quantile_ratio(
         returns_array=log_returns_array, window=len_st, quantile_spread=0.25
     )
 
@@ -78,12 +80,12 @@ def get_central_rate_of_change_raw(
 
 
 def get_mean_price_macd_raw(
-    prices_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
-) -> ArrayFloat:
-    mean_price_ratio_raw: ArrayFloat = get_mean_price_ratio_raw(
+    prices_array: arrays.ArrayFloat, len_st: int, len_lt: int, len_macd: int
+) -> arrays.ArrayFloat:
+    mean_price_ratio_raw: arrays.ArrayFloat = get_mean_price_ratio_raw(
         prices_array=prices_array, len_st=len_st, len_lt=len_lt
     )
-    mean_price_ratio_raw_sma: ArrayFloat = mt.get_rolling_mean(
+    mean_price_ratio_raw_sma: arrays.ArrayFloat = mt.get_rolling_mean(
         array=mean_price_ratio_raw, length=len_macd, min_length=len_macd
     )
 
@@ -91,12 +93,12 @@ def get_mean_price_macd_raw(
 
 
 def get_median_price_macd_raw(
-    prices_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
-) -> ArrayFloat:
-    median_price_ratio_raw: ArrayFloat = get_median_price_ratio_raw(
+    prices_array: arrays.ArrayFloat, len_st: int, len_lt: int, len_macd: int
+) -> arrays.ArrayFloat:
+    median_price_ratio_raw: arrays.ArrayFloat = get_median_price_ratio_raw(
         prices_array=prices_array, len_st=len_st, len_lt=len_lt
     )
-    median_price_ratio_raw_sma: ArrayFloat = mt.get_rolling_mean(
+    median_price_ratio_raw_sma: arrays.ArrayFloat = mt.get_rolling_mean(
         median_price_ratio_raw, length=len_macd, min_length=len_macd
     )
 
@@ -104,12 +106,12 @@ def get_median_price_macd_raw(
 
 
 def get_central_price_macd_raw(
-    prices_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
-) -> ArrayFloat:
-    central_price_ratio_raw: ArrayFloat = get_central_price_ratio_raw(
+    prices_array: arrays.ArrayFloat, len_st: int, len_lt: int, len_macd: int
+) -> arrays.ArrayFloat:
+    central_price_ratio_raw: arrays.ArrayFloat = get_central_price_ratio_raw(
         prices_array=prices_array, len_st=len_st, len_lt=len_lt
     )
-    central_price_ratio_raw_sma: ArrayFloat = mt.get_rolling_mean(
+    central_price_ratio_raw_sma: arrays.ArrayFloat = mt.get_rolling_mean(
         array=central_price_ratio_raw, length=len_macd, min_length=len_macd
     )
 
@@ -117,12 +119,12 @@ def get_central_price_macd_raw(
 
 
 def get_mean_rate_of_change_macd_raw(
-    returns_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
-) -> ArrayFloat:
-    mean_roc_raw: ArrayFloat = get_mean_rate_of_change_raw(
+    returns_array: arrays.ArrayFloat, len_st: int, len_lt: int, len_macd: int
+) -> arrays.ArrayFloat:
+    mean_roc_raw: arrays.ArrayFloat = get_mean_rate_of_change_raw(
         log_returns_array=returns_array, len_st=len_st, len_lt=len_lt
     )
-    mean_roc_raw_sma: ArrayFloat = mt.get_rolling_mean(
+    mean_roc_raw_sma: arrays.ArrayFloat = mt.get_rolling_mean(
         array=mean_roc_raw, length=len_macd, min_length=len_macd
     )
 
@@ -130,12 +132,12 @@ def get_mean_rate_of_change_macd_raw(
 
 
 def get_median_rate_of_change_macd_raw(
-    returns_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
-) -> ArrayFloat:
-    median_roc_raw: ArrayFloat = get_median_rate_of_change_raw(
+    returns_array: arrays.ArrayFloat, len_st: int, len_lt: int, len_macd: int
+) -> arrays.ArrayFloat:
+    median_roc_raw: arrays.ArrayFloat = get_median_rate_of_change_raw(
         log_returns_array=returns_array, len_st=len_st, len_lt=len_lt
     )
-    median_roc_raw_sma: ArrayFloat = mt.get_rolling_mean(
+    median_roc_raw_sma: arrays.ArrayFloat = mt.get_rolling_mean(
         array=median_roc_raw, length=len_macd, min_length=len_macd
     )
 
@@ -143,12 +145,12 @@ def get_median_rate_of_change_macd_raw(
 
 
 def get_central_rate_of_change_macd_raw(
-    returns_array: ArrayFloat, len_st: int, len_lt: int, len_macd: int
-) -> ArrayFloat:
-    central_roc_raw: ArrayFloat = get_central_rate_of_change_raw(
+    returns_array: arrays.ArrayFloat, len_st: int, len_lt: int, len_macd: int
+) -> arrays.ArrayFloat:
+    central_roc_raw: arrays.ArrayFloat = get_central_rate_of_change_raw(
         log_returns_array=returns_array, len_st=len_st, len_lt=len_lt
     )
-    central_roc_raw_sma: ArrayFloat = mt.get_rolling_mean(
+    central_roc_raw_sma: arrays.ArrayFloat = mt.get_rolling_mean(
         array=central_roc_raw, length=len_macd, min_length=len_macd
     )
 
@@ -156,9 +158,9 @@ def get_central_rate_of_change_macd_raw(
 
 
 def get_normalised_mean_price_ratio_raw(
-    prices_array: ArrayFloat, len_signal: int, len_norm: int
-) -> ArrayFloat:
-    mean_roc: ArrayFloat = get_mean_price_ratio_raw(
+    prices_array: arrays.ArrayFloat, len_signal: int, len_norm: int
+) -> arrays.ArrayFloat:
+    mean_roc: arrays.ArrayFloat = get_mean_price_ratio_raw(
         prices_array=prices_array, len_st=1, len_lt=len_signal
     )
     return mt.get_rolling_median_normalisation(
@@ -167,9 +169,9 @@ def get_normalised_mean_price_ratio_raw(
 
 
 def get_normalised_mean_rate_of_change_raw(
-    log_returns_array: ArrayFloat, len_signal: int, len_norm: int
-) -> ArrayFloat:
-    mean_roc: ArrayFloat = get_mean_rate_of_change_raw(
+    log_returns_array: arrays.ArrayFloat, len_signal: int, len_norm: int
+) -> arrays.ArrayFloat:
+    mean_roc: arrays.ArrayFloat = get_mean_rate_of_change_raw(
         log_returns_array=log_returns_array, len_st=1, len_lt=len_signal
     )
     return mt.get_rolling_median_normalisation(
@@ -178,9 +180,9 @@ def get_normalised_mean_rate_of_change_raw(
 
 
 def smoothed_skewness(
-    log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
-) -> ArrayFloat:
-    smoothed_array: ArrayFloat = mt.get_rolling_mean(
+    log_returns_array: arrays.ArrayFloat, len_smooth: int, len_skew: int
+) -> arrays.ArrayFloat:
+    smoothed_array: arrays.ArrayFloat = mt.get_rolling_mean(
         array=log_returns_array, length=len_smooth, min_length=len_smooth
     )
     return mt.get_rolling_skewness(
@@ -189,9 +191,9 @@ def smoothed_skewness(
 
 
 def smoothed_kurtosis(
-    log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
-) -> ArrayFloat:
-    smoothed_array: ArrayFloat = mt.get_rolling_mean(
+    log_returns_array: arrays.ArrayFloat, len_smooth: int, len_skew: int
+) -> arrays.ArrayFloat:
+    smoothed_array: arrays.ArrayFloat = mt.get_rolling_mean(
         array=log_returns_array, length=len_smooth, min_length=len_smooth
     )
 
@@ -201,9 +203,9 @@ def smoothed_kurtosis(
 
 
 def get_relative_skewness(
-    log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
-) -> ArrayFloat:
-    skewness_array: ArrayFloat = smoothed_skewness(
+    log_returns_array: arrays.ArrayFloat, len_smooth: int, len_skew: int
+) -> arrays.ArrayFloat:
+    skewness_array: arrays.ArrayFloat = smoothed_skewness(
         log_returns_array=log_returns_array,
         len_smooth=len_smooth,
         len_skew=len_skew,
@@ -212,9 +214,9 @@ def get_relative_skewness(
 
 
 def get_relative_kurt(
-    log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
-) -> ArrayFloat:
-    kurtosis_array: ArrayFloat = smoothed_kurtosis(
+    log_returns_array: arrays.ArrayFloat, len_smooth: int, len_skew: int
+) -> arrays.ArrayFloat:
+    kurtosis_array: arrays.ArrayFloat = smoothed_kurtosis(
         log_returns_array=log_returns_array,
         len_smooth=len_smooth,
         len_skew=len_skew,
@@ -223,45 +225,49 @@ def get_relative_kurt(
 
 
 def get_skew_on_kurtosis(
-    log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
-) -> ArrayFloat:
-    skew: ArrayFloat = smoothed_skewness(
+    log_returns_array: arrays.ArrayFloat, len_smooth: int, len_skew: int
+) -> arrays.ArrayFloat:
+    skew: arrays.ArrayFloat = smoothed_skewness(
         log_returns_array=log_returns_array,
         len_smooth=len_smooth,
         len_skew=len_skew,
     )
-    kurt: ArrayFloat = smoothed_kurtosis(
+    kurt: arrays.ArrayFloat = smoothed_kurtosis(
         log_returns_array=log_returns_array,
         len_smooth=len_smooth,
         len_skew=len_skew,
     )
     if len_skew <= 64:
-        skew_on_kurt_signal: ArrayFloat = mt.dynamic_signal(metric=kurt, signal=skew)
+        skew_on_kurt_signal: arrays.ArrayFloat = mt.dynamic_signal(
+            metric=kurt, signal=skew
+        )
     else:
-        skew_on_kurt_signal: ArrayFloat = mt.dynamic_signal(metric=kurt, signal=-skew)
+        skew_on_kurt_signal: arrays.ArrayFloat = mt.dynamic_signal(
+            metric=kurt, signal=-skew
+        )
 
     return skew_on_kurt_signal
 
 
 def get_relative_skew_on_kurtosis(
-    log_returns_array: ArrayFloat, len_smooth: int, len_skew: int
-) -> ArrayFloat:
-    relative_skew: ArrayFloat = get_relative_skewness(
+    log_returns_array: arrays.ArrayFloat, len_smooth: int, len_skew: int
+) -> arrays.ArrayFloat:
+    relative_skew: arrays.ArrayFloat = get_relative_skewness(
         log_returns_array=log_returns_array,
         len_smooth=len_smooth,
         len_skew=len_skew,
     )
-    relative_kurt: ArrayFloat = get_relative_kurt(
+    relative_kurt: arrays.ArrayFloat = get_relative_kurt(
         log_returns_array=log_returns_array,
         len_smooth=len_smooth,
         len_skew=len_skew,
     )
     if len_skew <= 64:
-        relative_skew_on_kurt_signal: ArrayFloat = mt.dynamic_signal(
+        relative_skew_on_kurt_signal: arrays.ArrayFloat = mt.dynamic_signal(
             metric=relative_kurt, signal=-relative_skew
         )
     else:
-        relative_skew_on_kurt_signal: ArrayFloat = mt.dynamic_signal(
+        relative_skew_on_kurt_signal: arrays.ArrayFloat = mt.dynamic_signal(
             metric=relative_kurt, signal=relative_skew
         )
 
@@ -269,9 +275,9 @@ def get_relative_skew_on_kurtosis(
 
 
 def smoothed_directional_volatility(
-    returns_array: ArrayFloat, len_st: int, len_vol: int
-) -> ArrayFloat:
-    smoothed_array: ArrayFloat = mt.get_rolling_mean(
+    returns_array: arrays.ArrayFloat, len_st: int, len_vol: int
+) -> arrays.ArrayFloat:
+    smoothed_array: arrays.ArrayFloat = mt.get_rolling_mean(
         array=returns_array, length=len_st, min_length=len_st
     )
     positive_vol, negative_vol = mt.separate_volatility(
@@ -282,9 +288,12 @@ def smoothed_directional_volatility(
 
 
 def relative_directional_volatility(
-    log_returns_array: ArrayFloat, len_smooth: int, len_vol: int, len_relative: int
-) -> ArrayFloat:
-    directional_volatility_raw: ArrayFloat = smoothed_directional_volatility(
+    log_returns_array: arrays.ArrayFloat,
+    len_smooth: int,
+    len_vol: int,
+    len_relative: int,
+) -> arrays.ArrayFloat:
+    directional_volatility_raw: arrays.ArrayFloat = smoothed_directional_volatility(
         returns_array=log_returns_array, len_st=len_smooth, len_vol=len_vol
     )
     return mt.relative_normalization(
@@ -293,9 +302,9 @@ def relative_directional_volatility(
 
 
 def normalised_directional_volatility(
-    log_returns_array: ArrayFloat, len_smooth: int, len_vol: int, len_norm: int
-) -> ArrayFloat:
-    directional_volatility_raw: ArrayFloat = smoothed_directional_volatility(
+    log_returns_array: arrays.ArrayFloat, len_smooth: int, len_vol: int, len_norm: int
+) -> arrays.ArrayFloat:
+    directional_volatility_raw: arrays.ArrayFloat = smoothed_directional_volatility(
         returns_array=log_returns_array,
         len_st=len_smooth,
         len_vol=len_vol,

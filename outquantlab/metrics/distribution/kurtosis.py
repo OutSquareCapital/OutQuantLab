@@ -1,5 +1,5 @@
 from numba import njit, prange  # type: ignore
-from outquantlab.structures import ArrayFloat, Float32, Nan, nan_array
+from outquantlab.structures import arrays
 
 
 @njit
@@ -11,10 +11,10 @@ def get_kurtosis(
     sum_values_fourth: float,
     consecutive_equal_count: int,
     min_length: int = 4,
-) -> float | Float32:
+) -> float | arrays.Float32:
     if observation_count >= min_length:
         if observation_count < 4:
-            return Nan
+            return arrays.Nan
         elif consecutive_equal_count >= observation_count:
             return -3.0
         else:
@@ -34,7 +34,7 @@ def get_kurtosis(
             )
 
             if variance <= 1e-14:
-                return Nan
+                return arrays.Nan
             else:
                 kurtosis = (
                     total_observations * total_observations - 1.0
@@ -45,7 +45,7 @@ def get_kurtosis(
                     (total_observations - 2.0) * (total_observations - 3.0)
                 )
     else:
-        return Nan
+        return arrays.Nan
 
 
 @njit
@@ -157,9 +157,9 @@ def remove_kurtosis_contribution(
 
 
 @njit
-def get_rolling_kurtosis(array: ArrayFloat, length: int, min_length: int) -> ArrayFloat:
+def get_rolling_kurtosis(array: arrays.ArrayFloat, length: int, min_length: int) -> arrays.ArrayFloat:
     num_rows, num_cols = array.shape
-    output: ArrayFloat = nan_array(shape=(num_rows, num_cols))
+    output: arrays.ArrayFloat = arrays.nan_array(shape=(num_rows, num_cols))
 
     for col in prange(num_cols):
         (

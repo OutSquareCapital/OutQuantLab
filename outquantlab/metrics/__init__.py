@@ -11,11 +11,11 @@ from outquantlab.metrics.aggregation import (
     get_rolling_sum,
 )
 from outquantlab.metrics.correlation import (
-    get_clusters,
     get_correlation_matrix,
     get_distance_matrix,
     get_filled_correlation_matrix,
     get_overall_average_correlation,
+    get_cluster_structure,
 )
 from outquantlab.metrics.distribution import get_rolling_skewness, get_rolling_kurtosis
 from outquantlab.metrics.normalization import (
@@ -32,7 +32,6 @@ from outquantlab.metrics.normalization import (
 )
 from outquantlab.metrics.performance import (
     expanding_sharpe_ratio,
-    get_equity_curves,
     get_max_drawdown,
     get_overall_average_drawdown,
     get_overall_monthly_skewness,
@@ -40,9 +39,7 @@ from outquantlab.metrics.performance import (
     get_returns_distribution,
     get_rolling_drawdown,
     get_rolling_sharpe_ratio,
-    get_total_returns,
-    log_returns_np,
-    pct_returns_np,
+    get_total_returns
 )
 from outquantlab.metrics.volatility import (
     get_overall_volatility_annualized,
@@ -76,10 +73,7 @@ __all__: list[str] = [
     "overall_volatility",
     "get_overall_volatility_annualized",
     "get_overall_sharpe_ratio",
-    "get_equity_curves",
     "get_rolling_drawdown",
-    "log_returns_np",
-    "pct_returns_np",
     "get_max_drawdown",
     "get_overall_mean",
     "get_overall_average_correlation",
@@ -96,8 +90,8 @@ __all__: list[str] = [
     "dynamic_signal",
     "rolling_scalar_normalisation",
     "get_overall_average_drawdown",
-    "get_clusters",
     "get_filled_correlation_matrix",
     "get_rolling_volatility_annualized",
-    "long_bias_normalization"
+    "long_bias_normalization",
+    "get_cluster_structure",
 ]

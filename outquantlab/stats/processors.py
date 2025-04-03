@@ -11,21 +11,16 @@ from outquantlab.stats.graphs import (
     Violins,
     LogCurves
 )
-from outquantlab.structures import (
-    ArrayFloat,
-    SeriesFloat,
-    DatedDataFrameFloat,
-    DefaultDataFrameFloat,
-)
+from outquantlab.structures import arrays, DatedDataFrameFloat, DefaultDataFrameFloat, SeriesFloat
 
-type DefinedFunc = Callable[[ArrayFloat], ArrayFloat]
-type ParametrableFunc = Callable[[ArrayFloat, int], ArrayFloat]
+type DefinedFunc = Callable[[arrays.ArrayFloat], arrays.ArrayFloat]
+type ParametrableFunc = Callable[[arrays.ArrayFloat, int], arrays.ArrayFloat]
 
 
 @dataclass(slots=True)
 class StatProcessor[
     D: DatedDataFrameFloat | SeriesFloat | DefaultDataFrameFloat,
-    F: Callable[..., ArrayFloat],
+    F: Callable[..., arrays.ArrayFloat],
 ](ABC):
     _func: F
     _ascending: bool = field(default=True)
@@ -47,7 +42,7 @@ class StatProcessor[
 
 class EquityProcessor(StatProcessor[DatedDataFrameFloat, DefinedFunc]):
     def get_formatted_data(self, data: DatedDataFrameFloat) -> DatedDataFrameFloat:
-        stats_array: ArrayFloat = self._func(data.get_array())
+        stats_array: arrays.ArrayFloat = self._func(data.get_array())
         return DatedDataFrameFloat(
             data=stats_array,
             index=data.get_index(),
@@ -71,7 +66,7 @@ class RollingProcessor(StatProcessor[DatedDataFrameFloat, ParametrableFunc]):
     def get_formatted_data(
         self, data: DatedDataFrameFloat, length: int
     ) -> DatedDataFrameFloat:
-        stats_array: ArrayFloat = self._func(data.get_array(), length)
+        stats_array: arrays.ArrayFloat = self._func(data.get_array(), length)
         return DatedDataFrameFloat(
             data=stats_array,
             index=data.get_index(),
@@ -95,7 +90,7 @@ class SamplingProcessor(StatProcessor[DefaultDataFrameFloat, ParametrableFunc]):
     def get_formatted_data(
         self, data: DatedDataFrameFloat, frequency: int
     ) -> DefaultDataFrameFloat:
-        stats_array: ArrayFloat = self._func(data.get_array(), frequency)
+        stats_array: arrays.ArrayFloat = self._func(data.get_array(), frequency)
         return DefaultDataFrameFloat(
             data=stats_array,
             columns=data.get_names(),
@@ -124,7 +119,7 @@ class SamplingProcessor(StatProcessor[DefaultDataFrameFloat, ParametrableFunc]):
 
 class TableProcessor(StatProcessor[DefaultDataFrameFloat, DefinedFunc]):
     def get_formatted_data(self, data: DefaultDataFrameFloat) -> DefaultDataFrameFloat:
-        stats_array: ArrayFloat = self._func(data.get_array())
+        stats_array: arrays.ArrayFloat = self._func(data.get_array())
         return DefaultDataFrameFloat(
             data=stats_array,
             columns=data.get_names(),
@@ -142,7 +137,7 @@ class TableProcessor(StatProcessor[DefaultDataFrameFloat, DefinedFunc]):
 
 class AggregateProcessor(StatProcessor[SeriesFloat, DefinedFunc]):
     def get_formatted_data(self, data: DatedDataFrameFloat) -> SeriesFloat:
-        stats_array: ArrayFloat = self._func(data.get_array())
+        stats_array: arrays.ArrayFloat = self._func(data.get_array())
         return SeriesFloat(data=stats_array, index=data.get_names()).sort_data(
             ascending=self._ascending
         )
