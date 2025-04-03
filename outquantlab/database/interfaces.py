@@ -4,7 +4,8 @@ from pathlib import Path
 from typing import Any
 from dataclasses import dataclass
 
-from outquantlab.structures import DatedDataFrameFloat
+from outquantlab.structures import frames
+
 
 @dataclass
 class FilesObject[T](ABC):
@@ -64,18 +65,18 @@ class JSONFile[K, V](DataFile[dict[K, V]]):
             json.dump(data, file, indent=3)
 
 
-class ParquetFile(DataFile[DatedDataFrameFloat]):
+class ParquetFile(DataFile[frames.DatedFloat]):
     extension = ".parquet"
 
-    def _load_implementation(self, names: list[str] | None = None) -> DatedDataFrameFloat:
+    def _load_implementation(self, names: list[str] | None = None) -> frames.DatedFloat:
         if names:
-            return DatedDataFrameFloat.from_parquet(path=self.path, names=names)
-        return DatedDataFrameFloat.from_parquet(path=self.path)
+            return frames.DatedFloat.from_parquet(path=self.path, names=names)
+        return frames.DatedFloat.from_parquet(path=self.path)
 
-    def _handle_missing_file(self) -> DatedDataFrameFloat:
-        empty_df: DatedDataFrameFloat = DatedDataFrameFloat.as_empty()
+    def _handle_missing_file(self) -> frames.DatedFloat:
+        empty_df: frames.DatedFloat = frames.DatedFloat.as_empty()
         empty_df.to_parquet(self.path, engine="pyarrow", index=True)
         return empty_df
 
-    def save(self, data:DatedDataFrameFloat) -> None:
+    def save(self, data:frames.DatedFloat) -> None:
         data.to_parquet(self.path, engine="pyarrow", index=True)

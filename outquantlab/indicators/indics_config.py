@@ -25,18 +25,18 @@ class BaseIndic(ABC):
         return f"{self.name} \n {self.active} \n {self.params}"
 
     @abstractmethod
-    def execute(*args: Any, **kwargs: Any) -> arrays.ArrayFloat: ...
+    def execute(*args: Any, **kwargs: Any) -> arrays.Float2D: ...
 
     def process_params_parallel(
         self,
         data_arrays: DataArrays,
         global_executor: ThreadPoolExecutor,
-    ) -> list[arrays.ArrayFloat]:
-        def process_single_param(param_tuple: tuple[int, ...]) -> arrays.ArrayFloat:
-            signal: arrays.ArrayFloat = rolling_scalar_normalisation(
+    ) -> list[arrays.Float2D]:
+        def process_single_param(param_tuple: tuple[int, ...]) -> arrays.Float2D:
+            signal: arrays.Float2D = rolling_scalar_normalisation(
                 raw_signal=self.execute(data_arrays, *param_tuple)
             )
-            # signal: arrays.ArrayFloat = long_bias_normalization(signal_array=signal)
+            # signal: arrays.Float2D = long_bias_normalization(signal_array=signal)
             return signal * data_arrays.pct_returns  # temporary
 
         return list(global_executor.map(process_single_param, self.params.combos))

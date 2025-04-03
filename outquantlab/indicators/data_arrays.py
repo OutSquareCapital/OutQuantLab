@@ -5,16 +5,16 @@ from outquantlab.structures import arrays
 
 
 class DataArrays(NamedTuple):
-    pct_returns: arrays.ArrayFloat
-    prices: arrays.ArrayFloat
-    log_returns: arrays.ArrayFloat
-    adjusted_returns: arrays.ArrayFloat
+    pct_returns: arrays.Float2D
+    prices: arrays.Float2D
+    log_returns: arrays.Float2D
+    adjusted_returns: arrays.Float2D
 
 
-def get_data_arrays(pct_returns: arrays.ArrayFloat) -> DataArrays:
-    prices: arrays.ArrayFloat = arrays.get_prices_array(returns_array=pct_returns)
-    log_returns: arrays.ArrayFloat = arrays.log_returns_array(prices_array=prices)
-    hv: arrays.ArrayFloat = hv_composite(returns_array=pct_returns)
+def get_data_arrays(pct_returns: arrays.Float2D) -> DataArrays:
+    prices: arrays.Float2D = arrays.get_prices_array(returns_array=pct_returns)
+    log_returns: arrays.Float2D = arrays.log_returns_array(prices_array=prices)
+    hv: arrays.Float2D = hv_composite(returns_array=pct_returns)
     return DataArrays(
         pct_returns=pct_returns,
         prices=arrays.shift_array(original_array=prices),
@@ -26,11 +26,11 @@ def get_data_arrays(pct_returns: arrays.ArrayFloat) -> DataArrays:
 
 
 def get_volatility_adjusted_returns(
-    pct_returns_array: arrays.ArrayFloat,
-    hv_array: arrays.ArrayFloat,
+    pct_returns_array: arrays.Float2D,
+    hv_array: arrays.Float2D,
     target_volatility: int = 25,
-) -> arrays.ArrayFloat:
-    vol_adj_position_size_shifted: arrays.ArrayFloat = arrays.shift_array(
+) -> arrays.Float2D:
+    vol_adj_position_size_shifted: arrays.Float2D = arrays.shift_array(
         original_array=target_volatility / (hv_array + 1e-10)
     )
     return pct_returns_array * vol_adj_position_size_shifted

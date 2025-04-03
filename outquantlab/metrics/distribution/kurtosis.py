@@ -157,9 +157,9 @@ def remove_kurtosis_contribution(
 
 
 @njit
-def get_rolling_kurtosis(array: arrays.ArrayFloat, length: int, min_length: int) -> arrays.ArrayFloat:
+def get_rolling_kurtosis(array: arrays.Float2D, length: int, min_length: int) -> arrays.Float2D:
     num_rows, num_cols = array.shape
-    output: arrays.ArrayFloat = arrays.nan_array(shape=(num_rows, num_cols))
+    output: arrays.Float2D = arrays.nan_array(shape=(num_rows, num_cols))
 
     for col in prange(num_cols):
         (

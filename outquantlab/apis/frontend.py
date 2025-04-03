@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from outquantlab.structures import DatedDict, DistributionDict, SeriesDict
+from outquantlab.structures import frames
 from enum import Enum
 
 class Server(Enum):
@@ -9,7 +9,7 @@ class Server(Enum):
     IP = "127.0.0.1"
     URL = f"http://{IP}:{PORT}{DATA}"
 
-type BackendData = DatedDict | DistributionDict | SeriesDict
+type BackendData = frames.DatedDict | frames.DistributionDict | frames.SeriesDict
 
 _app = FastAPI()
 _data_store: dict[str, BackendData] = {}

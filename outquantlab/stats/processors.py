@@ -11,16 +11,16 @@ from outquantlab.stats.graphs import (
     Violins,
     LogCurves
 )
-from outquantlab.structures import arrays, DatedDataFrameFloat, DefaultDataFrameFloat, SeriesFloat
+from outquantlab.structures import arrays, frames
 
-type DefinedFunc = Callable[[arrays.ArrayFloat], arrays.ArrayFloat]
-type ParametrableFunc = Callable[[arrays.ArrayFloat, int], arrays.ArrayFloat]
+type DefinedFunc = Callable[[arrays.Float2D], arrays.Float2D]
+type ParametrableFunc = Callable[[arrays.Float2D, int], arrays.Float2D]
 
 
 @dataclass(slots=True)
 class StatProcessor[
-    D: DatedDataFrameFloat | SeriesFloat | DefaultDataFrameFloat,
-    F: Callable[..., arrays.ArrayFloat],
+    D: frames.DatedFloat | frames.SeriesFloat | frames.DefaultFloat,
+    F: Callable[..., arrays.Float2D],
 ](ABC):
     _func: F
     _ascending: bool = field(default=True)
@@ -30,73 +30,73 @@ class StatProcessor[
         return self._func.__name__.replace("get", "").replace("_", " ").title()
 
     @abstractmethod
-    def send_to_api(self, data: DatedDataFrameFloat, *args: Any, **kwargs: Any) -> None:
+    def send_to_api(self, data: frames.DatedFloat, *args: Any, **kwargs: Any) -> None:
         raise NotImplementedError
 
     @abstractmethod
     def get_formatted_data(
-        self, data: DatedDataFrameFloat, *args: Any, **kwargs: Any
+        self, data: frames.DatedFloat, *args: Any, **kwargs: Any
     ) -> D:
         raise NotImplementedError
 
 
-class EquityProcessor(StatProcessor[DatedDataFrameFloat, DefinedFunc]):
-    def get_formatted_data(self, data: DatedDataFrameFloat) -> DatedDataFrameFloat:
-        stats_array: arrays.ArrayFloat = self._func(data.get_array())
-        return DatedDataFrameFloat(
+class EquityProcessor(StatProcessor[frames.DatedFloat, DefinedFunc]):
+    def get_formatted_data(self, data: frames.DatedFloat) -> frames.DatedFloat:
+        stats_array: arrays.Float2D = self._func(data.get_array())
+        return frames.DatedFloat(
             data=stats_array,
             index=data.get_index(),
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
 
-    def send_to_api(self, data: DatedDataFrameFloat) -> None:
+    def send_to_api(self, data: frames.DatedFloat) -> None:
         send_data_to_server(
             id=self._name,
             results=self.get_formatted_data(data=data).convert_to_json(),
         )
 
-    def plot(self, data: DatedDataFrameFloat) -> None:
+    def plot(self, data: frames.DatedFloat) -> None:
         LogCurves(
             formatted_data=self.get_formatted_data(data=data),
             title=self._name,
         )
 
 
-class RollingProcessor(StatProcessor[DatedDataFrameFloat, ParametrableFunc]):
+class RollingProcessor(StatProcessor[frames.DatedFloat, ParametrableFunc]):
     def get_formatted_data(
-        self, data: DatedDataFrameFloat, length: int
-    ) -> DatedDataFrameFloat:
-        stats_array: arrays.ArrayFloat = self._func(data.get_array(), length)
-        return DatedDataFrameFloat(
+        self, data: frames.DatedFloat, length: int
+    ) -> frames.DatedFloat:
+        stats_array: arrays.Float2D = self._func(data.get_array(), length)
+        return frames.DatedFloat(
             data=stats_array,
             index=data.get_index(),
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
 
-    def send_to_api(self, data: DatedDataFrameFloat, length: int) -> None:
+    def send_to_api(self, data: frames.DatedFloat, length: int) -> None:
         send_data_to_server(
             id=self._name,
             results=self.get_formatted_data(data=data, length=length).convert_to_json(),
         )
 
-    def plot(self, data: DatedDataFrameFloat, length: int) -> None:
+    def plot(self, data: frames.DatedFloat, length: int) -> None:
         Curves(
             formatted_data=self.get_formatted_data(data=data, length=length),
             title=self._name,
         )
 
 
-class SamplingProcessor(StatProcessor[DefaultDataFrameFloat, ParametrableFunc]):
+class SamplingProcessor(StatProcessor[frames.DefaultFloat, ParametrableFunc]):
     def get_formatted_data(
-        self, data: DatedDataFrameFloat, frequency: int
-    ) -> DefaultDataFrameFloat:
-        stats_array: arrays.ArrayFloat = self._func(data.get_array(), frequency)
-        return DefaultDataFrameFloat(
+        self, data: frames.DatedFloat, frequency: int
+    ) -> frames.DefaultFloat:
+        stats_array: arrays.Float2D = self._func(data.get_array(), frequency)
+        return frames.DefaultFloat(
             data=stats_array,
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
 
-    def send_to_api(self, data: DatedDataFrameFloat, frequency: int) -> None:
+    def send_to_api(self, data: frames.DatedFloat, frequency: int) -> None:
         send_data_to_server(
             id=self._name,
             results=self.get_formatted_data(
@@ -104,48 +104,48 @@ class SamplingProcessor(StatProcessor[DefaultDataFrameFloat, ParametrableFunc]):
             ).convert_to_json(),
         )
 
-    def plot_violins(self, data: DatedDataFrameFloat, frequency: int) -> None:
+    def plot_violins(self, data: frames.DatedFloat, frequency: int) -> None:
         Violins(
             formatted_data=self.get_formatted_data(data=data, frequency=frequency),
             title=self._name,
         )
 
-    def plot_histograms(self, data: DatedDataFrameFloat, frequency: int) -> None:
+    def plot_histograms(self, data: frames.DatedFloat, frequency: int) -> None:
         Histograms(
             formatted_data=self.get_formatted_data(data=data, frequency=frequency),
             title=self._name,
         )
 
 
-class TableProcessor(StatProcessor[DefaultDataFrameFloat, DefinedFunc]):
-    def get_formatted_data(self, data: DefaultDataFrameFloat) -> DefaultDataFrameFloat:
-        stats_array: arrays.ArrayFloat = self._func(data.get_array())
-        return DefaultDataFrameFloat(
+class TableProcessor(StatProcessor[frames.DefaultFloat, DefinedFunc]):
+    def get_formatted_data(self, data: frames.DefaultFloat) -> frames.DefaultFloat:
+        stats_array: arrays.Float2D = self._func(data.get_array())
+        return frames.DefaultFloat(
             data=stats_array,
             columns=data.get_names(),
         )
 
-    def send_to_api(self, data: DefaultDataFrameFloat) -> None:
+    def send_to_api(self, data: frames.DefaultFloat) -> None:
         send_data_to_server(
             id=self._name, results=self.get_formatted_data(data=data).convert_to_json()
         )
 
-    def plot(self, data: DefaultDataFrameFloat) -> None:
+    def plot(self, data: frames.DefaultFloat) -> None:
         HeatMap(formatted_data=self.get_formatted_data(data=data), title=self._name)
         HeatMap(formatted_data=self.get_formatted_data(data=data), title=self._name)
 
 
-class AggregateProcessor(StatProcessor[SeriesFloat, DefinedFunc]):
-    def get_formatted_data(self, data: DatedDataFrameFloat) -> SeriesFloat:
-        stats_array: arrays.ArrayFloat = self._func(data.get_array())
-        return SeriesFloat(data=stats_array, index=data.get_names()).sort_data(
+class AggregateProcessor(StatProcessor[frames.SeriesFloat, DefinedFunc]):
+    def get_formatted_data(self, data: frames.DatedFloat) -> frames.SeriesFloat:
+        stats_array: arrays.Float2D = self._func(data.get_array())
+        return frames.SeriesFloat(data=stats_array, index=data.get_names()).sort_data(
             ascending=self._ascending
         )
 
-    def send_to_api(self, data: DatedDataFrameFloat) -> None:
+    def send_to_api(self, data: frames.DatedFloat) -> None:
         send_data_to_server(
             id=self._name, results=self.get_formatted_data(data=data).convert_to_json()
         )
 
-    def plot(self, data: DatedDataFrameFloat) -> None:
+    def plot(self, data: frames.DatedFloat) -> None:
         Bars(formatted_data=self.get_formatted_data(data=data), title=self._name)

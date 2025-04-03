@@ -132,10 +132,10 @@ def remove_skewness_contribution(
 
 @njit
 def get_rolling_skewness(
-    array: arrays.ArrayFloat, length: int, min_length: int = 4
-) -> arrays.ArrayFloat:
+    array: arrays.Float2D, length: int, min_length: int = 4
+) -> arrays.Float2D:
     num_rows, num_cols = array.shape
-    output: arrays.ArrayFloat = arrays.nan_array(shape=(num_rows, num_cols))
+    output: arrays.Float2D = arrays.nan_array(shape=(num_rows, num_cols))
 
     for col in prange(num_cols):
         observation_count, sum_values, sum_values_squared, sum_values_cubed = (

@@ -10,10 +10,10 @@ from outquantlab.stats.design import (
     get_heatmap_colorscale,
     get_marker_config,
 )
-from outquantlab.structures import DatedDataFrameFloat, SeriesFloat, DefaultDataFrameFloat
+from outquantlab.structures import frames
 
 
-class Graph[D:DatedDataFrameFloat | DefaultDataFrameFloat | SeriesFloat](ABC):
+class Graph[D:frames.DatedFloat | frames.DefaultFloat | frames.SeriesFloat](ABC):
     def __init__(self, formatted_data: D, title: str) -> None:
         self.figure = go.Figure()
         self.setup_figure(formatted_data=formatted_data)
@@ -51,8 +51,8 @@ class Graph[D:DatedDataFrameFloat | DefaultDataFrameFloat | SeriesFloat](ABC):
         )
 
 
-class Curves(Graph[DatedDataFrameFloat]):
-    def setup_figure(self, formatted_data:DatedDataFrameFloat) -> None:
+class Curves(Graph[frames.DatedFloat]):
+    def setup_figure(self, formatted_data:frames.DatedFloat) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.columns:
             self.figure.add_trace(  # type: ignore
@@ -67,8 +67,8 @@ class Curves(Graph[DatedDataFrameFloat]):
             )
 
 
-class LogCurves(Graph[DatedDataFrameFloat]):
-    def setup_figure(self, formatted_data:DatedDataFrameFloat) -> None:
+class LogCurves(Graph[frames.DatedFloat]):
+    def setup_figure(self, formatted_data:frames.DatedFloat) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.columns:
             self.figure.add_trace(  # type: ignore
@@ -86,8 +86,8 @@ class LogCurves(Graph[DatedDataFrameFloat]):
         )
 
 
-class Violins(Graph[DefaultDataFrameFloat]):
-    def setup_figure(self, formatted_data: DefaultDataFrameFloat) -> None:
+class Violins(Graph[frames.DefaultFloat]):
+    def setup_figure(self, formatted_data: frames.DefaultFloat) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.columns:
             self.figure.add_trace(  # type: ignore
@@ -105,8 +105,8 @@ class Violins(Graph[DefaultDataFrameFloat]):
             )
 
 
-class Histograms(Graph[DefaultDataFrameFloat]):
-    def setup_figure(self, formatted_data:DefaultDataFrameFloat) -> None:
+class Histograms(Graph[frames.DefaultFloat]):
+    def setup_figure(self, formatted_data:frames.DefaultFloat) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.columns:
             self.figure.add_trace(  # type: ignore
@@ -122,8 +122,8 @@ class Histograms(Graph[DefaultDataFrameFloat]):
         )
 
 
-class Bars(Graph[SeriesFloat]):
-    def setup_figure(self, formatted_data: SeriesFloat) -> None:
+class Bars(Graph[frames.SeriesFloat]):
+    def setup_figure(self, formatted_data: frames.SeriesFloat) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for label, value in zip(
             formatted_data.get_names(),
@@ -144,8 +144,8 @@ class Bars(Graph[SeriesFloat]):
         )
 
 
-class HeatMap(Graph[DefaultDataFrameFloat]):
-    def setup_figure(self, formatted_data: DefaultDataFrameFloat) -> None:
+class HeatMap(Graph[frames.DefaultFloat]):
+    def setup_figure(self, formatted_data: frames.DefaultFloat) -> None:
         color_scale: list[list[float | str]] = get_heatmap_colorscale()
         self.figure.add_trace(  # type: ignore
             trace=go.Heatmap(
