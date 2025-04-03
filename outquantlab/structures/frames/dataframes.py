@@ -26,10 +26,10 @@ class DatedDict(TypedDict):
     columns: list[str]
 
 
-class DataFrameFloat[T: DatetimeIndex | None](DataFrame):
+class BaseFloat[T: DatetimeIndex | None](DataFrame):
     def __init__(
         self,
-        data: arrays.ArrayFloat | list[float],
+        data: arrays.Float2D | list[float],
         index: T,
         columns: list[str] | MultiIndex | Index,  # type: ignore
     ) -> None:
@@ -41,7 +41,7 @@ class DataFrameFloat[T: DatetimeIndex | None](DataFrame):
     def clean_nans(self) -> None:
         self.dropna(axis=0, how="all", inplace=True)  # type: ignore
 
-    def get_array(self) -> arrays.ArrayFloat:
+    def get_array(self) -> arrays.Float2D:
         return self.to_numpy(copy=False, na_value=arrays.Nan)  # type: ignore
 
     def get_names(self) -> list[str]:
@@ -50,10 +50,10 @@ class DataFrameFloat[T: DatetimeIndex | None](DataFrame):
         return self.columns.to_list()
 
 
-class DefaultDataFrameFloat(DataFrameFloat[None]):
+class DefaultFloat(BaseFloat[None]):
     def __init__(
         self,
-        data: arrays.ArrayFloat | list[float],
+        data: arrays.Float2D | list[float],
         columns: list[str] | MultiIndex | Index,  # type: ignore
     ) -> None:
         super().__init__(data=data, index=None, columns=columns)  # type: ignore
@@ -61,16 +61,16 @@ class DefaultDataFrameFloat(DataFrameFloat[None]):
     def get_index(self) -> RangeIndex:
         return self.index  # type: ignore
 
-    def sort_data(self, ascending: bool) -> "DefaultDataFrameFloat":
-        mean_values: arrays.ArrayFloat = nanmean(self.get_array(), axis=0)
-        sorted_indices: arrays.ArrayInt = arrays.get_sorted_indices(
+    def sort_data(self, ascending: bool) -> "DefaultFloat":
+        mean_values: arrays.Float2D = nanmean(self.get_array(), axis=0)
+        sorted_indices: arrays.Int2D = arrays.get_sorted_indices(
             array=mean_values, ascending=ascending
         )
 
-        sorted_data: arrays.ArrayFloat = self.get_array()[:, sorted_indices]
+        sorted_data: arrays.Float2D = self.get_array()[:, sorted_indices]
         sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]
 
-        return DefaultDataFrameFloat(data=sorted_data, columns=sorted_columns)
+        return DefaultFloat(data=sorted_data, columns=sorted_columns)
 
     def get_index_list(self) -> list[int]:
         return self.get_index().tolist()  # type: ignore
@@ -85,12 +85,12 @@ class DefaultDataFrameFloat(DataFrameFloat[None]):
         return DistributionDict(data=column_data, columns=self.get_names())
 
 
-class DatedDataFrameFloat(DataFrameFloat[DatetimeIndex]):
+class DatedFloat(BaseFloat[DatetimeIndex]):
     def get_index(self) -> DatetimeIndex:
         return self.index  # type: ignore
 
     @classmethod
-    def as_empty(cls) -> "DatedDataFrameFloat":
+    def as_empty(cls) -> "DatedFloat":
         return cls(
             data=arrays.empty_array(shape=(0, 0)),
             index=DatetimeIndex(data=[datetime.now()]),
@@ -98,7 +98,7 @@ class DatedDataFrameFloat(DataFrameFloat[DatetimeIndex]):
         )
 
     @classmethod
-    def from_pandas(cls, data: DataFrame) -> "DatedDataFrameFloat":
+    def from_pandas(cls, data: DataFrame) -> "DatedFloat":
         return cls(
             data=data.to_numpy(dtype=arrays.Float32, copy=False, na_value=arrays.Nan),  # type: ignore
             index=data.index,  # type: ignore
@@ -108,20 +108,20 @@ class DatedDataFrameFloat(DataFrameFloat[DatetimeIndex]):
     @classmethod
     def from_parquet(
         cls, path: Path, names: list[str] | None = None
-    ) -> "DatedDataFrameFloat":
+    ) -> "DatedFloat":
         data: DataFrame = read_parquet(path, engine="pyarrow", columns=names)
         return cls.from_pandas(data=data)
 
-    def sort_data(self, ascending: bool) -> "DatedDataFrameFloat":
-        mean_values: arrays.ArrayFloat = nanmean(self.get_array(), axis=0)
-        sorted_indices: arrays.ArrayInt = arrays.get_sorted_indices(
+    def sort_data(self, ascending: bool) -> "DatedFloat":
+        mean_values: arrays.Float2D = nanmean(self.get_array(), axis=0)
+        sorted_indices: arrays.Int2D = arrays.get_sorted_indices(
             array=mean_values, ascending=ascending
         )
 
-        sorted_data: arrays.ArrayFloat = self.get_array()[:, sorted_indices]
+        sorted_data: arrays.Float2D = self.get_array()[:, sorted_indices]
         sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]
 
-        return DatedDataFrameFloat(
+        return DatedFloat(
             data=sorted_data, columns=sorted_columns, index=self.get_index()
         )
 

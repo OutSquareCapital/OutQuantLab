@@ -1,10 +1,13 @@
 from typing import TypeAlias
 
-from numpy import float32, int32, nan
-from numpy.typing import NDArray
+import numpy as np
 
-Nan: float = nan
-Float32: TypeAlias = float32
-Int32: TypeAlias = int32
-ArrayFloat: TypeAlias = NDArray[Float32]
-ArrayInt: TypeAlias = NDArray[Int32]
+Nan: float = np.nan
+Float32: TypeAlias = np.float32
+Int32: TypeAlias = np.int32
+
+
+Int1D: TypeAlias = np.ndarray[tuple[int], np.dtype[Int32]]
+Int2D: TypeAlias = np.ndarray[tuple[int, int], np.dtype[Int32]]
+Float1D: TypeAlias = np.ndarray[tuple[int], np.dtype[Float32]]
+Float2D: TypeAlias = np.ndarray[tuple[int, int], np.dtype[Float32]]
