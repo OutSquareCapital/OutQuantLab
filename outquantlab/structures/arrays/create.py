@@ -3,27 +3,27 @@ import numpy as np
 from outquantlab.structures.arrays.types import Float2D, Float32, Int2D, Nan
 
 
-def empty_array(shape: tuple[int, ...]) -> Float2D:
+def empty(shape: tuple[int, ...]) -> Float2D:
     return np.empty(shape=shape, dtype=Float32)
 
 
-def empty_array_like(model: Float2D) -> Float2D:
+def empty_like(model: Float2D) -> Float2D:
     return np.empty_like(prototype=model, dtype=Float32)
 
 
-def full_array(shape: tuple[int, ...], fill_value: float) -> Float2D:
+def full(shape: tuple[int, ...], fill_value: float) -> Float2D:
     return np.full(shape=shape, fill_value=fill_value, dtype=Float32)
 
 
-def full_array_like(model: Float2D, fill_value: float) -> Float2D:
+def full_like(model: Float2D, fill_value: float) -> Float2D:
     return np.full_like(a=model, fill_value=fill_value, dtype=Float32)
 
 
-def nan_array(shape: tuple[int, ...]) -> Float2D:
+def create_nan(shape: tuple[int, ...]) -> Float2D:
     return np.full(shape=shape, fill_value=Nan, dtype=Float32)
 
 
-def nan_array_like(model: Float2D) -> Float2D:
+def nan_like(model: Float2D) -> Float2D:
     return np.full_like(a=model, fill_value=Nan, dtype=Float32)
 
 
