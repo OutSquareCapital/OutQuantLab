@@ -10,6 +10,7 @@ from numpy import (
     cumprod,
     empty,
     empty_like,
+    full_like,
     float32,
     full,
     int32,
@@ -28,14 +29,20 @@ ArrayInt: TypeAlias = NDArray[Int32]
 def empty_array(shape: tuple[int, ...]) -> ArrayFloat:
     return empty(shape=shape, dtype=Float32)
 
+def empty_array_like(model: ArrayFloat) -> ArrayFloat:
+    return empty_like(prototype=model, dtype=Float32)
 
 def full_array(shape: tuple[int, ...], fill_value: float) -> ArrayFloat:
     return full(shape=shape, fill_value=fill_value, dtype=Float32)
 
+def full_array_like(model: ArrayFloat, fill_value: float) -> ArrayFloat:
+    return full_like(a=model, fill_value=fill_value, dtype=Float32)
 
-def empty_like_array(prototype: ArrayFloat) -> ArrayFloat:
-    return empty_like(prototype=prototype, dtype=Float32)
+def nan_array(shape: tuple[int, ...]) -> ArrayFloat:
+    return full(shape=shape, fill_value=Nan, dtype=Float32)
 
+def nan_array_like(model: ArrayFloat) -> ArrayFloat:
+    return full_like(a=model, fill_value=Nan, dtype=Float32)
 
 def reduce_array(array: ArrayFloat, frequency: int) -> ArrayFloat:
     array_length: int = array.shape[0]
@@ -49,14 +56,14 @@ def reduce_array(array: ArrayFloat, frequency: int) -> ArrayFloat:
 
 def log_returns_array(prices_array: ArrayFloat) -> ArrayFloat:
     ratios = prices_array[1:] / prices_array[:-1]
-    log_returns_array: ArrayFloat = empty_like_array(prototype=prices_array)
+    log_returns_array: ArrayFloat = empty_array_like(model=prices_array)
     log_returns_array[0] = Nan
     log_returns_array[1:] = log(ratios)
     return log_returns_array
 
 
 def pct_returns_array(prices_array: ArrayFloat) -> ArrayFloat:
-    pct_returns_array: ArrayFloat = empty_like_array(prototype=prices_array)
+    pct_returns_array: ArrayFloat = empty_array_like(model=prices_array)
     pct_returns_array[0] = Nan
     pct_returns_array[1:] = prices_array[1:] / prices_array[:-1] - 1
     return pct_returns_array
@@ -67,7 +74,7 @@ def get_prices_array(returns_array: ArrayFloat) -> ArrayFloat:
     mask: ArrayFloat = isnan(temp_array)
     temp_array[mask] = 0
 
-    cumulative_returns: ArrayFloat = empty_like_array(prototype=temp_array)
+    cumulative_returns: ArrayFloat = empty_array_like(model=temp_array)
 
     cumulative_returns[:0] = Nan
 
@@ -79,7 +86,7 @@ def get_prices_array(returns_array: ArrayFloat) -> ArrayFloat:
 
 
 def shift_array(original_array: ArrayFloat, step: int = 1) -> ArrayFloat:
-    shifted_array: ArrayFloat = empty_like_array(prototype=original_array)
+    shifted_array: ArrayFloat = empty_array_like(model=original_array)
     shifted_array[step:, :] = original_array[:-step, :]
     shifted_array[:step, :] = Nan
     return shifted_array
