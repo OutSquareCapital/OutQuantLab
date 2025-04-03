@@ -1,8 +1,8 @@
-from outquantlab.backtest import process_backtest
-from outquantlab.core import AppConfig, BacktestResults
+from outquantlab.backtest import process_backtest, BacktestResults
+from outquantlab.core import AppConfig
 from outquantlab.database import DataBaseProvider
 from outquantlab.stats import Stats
-from outquantlab.structures import DataFrameFloat
+from outquantlab.structures import frames
 from outquantlab.apis import start_server
 
 
@@ -23,7 +23,7 @@ class OutQuantLab:
     def save_config(self) -> None:
         self._dbp.save_app_config(app_config=self.app_config)
 
-    def send_results(self, results: DataFrameFloat) -> None:
+    def send_results(self, results:frames.DatedFloat) -> None:
         self.stats.rolling.sharpe_ratio.send_to_api(data=results, length=1250)
         self.stats.overall.sharpe_ratio.send_to_api(data=results)
         self.stats.distribution.send_to_api(data=results, frequency=20)

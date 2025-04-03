@@ -1,6 +1,6 @@
-from outquantlab.core.clusters import AssetsClusters, IndicsClusters
+from outquantlab.core.clusters import AssetsClusters, IndicsClusters, BacktestResults, aggregate_raw_returns
 from outquantlab.core.collections import IndicsConfig, AssetsConfig
-from outquantlab.core.config_state import AppConfig, BacktestConfig, BacktestResults
+from outquantlab.core.config_state import AppConfig, BacktestConfig
 __all__: list[str] = [
     "AssetsClusters",
     "IndicsClusters",
@@ -9,4 +9,5 @@ __all__: list[str] = [
     "AppConfig",
     "BacktestConfig",
     "BacktestResults",
+    "aggregate_raw_returns",
 ]
