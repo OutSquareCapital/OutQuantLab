@@ -92,7 +92,7 @@ class DatedFloat(BaseFloat[DatetimeIndex]):
     @classmethod
     def as_empty(cls) -> "DatedFloat":
         return cls(
-            data=arrays.empty(shape=(0, 0)),
+            data=[],
             index=DatetimeIndex(data=[datetime.now()]),
             columns=[],
         )
