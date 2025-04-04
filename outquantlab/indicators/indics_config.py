@@ -22,7 +22,7 @@ class BaseIndic(ABC):
         self.params: IndicParams = IndicParams(values=param_values)
 
     def __repr__(self) -> str:
-        return f"{self.name} \n {self.active} \n {self.params}"
+        return f"name: {self.name} \n statut: {self.active} \n params: {self.params}"
 
     @abstractmethod
     def execute(*args: Any, **kwargs: Any) -> arrays.Float2D: ...
