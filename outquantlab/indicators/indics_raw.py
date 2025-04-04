@@ -3,7 +3,7 @@ from outquantlab.structures import arrays
 
 
 def get_fixed_bias(prices_array: arrays.Float2D, Bias: float) -> arrays.Float2D:
-    return arrays.full_like(model=prices_array, fill_value=Bias)
+    return arrays.create_full_like(model=prices_array, fill_value=Bias)
 
 
 def get_mean_price_ratio_raw(

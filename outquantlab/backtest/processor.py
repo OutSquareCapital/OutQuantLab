@@ -35,7 +35,7 @@ class IndicatorsProcessor:
     ) -> None:
         self.assets_nb: int = assets_nb
         self.start_index: int = 0
-        self.results: arrays.Float2D = arrays.empty(
+        self.results: arrays.Float2D = arrays.create_empty(
             length=days_nb, width=total_returns_streams
         )
 

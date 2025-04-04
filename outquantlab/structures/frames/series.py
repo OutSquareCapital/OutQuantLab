@@ -44,7 +44,7 @@ class SeriesFloat(Series):  # type: ignore
     def from_array_list(
         cls, data: list[arrays.Float2D], index: list[str]
     ) -> "SeriesFloat":
-        return cls(data=arrays.combine(arrays_list=data), index=index)
+        return cls(data=arrays.create_from_list(arrays_list=data), index=index)
 
     def convert_to_json(self) -> SeriesDict:
         data: list[float] = self.get_array().tolist()

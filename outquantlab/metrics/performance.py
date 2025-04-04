@@ -81,7 +81,7 @@ def get_overall_monthly_skewness(returns_array: arrays.Float2D) -> arrays.Float2
     monthly_prices: arrays.Float2D = arrays.reduce(
         array=prices_array, frequency=consts.MONTH
     )
-    monthly_returns: arrays.Float2D = arrays.pct_returns(
+    monthly_returns: arrays.Float2D = arrays.get_pct_returns(
         prices=monthly_prices
     )
     length_to_use: int = monthly_returns.shape[0]

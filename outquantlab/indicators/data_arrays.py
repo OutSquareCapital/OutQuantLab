@@ -13,7 +13,7 @@ class DataArrays(NamedTuple):
 
 def get_data_arrays(pct_returns: arrays.Float2D) -> DataArrays:
     prices: arrays.Float2D = arrays.get_prices(returns=pct_returns)
-    log_returns: arrays.Float2D = arrays.log_returns(prices=prices)
+    log_returns: arrays.Float2D = arrays.get_log_returns(prices=prices)
     hv: arrays.Float2D = hv_composite(returns_array=pct_returns)
     return DataArrays(
         pct_returns=pct_returns,
