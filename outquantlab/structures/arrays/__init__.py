@@ -1,20 +1,22 @@
 from outquantlab.structures.arrays.transform import (
     backfill,
-    combine,
     fill_nan,
-    get_prices,
-    log_returns,
-    pct_returns,
     reduce,
     shift,
 )
 from outquantlab.structures.arrays.create import (
-    empty,
-    empty_like,
-    full,
-    full_like,
+    create_empty,
+    create_empty_like,
+    create_full,
+    create_full_like,
     create_nan,
-    get_sorted_indices
+    create_from_list
+)
+from outquantlab.structures.arrays.extract import (
+    get_prices,
+    get_log_returns,
+    get_pct_returns,
+    get_sorted_indices,
 )
 from outquantlab.structures.arrays.types import (
     Int2D,
@@ -33,17 +35,17 @@ __all__: list[str] = [
     "Int32",
     "Nan",
     'backfill',
-    'combine',
-    'empty',
-    'empty_like',
     'fill_nan',
-    'full',
-    'full_like',
+    'create_nan',
+    'reduce',
+    'shift',
+    'create_full_like',
+    'create_full',
+    'create_empty_like',
+    'create_empty',
+    'create_from_list',
+    'get_log_returns',
+    'get_pct_returns',
     'get_prices',
     'get_sorted_indices',
-    'log_returns',
-    'create_nan',
-    'pct_returns',
-    'reduce',
-    'shift'
 ]
