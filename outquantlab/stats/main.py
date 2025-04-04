@@ -8,7 +8,8 @@ from outquantlab.stats.processors import (
     TableProcessor,
     EquityProcessor
 )
-from outquantlab.structures import arrays
+from outquantlab.structures import arrays, frames
+from outquantlab.apis import start_server
 
 class AggregateProcessorsRegistery(NamedTuple):
     returns: AggregateProcessor
@@ -63,3 +64,9 @@ class Stats:
         self.equity = EquityProcessor(
             _func=arrays.get_prices, _ascending=True
         )
+
+    def send_results(self, results:frames.DatedFloat) -> None:
+        self.rolling.sharpe_ratio.send_to_api(data=results, length=1250)
+        self.overall.sharpe_ratio.send_to_api(data=results)
+        self.distribution.send_to_api(data=results, frequency=20)
+        start_server()
