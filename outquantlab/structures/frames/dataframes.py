@@ -38,8 +38,8 @@ class BaseFloat[T: DatetimeIndex | None](DataFrame):
     def select(self, column: str) -> list[float]:
         return self[column].tolist()  # type: ignore
 
-    def clean_nans(self) -> None:
-        self.dropna(axis=0, how="all", inplace=True)  # type: ignore
+    def clean_nans(self, axis: int = 0) -> None:
+        self.dropna(axis=axis, how="all", inplace=True)  # type: ignore
 
     def get_array(self) -> arrays.Float2D:
         return self.to_numpy(copy=False, na_value=arrays.Nan)  # type: ignore
@@ -106,9 +106,7 @@ class DatedFloat(BaseFloat[DatetimeIndex]):
         )
 
     @classmethod
-    def from_parquet(
-        cls, path: Path, names: list[str] | None = None
-    ) -> "DatedFloat":
+    def from_parquet(cls, path: Path, names: list[str] | None = None) -> "DatedFloat":
         data: DataFrame = read_parquet(path, engine="pyarrow", columns=names)
         return cls.from_pandas(data=data)
 
