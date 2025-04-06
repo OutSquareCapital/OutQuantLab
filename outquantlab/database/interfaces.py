@@ -17,7 +17,7 @@ class FilesObject[T](ABC):
     def save(self, data: T) -> None:
         raise NotImplementedError
 
-class DataFile[T](ABC):
+class FileHandler[T](ABC):
     extension: str
 
     def __init__(self, db_path: Path, file_name: str) -> None:
@@ -47,7 +47,7 @@ class DataFile[T](ABC):
         return f"{self.__class__.__name__} path: \n {self.path}\n"
 
 
-class JSONFile[K, V](DataFile[dict[K, V]]):
+class JSONHandler[K, V](FileHandler[dict[K, V]]):
     extension = ".json"
 
     def _load_implementation(self, names: list[str] | None = None) -> dict[K, V]:
@@ -65,7 +65,7 @@ class JSONFile[K, V](DataFile[dict[K, V]]):
             json.dump(data, file, indent=3)
 
 
-class ParquetFile(DataFile[frames.DatedFloat]):
+class ParquetHandler(FileHandler[frames.DatedFloat]):
     extension = ".parquet"
 
     def _load_implementation(self, names: list[str] | None = None) -> frames.DatedFloat:
