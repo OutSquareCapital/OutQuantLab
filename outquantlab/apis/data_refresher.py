@@ -6,19 +6,7 @@ from outquantlab.structures import arrays, frames
 
 def fetch_data(assets: list[str]) -> frames.DatedFloat:
     test_connection(asset=assets[0])
-    data: frames.DatedFloat = _get_yf_data(assets=assets)
-    check_data(data=data)
-    return data
-
-def check_data(data: frames.DatedFloat) -> None:
-    base_shape: tuple[int, int] = data.shape
-    data.clean_nans(axis=1)
-    new_shape: tuple[int, int] = data.shape
-    if base_shape != new_shape:
-        raise ValueError(
-            f"Deleted {base_shape[1] - new_shape[1]} columns after cleaning NaNs"
-        )
-
+    return _get_yf_data(assets=assets)
 
 def _get_yf_data(assets: list[str]) -> frames.DatedFloat:
     prices: frames.DatedFloat = _get_prices_data(assets=assets)
