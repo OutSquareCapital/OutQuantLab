@@ -31,6 +31,6 @@ def get_volatility_adjusted_returns(
     target_volatility: int = 25,
 ) -> arrays.Float2D:
     vol_adj_position_size_shifted: arrays.Float2D = arrays.shift(
-        original=target_volatility / (hv_array + 1e-10)
+        original=target_volatility / hv_array
     )
     return pct_returns_array * vol_adj_position_size_shifted
