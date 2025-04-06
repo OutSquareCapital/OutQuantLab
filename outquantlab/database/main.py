@@ -1,60 +1,49 @@
-from pathlib import Path
-
 from outquantlab.core import AppConfig
-from outquantlab.database.implementations import (
-    AssetFiles,
-    AssetsClustersFiles,
-    IndicFiles,
-    IndicsClustersFiles,
-    TickersData,
-)
-from outquantlab.database.interfaces import JSONFile, ParquetFile
-from outquantlab.structures import frames
+from outquantlab.database.structure import DBStructure, get_db_structure
+from outquantlab.structures import frames, arrays
+from outquantlab.apis import fetch_data
+
 
 class DataBaseProvider:
     def __init__(self, db_name: str) -> None:
-        db_path: Path = self._get_db_path(db_name=db_name)
-        self.assets = AssetFiles(
-            active=JSONFile(db_path=db_path, file_name="assets_active"),
-        )
+        self._db: DBStructure = get_db_structure(db_name=db_name)
 
-        self.indics = IndicFiles(
-            active=JSONFile(db_path=db_path, file_name="indics_active"),
-            params=JSONFile(db_path=db_path, file_name="indics_params"),
-        )
-        self.tickers = TickersData(
-            returns=ParquetFile(db_path=db_path, file_name="returns_data"),
-        )
-        self.assets_clusters = AssetsClustersFiles(
-            clusters=JSONFile(db_path=db_path, file_name="assets_clusters"),
-        )
-        self.indics_clusters = IndicsClustersFiles(
-            clusters=JSONFile(db_path=db_path, file_name="indics_clusters"),
-        )
-
-    def _get_db_path(self, db_name: str) -> Path:
-        current_file_path: Path = Path(__file__).resolve()
-        current_dir: Path = current_file_path.parent
-        return current_dir / db_name
-
-    def get_returns_data(self, app_config: AppConfig) -> frames.DatedFloat:
-        return self.tickers.get(
+    def get_returns_data(
+        self, app_config: AppConfig, new_data: bool
+    ) -> frames.DatedFloat:
+        if new_data:
+            data: frames.DatedFloat = self._db.tickers.get()
+            data = clean_data(data=data)
+            self._db.tickers.save(data=data)
+            return data
+        return self._db.tickers.get(
             assets=app_config.assets_config.get_all_active_entities_names()
         )
 
     def refresh_data(self, app_config: AppConfig) -> None:
-        self.tickers.refresh(assets=app_config.assets_config.get_all_entities_names())
+        assets: list[str] = app_config.assets_config.get_all_entities_names()
+        data: frames.DatedFloat = fetch_data(assets=assets)
+        self._db.tickers.save(data=data)
 
     def get_app_config(self) -> AppConfig:
         return AppConfig(
-            assets_config=self.assets.get(),
-            assets_clusters=self.assets_clusters.get(),
-            indics_config=self.indics.get(),
-            indics_clusters=self.indics_clusters.get(),
+            assets_config=self._db.assets.get(),
+            assets_clusters=self._db.assets_clusters.get(),
+            indics_config=self._db.indics.get(),
+            indics_clusters=self._db.indics_clusters.get(),
         )
 
     def save_app_config(self, app_config: AppConfig) -> None:
-        self.assets.save(data=app_config.assets_config)
-        self.indics.save(data=app_config.indics_config)
-        self.assets_clusters.save(data=app_config.assets_clusters)
-        self.indics_clusters.save(data=app_config.indics_clusters)
+        self._db.assets.save(data=app_config.assets_config)
+        self._db.indics.save(data=app_config.indics_config)
+        self._db.assets_clusters.save(data=app_config.assets_clusters)
+        self._db.indics_clusters.save(data=app_config.indics_clusters)
+
+
+def clean_data(data: frames.DatedFloat) -> frames.DatedFloat:
+    data.clean_nans(axis=1)
+    array: arrays.Float2D = data.get_array()
+    cleaned_array: arrays.Float2D = arrays.fill_nan(array)
+    return frames.DatedFloat(
+        data=cleaned_array, index=data.get_index(), columns=data.columns
+    )

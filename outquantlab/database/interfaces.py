@@ -2,12 +2,10 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
-from dataclasses import dataclass
 
 from outquantlab.structures import frames
 
 
-@dataclass
 class FilesObject[T](ABC):
     @abstractmethod
     def get(self, *args: Any, **kwargs: Any) -> T:

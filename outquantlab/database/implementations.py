@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-
-from outquantlab.apis import fetch_data
 from outquantlab.core import (
     AssetsClusters,
     AssetsConfig,
@@ -9,11 +6,14 @@ from outquantlab.core import (
 )
 from outquantlab.database.interfaces import FilesObject, JSONHandler, ParquetHandler
 from outquantlab.structures import frames
+from pathlib import Path
 
 
-@dataclass
 class AssetsClustersFiles(FilesObject[AssetsClusters]):
-    clusters: JSONHandler[str, dict[str, list[str]]]
+    def __init__(self, db_path: Path) -> None:
+        self.clusters = JSONHandler[str, dict[str, list[str]]](
+            db_path=db_path, file_name="assets_clusters"
+        )
 
     def get(self) -> AssetsClusters:
         return AssetsClusters(
@@ -24,9 +24,11 @@ class AssetsClustersFiles(FilesObject[AssetsClusters]):
         self.clusters.save(data=data.structure)
 
 
-@dataclass
 class IndicsClustersFiles(FilesObject[IndicsClusters]):
-    clusters: JSONHandler[str, dict[str, list[str]]]
+    def __init__(self, db_path: Path) -> None:
+        self.clusters = JSONHandler[str, dict[str, list[str]]](
+            db_path=db_path, file_name="indics_clusters"
+        )
 
     def get(self) -> IndicsClusters:
         return IndicsClusters(
@@ -37,9 +39,9 @@ class IndicsClustersFiles(FilesObject[IndicsClusters]):
         self.clusters.save(data=data.structure)
 
 
-@dataclass
 class AssetFiles(FilesObject[AssetsConfig]):
-    active: JSONHandler[str, bool]
+    def __init__(self, db_path: Path) -> None:
+        self.active = JSONHandler[str, bool](db_path=db_path, file_name="assets_active")
 
     def get(self) -> AssetsConfig:
         return AssetsConfig(
@@ -50,10 +52,12 @@ class AssetFiles(FilesObject[AssetsConfig]):
         self.active.save(data=data.get_all_entities_dict())
 
 
-@dataclass
 class IndicFiles(FilesObject[IndicsConfig]):
-    active: JSONHandler[str, bool]
-    params: JSONHandler[str, dict[str, list[int]]]
+    def __init__(self, db_path: Path) -> None:
+        self.active = JSONHandler[str, bool](db_path=db_path, file_name="indics_active")
+        self.params = JSONHandler[str, dict[str, list[int]]](
+            db_path=db_path, file_name="indics_params"
+        )
 
     def get(self) -> IndicsConfig:
         return IndicsConfig(
@@ -66,16 +70,12 @@ class IndicFiles(FilesObject[IndicsConfig]):
         self.params.save(data=data.prepare_indic_params())
 
 
-@dataclass
 class TickersData(FilesObject[frames.DatedFloat]):
-    returns: ParquetHandler
+    def __init__(self, db_path: Path) -> None:
+        self.returns = ParquetHandler(db_path=db_path, file_name="returns_data")
 
     def get(self, assets: list[str] | None = None) -> frames.DatedFloat:
         return self.returns.load(names=assets)
 
     def save(self, data: frames.DatedFloat) -> None:
         self.returns.save(data=data)
-
-    def refresh(self, assets: list[str]) -> None:
-        data: frames.DatedFloat = fetch_data(assets=assets)
-        self.save(data=data)
