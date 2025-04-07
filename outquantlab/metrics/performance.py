@@ -94,7 +94,9 @@ def get_overall_monthly_skewness(returns_array: arrays.Float2D) -> arrays.Float2
 def get_returns_distribution(
     returns_array: arrays.Float2D, frequency: int
 ) -> arrays.Float2D:
-    resampled_returns: arrays.Float2D = arrays.reduce(
-        array=returns_array, frequency=frequency
+    equity = arrays.get_prices(returns=returns_array)
+    resampled_equity: arrays.Float2D = arrays.reduce(
+        array=equity, frequency=frequency
     )
+    resampled_returns = arrays.get_pct_returns(prices=resampled_equity)
     return resampled_returns * consts.PERCENTAGE
