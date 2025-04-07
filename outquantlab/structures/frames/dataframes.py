@@ -38,8 +38,11 @@ class BaseFloat[T: DatetimeIndex | None](DataFrame):
     def select(self, column: str) -> list[float]:
         return self[column].tolist()  # type: ignore
 
-    def clean_nans(self, axis: int = 0) -> None:
-        self.dropna(axis=axis, how="all", inplace=True)  # type: ignore
+    def clean_nans(self, axis: int = 0, total: bool = False) -> None:
+        if total:
+            self.dropna(axis=axis, how="any", inplace=True)  # type: ignore
+        else:
+            self.dropna(axis=axis, how="all", inplace=True)  # type: ignore
 
     def get_array(self) -> arrays.Float2D:
         return self.to_numpy(copy=False, na_value=arrays.Nan)  # type: ignore
