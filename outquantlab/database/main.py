@@ -15,6 +15,8 @@ class DataBaseProvider:
             data: frames.DatedFloat = self._db.tickers.get()
             data = clean_data(data=data)
             self._db.tickers.save(data=data)
+            app_config.assets_config.update_assets(names=data.get_names())
+            self._db.assets.save(data=app_config.assets_config)
             return data
         return self._db.tickers.get(
             assets=app_config.assets_config.get_all_active_entities_names()
@@ -28,16 +30,12 @@ class DataBaseProvider:
     def get_app_config(self) -> AppConfig:
         return AppConfig(
             assets_config=self._db.assets.get(),
-            assets_clusters=self._db.assets_clusters.get(),
             indics_config=self._db.indics.get(),
-            indics_clusters=self._db.indics_clusters.get(),
         )
 
     def save_app_config(self, app_config: AppConfig) -> None:
         self._db.assets.save(data=app_config.assets_config)
         self._db.indics.save(data=app_config.indics_config)
-        self._db.assets_clusters.save(data=app_config.assets_clusters)
-        self._db.indics_clusters.save(data=app_config.indics_clusters)
 
 
 def clean_data(data: frames.DatedFloat) -> frames.DatedFloat:

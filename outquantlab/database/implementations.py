@@ -1,43 +1,8 @@
-from outquantlab.core import (
-    AssetsClusters,
-    AssetsConfig,
-    IndicsClusters,
-    IndicsConfig,
-)
-from outquantlab.database.interfaces import FilesObject, JSONHandler, ParquetHandler
-from outquantlab.structures import frames
 from pathlib import Path
 
-
-class AssetsClustersFiles(FilesObject[AssetsClusters]):
-    def __init__(self, db_path: Path) -> None:
-        self.clusters = JSONHandler[str, dict[str, list[str]]](
-            db_path=db_path, file_name="assets_clusters"
-        )
-
-    def get(self) -> AssetsClusters:
-        return AssetsClusters(
-            clusters=self.clusters.load(),
-        )
-
-    def save(self, data: AssetsClusters) -> None:
-        self.clusters.save(data=data.structure)
-
-
-class IndicsClustersFiles(FilesObject[IndicsClusters]):
-    def __init__(self, db_path: Path) -> None:
-        self.clusters = JSONHandler[str, dict[str, list[str]]](
-            db_path=db_path, file_name="indics_clusters"
-        )
-
-    def get(self) -> IndicsClusters:
-        return IndicsClusters(
-            clusters=self.clusters.load(),
-        )
-
-    def save(self, data: IndicsClusters) -> None:
-        self.clusters.save(data=data.structure)
-
+from outquantlab.core import AssetsConfig, IndicsConfig
+from outquantlab.database.interfaces import FilesObject, JSONHandler, ParquetHandler
+from outquantlab.structures import frames
 
 class AssetFiles(FilesObject[AssetsConfig]):
     def __init__(self, db_path: Path) -> None:

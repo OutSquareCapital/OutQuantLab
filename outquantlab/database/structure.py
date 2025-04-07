@@ -3,9 +3,7 @@ from typing import NamedTuple
 
 from outquantlab.database.implementations import (
     AssetFiles,
-    AssetsClustersFiles,
     IndicFiles,
-    IndicsClustersFiles,
     TickersData,
 )
 
@@ -14,8 +12,6 @@ class DBStructure(NamedTuple):
     assets: AssetFiles
     indics: IndicFiles
     tickers: TickersData
-    assets_clusters: AssetsClustersFiles
-    indics_clusters: IndicsClustersFiles
 
 
 def get_db_structure(db_name: str) -> DBStructure:
@@ -24,8 +20,6 @@ def get_db_structure(db_name: str) -> DBStructure:
         assets=AssetFiles(db_path=db_path),
         indics=IndicFiles(db_path=db_path),
         tickers=TickersData(db_path=db_path),
-        assets_clusters=AssetsClustersFiles(db_path=db_path),
-        indics_clusters=IndicsClustersFiles(db_path=db_path),
     )
 
 
