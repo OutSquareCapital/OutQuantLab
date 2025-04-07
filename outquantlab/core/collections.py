@@ -1,14 +1,8 @@
-from dataclasses import dataclass
 from inspect import signature
 
 from outquantlab.core.interfaces import BaseConfig
-from outquantlab.indicators import BaseIndic, INDICATOR_REGISTRY
-
-
-@dataclass(slots=True)
-class Asset:
-    name: str
-    active: bool
+from outquantlab.indicators import INDICATOR_REGISTRY, BaseIndic
+from outquantlab.portfolio import Asset
 
 
 class IndicsConfig(BaseConfig[BaseIndic]):
@@ -42,7 +36,6 @@ class IndicsConfig(BaseConfig[BaseIndic]):
 
     def _get_params_names(self, cls: type[BaseIndic]) -> list[str]:
         return list(signature(cls.execute).parameters.keys())[2:]
-
 
     def _get_params_values(
         self, param_names: list[str], name: str, params_config: dict[str, dict[str, list[int]]]
@@ -79,6 +72,11 @@ class AssetsConfig(BaseConfig[Asset]):
                 name=name, active=_get_active_statut(entity=assets_active, name=name)
             )
 
+    def update_assets(self, names: list[str]) -> None:
+        new_assets: dict[str, Asset] = {}
+        for name in names:
+            new_assets[name] = Asset(name=name, active=False)
+        self.entities = new_assets
 
 def _get_active_statut(entity: dict[str, bool], name: str) -> bool:
     return entity.get(name, False)
