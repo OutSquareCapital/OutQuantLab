@@ -10,7 +10,7 @@ from outquantlab.stats.processors import (
     SamplingProcessor,
     TableProcessor,
 )
-from outquantlab.structures import arrays, frames
+from outquantlab.structures import frames
 
 
 class AggregateProcessorsRegistery(NamedTuple):
@@ -50,7 +50,7 @@ class Stats:
         self.correlation = TableProcessor(
             _func=mt.get_filled_correlation_matrix, _ascending=False
         )
-        self.equity = EquityProcessor(_func=arrays.get_prices, _ascending=True)
+        self.equity = EquityProcessor(_func=mt.get_equity, _ascending=True)
 
     def send_results(self, results: frames.DatedFloat) -> None:
         self.rolling.sharpe_ratio.send_to_api(data=results, length=1250)

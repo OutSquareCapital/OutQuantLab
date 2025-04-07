@@ -39,7 +39,8 @@ from outquantlab.metrics.performance import (
     get_returns_distribution,
     get_rolling_drawdown,
     get_rolling_sharpe_ratio,
-    get_total_returns
+    get_total_returns,
+    get_equity
 )
 from outquantlab.metrics.volatility import (
     get_overall_volatility_annualized,
@@ -94,4 +95,5 @@ __all__: list[str] = [
     "get_rolling_volatility_annualized",
     "long_bias_normalization",
     "get_cluster_structure",
+    "get_equity",
 ]

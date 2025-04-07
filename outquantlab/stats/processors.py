@@ -16,7 +16,7 @@ from outquantlab.structures import arrays, frames
 
 type DefinedFunc = Callable[[arrays.Float2D], arrays.Float2D]
 type ParametrableFunc = Callable[[arrays.Float2D, int], arrays.Float2D]
-
+type OptionalFunc = Callable[[arrays.Float2D, int | None], arrays.Float2D]
 
 @dataclass(slots=True)
 class StatProcessor[
@@ -41,24 +41,23 @@ class StatProcessor[
         raise NotImplementedError
 
 
-class EquityProcessor(StatProcessor[frames.DatedFloat, DefinedFunc]):
-    def get_formatted_data(self, data: frames.DatedFloat) -> frames.DatedFloat:
-        stats_array: arrays.Float2D = self._func(data.get_array())
-        return frames.DatedFloat(
+class EquityProcessor(StatProcessor[frames.DefaultFloat, OptionalFunc]):
+    def get_formatted_data(self, data: frames.DatedFloat, frequency: int|None = None) -> frames.DefaultFloat:
+        stats_array: arrays.Float2D = self._func(data.get_array(), frequency)
+        return frames.DefaultFloat(
             data=stats_array,
-            index=data.get_index(),
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
 
-    def send_to_api(self, data: frames.DatedFloat) -> None:
+    def send_to_api(self, data: frames.DatedFloat, frequency: int|None = None) -> None:
         send_data_to_server(
             id=self._name,
-            results=self.get_formatted_data(data=data).convert_to_json(),
+            results=self.get_formatted_data(data=data, frequency=frequency).convert_to_json(),
         )
 
-    def plot(self, data: frames.DatedFloat) -> None:
+    def plot(self, data: frames.DatedFloat, frequency: int|None = None) -> None:
         LogCurves(
-            formatted_data=self.get_formatted_data(data=data),
+            formatted_data=self.get_formatted_data(data=data, frequency=frequency),
             title=self._name,
         )
 

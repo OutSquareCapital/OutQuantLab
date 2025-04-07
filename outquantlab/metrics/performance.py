@@ -16,6 +16,15 @@ def get_total_returns(returns_array: arrays.Float2D) -> arrays.Float2D:
     total_returns: arrays.Float2D = equity_curves[-1]
     return total_returns - consts.PERCENTAGE
 
+def get_equity(
+    returns_array: arrays.Float2D, frequency: int |None = None
+) -> arrays.Float2D:
+    equity = arrays.get_prices(returns=returns_array)
+    if frequency is None:
+        return equity
+    return arrays.reduce(
+        array=equity, frequency=frequency
+    )
 
 def get_rolling_drawdown(
     returns_array: arrays.Float2D, length: int
@@ -94,9 +103,8 @@ def get_overall_monthly_skewness(returns_array: arrays.Float2D) -> arrays.Float2
 def get_returns_distribution(
     returns_array: arrays.Float2D, frequency: int
 ) -> arrays.Float2D:
-    equity = arrays.get_prices(returns=returns_array)
-    resampled_equity: arrays.Float2D = arrays.reduce(
-        array=equity, frequency=frequency
+    resampled_equity: arrays.Float2D = get_equity(
+        returns_array=returns_array, frequency=frequency
     )
     resampled_returns = arrays.get_pct_returns(prices=resampled_equity)
     return resampled_returns * consts.PERCENTAGE

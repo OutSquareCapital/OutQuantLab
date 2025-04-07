@@ -67,8 +67,8 @@ class Curves(Graph[frames.DatedFloat]):
             )
 
 
-class LogCurves(Graph[frames.DatedFloat]):
-    def setup_figure(self, formatted_data:frames.DatedFloat) -> None:
+class LogCurves(Graph[frames.DefaultFloat]):
+    def setup_figure(self, formatted_data:frames.DefaultFloat) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.columns:
             self.figure.add_trace(  # type: ignore
