@@ -20,7 +20,6 @@ class DataArrays:
         self.adjusted_returns = get_volatility_adjusted_returns(
             pct_returns_array=self.pct_returns, hv_array=hv
         )
-        self.pct_returns = arrays.shift(original=self.pct_returns)
 
 
 def get_volatility_adjusted_returns(
