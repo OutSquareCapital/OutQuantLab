@@ -45,7 +45,7 @@ class Stats:
         self.overall = AggregateProcessorsRegistery()
         self.rolling = RollingProcessorsRegistery()
         self.distribution = SamplingProcessor(
-            _func=mt.get_returns_distribution, _ascending=False
+            _func=mt.get_returns_distribution, _ascending=True
         )
         self.correlation = TableProcessor(
             _func=mt.get_filled_correlation_matrix, _ascending=False
