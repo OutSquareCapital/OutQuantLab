@@ -105,6 +105,21 @@ class Violins(Graph[frames.DefaultFloat]):
             )
 
 
+class Boxes(Graph[frames.DefaultFloat]):
+    def setup_figure(self, formatted_data: frames.DefaultFloat) -> None:
+        color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
+        for column in formatted_data.columns:
+            self.figure.add_trace(  # type: ignore
+                trace=go.Box(
+                    y=formatted_data[column],
+                    name=column,
+                    marker=get_marker_config(color=color_map[column]),
+                    boxpoints=False,
+                    hovertemplate=CustomHovers.VERTICAL_DATA.value,
+                )
+            )
+
+
 class Histograms(Graph[frames.DefaultFloat]):
     def setup_figure(self, formatted_data:frames.DefaultFloat) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())

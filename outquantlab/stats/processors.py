@@ -9,7 +9,8 @@ from outquantlab.stats.graphs import (
     HeatMap,
     Histograms,
     Violins,
-    LogCurves
+    LogCurves,
+    Boxes
 )
 from outquantlab.structures import arrays, frames
 
@@ -116,6 +117,11 @@ class SamplingProcessor(StatProcessor[frames.DefaultFloat, ParametrableFunc]):
             title=self._name,
         )
 
+    def plot_boxes(self, data: frames.DatedFloat, frequency: int) -> None:
+        Boxes(
+            formatted_data=self.get_formatted_data(data=data, frequency=frequency),
+            title=self._name,
+        )
 
 class TableProcessor(StatProcessor[frames.DefaultFloat, DefinedFunc]):
     def get_formatted_data(self, data: frames.DefaultFloat) -> frames.DefaultFloat:
