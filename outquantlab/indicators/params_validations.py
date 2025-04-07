@@ -5,16 +5,21 @@ from dataclasses import dataclass, field
 ParamsValidator = Callable[[dict[str, int]], bool]
 ValidationProcess = tuple[ParamsValidator, ParamsValidator]
 
+
 @dataclass(slots=True)
 class IndicParams:
     values: dict[str, list[int]]
     combos: list[tuple[int, ...]] = field(default_factory=list)
-    
-    def __repr__(self) -> str:
-        return f"values: \n {self.values} \n combos: \n {self.combos}"
+
     @property
     def quantity(self) -> int:
         return len(self.combos)
+
+    def get_combo_names(self) -> list[str]:
+        return ["_".join(map(str, combo)) for combo in self.combos]
+
+    def __repr__(self) -> str:
+        return f"values: \n {self.values} \n combos: \n {self.combos}"
 
     def get_valid_pairs(self) -> None:
         parameter_names = list(self.values.keys())
@@ -29,6 +34,7 @@ class IndicParams:
             raise ValueError(
                 f"Aucune combinaison valide trouvée pour l'indicateur {self}"
             )
+
 
 def _check_trend(params: dict[str, int]) -> bool:
     return bool(next((k for k in params if "st" in k), None)) and bool(

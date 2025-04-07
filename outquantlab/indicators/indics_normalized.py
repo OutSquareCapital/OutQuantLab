@@ -1,15 +1,7 @@
-from typing import Protocol
-
 import outquantlab.indicators.indics_raw as raw
 import outquantlab.metrics as mt
-from outquantlab.indicators.indics_config import BaseIndic
+from outquantlab.indicators.indics_config import BaseIndic, AssetsData
 from outquantlab.structures import arrays
-
-
-class AssetsData(Protocol):
-    prices: arrays.Float2D
-    log_returns: arrays.Float2D
-
 
 INDICATOR_REGISTRY: dict[str, type[BaseIndic]] = {}
 
