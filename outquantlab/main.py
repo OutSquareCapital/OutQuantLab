@@ -1,6 +1,6 @@
 from outquantlab.backtest import Backtestor
 from outquantlab.indicators import BaseIndic
-from outquantlab.structures import arrays, frames
+from outquantlab.structures import frames
 from outquantlab.portfolio import BacktestResults, get_multi_index, aggregate_raw_returns, get_clusters
 
 class OutQuantLab:
@@ -8,25 +8,23 @@ class OutQuantLab:
         self.indics: list[BaseIndic] = indics
         self.returns_df: frames.DatedFloat = returns_df
 
-    def backtest(self) -> arrays.Float2D:
+    def backtest(self) -> frames.DatedFloat:
         process = Backtestor(
             pct_returns=self.returns_df.get_array(),
             indics=self.indics,
         )
-        return process.process_backtest()
-    
-    def get_portfolio(self, data: arrays.Float2D) -> BacktestResults:
         multi_index = get_multi_index(
             asset_names=self.returns_df.get_names(),
             indics=self.indics
         )
-    
-        overall_frame = frames.DatedFloat(
-            data=data,
+        return frames.DatedFloat(
+            data=process.process_backtest(),
             index=self.returns_df.get_index(),
             columns=multi_index
             )
-        return aggregate_raw_returns(returns_df=overall_frame)
+    
+    def get_portfolio(self, data: frames.DatedFloat) -> BacktestResults:
+        return aggregate_raw_returns(returns_df=data)
     
     def get_clusters(self, data: frames.DatedFloat) -> dict[str, list[str]]:
         data.clean_nans(total=True)
