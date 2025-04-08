@@ -1,6 +1,6 @@
 from outquantlab.core import AppConfig
 from outquantlab.database.structure import DBStructure, get_db_structure
-from outquantlab.structures import frames, arrays
+from outquantlab.structures import frames
 from outquantlab.apis import fetch_data
 
 
@@ -13,8 +13,6 @@ class DataBaseProvider:
     ) -> frames.DatedFloat:
         if new_data:
             data: frames.DatedFloat = self._db.tickers.get()
-            data = clean_data(data=data)
-            self._db.tickers.save(data=data)
             app_config.assets_config.update_assets(names=data.get_names())
             self._db.assets.save(data=app_config.assets_config)
             return data
@@ -36,12 +34,3 @@ class DataBaseProvider:
     def save_app_config(self, app_config: AppConfig) -> None:
         self._db.assets.save(data=app_config.assets_config)
         self._db.indics.save(data=app_config.indics_config)
-
-
-def clean_data(data: frames.DatedFloat) -> frames.DatedFloat:
-    data.clean_nans(axis=1)
-    array: arrays.Float2D = data.get_array()
-    cleaned_array: arrays.Float2D = arrays.fill_nan(array)
-    return frames.DatedFloat(
-        data=cleaned_array, index=data.get_index(), columns=data.columns
-    )
