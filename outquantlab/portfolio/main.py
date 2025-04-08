@@ -1,6 +1,6 @@
 
 from outquantlab.metrics import get_overall_mean
-from outquantlab.portfolio.levels import CLUSTERS_LEVELS
+from outquantlab.portfolio.structures import CLUSTERS_LEVELS
 from outquantlab.structures import frames
 
     
