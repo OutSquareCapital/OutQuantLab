@@ -11,11 +11,11 @@ def create_empty_like(model: Float2D) -> Float2D:
     return np.empty_like(model, dtype=Float32)
 
 @njit
-def create_full(length: int, width: int, fill_value: float) -> Float2D:
+def create_full(length: int, width: int, fill_value: Float32) -> Float2D:
     return np.full(shape=(length, width), fill_value=fill_value, dtype=Float32)
 
 @njit
-def create_full_like(model: Float2D, fill_value: float) -> Float2D:
+def create_full_like(model: Float2D, fill_value: Float32) -> Float2D:
     return np.full_like(model, fill_value=fill_value, dtype=Float32)
 
 @njit
