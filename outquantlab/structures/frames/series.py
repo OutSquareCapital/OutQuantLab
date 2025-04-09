@@ -41,6 +41,14 @@ class SeriesFloat(Series):  # type: ignore
         )
 
     @classmethod
+    def from_dict(
+        cls, data: dict[str, float]
+    ) -> "SeriesFloat":
+        values: list[float] = list(data.values())
+        index: list[str] = list(data.keys())
+        return cls(data=values, index=index)
+    
+    @classmethod
     def from_array_list(
         cls, data: list[arrays.Float2D], index: list[str]
     ) -> "SeriesFloat":

@@ -4,6 +4,8 @@ from outquantlab.stats import Stats
 from outquantlab.database import DataBaseProvider
 from outquantlab.portfolio import BacktestResults
 from outquantlab.core import AppConfig
+from outquantlab.apis import LabAPI, ExternalAPI
+
 __all__: list[str] = [
     "OutQuantLab",
     "Stats",
@@ -12,4 +14,6 @@ __all__: list[str] = [
     "BacktestResults",
     "DataBaseProvider",
     "AppConfig",
+    "LabAPI",
+    "ExternalAPI",
 ]

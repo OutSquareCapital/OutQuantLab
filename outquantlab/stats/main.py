@@ -2,7 +2,6 @@ from dataclasses import dataclass, field
 from typing import NamedTuple
 
 import outquantlab.metrics as mt
-from outquantlab.apis import start_server
 from outquantlab.stats.processors import (
     AggregateProcessor,
     EquityProcessor,
@@ -10,7 +9,6 @@ from outquantlab.stats.processors import (
     SamplingProcessor,
     TableProcessor,
 )
-from outquantlab.structures import frames
 
 
 class AggregateProcessorsRegistery(NamedTuple):
@@ -51,9 +49,3 @@ class Stats:
             _func=mt.get_filled_correlation_matrix, _ascending=False
         )
         self.equity = EquityProcessor(_func=mt.get_equity, _ascending=True)
-
-    def send_results(self, results: frames.DatedFloat) -> None:
-        self.rolling.sharpe_ratio.send_to_api(data=results, length=1250)
-        self.overall.sharpe_ratio.send_to_api(data=results)
-        self.distribution.send_to_api(data=results, frequency=20)
-        start_server()
