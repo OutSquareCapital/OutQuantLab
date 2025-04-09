@@ -1,199 +1,164 @@
 import outquantlab.indicators.indics_raw as raw
 import outquantlab.metrics as mt
-from outquantlab.indicators.indics_config import BaseIndic, AssetsData
+from outquantlab.indicators.indics_types import (
+    IndicAcceleration,
+    IndicAccelerationTrend,
+    IndicSmoothedSignal,
+    IndicSmoothedSignalTrend,
+    IndicTrend,
+    IndicVolatility,
+    IndicVolatilityTrend,
+)
+from outquantlab.indicators.interfaces import AssetsData, BaseIndic, GenericIndic
+from outquantlab.indicators.params_types import (
+    Acceleration,
+    AccelerationTrend,
+    Bias,
+    SmoothedSignal,
+    SmoothedSignalTrend,
+    Trend,
+    Volatility,
+    VolatilityTrend,
+)
 from outquantlab.structures import arrays
 
-INDICATOR_REGISTRY: dict[str, type[BaseIndic]] = {}
+INDICATOR_REGISTRY: dict[str, type[GenericIndic]] = {}
 
 
-def _register_indicator(cls: type[BaseIndic]) -> type[BaseIndic]:
+def register_indicator(cls: type[GenericIndic]) -> type[GenericIndic]:
     INDICATOR_REGISTRY[cls.__name__] = cls
     return cls
 
 
-@_register_indicator
-class MeanPriceRatio(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MeanPriceRatio(IndicTrend):
+    def execute(self, data: AssetsData, params: Trend) -> arrays.Float2D:
         mean_price_ratio_raw: arrays.Float2D = raw.get_mean_price_ratio_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
+            prices_array=data.prices,
+            params=params,
         )
         return mt.sign_normalization(signal_array=mean_price_ratio_raw)
 
 
-@_register_indicator
-class MedianPriceRatio(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MedianPriceRatio(IndicTrend):
+    def execute(self, data: AssetsData, params: Trend) -> arrays.Float2D:
         median_price_ratio_raw: arrays.Float2D = raw.get_median_price_ratio_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
+            prices_array=data.prices,
+            params=params,
         )
         return mt.sign_normalization(signal_array=median_price_ratio_raw)
 
 
-@_register_indicator
-class CentralPriceRatio(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int
-    ) -> arrays.Float2D:
+@register_indicator
+class CentralPriceRatio(IndicTrend):
+    def execute(self, data: AssetsData, params: Trend) -> arrays.Float2D:
         central_price_ratio_raw: arrays.Float2D = raw.get_central_price_ratio_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
+            prices_array=data.prices,
+            params=params,
         )
         return mt.sign_normalization(signal_array=central_price_ratio_raw)
 
 
-@_register_indicator
-class MeanRateOfChange(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MeanRateOfChange(IndicTrend):
+    def execute(self, data: AssetsData, params: Trend) -> arrays.Float2D:
         mean_roc_raw: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
+            log_returns_array=data.log_returns,
+            params=params,
         )
         return mt.sign_normalization(signal_array=mean_roc_raw)
 
 
-@_register_indicator
-class MedianRateOfChange(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MedianRateOfChange(IndicTrend):
+    def execute(self, data: AssetsData, params: Trend) -> arrays.Float2D:
         median_roc_raw: arrays.Float2D = raw.get_median_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
+            log_returns_array=data.log_returns,
+            params=params,
         )
         return mt.sign_normalization(signal_array=median_roc_raw)
 
 
-@_register_indicator
-class CentralRateOfChange(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int
-    ) -> arrays.Float2D:
+@register_indicator
+class CentralRateOfChange(IndicTrend):
+    def execute(self, data: AssetsData, params: Trend) -> arrays.Float2D:
         central_roc_raw: arrays.Float2D = raw.get_central_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
+            log_returns_array=data.log_returns,
+            params=params,
         )
         return mt.sign_normalization(signal_array=central_roc_raw)
 
 
-@_register_indicator
-class MeanPriceMacd(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MeanPriceMacd(IndicAcceleration):
+    def execute(self, data: AssetsData, params: Acceleration) -> arrays.Float2D:
         mean_price_ratio_macd_raw: arrays.Float2D = raw.get_mean_price_macd_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            prices_array=data.prices,
+            params=params,
         )
         return mt.sign_normalization(signal_array=mean_price_ratio_macd_raw)
 
 
-@_register_indicator
-class MedianPriceMacd(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MedianPriceMacd(IndicAcceleration):
+    def execute(self, data: AssetsData, params: Acceleration) -> arrays.Float2D:
         median_price_ratio_macd_raw: arrays.Float2D = raw.get_median_price_macd_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            prices_array=data.prices,
+            params=params,
         )
         return mt.sign_normalization(signal_array=median_price_ratio_macd_raw)
 
 
-@_register_indicator
-class CentralPriceMacd(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
-    ) -> arrays.Float2D:
+@register_indicator
+class CentralPriceMacd(IndicAcceleration):
+    def execute(self, data: AssetsData, params: Acceleration) -> arrays.Float2D:
         central_price_ratio_macd_raw: arrays.Float2D = raw.get_central_price_macd_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            prices_array=data.prices,
+            params=params,
         )
         return mt.sign_normalization(signal_array=central_price_ratio_macd_raw)
 
 
-@_register_indicator
-class MeanRateOfChangeMacd(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MeanRateOfChangeMacd(IndicAcceleration):
+    def execute(self, data: AssetsData, params: Acceleration) -> arrays.Float2D:
         mean_roc_macd_raw: arrays.Float2D = raw.get_mean_rate_of_change_macd_raw(
-            returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            returns_array=data.log_returns,
+            params=params,
         )
         return mt.sign_normalization(signal_array=mean_roc_macd_raw)
 
 
-@_register_indicator
-class MedianRateOfChangeMacd(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MedianRateOfChangeMacd(IndicAcceleration):
+    def execute(self, data: AssetsData, params: Acceleration) -> arrays.Float2D:
         median_roc_macd_raw: arrays.Float2D = raw.get_median_rate_of_change_macd_raw(
-            returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            returns_array=data.log_returns,
+            params=params,
         )
         return mt.sign_normalization(signal_array=median_roc_macd_raw)
 
 
-@_register_indicator
-class CentralRateOfChangeMacd(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_st: int, len_lt: int, len_macd: int
-    ) -> arrays.Float2D:
+@register_indicator
+class CentralRateOfChangeMacd(IndicAcceleration):
+    def execute(self, data: AssetsData, params: Acceleration) -> arrays.Float2D:
         central_roc_macd_raw: arrays.Float2D = raw.get_central_rate_of_change_macd_raw(
-            returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            returns_array=data.log_returns,
+            params=params,
         )
         return mt.sign_normalization(signal_array=central_roc_macd_raw)
 
 
-@_register_indicator
-class MeanPriceMacdTrend(BaseIndic):
-    def execute(
-        self,
-        data_arrays: AssetsData,
-        len_st: int,
-        len_lt: int,
-        len_macd: int,
-        len_trend_st: int,
-        len_trend_lt: int,
-    ) -> arrays.Float2D:
+@register_indicator
+class MeanPriceMacdTrend(IndicAccelerationTrend):
+    def execute(self, data: AssetsData, params: AccelerationTrend) -> arrays.Float2D:
         mean_price_ratio_signal: arrays.Float2D = raw.get_mean_price_ratio_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            prices_array=data.prices,
+            params=params.filter,
         )
         mean_price_macd_signal: arrays.Float2D = raw.get_mean_price_macd_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            prices_array=data.prices, params=params.macd
         )
 
         return mt.get_indicator_on_trend_signal(
@@ -202,27 +167,15 @@ class MeanPriceMacdTrend(BaseIndic):
         )
 
 
-@_register_indicator
-class MedianPriceMacdTrend(BaseIndic):
-    def execute(
-        self,
-        data_arrays: AssetsData,
-        len_st: int,
-        len_lt: int,
-        len_macd: int,
-        len_trend_st: int,
-        len_trend_lt: int,
-    ) -> arrays.Float2D:
+@register_indicator
+class MedianPriceMacdTrend(IndicAccelerationTrend):
+    def execute(self, data: AssetsData, params: AccelerationTrend) -> arrays.Float2D:
         median_price_ratio_signal: arrays.Float2D = raw.get_median_price_ratio_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            prices_array=data.prices,
+            params=params.filter,
         )
         median_price_macd_signal: arrays.Float2D = raw.get_median_price_macd_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            prices_array=data.prices, params=params.macd
         )
         return mt.get_indicator_on_trend_signal(
             trend_signal=median_price_ratio_signal,
@@ -230,27 +183,15 @@ class MedianPriceMacdTrend(BaseIndic):
         )
 
 
-@_register_indicator
-class CentralPriceMacdTrend(BaseIndic):
-    def execute(
-        self,
-        data_arrays: AssetsData,
-        len_st: int,
-        len_lt: int,
-        len_macd: int,
-        len_trend_st: int,
-        len_trend_lt: int,
-    ) -> arrays.Float2D:
+@register_indicator
+class CentralPriceMacdTrend(IndicAccelerationTrend):
+    def execute(self, data: AssetsData, params: AccelerationTrend) -> arrays.Float2D:
         central_price_ratio_signal: arrays.Float2D = raw.get_central_price_ratio_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            prices_array=data.prices,
+            params=params.filter,
         )
         central_price_macd_signal: arrays.Float2D = raw.get_central_price_macd_raw(
-            prices_array=data_arrays.prices,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            prices_array=data.prices, params=params.macd
         )
         return mt.get_indicator_on_trend_signal(
             trend_signal=central_price_ratio_signal,
@@ -258,27 +199,15 @@ class CentralPriceMacdTrend(BaseIndic):
         )
 
 
-@_register_indicator
-class MeanRateOfChangeMacdTrend(BaseIndic):
-    def execute(
-        self,
-        data_arrays: AssetsData,
-        len_st: int,
-        len_lt: int,
-        len_macd: int,
-        len_trend_st: int,
-        len_trend_lt: int,
-    ) -> arrays.Float2D:
+@register_indicator
+class MeanRateOfChangeMacdTrend(IndicAccelerationTrend):
+    def execute(self, data: AssetsData, params: AccelerationTrend) -> arrays.Float2D:
         mean_roc_trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns,
+            params=params.filter,
         )
         mean_roc_macd_signal: arrays.Float2D = raw.get_mean_rate_of_change_macd_raw(
-            returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            returns_array=data.log_returns, params=params.macd
         )
         return mt.get_indicator_on_trend_signal(
             trend_signal=mean_roc_trend_signal,
@@ -286,27 +215,15 @@ class MeanRateOfChangeMacdTrend(BaseIndic):
         )
 
 
-@_register_indicator
-class MedianRateOfChangeMacdTrend(BaseIndic):
-    def execute(
-        self,
-        data_arrays: AssetsData,
-        len_st: int,
-        len_lt: int,
-        len_macd: int,
-        len_trend_st: int,
-        len_trend_lt: int,
-    ) -> arrays.Float2D:
+@register_indicator
+class MedianRateOfChangeMacdTrend(IndicAccelerationTrend):
+    def execute(self, data: AssetsData, params: AccelerationTrend) -> arrays.Float2D:
         median_roc_trend_signal: arrays.Float2D = raw.get_median_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns,
+            params=params.filter,
         )
         median_roc_macd_signal: arrays.Float2D = raw.get_median_rate_of_change_macd_raw(
-            returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
-            len_macd=len_macd,
+            returns_array=data.log_returns, params=params.macd
         )
         return mt.get_indicator_on_trend_signal(
             trend_signal=median_roc_trend_signal,
@@ -314,28 +231,16 @@ class MedianRateOfChangeMacdTrend(BaseIndic):
         )
 
 
-@_register_indicator
-class CentralRateOfChangeMacdTrend(BaseIndic):
-    def execute(
-        self,
-        data_arrays: AssetsData,
-        len_st: int,
-        len_lt: int,
-        len_macd: int,
-        len_trend_st: int,
-        len_trend_lt: int,
-    ) -> arrays.Float2D:
+@register_indicator
+class CentralRateOfChangeMacdTrend(IndicAccelerationTrend):
+    def execute(self, data: AssetsData, params: AccelerationTrend) -> arrays.Float2D:
         central_roc_trend_signal: arrays.Float2D = raw.get_central_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns,
+            params=params.filter,
         )
         central_roc_macd_signal: arrays.Float2D = (
             raw.get_central_rate_of_change_macd_raw(
-                returns_array=data_arrays.log_returns,
-                len_st=len_st,
-                len_lt=len_lt,
-                len_macd=len_macd,
+                returns_array=data.log_returns, params=params.macd
             )
         )
         return mt.get_indicator_on_trend_signal(
@@ -344,60 +249,51 @@ class CentralRateOfChangeMacdTrend(BaseIndic):
         )
 
 
-@_register_indicator
-class FixedBias(BaseIndic):
-    def execute(self, data_arrays: AssetsData, Bias: int) -> arrays.Float2D:
-        return raw.get_fixed_bias(prices_array=data_arrays.prices, Bias=Bias)
+@register_indicator
+class FixedBias(BaseIndic[Bias]):
+    def execute(self, data: AssetsData, params: Bias) -> arrays.Float2D:
+        return arrays.create_full_like(
+            model=data.prices, fill_value=arrays.Float32(1.0)
+        )
+
+    def _get_combo(self, combination: tuple[int, ...]) -> Bias:
+        return Bias(values=combination)
 
 
-@_register_indicator
-class MeanPriceRatioNormalised(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_signal: int, len_norm: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MeanPriceRatioNormalised(IndicSmoothedSignal):
+    def execute(self, data: AssetsData, params: SmoothedSignal) -> arrays.Float2D:
         normalised_price_ratio: arrays.Float2D = (
             raw.get_normalised_mean_price_ratio_raw(
-                prices_array=data_arrays.prices,
-                len_signal=len_signal,
-                len_norm=len_norm,
+                prices_array=data.prices, params=params
             )
         )
         return mt.limit_normalization(signal_array=normalised_price_ratio)
 
 
-@_register_indicator
-class MeanRateOfChangeNormalised(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_signal: int, len_norm: int
-    ) -> arrays.Float2D:
+@register_indicator
+class MeanRateOfChangeNormalised(IndicSmoothedSignal):
+    def execute(self, data: AssetsData, params: SmoothedSignal) -> arrays.Float2D:
         normalised_roc: arrays.Float2D = raw.get_normalised_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_signal=len_signal,
-            len_norm=len_norm,
+            log_returns_array=data.log_returns, params=params
         )
 
         return mt.limit_normalization(signal_array=normalised_roc)
 
 
-@_register_indicator
-class MeanRateOfChangeNormalisedTrend(BaseIndic):
+@register_indicator
+class MeanRateOfChangeNormalisedTrend(IndicSmoothedSignalTrend):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_signal: int,
-        len_norm: int,
-        len_st: int,
-        len_lt: int,
+        data: AssetsData,
+        params: SmoothedSignalTrend,
     ) -> arrays.Float2D:
         normalised_roc: arrays.Float2D = raw.get_normalised_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_signal=len_signal,
-            len_norm=len_norm,
+            log_returns_array=data.log_returns, params=params.smoothed_signal
         )
         trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
+            log_returns_array=data.log_returns,
+            params=params.trend,
         )
         normalised_on_trend_signal: arrays.Float2D = mt.get_indicator_on_trend_signal(
             trend_signal=trend_signal, indicator_signal=normalised_roc
@@ -405,25 +301,18 @@ class MeanRateOfChangeNormalisedTrend(BaseIndic):
         return mt.limit_normalization(signal_array=normalised_on_trend_signal)
 
 
-@_register_indicator
-class MeanPriceRatioNormalisedTrend(BaseIndic):
+@register_indicator
+class MeanPriceRatioNormalisedTrend(IndicSmoothedSignalTrend):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_signal: int,
-        len_norm: int,
-        len_st: int,
-        len_lt: int,
+        data: AssetsData,
+        params: SmoothedSignalTrend,
     ) -> arrays.Float2D:
         normalised_ratio: arrays.Float2D = raw.get_normalised_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_signal=len_signal,
-            len_norm=len_norm,
+            log_returns_array=data.log_returns, params=params.smoothed_signal
         )
-        trend_signal = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_st,
-            len_lt=len_lt,
+        trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
+            log_returns_array=data.log_returns, params=params.trend
         )
         normalised_on_trend_signal: arrays.Float2D = mt.get_indicator_on_trend_signal(
             trend_signal=trend_signal, indicator_signal=normalised_ratio
@@ -431,79 +320,58 @@ class MeanPriceRatioNormalisedTrend(BaseIndic):
         return mt.limit_normalization(signal_array=normalised_on_trend_signal)
 
 
-@_register_indicator
-class Skewness(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_smooth: int, len_skew: int
-    ) -> arrays.Float2D:
+@register_indicator
+class Skewness(IndicSmoothedSignal):
+    def execute(self, data: AssetsData, params: SmoothedSignal) -> arrays.Float2D:
         skewness_array: arrays.Float2D = raw.smoothed_skewness(
-            log_returns_array=data_arrays.log_returns,
-            len_smooth=len_smooth,
-            len_skew=len_skew,
+            log_returns_array=data.log_returns, params=params
         )
         return mt.sign_normalization(signal_array=-skewness_array)
 
 
-@_register_indicator
-class RelativeSkewness(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_smooth: int, len_skew: int
-    ) -> arrays.Float2D:
+@register_indicator
+class RelativeSkewness(IndicSmoothedSignal):
+    def execute(self, data: AssetsData, params: SmoothedSignal) -> arrays.Float2D:
         relative_skew: arrays.Float2D = raw.get_relative_skewness(
-            log_returns_array=data_arrays.log_returns,
-            len_smooth=len_smooth,
-            len_skew=len_skew,
+            log_returns_array=data.log_returns, params=params
         )
         return mt.sign_normalization(signal_array=relative_skew)
 
 
-@_register_indicator
-class SkewnessOnKurtosis(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_smooth: int, len_skew: int
-    ) -> arrays.Float2D:
+@register_indicator
+class SkewnessOnKurtosis(IndicSmoothedSignal):
+    def execute(self, data: AssetsData, params: SmoothedSignal) -> arrays.Float2D:
         skew_on_kurt_signal: arrays.Float2D = raw.get_skew_on_kurtosis(
-            log_returns_array=data_arrays.log_returns,
-            len_smooth=len_smooth,
-            len_skew=len_skew,
+            log_returns_array=data.log_returns, params=params
         )
         return mt.sign_normalization(signal_array=skew_on_kurt_signal)
 
 
-@_register_indicator
-class RelativeSkewnessOnKurtosis(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_smooth: int, len_skew: int
-    ) -> arrays.Float2D:
+@register_indicator
+class RelativeSkewnessOnKurtosis(IndicSmoothedSignal):
+    def execute(self, data: AssetsData, params: SmoothedSignal) -> arrays.Float2D:
         relative_skew_on_kurt_signal: arrays.Float2D = (
             raw.get_relative_skew_on_kurtosis(
-                log_returns_array=data_arrays.log_returns,
-                len_smooth=len_smooth,
-                len_skew=len_skew,
+                log_returns_array=data.log_returns,
+                params=params,
             )
         )
+
         return mt.sign_normalization(signal_array=relative_skew_on_kurt_signal)
 
 
-@_register_indicator
-class SkewnessTrend(BaseIndic):
+@register_indicator
+class SkewnessTrend(IndicSmoothedSignalTrend):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_smooth: int,
-        len_skew: int,
-        len_trend_st: int,
-        len_trend_lt: int,
+        data: AssetsData,
+        params: SmoothedSignalTrend,
     ) -> arrays.Float2D:
         skewness_signal: arrays.Float2D = raw.smoothed_skewness(
-            log_returns_array=data_arrays.log_returns,
-            len_smooth=len_smooth,
-            len_skew=len_skew,
+            log_returns_array=data.log_returns, params=params.smoothed_signal
         )
         trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns, params=params.trend
         )
         skew_on_trend_signal: arrays.Float2D = mt.get_indicator_on_trend_signal(
             trend_signal=trend_signal, indicator_signal=skewness_signal
@@ -511,25 +379,18 @@ class SkewnessTrend(BaseIndic):
         return mt.sign_normalization(signal_array=skew_on_trend_signal)
 
 
-@_register_indicator
-class RelativeSkewnessTrend(BaseIndic):
+@register_indicator
+class RelativeSkewnessTrend(IndicSmoothedSignalTrend):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_smooth: int,
-        len_skew: int,
-        len_trend_st: int,
-        len_trend_lt: int,
+        data: AssetsData,
+        params: SmoothedSignalTrend,
     ) -> arrays.Float2D:
         relative_skewness_signal: arrays.Float2D = raw.get_relative_skewness(
-            log_returns_array=data_arrays.log_returns,
-            len_smooth=len_smooth,
-            len_skew=len_skew,
+            log_returns_array=data.log_returns, params=params.smoothed_signal
         )
         trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns, params=params.trend
         )
         relative_skew_on_trend: arrays.Float2D = mt.get_indicator_on_trend_signal(
             trend_signal=trend_signal, indicator_signal=relative_skewness_signal
@@ -538,52 +399,40 @@ class RelativeSkewnessTrend(BaseIndic):
         return mt.sign_normalization(signal_array=relative_skew_on_trend)
 
 
-@_register_indicator
-class SkewnessOnKurtosisTrend(BaseIndic):
+@register_indicator
+class SkewnessOnKurtosisTrend(IndicSmoothedSignalTrend):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_smooth: int,
-        len_skew: int,
-        len_trend_st: int,
-        len_trend_lt: int,
+        data: AssetsData,
+        params: SmoothedSignalTrend,
     ) -> arrays.Float2D:
         skew_on_kurt_signal: arrays.Float2D = raw.get_skew_on_kurtosis(
-            log_returns_array=data_arrays.log_returns,
-            len_smooth=len_smooth,
-            len_skew=len_skew,
+            log_returns_array=data.log_returns, params=params.smoothed_signal
         )
         trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns,
+            params=params.trend,
         )
         return mt.get_indicator_on_trend_signal(
             trend_signal=trend_signal, indicator_signal=skew_on_kurt_signal
         )
 
 
-@_register_indicator
-class RelativeSkewnessOnKurtosisTrend(BaseIndic):
+@register_indicator
+class RelativeSkewnessOnKurtosisTrend(IndicSmoothedSignalTrend):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_smooth: int,
-        len_skew: int,
-        len_trend_st: int,
-        len_trend_lt: int,
+        data: AssetsData,
+        params: SmoothedSignalTrend,
     ) -> arrays.Float2D:
         relative_skew_on_kurt_signal: arrays.Float2D = (
             raw.get_relative_skew_on_kurtosis(
-                log_returns_array=data_arrays.log_returns,
-                len_smooth=len_smooth,
-                len_skew=len_skew,
+                log_returns_array=data.log_returns, params=params.smoothed_signal
             )
         )
         trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns,
+            params=params.trend,
         )
         relative_skew_on_kurt_on_trend: arrays.Float2D = (
             mt.get_indicator_on_trend_signal(
@@ -595,78 +444,58 @@ class RelativeSkewnessOnKurtosisTrend(BaseIndic):
         return mt.limit_normalization(signal_array=relative_skew_on_kurt_on_trend)
 
 
-@_register_indicator
-class DirectionalVolatility(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_smooth: int, len_vol: int
-    ) -> arrays.Float2D:
+@register_indicator
+class DirectionalVolatility(IndicSmoothedSignal):
+    def execute(self, data: AssetsData, params: SmoothedSignal) -> arrays.Float2D:
         return raw.smoothed_directional_volatility(
-            returns_array=data_arrays.log_returns,
-            len_st=len_smooth,
-            len_vol=len_vol,
+            returns_array=data.log_returns,
+            params=params,
         )
 
 
-@_register_indicator
-class RelativeDirectionalVolatility(BaseIndic):
+@register_indicator
+class RelativeDirectionalVolatility(IndicVolatility):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_smooth: int,
-        len_relative: int,
-        len_vol: int,
+        data: AssetsData,
+        params: Volatility,
     ) -> arrays.Float2D:
         relative_directional_vol_signal: arrays.Float2D = (
             raw.relative_directional_volatility(
-                log_returns_array=data_arrays.log_returns,
-                len_smooth=len_smooth,
-                len_vol=len_vol,
-                len_relative=len_relative,
+                log_returns_array=data.log_returns, params=params
             )
         )
         return mt.sign_normalization(signal_array=relative_directional_vol_signal)
 
 
-@_register_indicator
-class NormalisedDirectionalVolatility(BaseIndic):
-    def execute(
-        self, data_arrays: AssetsData, len_smooth: int, len_norm: int, len_vol: int
-    ) -> arrays.Float2D:
+@register_indicator
+class NormalisedDirectionalVolatility(IndicVolatility):
+    def execute(self, data: AssetsData, params: Volatility) -> arrays.Float2D:
         normalised_directional_vol: arrays.Float2D = (
             raw.normalised_directional_volatility(
-                log_returns_array=data_arrays.log_returns,
-                len_smooth=len_smooth,
-                len_vol=len_vol,
-                len_norm=len_norm,
+                log_returns_array=data.log_returns,
+                params=params,
             )
         )
 
         return mt.limit_normalization(signal_array=normalised_directional_vol)
 
 
-@_register_indicator
-class RelativeDirectionalVolatilityTrend(BaseIndic):
+@register_indicator
+class RelativeDirectionalVolatilityTrend(IndicVolatilityTrend):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_smooth: int,
-        len_relative: int,
-        len_vol: int,
-        len_trend_st: int,
-        len_trend_lt: int,
+        data: AssetsData,
+        params: VolatilityTrend,
     ) -> arrays.Float2D:
         relative_directional_vol_signal: arrays.Float2D = (
             raw.relative_directional_volatility(
-                log_returns_array=data_arrays.log_returns,
-                len_smooth=len_smooth,
-                len_vol=len_vol,
-                len_relative=len_relative,
+                log_returns_array=data.log_returns, params=params.volatility
             )
         )
         trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns,
+            params=params.filter,
         )
 
         relative_directional_vol_on_trend: arrays.Float2D = (
@@ -678,29 +507,22 @@ class RelativeDirectionalVolatilityTrend(BaseIndic):
         return mt.limit_normalization(signal_array=relative_directional_vol_on_trend)
 
 
-@_register_indicator
-class NormalisedDirectionalVolatilityTrend(BaseIndic):
+@register_indicator
+class NormalisedDirectionalVolatilityTrend(IndicVolatilityTrend):
     def execute(
         self,
-        data_arrays: AssetsData,
-        len_smooth: int,
-        len_norm: int,
-        len_vol: int,
-        len_trend_st: int,
-        len_trend_lt: int,
+        data: AssetsData,
+        params: VolatilityTrend,
     ) -> arrays.Float2D:
         normalised_directional_vol: arrays.Float2D = (
             raw.normalised_directional_volatility(
-                log_returns_array=data_arrays.log_returns,
-                len_smooth=len_smooth,
-                len_vol=len_vol,
-                len_norm=len_norm,
+                log_returns_array=data.log_returns,
+                params=params.volatility,
             )
         )
         trend_signal: arrays.Float2D = raw.get_mean_rate_of_change_raw(
-            log_returns_array=data_arrays.log_returns,
-            len_st=len_trend_st,
-            len_lt=len_trend_lt,
+            log_returns_array=data.log_returns,
+            params=params.filter,
         )
         normalised_directional_vol_on_trend: arrays.Float2D = (
             mt.get_indicator_on_trend_signal(
