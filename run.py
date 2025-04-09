@@ -1,7 +1,6 @@
 import outquantlab as oql
 
-
-def use_example() -> None:
+def internal_use() -> None:
     dbp = oql.DataBaseProvider(db_name="data")
     config: oql.AppConfig = dbp.get_app_config()
     lab = oql.OutQuantLab(
@@ -10,10 +9,21 @@ def use_example() -> None:
     )
     results: oql.BacktestResults = lab.get_portfolio(data=lab.backtest())
     stats = oql.Stats()
-    stats.overall.sharpe_ratio.plot(data=results.assets)
-    stats.rolling.drawdown.plot(data=results.portfolio, length=1250)
-    dbp.save_app_config(app_config=config)
+    stats.equity.plot(data=results.portfolio, frequency=1)
 
+def server_use() -> None:
+    dbp = oql.DataBaseProvider(db_name="data")
+    config: oql.AppConfig = dbp.get_app_config()
+    lab = oql.OutQuantLab(
+        indics=config.indics_config.get_indics_params(),
+        returns_df=dbp.get_returns_data(app_config=config, new_data=False),
+    )
+    results: oql.BacktestResults = lab.get_portfolio(data=lab.backtest())
+    stats = oql.Stats()
+    equity = stats.equity.get_formatted_data(data=results.portfolio, frequency=1)
+    oql_server = oql.LabAPI()
+    oql_server.send_result(data=equity)
+    oql_server.start_server()
 
 if __name__ == "__main__":
-    use_example()
+    server_use()
