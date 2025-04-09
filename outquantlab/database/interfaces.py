@@ -68,7 +68,9 @@ class ParquetHandler(FileHandler[frames.DatedFloat]):
 
     def _load_implementation(self, names: list[str] | None = None) -> frames.DatedFloat:
         if names:
-            return frames.DatedFloat.from_parquet(path=self.path, names=names)
+            data: frames.DatedFloat = frames.DatedFloat.from_parquet(path=self.path, names=names)
+            data.clean_nans(axis=0, total=True)
+            return data
         return frames.DatedFloat.from_parquet(path=self.path)
 
     def _handle_missing_file(self) -> frames.DatedFloat:
