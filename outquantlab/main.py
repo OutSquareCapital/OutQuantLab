@@ -1,11 +1,11 @@
 from outquantlab.backtest import Backtestor
-from outquantlab.indicators import BaseIndic
+from outquantlab.indicators import GenericIndic
 from outquantlab.structures import frames
 from outquantlab.portfolio import BacktestResults, get_multi_index, aggregate_raw_returns, get_clusters
 
 class OutQuantLab:
-    def __init__(self, indics: list[BaseIndic], returns_df: frames.DatedFloat) -> None:
-        self.indics: list[BaseIndic] = indics
+    def __init__(self, indics: list[GenericIndic], returns_df: frames.DatedFloat) -> None:
+        self.indics: list[GenericIndic] = indics
         self.returns_df: frames.DatedFloat = returns_df
 
     def backtest(self) -> frames.DatedFloat:

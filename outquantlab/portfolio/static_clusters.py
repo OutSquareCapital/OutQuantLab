@@ -1,5 +1,5 @@
 from pandas import MultiIndex
-from outquantlab.indicators import BaseIndic
+from outquantlab.indicators import GenericIndic
 import outquantlab.portfolio.structures as structs
 from abc import ABC, abstractmethod
 
@@ -39,16 +39,16 @@ class AssetsClusters(BaseClustersTree[structs.Asset, structs.AssetsClustersTuple
         ]
 
 
-class IndicsClusters(BaseClustersTree[BaseIndic, structs.IndicsClustersTuples]):
+class IndicsClusters(BaseClustersTree[GenericIndic, structs.IndicsClustersTuples]):
     def get_clusters_tuples(
-        self, entities: list[BaseIndic]
+        self, entities: list[GenericIndic]
     ) -> list[structs.IndicsClustersTuples]:
         return [
             structs.IndicsClustersTuples(
                 *self.mapping[indic.name], params="_".join(map(str, combo))
             )
             for indic in entities
-            for combo in indic.params.combos
+            for combo in indic.combos
         ]
 
 
@@ -77,12 +77,12 @@ class ClustersHierarchy:
         return len(self.product_tuples)
 
 
-def get_multi_index(asset_names: list[str], indics: list[BaseIndic]) -> MultiIndex:
+def get_multi_index(asset_names: list[str], indics: list[GenericIndic]) -> MultiIndex:
     return MultiIndex.from_tuples(  # type: ignore
         tuples=[
             structs.ColumnName(asset=asset_name, indic=indic.name, param=param_name)
             for indic in indics
-            for param_name in indic.params.get_combo_names()
+            for param_name in indic.get_combo_names()
             for asset_name in asset_names
         ],
         names=structs.CLUSTERS_LEVELS
