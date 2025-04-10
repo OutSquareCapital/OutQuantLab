@@ -38,11 +38,11 @@ class BacktestSpecs:
     def get_stats(self) -> str:
         return (
             f"Backtest Numbers Statistics:\n"
-            f"  Threads: {self.thread_nb},\n"
-            f"  Days: {self.days},\n"
-            f"  Assets: {self.assets},\n"
-            f"  Indics: {self.indics},\n"
-            f"  Params: {self.params},\n"
+            f"  Threads: {self.thread_nb}\n"
+            f"  Days: {self.days}\n"
+            f"  Assets: {self.assets}\n"
+            f"  Indics: {self.indics}\n"
+            f"  Params: {self.params}\n"
             f"  Total Nb of strategies: {self.total}\n"
         )
 
