@@ -12,7 +12,7 @@ def _get_yf_data(assets: list[str]) -> frames.DatedFloat:
     prices: frames.DatedFloat = _get_prices_data(assets=assets)
     return frames.DatedFloat(
         data=arrays.get_pct_returns(prices=prices.get_array()),
-        columns=prices.columns,
+        columns=prices.columns.to_list(),
         index=prices.get_index(),
     )
 

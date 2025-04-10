@@ -16,7 +16,7 @@ class Server(Enum):
 type BackendData = frames.DatedDict | frames.DistributionDict | frames.SeriesDict
 
 
-class LabAPI:
+class LabServer:
     def __init__(self) -> None:
         self.app = FastAPI()
         self.router = APIRouter()
@@ -37,7 +37,7 @@ class LabAPI:
         print(f"Server started at {Server.URL.value}")
         uvicorn.run(app=self.app, host=Server.IP.value, port=Server.PORT.value)
 
-    def send_result(
+    def store_result(
         self, data: frames.DatedFloat | frames.DefaultFloat | frames.SeriesFloat
     ) -> None:
         result: BackendData = data.convert_to_json()
