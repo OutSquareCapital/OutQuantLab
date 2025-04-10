@@ -13,7 +13,7 @@ from pandas import (
 )
 
 import outquantlab.structures.arrays as arrays
-
+from outquantlab.structures.frames.series import SeriesFloat
 
 class DistributionDict(TypedDict):
     data: list[list[float]]
@@ -31,12 +31,15 @@ class BaseFloat[T: DatetimeIndex | None](DataFrame):
         self,
         data: arrays.Float2D | list[float],
         index: T,
-        columns: list[str] | MultiIndex | Index,  # type: ignore
+        columns: list[str] | MultiIndex | Index # type: ignore
     ) -> None:
         super().__init__(data=data, index=index, columns=columns, dtype=arrays.Float32)  # type: ignore
 
-    def select(self, column: str) -> list[float]:
-        return self[column].tolist()  # type: ignore
+    def select_col(self, column: str) -> SeriesFloat:
+        return self[column]  # type: ignore
+
+    def select_last_row(self) -> SeriesFloat:
+        return self.iloc[-1] # type: ignore
 
     def clean_nans(self, axis: int = 0, total: bool = False) -> None:
         if total:
@@ -82,8 +85,8 @@ class DefaultFloat(BaseFloat[None]):
         self.clean_nans()
         column_data: list[list[float]] = []
         for col_name in self.columns:
-            values: list[float] = self.select(column=col_name)
-            column_data.append(values)
+            values: SeriesFloat = self.select_col(column=col_name)
+            column_data.append(values.get_array().tolist())
 
         return DistributionDict(data=column_data, columns=self.get_names())
 
@@ -105,7 +108,7 @@ class DatedFloat(BaseFloat[DatetimeIndex]):
         return cls(
             data=data.to_numpy(dtype=arrays.Float32, copy=False, na_value=arrays.Nan),  # type: ignore
             index=data.index,  # type: ignore
-            columns=data.columns,
+            columns=data.columns
         )
 
     @classmethod
@@ -133,8 +136,8 @@ class DatedFloat(BaseFloat[DatetimeIndex]):
         self.clean_nans()
         column_data: list[list[float]] = []
         for col_name in self.columns:
-            values: list[float] = self.select(column=col_name)
-            column_data.append(values)
+            values: SeriesFloat = self.select_col(column=col_name)
+            column_data.append(values.get_array().tolist())
 
         return DatedDict(
             data=column_data,
