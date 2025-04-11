@@ -32,6 +32,3 @@ def create_nan(length: int, width: int) -> Float2D:
 @njit
 def create_nan_like(model: Float2D) -> Float2D:
     return np.full_like(model, fill_value=Nan, dtype=Float32)
-
-def create_from_list(arrays_list: list[Float2D]) -> Float2D:
-    return np.concatenate([array.reshape(1) for array in arrays_list])

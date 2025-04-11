@@ -14,7 +14,6 @@ from numquant.arrays.create import (
     create_full_like,
     create_nan,
     create_nan_like,
-    create_from_list
 )
 from numquant.arrays.extract import (
     get_prices,
@@ -36,10 +35,9 @@ __all__: list[str] = [
     "create_full",
     "create_empty_like",
     "create_empty",
-    "create_from_list",
     "get_log_returns",
     "get_pct_returns",
     "get_prices",
     "get_sorted_indices",
-    "fill_nan_with_data"
+    "fill_nan_with_data",
 ]
