@@ -6,6 +6,8 @@ from numquant.main import Float2D
 def get_mean(array: Float2D, length: int, min_length: int = 1) -> Float2D:
     return bn.move_mean(array, window=length, min_count=min_length, axis=0)  # type: ignore
 
+def get_expanding_mean(array: Float2D, min_length: int = 1) -> Float2D:
+    return get_mean(array=array, length=array.shape[0], min_length=min_length)
 
 def get_median(array: Float2D, length: int, min_length: int = 1) -> Float2D:
     return bn.move_median(array, window=length, min_count=min_length, axis=0)  # type: ignore

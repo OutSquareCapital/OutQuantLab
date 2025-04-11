@@ -1,7 +1,7 @@
 from numquant.main import Float2D, Float32, np
 
 from numquant.metrics.constants import ZERO, ONE, Period
-from numquant.metrics.rolling import get_mean, get_max, get_min, get_median
+from numquant.metrics.rolling.main import get_mean, get_max, get_min, get_median, get_expanding_mean
 from numquant.metrics.rolling.volatility import get_volatility
 from numquant.arrays import backfill
 from numquant.metrics.aggregate import get_median as get_median_agg
@@ -87,8 +87,8 @@ def _get_normalized_scalar(
     raw_signal: Float2D, length: int = Period.YEAR, target: int = 1
 ) -> Float2D:
     median: Float2D = get_median_agg(array=np.abs(raw_signal), axis=1)
-    mean: Float2D = get_mean(
-        array=median, length=raw_signal.shape[0], min_length=length
+    mean: Float2D = get_expanding_mean(
+        array=median, min_length=length
     )
     scalar: Float2D = target / mean # TODO: trouver une solution pour les actifs/strategies qui ont des periodes de 0
     return backfill(array=scalar)

@@ -27,11 +27,12 @@ from numquant.metrics.rolling.performance import (
     get_rolling_drawdown,
     get_sharpe_ratio,
 )
-from numquant.metrics.rolling.skewness import get_skewness
+from numquant.metrics.rolling.skewness import get_skewness, get_expanding_skewness
 from numquant.metrics.rolling.volatility import (
     get_volatility,
     get_volatility_annualized,
     hv_composite,
+    get_expanding_volatility
 )
 
 __all__: list[str] = [
@@ -62,4 +63,6 @@ __all__: list[str] = [
     "get_rolling_drawdown",
     "get_returns_distribution",
     "get_equity",
+    "get_expanding_volatility",
+    "get_expanding_skewness",
 ]

@@ -242,3 +242,8 @@ def get_skewness(
             )
 
     return output
+
+def get_expanding_skewness(
+    array: Float2D, min_length: int = 4
+) -> Float2D:
+    return get_skewness(array=array, length=array.shape[0], min_length=min_length)

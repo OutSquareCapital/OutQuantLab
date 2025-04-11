@@ -2,8 +2,8 @@ from numquant.arrays.extract import get_prices, get_pct_returns
 from numquant.arrays.transform import reduce
 from numquant.metrics.constants import ANNUALIZATION, Period, PERCENTAGE
 from numquant.main import Float2D
-from numquant.metrics.rolling.main import get_max, get_mean
-from numquant.metrics.rolling.volatility import get_volatility
+from numquant.metrics.rolling.main import get_max, get_mean, get_expanding_mean
+from numquant.metrics.rolling.volatility import get_volatility, get_expanding_volatility
 
 
 def get_sharpe_ratio(returns_array: Float2D, length: int) -> Float2D:
@@ -15,12 +15,11 @@ def get_sharpe_ratio(returns_array: Float2D, length: int) -> Float2D:
 
 
 def expanding_sharpe_ratio(returns_array: Float2D) -> Float2D:
-    length: int = returns_array.shape[0]
-    expanding_mean: Float2D = get_mean(
-        array=returns_array, length=length, min_length=Period.HALF_YEAR
+    expanding_mean: Float2D = get_expanding_mean(
+        array=returns_array, min_length=Period.HALF_YEAR
     )
-    expanding_std: Float2D = get_volatility(
-        array=returns_array, length=length, min_length=Period.HALF_YEAR
+    expanding_std: Float2D = get_expanding_volatility(
+        array=returns_array, min_length=Period.HALF_YEAR
     )
     return expanding_mean / expanding_std * ANNUALIZATION
 
