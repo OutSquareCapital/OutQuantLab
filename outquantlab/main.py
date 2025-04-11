@@ -8,10 +8,11 @@ class OutQuantLab:
         self.indics: list[GenericIndic] = indics
         self.returns_df: DatedFloat = returns_df
 
-    def backtest(self) -> DatedFloat:
+    def backtest(self, local: bool = True) -> DatedFloat:
         process = Backtestor(
             pct_returns=self.returns_df.get_array(),
             indics=self.indics,
+            local=local
         )
         multi_index = get_multi_index(
             asset_names=self.returns_df.get_names(),
@@ -33,3 +34,16 @@ class OutQuantLab:
             asset_names=data.get_names(),
             max_clusters=5
         )
+
+    def test_speed(self, iterations: int) -> None:
+        import time
+        self.backtest()
+        print("Compilation done.")
+        print("Starting backtest...")
+        start: float = time.perf_counter()
+        for i in range(iterations):
+            self.backtest(local=False)
+            print(f"Iteration {i + 1} done.")
+        end: float = time.perf_counter()
+        avg_time: float = (end - start) / iterations
+        print(f"Backtest time: {avg_time:.2f} seconds")
