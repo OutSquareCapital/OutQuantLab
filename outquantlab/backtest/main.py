@@ -7,12 +7,13 @@ import numquant as nq
 
 
 class Backtestor:
-    def __init__(self, pct_returns: nq.Float2D, indics: list[GenericIndic]) -> None:
+    def __init__(self, pct_returns: nq.Float2D, indics: list[GenericIndic], local: bool) -> None:
         self.indics: list[GenericIndic] = indics
         self.data: DataArrays = DataArrays(pct_returns=pct_returns)
         self.specs = BacktestSpecs(
             pct_returns=pct_returns,
             indics=self.indics,
+            local=local
         )
 
     def process_backtest(self) -> nq.Float2D:
@@ -31,7 +32,7 @@ class Backtestor:
                     )
 
                 except Exception as e:
-                    print(
+                    raise Exception(
                         f"Error during backtest.\n "
                         f"Issue: {e} \n "
                         f"Indicator:\n {indic}"

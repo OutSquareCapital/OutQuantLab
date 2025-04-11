@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 
 class BacktestSpecs:
-    def __init__(self, pct_returns: nq.Float2D, indics: list[GenericIndic]) -> None:
+    def __init__(self, pct_returns: nq.Float2D, indics: list[GenericIndic], local: bool) -> None:
         self.thread_nb: int = cpu_count() or 8
         self.current_index: int = 0
         self.assets: int = pct_returns.shape[1]
@@ -14,8 +14,10 @@ class BacktestSpecs:
         self.indics: int = len(indics)
         self.params: int = sum([indic.quantity for indic in indics])
         self.total: int = self.assets * self.params
-        print(self.get_stats())
-        self.progress_bar = tqdm(total=self.total, desc="Backtest Progress")
+        self.local: bool = local
+        if self.local:
+            print(self.get_stats())
+            self.progress_bar = tqdm(total=self.total, desc="Backtest Progress")
 
     def get_main_array(self) -> nq.Float2D:
         return nq.arrays.create_empty(length=self.days, width=self.total)
@@ -26,11 +28,12 @@ class BacktestSpecs:
         for i in range(len(results_list)):
             end_index: int = self.current_index + self.assets
             main_array[:, self.current_index : end_index] = results_list[i]
-            self.update_progress()
             self.current_index = end_index
+            if self.local:
+                self.update_progress(progress=self.assets)
 
-    def update_progress(self) -> None:
-        self.progress_bar.update(self.assets)
+    def update_progress(self, progress: int) -> None:
+        self.progress_bar.update(progress)
         self.progress_bar.refresh()
         if self.current_index >= self.total:
             self.progress_bar.close()
