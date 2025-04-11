@@ -33,27 +33,6 @@ class SeriesFloat(Series):  # type: ignore
         sorted_index: list[str] = [self.get_names()[i] for i in sorted_indices]
         return SeriesFloat(data=sorted_array, index=sorted_index)
 
-    @classmethod
-    def from_pandas(cls, data: Series) -> "SeriesFloat":  # type: ignore
-        return cls(
-            data=data.to_numpy(dtype=nq.Float32, copy=False, na_value=nq.Nan),  # type: ignore
-            index=data.index,  # type: ignore
-        )
-
-    @classmethod
-    def from_dict(
-        cls, data: dict[str, float]
-    ) -> "SeriesFloat":
-        values: list[float] = list(data.values())
-        index: list[str] = list(data.keys())
-        return cls(data=values, index=index)
-    
-    @classmethod
-    def from_array_list(
-        cls, data: list[nq.Float2D], index: list[str]
-    ) -> "SeriesFloat":
-        return cls(data=nq.arrays.create_from_list(arrays_list=data), index=index)
-
     def convert_to_json(self) -> SeriesDict:
         data: list[float] = self.get_array().tolist()
         index: list[str] = self.get_names()
