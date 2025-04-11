@@ -1,12 +1,25 @@
-from pandas import MultiIndex
-from outquantlab.indicators import GenericIndic
-import outquantlab.portfolio.structures as structs
 from abc import ABC, abstractmethod
 
-class BaseClustersTree[T: structs.StrategyComponent, L: tuple[str, ...]](ABC):
-    def __init__(self, clusters: structs.ClustersTree) -> None:
-        self.structure: structs.ClustersTree = clusters
-        self.mapping: structs.ClustersMap = self.map_nested_clusters_to_entities()
+from pandas import MultiIndex
+
+from outquantlab.indicators import GenericIndic
+from outquantlab.portfolio.structures import (
+    CLUSTERS_LEVELS,
+    Asset,
+    AssetsClustersTuples,
+    ClustersMap,
+    ClustersTree,
+    ColumnName,
+    IndicsClustersTuples,
+    PortfolioClustersTuples,
+    StrategyComponent,
+)
+
+
+class BaseClustersTree[T: StrategyComponent, L: tuple[str, ...]](ABC):
+    def __init__(self, clusters: ClustersTree) -> None:
+        self.structure: ClustersTree = clusters
+        self.mapping: ClustersMap = self.map_nested_clusters_to_entities()
 
     def check_data_structure(self, entities: list[T]) -> None:
         if "default" not in self.structure:
@@ -14,13 +27,13 @@ class BaseClustersTree[T: structs.StrategyComponent, L: tuple[str, ...]](ABC):
         for entity in entities:
             if entity.name not in self.mapping:
                 self.structure["default"].append(entity.name)
-                self.mapping[entity.name] = ("default")
+                self.mapping[entity.name] = "default"
 
-    def update_clusters_structure(self, new_structure: structs.ClustersTree) -> None:
+    def update_clusters_structure(self, new_structure: ClustersTree) -> None:
         self.structure = new_structure
         self.mapping = self.map_nested_clusters_to_entities()
 
-    def map_nested_clusters_to_entities(self) -> structs.ClustersMap:
+    def map_nested_clusters_to_entities(self) -> ClustersMap:
         return {
             entity: level1
             for level1, entities in self.structure.items()
@@ -31,20 +44,17 @@ class BaseClustersTree[T: structs.StrategyComponent, L: tuple[str, ...]](ABC):
     def get_clusters_tuples(self, entities: list[T]) -> list[L]: ...
 
 
-class AssetsClusters(BaseClustersTree[structs.Asset, structs.AssetsClustersTuples]):
-    def get_clusters_tuples(self, entities: list[structs.Asset]) -> list[structs.AssetsClustersTuples]:
-        return [
-            structs.AssetsClustersTuples(*self.mapping[asset.name])
-            for asset in entities
-        ]
+class AssetsClusters(BaseClustersTree[Asset, AssetsClustersTuples]):
+    def get_clusters_tuples(self, entities: list[Asset]) -> list[AssetsClustersTuples]:
+        return [AssetsClustersTuples(*self.mapping[asset.name]) for asset in entities]
 
 
-class IndicsClusters(BaseClustersTree[GenericIndic, structs.IndicsClustersTuples]):
+class IndicsClusters(BaseClustersTree[GenericIndic, IndicsClustersTuples]):
     def get_clusters_tuples(
         self, entities: list[GenericIndic]
-    ) -> list[structs.IndicsClustersTuples]:
+    ) -> list[IndicsClustersTuples]:
         return [
-            structs.IndicsClustersTuples(
+            IndicsClustersTuples(
                 *self.mapping[indic.name], params="_".join(map(str, combo))
             )
             for indic in entities
@@ -55,23 +65,24 @@ class IndicsClusters(BaseClustersTree[GenericIndic, structs.IndicsClustersTuples
 class ClustersHierarchy:
     def __init__(
         self,
-        asset_tuples: list[structs.AssetsClustersTuples],
-        indics_tuples: list[structs.IndicsClustersTuples],
+        asset_tuples: list[AssetsClustersTuples],
+        indics_tuples: list[IndicsClustersTuples],
     ) -> None:
-        self.product_tuples: list[structs.PortfolioClustersTuples] = [
-            structs.PortfolioClustersTuples(
+        self.product_tuples: list[PortfolioClustersTuples] = [
+            PortfolioClustersTuples(
                 *asset_tuple,
                 *indics_tuple,
             )
             for indics_tuple in indics_tuples
             for asset_tuple in asset_tuples
         ]
+
     def get_multi_index(self) -> MultiIndex:
         return MultiIndex.from_tuples(  # type: ignore
             tuples=self.product_tuples,
-            names=structs.CLUSTERS_LEVELS,
+            names=CLUSTERS_LEVELS,
         )
-    
+
     @property
     def length(self) -> int:
         return len(self.product_tuples)
@@ -80,10 +91,10 @@ class ClustersHierarchy:
 def get_multi_index(asset_names: list[str], indics: list[GenericIndic]) -> MultiIndex:
     return MultiIndex.from_tuples(  # type: ignore
         tuples=[
-            structs.ColumnName(asset=asset_name, indic=indic.name, param=param_name)
+            ColumnName(asset=asset_name, indic=indic.name, param=param_name)
             for indic in indics
             for param_name in indic.get_combo_names()
             for asset_name in asset_names
         ],
-        names=structs.CLUSTERS_LEVELS
+        names=CLUSTERS_LEVELS,
     )
