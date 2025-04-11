@@ -43,6 +43,36 @@ class SmoothedSignalTrend(BaseParams):
 
 
 @dataclass(slots=True)
+class NormalizedSmoothedSignal(BaseParams):
+    smoothed_signal: SmoothedSignal = field(init=False)
+    normalization: int = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.smoothed_signal = SmoothedSignal(values=self.values[:2])
+        self.normalization = self.values[2]
+
+    def validate(self) -> bool:
+        return (
+            self.smoothed_signal.validate()
+            and self.normalization > self.smoothed_signal.signal
+        )
+
+@dataclass(slots=True)
+class NormalizedSmoothedSignalTrend(BaseParams):
+    signal: NormalizedSmoothedSignal = field(init=False)
+    trend: Trend = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.signal = NormalizedSmoothedSignal(values=self.values[:3])
+        self.trend = Trend(values=self.values[3:5])
+
+    def validate(self) -> bool:
+        return (
+            self.signal.validate()
+            and self.trend.validate()
+        )
+
+@dataclass(slots=True)
 class Acceleration(BaseParams):
     trend: Trend = field(init=False)
     acceleration: int = field(init=False)

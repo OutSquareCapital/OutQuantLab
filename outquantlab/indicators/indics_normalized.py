@@ -1,3 +1,4 @@
+import numquant as nq
 import outquantlab.indicators.indics_raw as raw
 from outquantlab.indicators.indics_types import (
     IndicAcceleration,
@@ -7,6 +8,8 @@ from outquantlab.indicators.indics_types import (
     IndicTrend,
     IndicVolatility,
     IndicVolatilityTrend,
+    IndicNormalizedSmoothedSignal,
+    IndicNormalizedSmoothedSignalTrend
 )
 from outquantlab.indicators.interfaces import AssetsData, BaseIndic, GenericIndic
 from outquantlab.indicators.params_types import (
@@ -18,8 +21,9 @@ from outquantlab.indicators.params_types import (
     Trend,
     Volatility,
     VolatilityTrend,
+    NormalizedSmoothedSignal,
+    NormalizedSmoothedSignalTrend,
 )
-import numquant as nq
 
 INDICATOR_REGISTRY: dict[str, type[GenericIndic]] = {}
 
@@ -301,8 +305,8 @@ class Skewness(IndicSmoothedSignal):
 
 
 @register_indicator
-class RelativeSkewness(IndicSmoothedSignal):
-    def execute(self, data: AssetsData, params: SmoothedSignal) -> nq.Float2D:
+class RelativeSkewness(IndicNormalizedSmoothedSignal):
+    def execute(self, data: AssetsData, params: NormalizedSmoothedSignal) -> nq.Float2D:
         relative_skew: nq.Float2D = raw.get_relative_skewness(
             log_returns_array=data.log_returns, params=params
         )
@@ -319,8 +323,8 @@ class SkewnessOnKurtosis(IndicSmoothedSignal):
 
 
 @register_indicator
-class RelativeSkewnessOnKurtosis(IndicSmoothedSignal):
-    def execute(self, data: AssetsData, params: SmoothedSignal) -> nq.Float2D:
+class RelativeSkewnessOnKurtosis(IndicNormalizedSmoothedSignal):
+    def execute(self, data: AssetsData, params: NormalizedSmoothedSignal) -> nq.Float2D:
         relative_skew_on_kurt_signal: nq.Float2D = raw.get_relative_skew_on_kurtosis(
             log_returns_array=data.log_returns,
             params=params,
@@ -353,14 +357,14 @@ class SkewnessTrend(IndicSmoothedSignalTrend):
 
 
 @register_indicator
-class RelativeSkewnessTrend(IndicSmoothedSignalTrend):
+class RelativeSkewnessTrend(IndicNormalizedSmoothedSignalTrend):
     def execute(
         self,
         data: AssetsData,
-        params: SmoothedSignalTrend,
+        params: NormalizedSmoothedSignalTrend,
     ) -> nq.Float2D:
         relative_skewness_signal: nq.Float2D = raw.get_relative_skewness(
-            log_returns_array=data.log_returns, params=params.smoothed_signal
+            log_returns_array=data.log_returns, params=params.signal
         )
         trend_signal: nq.Float2D = raw.get_mean_rate_of_change_raw(
             log_returns_array=data.log_returns, params=params.trend
@@ -394,14 +398,14 @@ class SkewnessOnKurtosisTrend(IndicSmoothedSignalTrend):
 
 
 @register_indicator
-class RelativeSkewnessOnKurtosisTrend(IndicSmoothedSignalTrend):
+class RelativeSkewnessOnKurtosisTrend(IndicNormalizedSmoothedSignalTrend):
     def execute(
         self,
         data: AssetsData,
-        params: SmoothedSignalTrend,
+        params: NormalizedSmoothedSignalTrend,
     ) -> nq.Float2D:
         relative_skew_on_kurt_signal: nq.Float2D = raw.get_relative_skew_on_kurtosis(
-            log_returns_array=data.log_returns, params=params.smoothed_signal
+            log_returns_array=data.log_returns, params=params.signal
         )
         trend_signal: nq.Float2D = raw.get_mean_rate_of_change_raw(
             log_returns_array=data.log_returns,

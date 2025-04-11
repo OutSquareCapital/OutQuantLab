@@ -3,6 +3,7 @@ from outquantlab.indicators.params_types import (
     SmoothedSignal,
     Trend,
     Volatility,
+    NormalizedSmoothedSignal
 )
 import numquant as nq
 
@@ -186,31 +187,30 @@ def smoothed_kurtosis(
 
 
 def get_relative_skewness(
-    log_returns_array: nq.Float2D, params: SmoothedSignal
+    log_returns_array: nq.Float2D, params: NormalizedSmoothedSignal
 ) -> nq.Float2D:
-    max_length: int = max(log_returns_array.shape[0], params.signal * 4)
     skewness_array: nq.Float2D = smoothed_skewness(
         log_returns_array=log_returns_array,
-        params=params,
+        params=params.smoothed_signal,
     )
     return nq.metrics.roll.relative_normalization(
-        signal_array=skewness_array, length=max_length
+        signal_array=skewness_array, length=params.normalization
     )
 
 
 def get_relative_kurt(
-    log_returns_array: nq.Float2D, params: SmoothedSignal
+    log_returns_array: nq.Float2D, params: NormalizedSmoothedSignal
 ) -> nq.Float2D:
-    max_length: int = max(log_returns_array.shape[0], params.signal * 4)
     kurtosis_array: nq.Float2D = smoothed_kurtosis(
         log_returns_array=log_returns_array,
-        params=params,
+        params=params.smoothed_signal,
     )
     return nq.metrics.roll.relative_normalization(
-        signal_array=kurtosis_array, length=max_length
+        signal_array=kurtosis_array, length=params.normalization
     )
 
 
+# TODO: trouver moyen de separer ces 2 strategies conditionnelles
 def get_skew_on_kurtosis(
     log_returns_array: nq.Float2D, params: SmoothedSignal
 ) -> nq.Float2D:
@@ -235,7 +235,7 @@ def get_skew_on_kurtosis(
 
 
 def get_relative_skew_on_kurtosis(
-    log_returns_array: nq.Float2D, params: SmoothedSignal
+    log_returns_array: nq.Float2D, params: NormalizedSmoothedSignal
 ) -> nq.Float2D:
     relative_skew: nq.Float2D = get_relative_skewness(
         log_returns_array=log_returns_array,
@@ -245,7 +245,7 @@ def get_relative_skew_on_kurtosis(
         log_returns_array=log_returns_array,
         params=params,
     )
-    if params.signal <= 64:
+    if params.smoothed_signal.signal <= 64:
         relative_skew_on_kurt_signal: nq.Float2D = nq.metrics.roll.invert_signal_short(
             metric=relative_kurt, signal=relative_skew
         )
