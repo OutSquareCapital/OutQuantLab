@@ -1,9 +1,9 @@
+from numquant.arrays import get_pct_returns, get_prices, reduce
+from numquant.main import Float2D
 from numquant.metrics.aggregate.main import get_mean, get_min
 from numquant.metrics.aggregate.volatility import get_volatility
-from numquant.main import Float2D
-from numquant.metrics.constants import Period, PERCENTAGE, ANNUALIZATION
-from numquant.metrics.rolling import get_rolling_drawdown, get_expanding_skewness
-from numquant.arrays import get_prices, reduce, get_pct_returns
+from numquant.metrics.constants import ANNUALIZATION, PERCENTAGE, Period
+from numquant.metrics.rolling import get_expanding_skewness, get_rolling_drawdown
 
 
 def get_sharpe_ratio(returns_array: Float2D) -> Float2D:

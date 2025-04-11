@@ -1,14 +1,18 @@
-from numquant.main import Float2D
-from numquant.metrics.constants import Period, ANNUALIZED_PERCENTAGE
 import bottleneck as bn  # type: ignore
+
 from numquant.arrays import fill_nan_with_data
+from numquant.main import Float2D
 from numquant.metrics.aggregate import get_mean
+from numquant.metrics.constants import ANNUALIZED_PERCENTAGE, Period
+
 
 def get_volatility(array: Float2D, length: int, min_length: int = 1) -> Float2D:
     return bn.move_std(array, window=length, min_count=min_length, axis=0, ddof=1)  # type: ignore
 
+
 def get_expanding_volatility(array: Float2D, min_length: int = 1) -> Float2D:
     return get_volatility(array=array, length=array.shape[0], min_length=min_length)
+
 
 def get_volatility_annualized(
     array: Float2D, length: int, min_length: int = 1
@@ -17,6 +21,7 @@ def get_volatility_annualized(
         get_volatility(array=array, length=length, min_length=min_length)
         * ANNUALIZED_PERCENTAGE
     )
+
 
 def hv_composite(
     returns_array: Float2D,
@@ -34,9 +39,8 @@ def hv_composite(
         short_term_vol=st_vol,
         long_term_vol=lt_vol,
     )
-    return (
-        get_composite_vol_filled(composite_vol=composite_vol) * ANNUALIZED_PERCENTAGE
-    )
+    return get_composite_vol_filled(composite_vol=composite_vol) * ANNUALIZED_PERCENTAGE
+
 
 def get_composite_vol_raw(
     st_weight: float, short_term_vol: Float2D, long_term_vol: Float2D

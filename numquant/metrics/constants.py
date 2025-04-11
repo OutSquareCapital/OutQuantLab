@@ -1,5 +1,6 @@
-from numquant.main import Float32
 from enum import IntEnum
+
+from numquant.main import Float32
 
 ZERO = Float32(0.0)
 ONE = Float32(1.0)

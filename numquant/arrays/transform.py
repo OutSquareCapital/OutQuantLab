@@ -20,6 +20,7 @@ def shift(original: Float2D, step: int = 1) -> Float2D:
     shifted[:step, :] = Nan
     return shifted
 
+
 def backfill(array: Float2D) -> Float2D:
     return bfill(array, axis=0)  # type: ignore
 
@@ -33,6 +34,7 @@ def fill_nan(array: Float2D) -> Float2D:
     cond = (idx > first_valid_idx) & mask
     result[cond] = 0
     return result
+
 
 def fill_nan_with_data(base_array: Float2D, array_filler: Float2D) -> Float2D:
     return np.where(np.isnan(base_array), array_filler, base_array)

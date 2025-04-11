@@ -1,10 +1,3 @@
-from numquant.arrays.transform import (
-    backfill,
-    fill_nan,
-    reduce,
-    shift,
-    fill_nan_with_data
-)
 from numquant.arrays.create import (
     create_1dim,
     create_2dim,
@@ -16,10 +9,17 @@ from numquant.arrays.create import (
     create_nan_like,
 )
 from numquant.arrays.extract import (
-    get_prices,
     get_log_returns,
     get_pct_returns,
+    get_prices,
     get_sorted_indices,
+)
+from numquant.arrays.transform import (
+    backfill,
+    fill_nan,
+    fill_nan_with_data,
+    reduce,
+    shift,
 )
 
 __all__: list[str] = [

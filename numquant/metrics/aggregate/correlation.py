@@ -10,6 +10,7 @@ def get_distance_matrix(returns_array: Float2D) -> Float2D:
     distance_matrix: Float2D = 2 * (1 - corr_matrix)
     return np.sqrt(distance_matrix, out=corr_matrix, dtype=Float32)
 
+
 def get_average_correlation(returns_array: Float2D) -> Float2D:
     corr_matrix: Float2D = get_correlation_matrix(returns_array=returns_array)
     sum_correlations: Float2D = np.sum(corr_matrix, axis=1)
