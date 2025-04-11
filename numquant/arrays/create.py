@@ -1,6 +1,13 @@
-import numpy as np
 from numba import njit # type: ignore
-from outquantlab.structures.arrays.types import Float2D, Float32, Nan
+from numquant.main import Float2D, Float32, Nan, np, Float1D
+
+@njit
+def create_1dim(data: tuple[float, ...]) -> Float1D:
+    return np.array(data, dtype=Float32)
+
+@njit
+def create_2dim(data: tuple[tuple[float, ...], ...]) -> Float2D:
+    return np.array(data, dtype=Float32)
 
 @njit
 def create_empty(length: int, width: int) -> Float2D:

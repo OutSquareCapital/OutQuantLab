@@ -1,10 +1,9 @@
-from outquantlab.structures import arrays
-from outquantlab.metrics import get_cluster_structure
+import numquant as nq
 
 def get_clusters(
-    returns_array: arrays.Float2D, asset_names: list[str], max_clusters: int
+    returns_array: nq.Float2D, asset_names: list[str], max_clusters: int
 ) -> dict[str, list[str]]:
-    clusters_structure: list[int] = get_cluster_structure(
+    clusters_structure: list[int] = nq.metrics.get_cluster_structure(
         returns_array=returns_array, max_clusters=max_clusters
     )
 

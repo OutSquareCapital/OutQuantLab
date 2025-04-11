@@ -1,9 +1,9 @@
 from numba import njit, prange  # type: ignore
-from outquantlab.structures import arrays
-
+from numquant.main import Float2D, Float32, Nan
+from numquant.arrays import create_nan
 
 @njit
-def get_kurtosis(
+def compute_kurtosis(
     observation_count: int,
     sum_values: float,
     sum_values_squared: float,
@@ -11,10 +11,10 @@ def get_kurtosis(
     sum_values_fourth: float,
     consecutive_equal_count: int,
     min_length: int = 4,
-) -> float | arrays.Float32:
+) -> float | Float32:
     if observation_count >= min_length:
         if observation_count < 4:
-            return arrays.Nan
+            return Nan
         elif consecutive_equal_count >= observation_count:
             return -3.0
         else:
@@ -34,7 +34,7 @@ def get_kurtosis(
             )
 
             if variance <= 1e-14:
-                return arrays.Nan
+                return Nan
             else:
                 kurtosis = (
                     total_observations * total_observations - 1.0
@@ -45,7 +45,7 @@ def get_kurtosis(
                     (total_observations - 2.0) * (total_observations - 3.0)
                 )
     else:
-        return arrays.Nan
+        return Nan
 
 
 @njit
@@ -157,9 +157,9 @@ def remove_kurtosis_contribution(
 
 
 @njit
-def get_rolling_kurtosis(array: arrays.Float2D, length: int, min_length: int) -> arrays.Float2D:
+def get_kurtosis(array: Float2D, length: int, min_length: int) -> Float2D:
     num_rows, num_cols = array.shape
-    output = arrays.create_nan(length=num_rows, width=num_cols)
+    output = create_nan(length=num_rows, width=num_cols)
 
     for col in prange(num_cols):
         (
@@ -277,7 +277,7 @@ def get_rolling_kurtosis(array: arrays.Float2D, length: int, min_length: int) ->
                     previous_value=previous_value,
                 )
 
-            output[row, col] = get_kurtosis(
+            output[row, col] = compute_kurtosis(
                 observation_count=observation_count,
                 sum_values=sum_values,
                 sum_values_squared=sum_values_squared,

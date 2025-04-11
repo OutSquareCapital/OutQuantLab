@@ -1,6 +1,6 @@
 import requests
 from typing import TypedDict
-from outquantlab.structures import frames
+from outquantlab.frames import DatedFloat, SeriesFloat, SeriesDict
 
 EXTERNAL = "https://jsonplaceholder.typicode.com/posts/1"
 
@@ -28,10 +28,10 @@ class LabClient:
             raise ValueError(f"Error fetching data from {self.url}: {e}")
         return data
 
-    def return_data(self, data: frames.DatedFloat) -> None:
+    def return_data(self, data: DatedFloat) -> None:
         try:
-            signal: frames.SeriesFloat = data.select_last_row()
-            formatted_signal: frames.SeriesDict = signal.convert_to_json()
+            signal: SeriesFloat = data.select_last_row()
+            formatted_signal: SeriesDict = signal.convert_to_json()
             requests.post(url=self.url, json=formatted_signal)
         except Exception as e:
             raise ValueError(f"Error sending data to {self.url}: {e}")

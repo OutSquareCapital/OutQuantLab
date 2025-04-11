@@ -1,10 +1,10 @@
-from outquantlab.structures.frames.dataframes import (
+from outquantlab.frames.dataframes import (
     DatedFloat,
     DatedDict,
     DefaultFloat,
     DistributionDict,
 )
-from outquantlab.structures.frames.series import SeriesDict, SeriesFloat
+from outquantlab.frames.series import SeriesDict, SeriesFloat
 
 __all__: list[str] = [
     "SeriesFloat",

@@ -1,7 +1,5 @@
-import numpy as np
-
-from outquantlab.structures.arrays.create import create_empty_like
-from outquantlab.structures.arrays.types import Float2D, Float32, Int2D, Nan
+from numquant.arrays.create import create_empty_like
+from numquant.main import Float2D, Float32, Int2D, Nan, np
 
 
 def get_sorted_indices(array: Float2D, ascending: bool) -> Int2D:
@@ -30,13 +28,8 @@ def get_prices(returns: Float2D) -> Float2D:
     temp: Float2D = returns.copy()
     mask: Float2D = np.isnan(temp)
     temp[mask] = 0
-
     cumulative_returns: Float2D = create_empty_like(model=temp)
-
     cumulative_returns[:0] = Nan
-
     cumulative_returns[0:] = np.cumprod(a=1 + temp[0:], axis=0)
-
     cumulative_returns[mask] = Nan
-
     return cumulative_returns * Float32(100)

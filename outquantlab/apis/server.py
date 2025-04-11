@@ -3,7 +3,7 @@ from enum import Enum
 import uvicorn
 from fastapi import APIRouter, FastAPI
 
-from outquantlab.structures import frames
+from outquantlab.frames import DatedFloat, DefaultFloat, DistributionDict, SeriesFloat, SeriesDict, DatedDict
 
 
 class Server(Enum):
@@ -13,7 +13,7 @@ class Server(Enum):
     URL = f"http://{IP}:{PORT}{DATA}"
 
 
-type BackendData = frames.DatedDict | frames.DistributionDict | frames.SeriesDict
+type BackendData = DatedDict | DistributionDict | SeriesDict
 
 
 class LabServer:
@@ -38,7 +38,7 @@ class LabServer:
         uvicorn.run(app=self.app, host=Server.IP.value, port=Server.PORT.value)
 
     def store_result(
-        self, data: frames.DatedFloat | frames.DefaultFloat | frames.SeriesFloat
+        self, data: DatedFloat | DefaultFloat | SeriesFloat
     ) -> None:
         result: BackendData = data.convert_to_json()
         self._data_store[self._current_id] = result

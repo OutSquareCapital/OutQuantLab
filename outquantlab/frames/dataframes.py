@@ -1,8 +1,6 @@
 from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
-
-from numpy import nanmean
 from pandas import (
     DataFrame,
     DatetimeIndex,
@@ -12,8 +10,8 @@ from pandas import (
     read_parquet,
 )
 
-import outquantlab.structures.arrays as arrays
-from outquantlab.structures.frames.series import SeriesFloat
+import numquant as nq
+from outquantlab.frames.series import SeriesFloat
 
 class DistributionDict(TypedDict):
     data: list[list[float]]
@@ -29,11 +27,11 @@ class DatedDict(TypedDict):
 class BaseFloat[T: DatetimeIndex | None](DataFrame):
     def __init__(
         self,
-        data: arrays.Float2D | list[float],
+        data: nq.Float2D | list[float],
         index: T,
         columns: list[str] | MultiIndex | Index # type: ignore
     ) -> None:
-        super().__init__(data=data, index=index, columns=columns, dtype=arrays.Float32)  # type: ignore
+        super().__init__(data=data, index=index, columns=columns, dtype=nq.Float32)  # type: ignore
 
     def select_col(self, column: str) -> SeriesFloat:
         return self[column]  # type: ignore
@@ -47,8 +45,8 @@ class BaseFloat[T: DatetimeIndex | None](DataFrame):
         else:
             self.dropna(axis=axis, how="all", inplace=True)  # type: ignore
 
-    def get_array(self) -> arrays.Float2D:
-        return self.to_numpy(copy=False, na_value=arrays.Nan)  # type: ignore
+    def get_array(self) -> nq.Float2D:
+        return self.to_numpy(copy=False, na_value=nq.Nan)  # type: ignore
 
     def get_names(self) -> list[str]:
         if isinstance(self.columns, MultiIndex):
@@ -59,7 +57,7 @@ class BaseFloat[T: DatetimeIndex | None](DataFrame):
 class DefaultFloat(BaseFloat[None]):
     def __init__(
         self,
-        data: arrays.Float2D | list[float],
+        data: nq.Float2D | list[float],
         columns: list[str] | MultiIndex | Index,  # type: ignore
     ) -> None:
         super().__init__(data=data, index=None, columns=columns)  # type: ignore
@@ -68,12 +66,12 @@ class DefaultFloat(BaseFloat[None]):
         return self.index  # type: ignore
 
     def sort_data(self, ascending: bool) -> "DefaultFloat":
-        mean_values: arrays.Float2D = nanmean(self.get_array(), axis=0)
-        sorted_indices: arrays.Int2D = arrays.get_sorted_indices(
+        mean_values: nq.Float2D = nq.metrics.agg.get_mean(self.get_array())
+        sorted_indices: nq.Int2D = nq.arrays.get_sorted_indices(
             array=mean_values, ascending=ascending
         )
 
-        sorted_data: arrays.Float2D = self.get_array()[:, sorted_indices]
+        sorted_data: nq.Float2D = self.get_array()[:, sorted_indices]
         sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]
 
         return DefaultFloat(data=sorted_data, columns=sorted_columns)
@@ -106,7 +104,7 @@ class DatedFloat(BaseFloat[DatetimeIndex]):
     @classmethod
     def from_pandas(cls, data: DataFrame) -> "DatedFloat":
         return cls(
-            data=data.to_numpy(dtype=arrays.Float32, copy=False, na_value=arrays.Nan),  # type: ignore
+            data=data.to_numpy(dtype=nq.Float32, copy=False, na_value=nq.Nan),  # type: ignore
             index=data.index,  # type: ignore
             columns=data.columns
         )
@@ -117,12 +115,12 @@ class DatedFloat(BaseFloat[DatetimeIndex]):
         return cls.from_pandas(data=data)
 
     def sort_data(self, ascending: bool) -> "DatedFloat":
-        mean_values: arrays.Float2D = nanmean(self.get_array(), axis=0)
-        sorted_indices: arrays.Int2D = arrays.get_sorted_indices(
+        mean_values: nq.Float2D = nq.metrics.agg.get_mean(self.get_array())
+        sorted_indices: nq.Int2D = nq.arrays.get_sorted_indices(
             array=mean_values, ascending=ascending
         )
 
-        sorted_data: arrays.Float2D = self.get_array()[:, sorted_indices]
+        sorted_data: nq.Float2D = self.get_array()[:, sorted_indices]
         sorted_columns: list[str] = [self.columns[i] for i in sorted_indices]
 
         return DatedFloat(

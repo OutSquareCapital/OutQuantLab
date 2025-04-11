@@ -1,26 +1,25 @@
 
-from outquantlab.metrics import get_overall_mean
 from outquantlab.portfolio.structures import CLUSTERS_LEVELS
-from outquantlab.structures import frames
+from outquantlab.frames import DatedFloat
+import numquant as nq
 
-    
 class BacktestResults:
-    assets: frames.DatedFloat
-    indics: frames.DatedFloat
-    params: frames.DatedFloat
+    assets: DatedFloat
+    indics: DatedFloat
+    params: DatedFloat
 
-    def __getitem__(self, key: str) -> frames.DatedFloat:
-        value: frames.DatedFloat = self.__dict__[key]
+    def __getitem__(self, key: str) -> DatedFloat:
+        value: DatedFloat = self.__dict__[key]
         return value
 
-    def __setitem__(self, key: str, value: frames.DatedFloat) -> None:
+    def __setitem__(self, key: str, value: DatedFloat) -> None:
         self.__dict__[key] = value
 
     @property
-    def portfolio(self) -> frames.DatedFloat:
-        return get_overall_portfolio(data=self.assets)
+    def portfolio(self) -> DatedFloat:
+        return get_portfolio(data=self.assets)
 
-def aggregate_raw_returns(returns_df: frames.DatedFloat) -> BacktestResults:
+def aggregate_raw_returns(returns_df: DatedFloat) -> BacktestResults:
     results = BacktestResults()
     for lvl in range(len(CLUSTERS_LEVELS), 0, -1):
         returns_df = get_portfolio_returns(
@@ -33,16 +32,16 @@ def aggregate_raw_returns(returns_df: frames.DatedFloat) -> BacktestResults:
 
 
 def get_portfolio_returns(
-    returns_df: frames.DatedFloat, grouping_levels: list[str]
-) -> frames.DatedFloat:
-    return frames.DatedFloat.from_pandas(
+    returns_df: DatedFloat, grouping_levels: list[str]
+) -> DatedFloat:
+    return DatedFloat.from_pandas(
         data=returns_df.T.groupby(level=grouping_levels, observed=True).mean().T  # type: ignore
     )
 
 
-def get_overall_portfolio(data: frames.DatedFloat) -> frames.DatedFloat:
-    return frames.DatedFloat(
-        data=get_overall_mean(array=data.get_array(), axis=1),
+def get_portfolio(data: DatedFloat) -> DatedFloat:
+    return DatedFloat(
+        data=nq.metrics.agg.get_mean(array=data.get_array(), axis=1),
         index=data.get_index(),
         columns=["portfolio"],
     )

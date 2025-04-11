@@ -2,17 +2,16 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from typing import Protocol, TypeAlias, Any
 
-from outquantlab.metrics import rolling_scalar_normalisation, long_bias_normalization
-from outquantlab.structures import arrays
+import numquant as nq
 from itertools import product
 from dataclasses import dataclass
 
 
 class AssetsData(Protocol):
-    prices: arrays.Float2D
-    log_returns: arrays.Float2D
-    pct_returns: arrays.Float2D
-    adjusted_returns: arrays.Float2D
+    prices: nq.Float2D
+    log_returns: nq.Float2D
+    pct_returns: nq.Float2D
+    adjusted_returns: nq.Float2D
 
 
 @dataclass(slots=True)
@@ -61,7 +60,7 @@ class BaseIndic[T: BaseParams](ABC):
             )
 
     @abstractmethod
-    def execute(self, data: AssetsData, params: T) -> arrays.Float2D:
+    def execute(self, data: AssetsData, params: T) -> nq.Float2D:
         raise NotImplementedError
 
     @abstractmethod
@@ -72,8 +71,8 @@ class BaseIndic[T: BaseParams](ABC):
         self,
         data_arrays: AssetsData,
         global_executor: ThreadPoolExecutor,
-    ) -> list[arrays.Float2D]:
-        def process_single_param(param_tuple: T) -> arrays.Float2D:
+    ) -> list[nq.Float2D]:
+        def process_single_param(param_tuple: T) -> nq.Float2D:
             return (
                 self.normalize_signal(
                     signal=self.execute(data=data_arrays, params=param_tuple),
@@ -85,13 +84,13 @@ class BaseIndic[T: BaseParams](ABC):
         return list(global_executor.map(process_single_param, self.combos))
 
     def normalize_signal(
-        self, signal: arrays.Float2D, long_only: bool
-    ) -> arrays.Float2D:
+        self, signal: nq.Float2D, long_only: bool
+    ) -> nq.Float2D:
         if long_only:
-            return long_bias_normalization(
-                signal_array=rolling_scalar_normalisation(raw_signal=signal)
+            return nq.metrics.roll.long_bias_normalization(
+                signal_array=nq.metrics.roll.rolling_scalar_normalisation(raw_signal=signal)
             )
-        return rolling_scalar_normalisation(raw_signal=signal)
+        return nq.metrics.roll.rolling_scalar_normalisation(raw_signal=signal)
 
     def __repr__(self) -> str:
         return f"name: {self.name} \n statut: {self.active} \n params:\n {self.params_values}"

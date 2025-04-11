@@ -1,11 +1,10 @@
 from numba import njit, prange  # type: ignore
-from numpy import sqrt
 
-from outquantlab.structures import arrays
-
+from numquant.main import Float2D, Nan, np
+from numquant.arrays import create_nan
 
 @njit
-def get_skewness(
+def compute_skewness(
     min_length: int,
     observation_count: float,
     sum_values: float,
@@ -24,20 +23,20 @@ def get_skewness(
         )
 
         if observation_count < 3:
-            return arrays.Nan
+            return Nan
         elif consecutive_equal_count >= observation_count:
             return 0.0
         elif variance <= 1e-14:
-            return arrays.Nan
+            return Nan
         else:
-            std_dev = sqrt(variance)
+            std_dev = np.sqrt(variance)
             return (
-                sqrt(total_observations * (total_observations - 1))
+                np.sqrt(total_observations * (total_observations - 1))
                 * skewness_numerator
                 / ((total_observations - 2) * std_dev * std_dev * std_dev)
             )
     else:
-        return arrays.Nan
+        return Nan
 
 
 @njit
@@ -131,11 +130,11 @@ def remove_skewness_contribution(
 
 
 @njit
-def get_rolling_skewness(
-    array: arrays.Float2D, length: int, min_length: int = 4
-) -> arrays.Float2D:
+def get_skewness(
+    array: Float2D, length: int, min_length: int = 4
+) -> Float2D:
     num_rows, num_cols = array.shape
-    output = arrays.create_nan(length=num_rows, width=num_cols)
+    output = create_nan(length=num_rows, width=num_cols)
 
     for col in prange(num_cols):
         observation_count, sum_values, sum_values_squared, sum_values_cubed = (
@@ -233,7 +232,7 @@ def get_rolling_skewness(
                     previous_value=previous_value,
                 )
 
-            output[row, col] = get_skewness(
+            output[row, col] = compute_skewness(
                 min_length=min_length,
                 observation_count=observation_count,
                 sum_values=sum_values,

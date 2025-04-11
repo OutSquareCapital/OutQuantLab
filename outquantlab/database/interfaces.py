@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
-from outquantlab.structures import frames
+from outquantlab.frames import DatedFloat
 
 
 class FilesObject[T](ABC):
@@ -63,20 +63,20 @@ class JSONHandler[K, V](FileHandler[dict[K, V]]):
             json.dump(data, file, indent=3)
 
 
-class ParquetHandler(FileHandler[frames.DatedFloat]):
+class ParquetHandler(FileHandler[DatedFloat]):
     extension = ".parquet"
 
-    def _load_implementation(self, names: list[str] | None = None) -> frames.DatedFloat:
+    def _load_implementation(self, names: list[str] | None = None) -> DatedFloat:
         if names:
-            data: frames.DatedFloat = frames.DatedFloat.from_parquet(path=self.path, names=names)
+            data: DatedFloat = DatedFloat.from_parquet(path=self.path, names=names)
             data.clean_nans(axis=0, total=True)
             return data
-        return frames.DatedFloat.from_parquet(path=self.path)
+        return DatedFloat.from_parquet(path=self.path)
 
-    def _handle_missing_file(self) -> frames.DatedFloat:
-        empty_df: frames.DatedFloat = frames.DatedFloat.as_empty()
+    def _handle_missing_file(self) -> DatedFloat:
+        empty_df: DatedFloat = DatedFloat.as_empty()
         empty_df.to_parquet(self.path, engine="pyarrow", index=True)
         return empty_df
 
-    def save(self, data:frames.DatedFloat) -> None:
+    def save(self, data:DatedFloat) -> None:
         data.to_parquet(self.path, engine="pyarrow", index=True)

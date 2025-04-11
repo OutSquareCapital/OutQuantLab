@@ -1,8 +1,7 @@
-import numpy as np
 from numbagg import bfill
 
-from outquantlab.structures.arrays.create import create_empty_like
-from outquantlab.structures.arrays.types import Float2D, Int2D, Nan
+from numquant.arrays.create import create_empty_like
+from numquant.main import Float2D, Int2D, Nan, np
 
 
 def reduce(array: Float2D, frequency: int) -> Float2D:
@@ -34,3 +33,6 @@ def fill_nan(array: Float2D) -> Float2D:
     cond = (idx > first_valid_idx) & mask
     result[cond] = 0
     return result
+
+def fill_nan_with_data(base_array: Float2D, array_filler: Float2D) -> Float2D:
+    return np.where(np.isnan(base_array), array_filler, base_array)

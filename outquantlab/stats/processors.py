@@ -12,17 +12,18 @@ from outquantlab.stats.graphs import (
     LogCurves,
     Violins,
 )
-from outquantlab.structures import arrays, frames
+import numquant as nq 
+from outquantlab.frames import SeriesFloat, DefaultFloat, DatedFloat
 
-type DefinedFunc = Callable[[arrays.Float2D], arrays.Float2D]
-type ParametrableFunc = Callable[[arrays.Float2D, int], arrays.Float2D]
-type OptionalFunc = Callable[[arrays.Float2D, int | None], arrays.Float2D]
+type DefinedFunc = Callable[[nq.Float2D], nq.Float2D]
+type ParametrableFunc = Callable[[nq.Float2D, int], nq.Float2D]
+type OptionalFunc = Callable[[nq.Float2D, int | None], nq.Float2D]
 
 
 @dataclass(slots=True)
 class StatProcessor[
-    D: frames.DatedFloat | frames.SeriesFloat | frames.DefaultFloat,
-    F: Callable[..., arrays.Float2D],
+    D: DatedFloat | SeriesFloat | DefaultFloat,
+    F: Callable[..., nq.Float2D],
 ](ABC):
     _func: F
     _ascending: bool = field(default=True)
@@ -33,94 +34,94 @@ class StatProcessor[
 
     @abstractmethod
     def get_formatted_data(
-        self, data: frames.DatedFloat, *args: Any, **kwargs: Any
+        self, data: DatedFloat, *args: Any, **kwargs: Any
     ) -> D:
         raise NotImplementedError
 
 
-class EquityProcessor(StatProcessor[frames.DefaultFloat, OptionalFunc]):
+class EquityProcessor(StatProcessor[DefaultFloat, OptionalFunc]):
     def get_formatted_data(
-        self, data: frames.DatedFloat, frequency: int | None = None
-    ) -> frames.DefaultFloat:
-        stats_array: arrays.Float2D = self._func(data.get_array(), frequency)
-        return frames.DefaultFloat(
+        self, data: DatedFloat, frequency: int | None = None
+    ) -> DefaultFloat:
+        stats_array: nq.Float2D = self._func(data.get_array(), frequency)
+        return DefaultFloat(
             data=stats_array,
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
 
-    def plot(self, data: frames.DatedFloat, frequency: int | None = None) -> None:
+    def plot(self, data: DatedFloat, frequency: int | None = None) -> None:
         LogCurves(
             formatted_data=self.get_formatted_data(data=data, frequency=frequency),
             title=self._name,
         )
 
 
-class RollingProcessor(StatProcessor[frames.DatedFloat, ParametrableFunc]):
+class RollingProcessor(StatProcessor[DatedFloat, ParametrableFunc]):
     def get_formatted_data(
-        self, data: frames.DatedFloat, length: int
-    ) -> frames.DatedFloat:
-        stats_array: arrays.Float2D = self._func(data.get_array(), length)
-        return frames.DatedFloat(
+        self, data: DatedFloat, length: int
+    ) -> DatedFloat:
+        stats_array: nq.Float2D = self._func(data.get_array(), length)
+        return DatedFloat(
             data=stats_array,
             index=data.get_index(),
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
 
-    def plot(self, data: frames.DatedFloat, length: int) -> None:
+    def plot(self, data: DatedFloat, length: int) -> None:
         Curves(
             formatted_data=self.get_formatted_data(data=data, length=length),
             title=self._name,
         )
 
 
-class SamplingProcessor(StatProcessor[frames.DefaultFloat, ParametrableFunc]):
+class SamplingProcessor(StatProcessor[DefaultFloat, ParametrableFunc]):
     def get_formatted_data(
-        self, data: frames.DatedFloat, frequency: int
-    ) -> frames.DefaultFloat:
-        stats_array: arrays.Float2D = self._func(data.get_array(), frequency)
-        return frames.DefaultFloat(
+        self, data: DatedFloat, frequency: int
+    ) -> DefaultFloat:
+        stats_array: nq.Float2D = self._func(data.get_array(), frequency)
+        return DefaultFloat(
             data=stats_array,
             columns=data.get_names(),
         ).sort_data(ascending=self._ascending)
 
-    def plot_violins(self, data: frames.DatedFloat, frequency: int) -> None:
+    def plot_violins(self, data: DatedFloat, frequency: int) -> None:
         Violins(
             formatted_data=self.get_formatted_data(data=data, frequency=frequency),
             title=self._name,
         )
 
-    def plot_histograms(self, data: frames.DatedFloat, frequency: int) -> None:
+    def plot_histograms(self, data: DatedFloat, frequency: int) -> None:
         Histograms(
             formatted_data=self.get_formatted_data(data=data, frequency=frequency),
             title=self._name,
         )
 
-    def plot_boxes(self, data: frames.DatedFloat, frequency: int) -> None:
+    def plot_boxes(self, data: DatedFloat, frequency: int) -> None:
         Boxes(
             formatted_data=self.get_formatted_data(data=data, frequency=frequency),
             title=self._name,
         )
 
 
-class TableProcessor(StatProcessor[frames.DefaultFloat, DefinedFunc]):
-    def get_formatted_data(self, data: frames.DefaultFloat) -> frames.DefaultFloat:
-        stats_array: arrays.Float2D = self._func(data.get_array())
-        return frames.DefaultFloat(
+class TableProcessor(StatProcessor[DefaultFloat, DefinedFunc]):
+    def get_formatted_data(self, data: DefaultFloat) -> DefaultFloat:
+        stats_array: nq.Float2D = self._func(data.get_array())
+        return DefaultFloat(
             data=stats_array,
             columns=data.get_names(),
         )
 
-    def plot(self, data: frames.DefaultFloat) -> None:
+    def plot(self, data: DefaultFloat) -> None:
         HeatMap(formatted_data=self.get_formatted_data(data=data), title=self._name)
         HeatMap(formatted_data=self.get_formatted_data(data=data), title=self._name)
 
 
-class AggregateProcessor(StatProcessor[frames.SeriesFloat, DefinedFunc]):
-    def get_formatted_data(self, data: frames.DatedFloat) -> frames.SeriesFloat:
-        stats_array: arrays.Float2D = self._func(data.get_array())
-        return frames.SeriesFloat(data=stats_array, index=data.get_names()).sort_data(
+class AggregateProcessor(StatProcessor[SeriesFloat, DefinedFunc]):
+    def get_formatted_data(self, data: DatedFloat) -> SeriesFloat:
+        stats_array: nq.Float2D = self._func(data.get_array())
+        return SeriesFloat(data=stats_array, index=data.get_names()).sort_data(
             ascending=self._ascending
         )
 
-    def plot(self, data: frames.DatedFloat) -> None:
+    def plot(self, data: DatedFloat) -> None:
         Bars(formatted_data=self.get_formatted_data(data=data), title=self._name)

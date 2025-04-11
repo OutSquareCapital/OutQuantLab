@@ -1,4 +1,4 @@
-from outquantlab.structures.arrays import Float32
+from numquant.main import Float32
 
 ZERO = Float32(0.0)
 ONE = Float32(1.0)

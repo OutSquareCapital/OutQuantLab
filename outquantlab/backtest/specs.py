@@ -1,12 +1,12 @@
 from os import cpu_count
 
 from outquantlab.indicators import GenericIndic
-from outquantlab.structures import arrays
+import numquant as nq
 from tqdm import tqdm
 
 
 class BacktestSpecs:
-    def __init__(self, pct_returns: arrays.Float2D, indics: list[GenericIndic]) -> None:
+    def __init__(self, pct_returns: nq.Float2D, indics: list[GenericIndic]) -> None:
         self.thread_nb: int = cpu_count() or 8
         self.current_index: int = 0
         self.assets: int = pct_returns.shape[1]
@@ -17,11 +17,11 @@ class BacktestSpecs:
         print(self.get_stats())
         self.progress_bar = tqdm(total=self.total, desc="Backtest Progress")
 
-    def get_main_array(self) -> arrays.Float2D:
-        return arrays.create_empty(length=self.days, width=self.total)
+    def get_main_array(self) -> nq.Float2D:
+        return nq.arrays.create_empty(length=self.days, width=self.total)
 
     def fill_main_array(
-        self, main_array: arrays.Float2D, results_list: list[arrays.Float2D]
+        self, main_array: nq.Float2D, results_list: list[nq.Float2D]
     ) -> None:
         for i in range(len(results_list)):
             end_index: int = self.current_index + self.assets
@@ -45,12 +45,3 @@ class BacktestSpecs:
             f"  Params: {self.params}\n"
             f"  Total Nb of strategies: {self.total}\n"
         )
-
-
-class BacktestError(Exception):
-    def __init__(
-        self,
-        indic: GenericIndic,
-        e: Exception,
-    ) -> None:
-        super().__init__(f"Error during backtest.\n Issue: {e} \n Indicator:\n {indic}")

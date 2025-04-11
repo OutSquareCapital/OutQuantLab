@@ -2,7 +2,7 @@ from pathlib import Path
 
 from outquantlab.core import AssetsConfig, IndicsConfig
 from outquantlab.database.interfaces import FilesObject, JSONHandler, ParquetHandler
-from outquantlab.structures import frames
+from outquantlab.frames import DatedFloat
 
 class AssetFiles(FilesObject[AssetsConfig]):
     def __init__(self, db_path: Path) -> None:
@@ -35,12 +35,12 @@ class IndicFiles(FilesObject[IndicsConfig]):
         self.params.save(data=data.prepare_indic_params())
 
 
-class TickersData(FilesObject[frames.DatedFloat]):
+class TickersData(FilesObject[DatedFloat]):
     def __init__(self, db_path: Path) -> None:
         self.returns = ParquetHandler(db_path=db_path, file_name="returns_data")
 
-    def get(self, assets: list[str] | None = None) -> frames.DatedFloat:
+    def get(self, assets: list[str] | None = None) -> DatedFloat:
         return self.returns.load(names=assets)
 
-    def save(self, data: frames.DatedFloat) -> None:
+    def save(self, data: DatedFloat) -> None:
         self.returns.save(data=data)
