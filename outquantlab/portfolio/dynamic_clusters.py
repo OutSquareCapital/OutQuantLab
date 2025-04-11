@@ -1,9 +1,20 @@
 import numquant as nq
+from scipy.cluster.hierarchy import fcluster, linkage  # type: ignore
+from scipy.spatial.distance import squareform
+
+
+
+
+def get_cluster_structure(returns_array: nq.Float2D, max_clusters: int) -> list[int]:
+    distance_matrix: nq.Float2D = nq.metrics.agg.get_distance_matrix(returns_array=returns_array)
+    distance_condensed: nq.Float2D = squareform(distance_matrix, checks=False)
+    linkage_matrix: nq.Float2D = linkage(distance_condensed, method="ward")  # type: ignore
+    return fcluster(linkage_matrix, max_clusters, criterion="maxclust")  # type: ignore
 
 def get_clusters(
     returns_array: nq.Float2D, asset_names: list[str], max_clusters: int
 ) -> dict[str, list[str]]:
-    clusters_structure: list[int] = nq.metrics.get_cluster_structure(
+    clusters_structure: list[int] = get_cluster_structure(
         returns_array=returns_array, max_clusters=max_clusters
     )
 

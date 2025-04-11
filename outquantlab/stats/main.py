@@ -44,6 +44,6 @@ class Stats:
             _func=nq.metrics.roll.get_returns_distribution, _ascending=True
         )
         self.correlation = TableProcessor(
-            _func=nq.metrics.get_filled_correlation_matrix, _ascending=False
+            _func=nq.metrics.agg.get_filled_correlation_matrix, _ascending=False
         )
         self.equity = EquityProcessor(_func=nq.metrics.roll.get_equity, _ascending=True)
