@@ -1,6 +1,6 @@
 from numquant.main import Float2D, Float32, np
 
-from numquant.constants import ZERO, ONE, YEAR
+from numquant.metrics.constants import ZERO, ONE, Period
 from numquant.metrics.rolling import get_mean, get_max, get_min, get_median
 from numquant.metrics.rolling.volatility import get_volatility
 from numquant.arrays import backfill
@@ -84,7 +84,7 @@ def invert_signal_short(
     return np.where(metric < ZERO, -signal, signal)
 
 def _get_normalized_scalar(
-    raw_signal: Float2D, length: int = YEAR, target: int = 1
+    raw_signal: Float2D, length: int = Period.YEAR, target: int = 1
 ) -> Float2D:
     median: Float2D = get_median_agg(array=np.abs(raw_signal), axis=1)
     mean: Float2D = get_mean(

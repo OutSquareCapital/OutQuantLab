@@ -1,7 +1,7 @@
 import bottleneck as bn  # type: ignore
 
 from numquant.main import Float2D
-from numquant.constants import ANNUALIZED_PERCENTAGE
+from numquant.metrics.constants import ANNUALIZED_PERCENTAGE
 
 
 def get_mean(array: Float2D, axis: None | int = 0) -> Float2D:

@@ -1,5 +1,5 @@
 from numquant.main import Float2D
-from numquant.constants import MONTH, HALF_DECADE, ANNUALIZED_PERCENTAGE
+from numquant.metrics.constants import Period, ANNUALIZED_PERCENTAGE
 import bottleneck as bn  # type: ignore
 from numquant.arrays import fill_nan_with_data
 from numquant.metrics.aggregate import get_mean
@@ -17,8 +17,8 @@ def get_volatility_annualized(
 
 def hv_composite(
     returns_array: Float2D,
-    short_term_lengths: int = MONTH,
-    long_term_lengths: int = HALF_DECADE,
+    short_term_lengths: int = Period.MONTH,
+    long_term_lengths: int = Period.HALF_DECADE,
     st_weight: float = 0.6,
 ) -> Float2D:
     st_vol: Float2D = get_volatility(

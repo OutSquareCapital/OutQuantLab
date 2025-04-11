@@ -1,6 +1,6 @@
 from numquant.metrics.aggregate import get_mean, get_min, get_volatility
 from numquant.main import Float2D
-from numquant.constants import MONTH, PERCENTAGE, ANNUALIZATION
+from numquant.metrics.constants import Period, PERCENTAGE, ANNUALIZATION
 from numquant.metrics.rolling import get_rolling_drawdown, get_skewness
 from numquant.arrays import get_prices, reduce, get_pct_returns
 
@@ -37,7 +37,7 @@ def get_monthly_skewness(returns_array: Float2D) -> Float2D:
         returns=returns_array
     )
     monthly_prices: Float2D = reduce(
-        array=prices_array, frequency=MONTH
+        array=prices_array, frequency=Period.MONTH
     )
     monthly_returns: Float2D = get_pct_returns(
         prices=monthly_prices
