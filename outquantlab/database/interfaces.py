@@ -69,7 +69,7 @@ class ParquetHandler(FileHandler[DatedFloat]):
     def _load_implementation(self, names: list[str] | None = None) -> DatedFloat:
         if names:
             data: DatedFloat = DatedFloat.from_parquet(path=self.path, names=names)
-            data.clean_nans(axis=0, total=True)
+            data.clean_nans(axis=0)
             return data
         return DatedFloat.from_parquet(path=self.path)
 
