@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import NamedTuple
 import numquant as nq
 from outquantlab.stats.processors import (
     AggregateProcessor,
@@ -9,8 +8,8 @@ from outquantlab.stats.processors import (
     TableProcessor,
 )
 
-
-class AggregateProcessorsRegistery(NamedTuple):
+@dataclass(slots=True, frozen=True)
+class AggregateProcessorsRegistery:
     returns = AggregateProcessor(_func=nq.metrics.agg.get_total_returns)
     sharpe_ratio = AggregateProcessor(_func=nq.metrics.agg.get_sharpe_ratio)
     volatility = AggregateProcessor(
@@ -22,8 +21,8 @@ class AggregateProcessorsRegistery(NamedTuple):
         _func=nq.metrics.agg.get_monthly_skewness, _ascending=False
     )
 
-
-class RollingProcessorsRegistery(NamedTuple):
+@dataclass(slots=True, frozen=True)
+class RollingProcessorsRegistery:
     sharpe_ratio = RollingProcessor(
         _func=nq.metrics.roll.get_sharpe_ratio, _ascending=False
     )
@@ -34,15 +33,13 @@ class RollingProcessorsRegistery(NamedTuple):
 
 @dataclass(slots=True)
 class Stats:
-    overall: AggregateProcessorsRegistery = field(init=False)
-    rolling: RollingProcessorsRegistery = field(init=False)
+    overall: AggregateProcessorsRegistery = AggregateProcessorsRegistery()
+    rolling: RollingProcessorsRegistery = RollingProcessorsRegistery()
     distribution: SamplingProcessor = field(init=False)
     correlation: TableProcessor = field(init=False)
     equity: EquityProcessor = field(init=False)
 
     def __post_init__(self) -> None:
-        self.overall = AggregateProcessorsRegistery()
-        self.rolling = RollingProcessorsRegistery()
         self.distribution = SamplingProcessor(
             _func=nq.metrics.roll.get_returns_distribution, _ascending=True
         )

@@ -1,12 +1,12 @@
 from outquantlab.core import AppConfig
-from outquantlab.database.structure import DBStructure, get_db_structure
+from outquantlab.database.structure import DBStructure
 from outquantlab.frames import DatedFloat
 from outquantlab.apis import fetch_data
 
 
 class DataBaseProvider:
     def __init__(self, db_name: str) -> None:
-        self._db: DBStructure = get_db_structure(db_name=db_name)
+        self._db = DBStructure(name=db_name)
 
     def get_returns_data(
         self, app_config: AppConfig, new_data: bool
