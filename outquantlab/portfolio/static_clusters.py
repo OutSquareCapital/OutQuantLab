@@ -1,20 +1,33 @@
 from abc import ABC, abstractmethod
 
-from pandas import MultiIndex
-
 from outquantlab.indicators import GenericIndic
-from outquantlab.portfolio.structures import (
-    CLUSTERS_LEVELS,
-    Asset,
-    AssetsClustersTuples,
-    ClustersMap,
-    ClustersTree,
-    ColumnName,
-    IndicsClustersTuples,
-    PortfolioClustersTuples,
-    StrategyComponent,
-)
+from typing import NamedTuple, Protocol
+from dataclasses import dataclass
 
+@dataclass(slots=True)
+class Asset:
+    name: str
+    active: bool
+
+
+
+
+class StrategyComponent(Protocol):
+    name: str
+    active: bool
+
+class AssetsClustersTuples(NamedTuple):
+    cluster: str
+    asset: str
+
+
+class IndicsClustersTuples(NamedTuple):
+    cluster: str
+    indics: str
+    params: str
+
+type ClustersTree = dict[str, list[str]]
+type ClustersMap = dict[str, str]
 
 class BaseClustersTree[T: StrategyComponent, L: tuple[str, ...]](ABC):
     def __init__(self, clusters: ClustersTree) -> None:
@@ -59,45 +72,4 @@ class IndicsClusters(BaseClustersTree[GenericIndic, IndicsClustersTuples]):
             )
             for indic in entities
             for combo in indic.combos
-        ]
-
-
-class ClustersHierarchy:
-    def __init__(
-        self,
-        asset_tuples: list[AssetsClustersTuples],
-        indics_tuples: list[IndicsClustersTuples],
-    ) -> None:
-        self.product_tuples: list[PortfolioClustersTuples] = [
-            PortfolioClustersTuples(
-                *asset_tuple,
-                *indics_tuple,
-            )
-            for indics_tuple in indics_tuples
-            for asset_tuple in asset_tuples
-        ]
-
-    def get_multi_index(self) -> MultiIndex:
-        return MultiIndex.from_tuples(  # type: ignore
-            tuples=self.product_tuples,
-            names=CLUSTERS_LEVELS,
-        )
-
-    @property
-    def length(self) -> int:
-        return len(self.product_tuples)
-
-
-def get_multi_index(asset_names: list[str], indics: list[GenericIndic]) -> MultiIndex:
-    return MultiIndex.from_tuples(  # type: ignore
-        tuples=get_categories(asset_names=asset_names, indics=indics),
-        names=CLUSTERS_LEVELS,
-    )
-
-def get_categories(asset_names: list[str], indics: list[GenericIndic]) -> list[ColumnName]:
-    return [
-            ColumnName(asset=asset_name, indic=indic.name, param=param_name)
-            for indic in indics
-            for param_name in indic.get_combo_names()
-            for asset_name in asset_names
         ]

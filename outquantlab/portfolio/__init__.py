@@ -1,6 +1,6 @@
-from outquantlab.portfolio.static_clusters import get_multi_index, get_categories
 from outquantlab.portfolio.dynamic_clusters import get_clusters
-from outquantlab.portfolio.structures import Asset
+from outquantlab.portfolio.structures import get_multi_index, get_categories
+from outquantlab.portfolio.static_clusters import Asset
 from outquantlab.portfolio.main import BacktestResults
 
 __all__: list[str] = [

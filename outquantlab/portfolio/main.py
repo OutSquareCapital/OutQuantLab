@@ -1,7 +1,6 @@
 
 from outquantlab.frames import DatedFloat
 import numquant as nq
-
 from dataclasses import dataclass, field
 
 @dataclass(slots=True)
@@ -34,4 +33,3 @@ def get_portfolio(data: DatedFloat) -> DatedFloat:
         index=data.get_index(),
         columns=["portfolio"],
     )
-

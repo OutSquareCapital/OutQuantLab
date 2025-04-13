@@ -1,36 +1,8 @@
-from typing import NamedTuple, Protocol
-from dataclasses import dataclass
-
-@dataclass(slots=True)
-class Asset:
-    name: str
-    active: bool
+from typing import NamedTuple
+from pandas import MultiIndex
+from outquantlab.indicators import GenericIndic
 
 
-type ClustersTree = dict[str, list[str]]
-type ClustersMap = dict[str, str]
-
-class StrategyComponent(Protocol):
-    name: str
-    active: bool
-
-class AssetsClustersTuples(NamedTuple):
-    cluster: str
-    asset: str
-
-
-class IndicsClustersTuples(NamedTuple):
-    cluster: str
-    indics: str
-    params: str
-
-
-class PortfolioClustersTuples(NamedTuple):
-    assets_clusters: str
-    assets: str
-    indics_clusters: str
-    indics: str
-    params: str
 
 CLUSTERS_LEVELS: list[str] = [
     "assets",
@@ -42,3 +14,19 @@ class ColumnName(NamedTuple):
     asset: str
     indic: str
     param: str
+
+
+
+def get_multi_index(asset_names: list[str], indics: list[GenericIndic]) -> MultiIndex:
+    return MultiIndex.from_tuples(  # type: ignore
+        tuples=get_categories(asset_names=asset_names, indics=indics),
+        names=CLUSTERS_LEVELS,
+    )
+
+def get_categories(asset_names: list[str], indics: list[GenericIndic]) -> list[ColumnName]:
+    return [
+            ColumnName(asset=asset_name, indic=indic.name, param=param_name)
+            for indic in indics
+            for param_name in indic.get_combo_names()
+            for asset_name in asset_names
+        ]
