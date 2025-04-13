@@ -1,35 +1,24 @@
 
-from outquantlab.portfolio.structures import CLUSTERS_LEVELS
 from outquantlab.frames import DatedFloat
 import numquant as nq
 
+from dataclasses import dataclass, field
+
+@dataclass(slots=True)
 class BacktestResults:
-    assets: DatedFloat
-    indics: DatedFloat
     params: DatedFloat
-
-    def __getitem__(self, key: str) -> DatedFloat:
-        value: DatedFloat = self.__dict__[key]
-        return value
-
-    def __setitem__(self, key: str, value: DatedFloat) -> None:
-        self.__dict__[key] = value
-
-    @property
-    def portfolio(self) -> DatedFloat:
-        return get_portfolio(data=self.assets)
-
-def aggregate_raw_returns(returns_df: DatedFloat) -> BacktestResults:
-    results = BacktestResults()
-    for lvl in range(len(CLUSTERS_LEVELS), 0, -1):
-        returns_df = get_portfolio_returns(
-            returns_df=returns_df, grouping_levels=returns_df.columns.names[:lvl]
+    portfolio: DatedFloat = field(init=False)
+    assets: DatedFloat = field(init=False)
+    indics: DatedFloat = field(init=False)
+    
+    def __post_init__(self):
+        self.indics = get_portfolio_returns(
+            returns_df=self.params, grouping_levels=["assets", "indics"]
         )
-        returns_df.clean_nans()
-        key_name: str = returns_df.columns.names[lvl - 1]
-        results[key_name] = returns_df
-    return results
-
+        self.assets = get_portfolio_returns(
+            returns_df=self.indics, grouping_levels=["assets"]
+        )
+        self.portfolio = get_portfolio(data=self.assets)
 
 def get_portfolio_returns(
     returns_df: DatedFloat, grouping_levels: list[str]
@@ -45,3 +34,4 @@ def get_portfolio(data: DatedFloat) -> DatedFloat:
         index=data.get_index(),
         columns=["portfolio"],
     )
+
