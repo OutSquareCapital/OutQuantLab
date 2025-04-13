@@ -34,7 +34,8 @@ class BaseFloat[T: DatetimeIndex | None](DataFrame):
         super().__init__(data=data, index=index, columns=columns, dtype=nq.Float32)  # type: ignore
 
     def select_col(self, column: str) -> SeriesFloat:
-        return self[column]  # type: ignore
+        pd_serie = self[column] # type: ignore
+        return SeriesFloat(pd_serie, index=pd_serie.index) # type: ignore  
 
     def select_last_row(self) -> SeriesFloat:
         return self.iloc[-1] # type: ignore
