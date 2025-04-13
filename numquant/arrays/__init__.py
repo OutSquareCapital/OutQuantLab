@@ -7,6 +7,7 @@ from numquant.arrays.create import (
     create_full_like,
     create_nan,
     create_nan_like,
+    convert,
 )
 from numquant.arrays.extract import (
     get_log_returns,
@@ -40,4 +41,5 @@ __all__: list[str] = [
     "get_prices",
     "get_sorted_indices",
     "fill_nan_with_data",
+    "convert",
 ]

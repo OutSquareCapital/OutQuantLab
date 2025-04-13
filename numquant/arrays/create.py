@@ -1,6 +1,6 @@
 from numba import njit  # type: ignore
 
-from numquant.main import Float1D, Float2D, Float32, Nan, np
+from numquant.main import Float1D, Float2D, Float32, Nan, np, NPArray
 
 
 @njit
@@ -41,3 +41,6 @@ def create_nan(length: int, width: int) -> Float2D:
 @njit
 def create_nan_like(model: Float2D) -> Float2D:
     return np.full_like(model, fill_value=Nan, dtype=Float32)
+
+def convert(data: NPArray) -> Float2D:
+    return np.array(data, dtype=Float32)

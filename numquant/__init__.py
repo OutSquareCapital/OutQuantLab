@@ -5,6 +5,8 @@ from numquant.main import (
     Float32,
     Int32,
     Nan,
+    NPArray,
+    Float64
 )
 
 
@@ -19,5 +21,7 @@ __all__: list[str] = [
     "Float32",
     "Int32",
     "Nan",
-    "arrays"
+    "Float64",
+    "arrays",
+    "NPArray",
 ]
