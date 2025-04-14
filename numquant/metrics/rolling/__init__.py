@@ -31,7 +31,8 @@ from numquant.metrics.rolling.skewness import get_skewness, get_expanding_skewne
 from numquant.metrics.rolling.volatility import (
     get_volatility,
     get_volatility_annualized,
-    hv_composite,
+    get_volatility_annualized_pct,
+    get_composite_volatility,
     get_expanding_volatility
 )
 
@@ -45,7 +46,8 @@ __all__: list[str] = [
     "get_kurtosis",
     "get_skewness",
     "get_volatility_annualized",
-    "hv_composite",
+    "get_volatility_annualized_pct",
+    "get_composite_volatility",
     "get_sharpe_ratio",
     "get_central_point",
     "invert_signal_long",

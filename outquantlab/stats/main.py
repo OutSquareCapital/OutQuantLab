@@ -26,7 +26,7 @@ class RollingProcessorsRegistery:
     sharpe_ratio = RollingProcessor(
         _func=nq.metrics.roll.get_sharpe_ratio, _ascending=False
     )
-    volatility = RollingProcessor(_func=nq.metrics.roll.get_volatility_annualized)
+    volatility = RollingProcessor(_func=nq.metrics.roll.get_volatility_annualized_pct)
     drawdown = RollingProcessor(_func=nq.metrics.roll.get_rolling_drawdown)
     skewness = RollingProcessor(_func=nq.metrics.roll.get_skewness, _ascending=False)
 

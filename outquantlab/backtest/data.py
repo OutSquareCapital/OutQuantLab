@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 import numquant as nq
 
-
 @dataclass(slots=True)
 class DataArrays:
     pct_returns: nq.Float2D
@@ -12,7 +11,7 @@ class DataArrays:
     def __post_init__(self) -> None:
         prices: nq.Float2D = nq.arrays.get_prices(returns=self.pct_returns)
         log_returns: nq.Float2D = nq.arrays.get_log_returns(prices=prices)
-        hv: nq.Float2D = nq.metrics.roll.hv_composite(returns_array=self.pct_returns)
+        hv: nq.Float2D = nq.metrics.roll.get_composite_volatility(returns_array=self.pct_returns)
         self.prices = nq.arrays.shift(original=prices)
         self.log_returns = nq.arrays.shift(original=log_returns)
         self.adjusted_returns = get_volatility_adjusted_returns(
