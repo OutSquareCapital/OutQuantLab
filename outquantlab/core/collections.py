@@ -31,7 +31,12 @@ class IndicsConfig(BaseConfig[GenericIndic]):
     def get_indics_params(self) -> list[GenericIndic]:
         active_indics: list[GenericIndic] = self.get_all_active_entities()
         for indic in active_indics:
-            indic.get_valid_pairs()
+            try:
+                indic.get_valid_pairs()
+            except Exception as e:
+                raise ValueError(
+                    f"Error in {indic.name}: {e}"
+                ) from e
         return active_indics
 
     def prepare_indic_params(self) -> dict[str, dict[str, list[int]]]:
