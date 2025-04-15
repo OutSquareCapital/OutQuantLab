@@ -14,6 +14,7 @@ from numquant.arrays.extract import (
     get_pct_returns,
     get_prices,
     get_sorted_indices,
+    get_index
 )
 from numquant.arrays.transform import (
     backfill,
@@ -21,6 +22,7 @@ from numquant.arrays.transform import (
     fill_nan_with_data,
     reduce,
     shift,
+    
 )
 
 __all__: list[str] = [
@@ -42,4 +44,5 @@ __all__: list[str] = [
     "get_sorted_indices",
     "fill_nan_with_data",
     "convert",
+    "get_index",
 ]

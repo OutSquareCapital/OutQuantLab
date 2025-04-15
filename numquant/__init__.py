@@ -1,4 +1,5 @@
 from numquant.main import (
+    Int1D,
     Int2D,
     Float1D,
     Float2D,
@@ -6,7 +7,7 @@ from numquant.main import (
     Int32,
     Nan,
     NPArray,
-    Float64
+    Float64,
 )
 
 
@@ -24,4 +25,5 @@ __all__: list[str] = [
     "Float64",
     "arrays",
     "NPArray",
+    "Int1D",
 ]

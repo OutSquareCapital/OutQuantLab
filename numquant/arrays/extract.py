@@ -1,6 +1,8 @@
 from numquant.arrays.create import create_empty_like
-from numquant.main import Float2D, Float32, Int2D, Nan, np
+from numquant.main import Float2D, Float32, Int2D, Nan, np, Int1D
 
+def get_index(array: Float2D) -> Int1D:
+    return np.arange(array.shape[0])
 
 def get_sorted_indices(array: Float2D, ascending: bool) -> Int2D:
     sorted_indices: Int2D = np.argsort(array, None)
