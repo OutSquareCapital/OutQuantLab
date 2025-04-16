@@ -37,9 +37,8 @@ def get_equity(returns_array: Float2D, frequency: int | None = None) -> Float2D:
     return reduce(array=equity, frequency=frequency)
 
 
-def get_returns_distribution(returns_array: Float2D, frequency: int) -> Float2D:
-    resampled_equity: Float2D = get_equity(
+def get_returns_distribution(returns_array: Float2D, frequency: int | None = None) -> Float2D:
+    equity: Float2D = get_equity(
         returns_array=returns_array, frequency=frequency
     )
-    resampled_returns: Float2D = get_pct_returns(prices=resampled_equity)
-    return resampled_returns * PERCENTAGE
+    return get_pct_returns(prices=equity) * PERCENTAGE
