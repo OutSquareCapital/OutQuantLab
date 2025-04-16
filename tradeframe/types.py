@@ -1,15 +1,8 @@
 from enum import StrEnum
 import polars as pl
-from typing import Protocol, Any
+from typing import Any
 from dataclasses import dataclass, field
 import numquant as nq
-
-
-class Category(Protocol):
-    asset: str
-    indic: str
-    param: str
-
 
 class ColumnsIDs(StrEnum):
     INDEX = "Index"
