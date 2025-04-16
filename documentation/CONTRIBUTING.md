@@ -398,17 +398,8 @@ Slots: Always use slots=True in dataclasses for performance.
 
 Constants over variables: Prefer NamedTuple or Enum for invariants.
 
-### 3. Handling DataFrames and Series
 
-The project provides `DataFrameFloat` and `SeriesFloat` for strict typing. Use them instead of `pandas.DataFrame` or `pandas.Series` directly, when you know that you values will only contain floats.
-
-```python
-from custom_classes import DataFrameFloat, SeriesFloat
-
-df: DataFrameFloat = DataFrameFloat(data=my_array, index=my_dates, columns=my_labels)
-```
-
-### 4. Scope
+### 3. Scope
 
 . Scope Control & Visibility Management
 Private vs Public Convention
