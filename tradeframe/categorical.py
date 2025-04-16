@@ -1,7 +1,7 @@
 import polars as pl
 
 import numquant as nq
-from tradeframe.series import SeriesDated
+from tradeframe.frames1d import SeriesDated
 from tradeframe.types import ColumnsIDs, Category
 from tradeframe.interfaces import AbstractTradeFrame
 

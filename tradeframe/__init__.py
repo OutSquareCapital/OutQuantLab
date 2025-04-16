@@ -1,6 +1,6 @@
 from tradeframe.categorical import FrameCategoricalDated
-from tradeframe.frames import FrameDated, FrameDefault, FrameMatrix
-from tradeframe.series import SeriesDated, SeriesNamed, SeriesDefault
+from tradeframe.frames2d import FrameDated, FrameDefault, FrameMatrix
+from tradeframe.frames1d import SeriesDated, SeriesNamed, SeriesDefault
 
 __all__: list[str] = [
     "FrameCategoricalDated",
