@@ -1,35 +1,18 @@
-
-from outquantlab.frames import DatedFloat
-import numquant as nq
+import tradeframe as tf
 from dataclasses import dataclass, field
+
 
 @dataclass(slots=True)
 class BacktestResults:
-    params: DatedFloat
-    portfolio: DatedFloat = field(init=False)
-    assets: DatedFloat = field(init=False)
-    indics: DatedFloat = field(init=False)
+    params: tf.FrameCategoricalDated
+    indics: tf.FrameDated = field(init=False)
+    assets: tf.FrameDated = field(init=False)
+    portfolio: tf.SeriesDated = field(init=False)
     
-    def __post_init__(self):
-        self.indics = get_portfolio_returns(
-            returns_df=self.params, grouping_levels=["assets", "indics"]
-        )
-        self.assets = get_portfolio_returns(
-            returns_df=self.indics, grouping_levels=["assets"]
-        )
-        self.portfolio = get_portfolio(data=self.assets)
-
-def get_portfolio_returns(
-    returns_df: DatedFloat, grouping_levels: list[str]
-) -> DatedFloat:
-    return DatedFloat.from_pandas(
-        data=returns_df.T.groupby(level=grouping_levels, observed=True).mean().T  # type: ignore
-    )
-
-
-def get_portfolio(data: DatedFloat) -> DatedFloat:
-    return DatedFloat(
-        data=nq.metrics.agg.get_mean(array=data.get_array(), axis=1),
-        index=data.get_index(),
-        columns=["portfolio"],
-    )
+    def __post_init__(self) -> None:
+        indics_by_assets_df: tf.FrameCategoricalDated = self.params.get_portfolio(["assets", "indics"])
+        assets_df: tf.FrameCategoricalDated = indics_by_assets_df.get_portfolio(["assets"])
+        #assets_by_indics_df: tf.FrameCategoricalDated = self.params.get_portfolio(["indics"])
+        self.portfolio = assets_df.get_overall_portfolio()
+        self.indics = tf.FrameDated.create_from_categorical(data=indics_by_assets_df)
+        self.assets = tf.FrameDated.create_from_categorical(data=assets_df)

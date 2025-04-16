@@ -1,8 +1,6 @@
 from typing import NamedTuple
-from pandas import MultiIndex
 from outquantlab.indicators import GenericIndic
-
-
+import polars as pl
 
 CLUSTERS_LEVELS: list[str] = [
     "assets",
@@ -15,14 +13,6 @@ class ColumnName(NamedTuple):
     indic: str
     param: str
 
-
-
-def get_multi_index(asset_names: list[str], indics: list[GenericIndic]) -> MultiIndex:
-    return MultiIndex.from_tuples(  # type: ignore
-        tuples=get_categories(asset_names=asset_names, indics=indics),
-        names=CLUSTERS_LEVELS,
-    )
-
 def get_categories(asset_names: list[str], indics: list[GenericIndic]) -> list[ColumnName]:
     return [
             ColumnName(asset=asset_name, indic=indic.name, param=param_name)
@@ -30,3 +20,20 @@ def get_categories(asset_names: list[str], indics: list[GenericIndic]) -> list[C
             for param_name in indic.get_combo_names()
             for asset_name in asset_names
         ]
+
+def get_categories_df(asset_names: list[str], indics: list[GenericIndic]) -> pl.DataFrame:
+
+    data: list[dict[str, str]] = [
+        {"assets": asset_name, "indics": indic.name, "params": param_name}
+        for indic in indics
+        for param_name in indic.get_combo_names()
+        for asset_name in asset_names
+    ]
+    assets_categories = pl.Enum(categories=asset_names)
+    indics_categories = pl.Enum(categories=[indic.name for indic in indics])
+    schema = {
+        "assets": assets_categories,
+        "indics": indics_categories,
+        "params": pl.Utf8,
+    }
+    return pl.DataFrame(data, schema=schema)
