@@ -1,9 +1,9 @@
-from tradeframe.categorical import FrameCategoricalDated
+from tradeframe.categorical import FrameCategorical
 from tradeframe.frames2d import FrameDated, FrameDefault, FrameMatrix
 from tradeframe.frames1d import SeriesDated, SeriesNamed, SeriesDefault
 
 __all__: list[str] = [
-    "FrameCategoricalDated",
+    "FrameCategorical",
     "FrameDated",
     "FrameDefault",
     "FrameMatrix",
@@ -20,5 +20,5 @@ implemented avec index date, integer, ou string
 implemented avec index date ou integer
 Matrix avec index répété en horizontal et vertical, et values en matrice
 implemented avec index string
-Categorical avec index date horizontal, value vertical, et categories verticals
+Categorical avec value vertical, categories verticals, et colum names qui sont juste enumeration
 """

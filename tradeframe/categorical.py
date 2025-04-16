@@ -1,25 +1,18 @@
 import polars as pl
 
 import numquant as nq
-from tradeframe.frames1d import SeriesDated
 from tradeframe.types import ColumnsIDs, Category
-from tradeframe.interfaces import AbstractTradeFrame
 from typing import Self
 
-class FrameCategoricalDated(AbstractTradeFrame):
+
+class FrameCategorical:
     def __init__(self, data: pl.DataFrame, categories: list[str]) -> None:
-        super().__init__(data=data)
+        self._data: pl.DataFrame = data
         self._categories: list[str] = categories
 
     @property
     def values(self) -> pl.DataFrame:
         return self._data.drop(self._categories)
-
-    @property
-    def index(self) -> pl.Series:
-        cols: list[str] = self.values.columns
-        return pl.Series(name=ColumnsIDs.DATE, values=cols).cast(dtype=pl.Date)
-
 
     def get_names(self) -> list[str]:
         return (
@@ -32,12 +25,20 @@ class FrameCategoricalDated(AbstractTradeFrame):
     def create_from_np(
         cls,
         data: nq.Float2D,
-        dates: pl.Series,
-        categories: pl.DataFrame,
-    ) -> "FrameCategoricalDated":
-        returns: pl.DataFrame = pl.from_numpy(data=data, orient="col", schema=dates.to_list()).fill_nan(value=None)
-        concatened_data: pl.DataFrame = pl.concat(items=[categories, returns], how="horizontal")
-        categories_names: list[str] = categories.columns
+        categories: list[dict[str, str]],
+        asset_names: list[str],
+        indic_names: list[str],
+    ) -> Self:
+        categories_df: pl.DataFrame = cls.get_categories_schema(
+            data=categories, asset_names=asset_names, indic_names=indic_names
+        )
+        returns: pl.DataFrame = pl.from_numpy(data=data, orient="col").fill_nan(
+            value=None
+        )
+        concatened_data: pl.DataFrame = pl.concat(
+            items=[categories_df, returns], how="horizontal"
+        )
+        categories_names: list[str] = categories_df.columns
         return cls(data=concatened_data, categories=categories_names)
 
     def get_portfolio(self, categories: list[str]) -> Self:
@@ -45,14 +46,23 @@ class FrameCategoricalDated(AbstractTradeFrame):
         lazy_grouped: pl.LazyFrame = (
             self._data.lazy()
             .group_by(categories)
-            .agg(pl.col(name=return_cols).mean().cast(dtype=pl.Float32))
+            .agg(pl.col(name=return_cols).mean().cast(dtype=pl.Float32()))
         )
         df: pl.DataFrame = lazy_grouped.collect()
         return self.__class__(data=df, categories=categories)
 
-    def get_overall_portfolio(self) -> SeriesDated:
-        data: pl.Series = self.values.select(pl.all().mean()).transpose().to_series()
-        return SeriesDated.create_from_series(data=data, index=self.index)
+    @classmethod
+    def get_categories_schema(
+        cls, data: list[dict[str, str]], asset_names: list[str], indic_names: list[str]
+    ) -> pl.DataFrame:
+        assets_categories = pl.Enum(categories=asset_names)
+        indics_categories = pl.Enum(categories=indic_names)
+        schema = {
+            "assets": assets_categories,
+            "indics": indics_categories,
+            "params": pl.Utf8,
+        }
+        return pl.DataFrame(data=data, schema=schema)
 
 
 # TODO: a terme, transferer la pipeline vers format long.
@@ -84,3 +94,5 @@ def format_backtest_long(
         result_frames.append(df)
 
     return pl.concat(result_frames, rechunk=True)
+
+
