@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
-from outquantlab.frames import DatedFloat
+import tradeframe as tf
 
 
 class FilesObject[T](ABC):
@@ -63,20 +63,19 @@ class JSONHandler[K, V](FileHandler[dict[K, V]]):
             json.dump(data, file, indent=3)
 
 
-class ParquetHandler(FileHandler[DatedFloat]):
+class ParquetHandler(FileHandler[tf.FrameDated]):
     extension = ".parquet"
 
-    def _load_implementation(self, names: list[str] | None = None) -> DatedFloat:
+    def _load_implementation(self, names: list[str] | None = None) -> tf.FrameDated:
         if names:
-            data: DatedFloat = DatedFloat.from_parquet(path=self.path, names=names)
-            data.clean_nans(axis=0)
-            return data
-        return DatedFloat.from_parquet(path=self.path)
+            data: tf.FrameDated = tf.FrameDated.create_from_parquet(path=self.path, names=names)
+            return data.clean_nans()
+        return tf.FrameDated.create_from_parquet(path=self.path)
 
-    def _handle_missing_file(self) -> DatedFloat:
-        empty_df: DatedFloat = DatedFloat.as_empty()
-        empty_df.to_parquet(self.path, engine="pyarrow", index=True)
+    def _handle_missing_file(self) -> tf.FrameDated:
+        empty_df: tf.FrameDated = tf.FrameDated.create_as_empty()
+        empty_df.to_parquet(path=self.path)
         return empty_df
 
-    def save(self, data:DatedFloat) -> None:
-        data.to_parquet(self.path, engine="pyarrow", index=True)
+    def save(self, data: tf.FrameDated) -> None:
+        data.to_parquet(path=self.path)

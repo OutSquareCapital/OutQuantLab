@@ -2,7 +2,7 @@ from pathlib import Path
 
 from outquantlab.core import AssetsConfig, IndicsConfig
 from outquantlab.database.interfaces import FilesObject, JSONHandler, ParquetHandler
-from outquantlab.frames import DatedFloat
+import tradeframe as tf
 
 class AssetFiles(FilesObject[AssetsConfig]):
     def __init__(self, db_path: Path) -> None:
@@ -34,13 +34,12 @@ class IndicFiles(FilesObject[IndicsConfig]):
         self.active.save(data=data.get_all_entities_dict())
         self.params.save(data=data.prepare_indic_params())
 
-
-class TickersData(FilesObject[DatedFloat]):
+class TickersData(FilesObject[tf.FrameDated]):
     def __init__(self, db_path: Path) -> None:
         self.returns = ParquetHandler(db_path=db_path, file_name="returns_data")
 
-    def get(self, assets: list[str] | None = None) -> DatedFloat:
+    def get(self, assets: list[str] | None = None) -> tf.FrameDated:
         return self.returns.load(names=assets)
 
-    def save(self, data: DatedFloat) -> None:
+    def save(self, data: tf.FrameDated) -> None:
         self.returns.save(data=data)

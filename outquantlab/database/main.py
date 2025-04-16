@@ -1,6 +1,6 @@
 from outquantlab.core import AppConfig
 from outquantlab.database.structure import DBStructure
-from outquantlab.frames import DatedFloat
+import tradeframe as tf
 from outquantlab.apis import fetch_data
 
 
@@ -10,19 +10,19 @@ class DataBaseProvider:
 
     def get_returns_data(
         self, app_config: AppConfig, new_data: bool
-    ) -> DatedFloat:
+    ) -> tf.FrameDated:
         if new_data:
-            data: DatedFloat = self._db.tickers.get()
+            data: tf.FrameDated = self._db.tickers.get()
             app_config.assets_config.update_assets(names=data.get_names())
             self._db.assets.save(data=app_config.assets_config)
             return data
         return self._db.tickers.get(
             assets=app_config.assets_config.get_all_active_entities_names()
         )
-
+    
     def refresh_data(self, app_config: AppConfig) -> None:
         assets: list[str] = app_config.assets_config.get_all_entities_names()
-        data: DatedFloat = fetch_data(assets=assets)
+        data: tf.FrameDated = fetch_data(assets=assets)
         self._db.tickers.save(data=data)
 
     def get_app_config(self) -> AppConfig:
