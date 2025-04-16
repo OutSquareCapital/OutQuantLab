@@ -10,10 +10,16 @@ from outquantlab.stats.design import (
     get_heatmap_colorscale,
     get_marker_config,
 )
-from outquantlab.frames import DatedFloat, DefaultFloat, SeriesFloat
+import tradeframe as tf
 
 
-class Graph[D:DatedFloat | DefaultFloat | SeriesFloat](ABC):
+class Graph[
+    D: tf.FrameDated
+    | tf.FrameDefault
+    | tf.SeriesNamed
+    | tf.SeriesDefault
+    | tf.FrameMatrix
+](ABC):
     def __init__(self, formatted_data: D, title: str) -> None:
         self.figure = go.Figure()
         self.setup_figure(formatted_data=formatted_data)
@@ -51,33 +57,32 @@ class Graph[D:DatedFloat | DefaultFloat | SeriesFloat](ABC):
         )
 
 
-class Curves(Graph[DatedFloat]):
-    def setup_figure(self, formatted_data:DatedFloat) -> None:
+class Curves(Graph[tf.FrameDated]):
+    def setup_figure(self, formatted_data: tf.FrameDated) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
-        for column in formatted_data.columns:
+        for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
                 trace=go.Scatter(
-                    x=formatted_data.get_index(),
-                    y=formatted_data[column],
+                    x=formatted_data.index,
+                    y=column,
                     mode="lines",
-                    name=column,
-                    line=dict(width=2, color=color_map[column]),
+                    name=column.name,
+                    line=dict(width=2, color=color_map[column.name]),
                     hovertemplate=CustomHovers.VERTICAL_DATA.value,
                 )
             )
 
 
-class LogCurves(Graph[DefaultFloat]):
-    def setup_figure(self, formatted_data:DefaultFloat) -> None:
+class LogCurves(Graph[tf.FrameDefault | tf.SeriesDefault]):
+    def setup_figure(self, formatted_data: tf.FrameDefault | tf.SeriesDefault) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
-        for column in formatted_data.columns:
+        for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
                 trace=go.Scatter(
-                    x=formatted_data.get_index(),
-                    y=formatted_data[column],
+                    y=column,
                     mode="lines",
-                    name=column,
-                    line=dict(width=2, color=color_map[column]),
+                    name=column.name,
+                    line=dict(width=2, color=color_map[column.name]),
                     hovertemplate=CustomHovers.VERTICAL_DATA.value,
                 )
             )
@@ -86,17 +91,17 @@ class LogCurves(Graph[DefaultFloat]):
         )
 
 
-class Violins(Graph[DefaultFloat]):
-    def setup_figure(self, formatted_data: DefaultFloat) -> None:
+class Violins(Graph[tf.FrameDefault]):
+    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
-        for column in formatted_data.columns:
+        for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
                 trace=go.Violin(
-                    y=formatted_data[column],
-                    name=column,
+                    y=column,
+                    name=column.name,
                     box_visible=True,
                     points=False,
-                    marker=get_marker_config(color=color_map[column]),
+                    marker=get_marker_config(color=color_map[column.name]),
                     box_line_color=Colors.WHITE,
                     hoveron="violins",
                     hoverinfo="y",
@@ -105,30 +110,30 @@ class Violins(Graph[DefaultFloat]):
             )
 
 
-class Boxes(Graph[DefaultFloat]):
-    def setup_figure(self, formatted_data: DefaultFloat) -> None:
+class Boxes(Graph[tf.FrameDefault]):
+    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
-        for column in formatted_data.columns:
+        for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
                 trace=go.Box(
-                    y=formatted_data[column],
-                    name=column,
-                    marker=get_marker_config(color=color_map[column]),
+                    y=column,
+                    name=column.name,
+                    marker=get_marker_config(color=color_map[column.name]),
                     boxpoints=False,
                     hovertemplate=CustomHovers.VERTICAL_DATA.value,
                 )
             )
 
 
-class Histograms(Graph[DefaultFloat]):
-    def setup_figure(self, formatted_data:DefaultFloat) -> None:
+class Histograms(Graph[tf.FrameDefault]):
+    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
-        for column in formatted_data.columns:
+        for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
                 trace=go.Histogram(
-                    x=formatted_data[column],
-                    name=column,
-                    marker=get_marker_config(color=color_map[column]),
+                    x=column,
+                    name=column.name,
+                    marker=get_marker_config(color=color_map[column.name]),
                     hovertemplate=CustomHovers.HORIZONTAL_DATA.value,
                 )
             )
@@ -137,13 +142,10 @@ class Histograms(Graph[DefaultFloat]):
         )
 
 
-class Bars(Graph[SeriesFloat]):
-    def setup_figure(self, formatted_data: SeriesFloat) -> None:
+class Bars(Graph[tf.SeriesNamed]):
+    def setup_figure(self, formatted_data: tf.SeriesNamed) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
-        for label, value in zip(
-            formatted_data.get_names(),
-            formatted_data.get_array(),
-        ):
+        for label, value in formatted_data.get_dict().items():
             self.figure.add_trace(  # type: ignore
                 trace=go.Bar(
                     x=[label],
@@ -159,14 +161,14 @@ class Bars(Graph[SeriesFloat]):
         )
 
 
-class HeatMap(Graph[DefaultFloat]):
-    def setup_figure(self, formatted_data: DefaultFloat) -> None:
+class HeatMap(Graph[tf.FrameMatrix]):
+    def setup_figure(self, formatted_data: tf.FrameMatrix) -> None:
         color_scale: list[list[float | str]] = get_heatmap_colorscale()
         self.figure.add_trace(  # type: ignore
             trace=go.Heatmap(
                 z=formatted_data.get_array(),
-                x=formatted_data.columns,
-                y=formatted_data.columns,
+                x=formatted_data.get_names(),
+                y=formatted_data.get_names(),
                 showscale=False,
                 colorscale=color_scale,
                 hovertemplate=CustomHovers.HEATMAP.value,
@@ -175,5 +177,5 @@ class HeatMap(Graph[DefaultFloat]):
         self.figure.update_layout(  # type: ignore
             yaxis=dict(showgrid=False, autorange="reversed")
         )
-        self.figure.update_yaxes(showticklabels=False) # type: ignore
-        self.figure.update_xaxes(showticklabels=False) # type: ignore
+        self.figure.update_yaxes(showticklabels=False, scaleanchor="x")  # type: ignore
+        self.figure.update_xaxes(showticklabels=False)  # type: ignore
