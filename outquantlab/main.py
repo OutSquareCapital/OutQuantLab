@@ -1,49 +1,40 @@
+import numquant as nq
+import tradeframe as tf
 from outquantlab.backtest import Backtestor
 from outquantlab.indicators import GenericIndic
-from outquantlab.frames import DatedFloat
-from outquantlab.portfolio import BacktestResults, get_multi_index, aggregate_raw_returns, get_clusters
+from outquantlab.portfolio import (
+    BacktestResults,
+    get_categories_df,
+    get_clusters,
+)
+
 
 class OutQuantLab:
-    def __init__(self, indics: list[GenericIndic], returns_df: DatedFloat) -> None:
+    def __init__(self, indics: list[GenericIndic], returns_df: tf.FrameDated) -> None:
         self.indics: list[GenericIndic] = indics
-        self.returns_df: DatedFloat = returns_df
+        self.returns_df: tf.FrameDated = returns_df
 
-    def backtest(self, local: bool = True) -> DatedFloat:
+    def backtest(self, local: bool = True) -> nq.Float2D:
         process = Backtestor(
-            pct_returns=self.returns_df.get_array(),
-            indics=self.indics,
-            local=local
-        )
-        multi_index = get_multi_index(
-            asset_names=self.returns_df.get_names(),
-            indics=self.indics
-        )
-        return DatedFloat(
-            data=process.process_backtest(),
-            index=self.returns_df.get_index(),
-            columns=multi_index
-            )
-    
-    def get_portfolio(self, data: DatedFloat) -> BacktestResults:
-        return aggregate_raw_returns(returns_df=data)
-    
-    def get_clusters(self, data: DatedFloat) -> dict[str, list[str]]:
-        data.clean_nans(total=True)
-        return get_clusters(
-            returns_array=data.get_array(),
-            asset_names=data.get_names(),
-            max_clusters=5
+            pct_returns=self.returns_df.get_array(), indics=self.indics, local=local
         )
 
-    def test_speed(self, iterations: int) -> None:
-        import time
-        self.backtest()
-        print("Compilation done.")
-        print("Starting backtest...")
-        start: float = time.perf_counter()
-        for i in range(iterations):
-            self.backtest(local=False)
-            print(f"Iteration {i + 1} done.")
-        end: float = time.perf_counter()
-        avg_time: float = (end - start) / iterations
-        print(f"Backtest time: {avg_time:.2f} seconds")
+        return process.process_backtest()
+
+    def format_backtest(self, data: nq.Float2D) -> tf.FrameCategoricalDated:
+        return tf.FrameCategoricalDated.create_from_np(
+            data=data,
+            dates=self.returns_df.index,
+            categories=get_categories_df(
+                asset_names=self.returns_df.get_names(), indics=self.indics
+            ),
+        )
+
+    def get_portfolio(self, data: tf.FrameCategoricalDated) -> BacktestResults:
+        return BacktestResults(params=data)
+
+    def get_clusters(self, data: tf.FrameDated) -> dict[str, list[str]]:
+        clean_df: tf.FrameDated = data.clean_nans(total=True)
+        return get_clusters(
+            returns_array=clean_df.get_array(), asset_names=clean_df.get_names(), max_clusters=5
+        )
