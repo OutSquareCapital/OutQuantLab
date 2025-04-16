@@ -51,11 +51,13 @@ class Frame2D(BaseWideFrame[FrameConfig]):
             return self.__class__(df)
 
 
+
+
 class FrameDefault(Frame2D):
     _CONFIG = FrameConfig(index_col=ColumnsIDs.INDEX, index_type=pl.UInt32())
 
     @classmethod
-    def create_from_np(cls, data: nq.Float2D, asset_names: list[str]) -> "FrameDefault":
+    def create_from_np(cls, data: nq.Float2D, asset_names: list[str]) -> Self:
         returns: pl.DataFrame = cls._CONFIG.get_data(
             array=data, asset_names=asset_names
         )
@@ -78,9 +80,14 @@ class FrameDated(Frame2D):
         return cls.create_from_frames(data=returns, index=dates)
 
     @classmethod
-    def create_from_parquet(
-        cls, path: Path, names: list[str] | None = None
-    ) -> "FrameDated":
+    def create_from_categorical(cls, data: FrameCategoricalDated) -> Self:
+        transposed_data: pl.DataFrame = data.values.transpose(
+            column_names=data.get_names()
+        ).with_columns(data.index)
+        return cls(data=transposed_data)
+
+    @classmethod
+    def create_from_parquet(cls, path: Path, names: list[str] | None = None) -> Self:
         if names:
             columns_to_get: list[str] = [cls._CONFIG.index_col] + names
             df: pl.DataFrame = pl.read_parquet(source=path, columns=columns_to_get)
@@ -93,7 +100,7 @@ class FrameDated(Frame2D):
         )
 
     @classmethod
-    def create_from_pd(cls, pd_df: DataFrame) -> "FrameDated":
+    def create_from_pd(cls, pd_df: DataFrame) -> Self:
         df: pl.DataFrame = pl.from_pandas(
             data=pd_df,
             include_index=True,
@@ -104,20 +111,11 @@ class FrameDated(Frame2D):
                 pl.col(name=cls._CONFIG.index_col).cast(dtype=cls._CONFIG.index_type)
             )
         )
-
-    @classmethod
-    def create_from_categorical(cls, data: FrameCategoricalDated) -> "FrameDated":
-        transposed_data: pl.DataFrame = data.values.transpose(
-            column_names=data.get_names()
-        ).with_columns(data.index)
-        return cls(data=transposed_data)
-
-
 class FrameMatrix(Frame2D):
     _CONFIG = FrameConfig(index_col=ColumnsIDs.INDEX, index_type=pl.UInt32())
 
     @classmethod
-    def create_from_np(cls, data: nq.Float2D, asset_names: list[str]) -> "FrameMatrix":
+    def create_from_np(cls, data: nq.Float2D, asset_names: list[str]) -> Self:
         returns: pl.DataFrame = cls._CONFIG.get_data(
             array=data, asset_names=asset_names
         )

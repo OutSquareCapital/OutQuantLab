@@ -4,6 +4,7 @@ import numquant as nq
 from tradeframe.frames1d import SeriesDated
 from tradeframe.types import ColumnsIDs, Category
 from tradeframe.interfaces import AbstractTradeFrame
+from typing import Self
 
 class FrameCategoricalDated(AbstractTradeFrame):
     def __init__(self, data: pl.DataFrame, categories: list[str]) -> None:
@@ -34,23 +35,12 @@ class FrameCategoricalDated(AbstractTradeFrame):
         dates: pl.Series,
         categories: pl.DataFrame,
     ) -> "FrameCategoricalDated":
-        schema: dict[str, pl.Float32] = {f"{date}": pl.Float32() for date in dates}
-        returns: pl.DataFrame = pl.from_numpy(data=data, orient="col", schema=schema).fill_nan(value=None)
-        concatened_data: pl.DataFrame = pl.concat([categories, returns], how="horizontal")
+        returns: pl.DataFrame = pl.from_numpy(data=data, orient="col", schema=dates.to_list()).fill_nan(value=None)
+        concatened_data: pl.DataFrame = pl.concat(items=[categories, returns], how="horizontal")
         categories_names: list[str] = categories.columns
         return cls(data=concatened_data, categories=categories_names)
-    @classmethod
-    def create_from_np2(
-        cls,
-        data: nq.Float2D,
-        dates: pl.Series,
-        categories: pl.DataFrame,
-    ) -> "FrameCategoricalDated":
-        returns: pl.DataFrame = pl.from_numpy(data=data, orient="col").fill_nan(value=None)
-        concatened_data: pl.DataFrame = pl.concat([categories, returns], how="horizontal")
-        categories_names: list[str] = categories.columns
-        return cls(data=concatened_data, categories=categories_names)
-    def get_portfolio(self, categories: list[str]) -> "FrameCategoricalDated":
+
+    def get_portfolio(self, categories: list[str]) -> Self:
         return_cols: list[str] = self.values.columns
         lazy_grouped: pl.LazyFrame = (
             self._data.lazy()
@@ -58,7 +48,7 @@ class FrameCategoricalDated(AbstractTradeFrame):
             .agg(pl.col(name=return_cols).mean().cast(dtype=pl.Float32))
         )
         df: pl.DataFrame = lazy_grouped.collect()
-        return FrameCategoricalDated(data=df, categories=categories)
+        return self.__class__(data=df, categories=categories)
 
     def get_overall_portfolio(self) -> SeriesDated:
         data: pl.Series = self.values.select(pl.all().mean()).transpose().to_series()

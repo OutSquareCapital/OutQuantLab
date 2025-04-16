@@ -56,7 +56,7 @@ class SeriesDated(Frame1D):
     _CONFIG = SeriesConfig(index_col=ColumnsIDs.DATE, index_type=pl.Date())
 
     @classmethod
-    def create_from_np(cls, data: nq.Float2D, index: pl.Series) -> "SeriesDated":
+    def create_from_np(cls, data: nq.Float2D, index: pl.Series) -> Self:
         df_data: pl.Series = cls._CONFIG.get_data(array=data)
         return cls.create_from_series(data=df_data, index=index)
 
@@ -65,7 +65,7 @@ class SeriesNamed(Frame1D):
     _CONFIG = SeriesConfig(index_col=ColumnsIDs.NAMES, index_type=pl.Utf8())
 
     @classmethod
-    def create_from_np(cls, data: nq.Float2D, names: list[str]) -> "SeriesNamed":
+    def create_from_np(cls, data: nq.Float2D, names: list[str]) -> Self:
         df_data: pl.Series = cls._CONFIG.get_data(array=data)
         index: pl.Series = cls._CONFIG.get_index(data=names)
         return cls.create_from_series(data=df_data, index=index)
