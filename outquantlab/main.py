@@ -4,7 +4,7 @@ from outquantlab.backtest import Backtestor
 from outquantlab.indicators import GenericIndic
 from outquantlab.portfolio import (
     BacktestResults,
-    get_categories_df,
+    get_categories_dict,
     get_clusters,
 )
 
@@ -21,20 +21,23 @@ class OutQuantLab:
 
         return process.process_backtest()
 
-    def format_backtest(self, data: nq.Float2D) -> tf.FrameCategoricalDated:
-        return tf.FrameCategoricalDated.create_from_np(
+    def format_backtest(self, data: nq.Float2D) -> tf.FrameCategorical:
+        indic_names: list[str] = [indic.name for indic in self.indics]
+        asset_names: list[str] = self.returns_df.get_names()
+        return tf.FrameCategorical.create_from_np(
             data=data,
-            dates=self.returns_df.index,
-            categories=get_categories_df(
-                asset_names=self.returns_df.get_names(), indics=self.indics
-            ),
+            categories=get_categories_dict(asset_names=asset_names, indics=self.indics),
+            asset_names=asset_names,
+            indic_names=indic_names,
         )
 
-    def get_portfolio(self, data: tf.FrameCategoricalDated) -> BacktestResults:
-        return BacktestResults(params=data)
+    def get_portfolio(self, data: tf.FrameCategorical) -> BacktestResults:
+        return BacktestResults(benchmark=self.returns_df, global_result=data)
 
     def get_clusters(self, data: tf.FrameDated) -> dict[str, list[str]]:
         clean_df: tf.FrameDated = data.clean_nans(total=True)
         return get_clusters(
-            returns_array=clean_df.get_array(), asset_names=clean_df.get_names(), max_clusters=5
+            returns_array=clean_df.get_array(),
+            asset_names=clean_df.get_names(),
+            max_clusters=5,
         )
