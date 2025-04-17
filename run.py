@@ -3,11 +3,12 @@ import outquantlab as oql
 
 def internal_use() -> None:
     db = oql.DBStructure(db_name="data")
-    assets_config: oql.AssetsConfig = db.assets.get()
+    tickers_data: oql.TickersData = db.tickers.get()
+    #assets_config: oql.AssetsConfig = db.assets.get()
     indics_config: oql.IndicsConfig = db.indics.get()
     lab = oql.OutQuantLab(
         indics=indics_config.get_indics_params(),
-        returns_df=db.get_returns_data(config=assets_config, new_data=False),
+        returns_df=tickers_data.get_returns_data(),
     )
     results: oql.BacktestResults = lab.get_portfolio(
         data=lab.format_backtest(lab.backtest())
@@ -18,11 +19,12 @@ def internal_use() -> None:
 
 def server_use() -> None:
     db = oql.DBStructure(db_name="data")
-    assets_config: oql.AssetsConfig = db.assets.get()
+    tickers_data: oql.TickersData = db.tickers.get()
+    #assets_config: oql.AssetsConfig = db.assets.get()
     indics_config: oql.IndicsConfig = db.indics.get()
     lab = oql.OutQuantLab(
         indics=indics_config.get_indics_params(),
-        returns_df=db.get_returns_data(config=assets_config, new_data=False),
+        returns_df=tickers_data.get_returns_data(),
     )
     results: oql.BacktestResults = lab.get_portfolio(
         data=lab.format_backtest(lab.backtest())
