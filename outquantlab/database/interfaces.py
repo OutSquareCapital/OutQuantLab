@@ -16,10 +16,10 @@ class FilesObject[T](ABC):
         raise NotImplementedError
 
 class FileHandler[T](ABC):
-    extension: str
+    _EXTENSION: str
 
     def __init__(self, db_path: Path, file_name: str) -> None:
-        self.path: Path = db_path / f"{file_name}{self.extension}"
+        self.path: Path = db_path / f"{file_name}{self._EXTENSION}"
 
     def load(self, names: list[str] | None = None) -> T:
         if not self.path.exists():
@@ -39,7 +39,7 @@ class FileHandler[T](ABC):
 
 
 class JSONHandler[K, V](FileHandler[dict[K, V]]):
-    extension = ".json"
+    _EXTENSION = ".json"
 
     def _load_implementation(self, names: list[str] | None = None) -> dict[K, V]:
         with open(self.path, "r") as file:
@@ -52,7 +52,7 @@ class JSONHandler[K, V](FileHandler[dict[K, V]]):
 
 
 class ParquetHandler(FileHandler[tf.FrameDated]):
-    extension = ".parquet"
+    _EXTENSION = ".parquet"
 
     def _load_implementation(self, names: list[str] | None = None) -> tf.FrameDated:
         if names:
