@@ -1,4 +1,4 @@
-from outquantlab.core import AppConfig
+from outquantlab.core import AppConfig, AssetsConfig
 from outquantlab.database.structure import DBStructure
 import tradeframe as tf
 from outquantlab.apis import YahooData
@@ -10,19 +10,19 @@ class DataBaseProvider:
         self._yf = YahooData()
 
     def get_returns_data(
-        self, app_config: AppConfig, new_data: bool
+        self, config: AssetsConfig, new_data: bool
     ) -> tf.FrameDated:
         if new_data:
             data: tf.FrameDated = self._db.tickers.get()
-            app_config.assets_config.update_assets(names=data.get_names())
-            self._db.assets.save(data=app_config.assets_config)
+            config.update_assets(names=data.get_names())
+            self._db.assets.save(data=config)
             return data
         return self._db.tickers.get(
-            assets=app_config.assets_config.get_all_active_entities_names()
+            assets=config.get_all_active_entities_names()
         )
     
-    def refresh_data(self, app_config: AppConfig) -> None:
-        assets: list[str] = app_config.assets_config.get_all_entities_names()
+    def refresh_data(self, config: AssetsConfig) -> None:
+        assets: list[str] = config.get_all_entities_names()
         data: tf.FrameDated = self._yf.fetch_data(assets=assets)
         self._db.tickers.save(data=data)
 

@@ -6,9 +6,11 @@ def internal_use() -> None:
     config: oql.AppConfig = dbp.get_app_config()
     lab = oql.OutQuantLab(
         indics=config.indics_config.get_indics_params(),
-        returns_df=dbp.get_returns_data(app_config=config, new_data=False),
+        returns_df=dbp.get_returns_data(config=config.assets_config, new_data=False),
     )
-    results: oql.BacktestResults = lab.get_portfolio(data=lab.format_backtest(lab.backtest()))
+    results: oql.BacktestResults = lab.get_portfolio(
+        data=lab.format_backtest(lab.backtest())
+    )
     stats = oql.Stats()
     stats.equity.plot(data=results.assets, frequency=1)
 
@@ -18,9 +20,11 @@ def server_use() -> None:
     config: oql.AppConfig = dbp.get_app_config()
     lab = oql.OutQuantLab(
         indics=config.indics_config.get_indics_params(),
-        returns_df=dbp.get_returns_data(app_config=config, new_data=False),
+        returns_df=dbp.get_returns_data(config=config.assets_config, new_data=False),
     )
-    results: oql.BacktestResults = lab.get_portfolio(data=lab.format_backtest(lab.backtest()))
+    results: oql.BacktestResults = lab.get_portfolio(
+        data=lab.format_backtest(lab.backtest())
+    )
     stats = oql.Stats()
     oql_server = oql.apis.LabServer()
     oql_server.store_result(
@@ -31,8 +35,8 @@ def server_use() -> None:
 
 def client_use() -> None:
     pass
-    #client = oql.apis.LabClient()
-    #data = client.request_data()
+    # client = oql.apis.LabClient()
+    # data = client.request_data()
     # add data to db
     # process data
     # implementation to transform results.assets into a concrete futures position int
