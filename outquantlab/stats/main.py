@@ -10,11 +10,10 @@ from outquantlab.stats.processors import (
 
 @dataclass(slots=True, frozen=True)
 class AggregateProcessorsRegistery:
-    returns = AggregateProcessor(_func=nq.metrics.agg.get_total_returns)
-    sharpe_ratio = AggregateProcessor(_func=nq.metrics.agg.get_sharpe_ratio)
+    returns = AggregateProcessor(_func=nq.metrics.agg.get_total_returns, _ascending=False)
+    sharpe_ratio = AggregateProcessor(_func=nq.metrics.agg.get_sharpe_ratio, _ascending=False)
     volatility = AggregateProcessor(
-        _func=nq.metrics.agg.get_volatility_annualized,
-        _ascending=False,
+        _func=nq.metrics.agg.get_volatility_annualized
     )
     drawdown = AggregateProcessor(_func=nq.metrics.agg.get_average_drawdown)
     skewness = AggregateProcessor(

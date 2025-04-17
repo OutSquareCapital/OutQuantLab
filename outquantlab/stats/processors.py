@@ -24,8 +24,7 @@ type OptionalFunc = Callable[[nq.Float2D, int | None], nq.Float2D]
 class StatProcessor[
     D: tf.FrameDated
     | tf.FrameDefault
-    | tf.SeriesNamed
-    | tf.SeriesDefault
+    | dict[str, float]
     | tf.FrameMatrix,
     F: Callable[..., nq.Float2D],
 ](ABC):
@@ -119,12 +118,11 @@ class TableProcessor(StatProcessor[tf.FrameMatrix, DefinedFunc]):
         HeatMap(formatted_data=self.get_formatted_data(data=data), title=self._name)
 
 
-class AggregateProcessor(StatProcessor[tf.SeriesNamed, DefinedFunc]):
-    def get_formatted_data(self, data: tf.FrameDated) -> tf.SeriesNamed:
+class AggregateProcessor(StatProcessor[dict[str, float], DefinedFunc]):
+    def get_formatted_data(self, data: tf.FrameDated) -> dict[str, float]:
         stats_array: nq.Float2D = self._func(data.get_array())
-        return tf.SeriesNamed.create_from_np(
-            data=stats_array, names=data.get_names()
-        ).sort_data(ascending=self._ascending)
+        data_dict =  dict(zip(data.get_names(), stats_array.flatten()))
+        return dict(sorted(data_dict.items(), key=lambda item: item[1], reverse=self._ascending))
 
     def plot(self, data: tf.FrameDated) -> None:
         Bars(formatted_data=self.get_formatted_data(data=data), title=self._name)

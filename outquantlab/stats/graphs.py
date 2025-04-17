@@ -16,8 +16,7 @@ import tradeframe as tf
 class Graph[
     D: tf.FrameDated
     | tf.FrameDefault
-    | tf.SeriesNamed
-    | tf.SeriesDefault
+    | dict[str, float]
     | tf.FrameMatrix
 ](ABC):
     def __init__(self, formatted_data: D, title: str) -> None:
@@ -73,8 +72,8 @@ class Curves(Graph[tf.FrameDated]):
             )
 
 
-class LogCurves(Graph[tf.FrameDefault | tf.SeriesDefault]):
-    def setup_figure(self, formatted_data: tf.FrameDefault | tf.SeriesDefault) -> None:
+class LogCurves(Graph[tf.FrameDefault]):
+    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
@@ -142,10 +141,11 @@ class Histograms(Graph[tf.FrameDefault]):
         )
 
 
-class Bars(Graph[tf.SeriesNamed]):
-    def setup_figure(self, formatted_data: tf.SeriesNamed) -> None:
-        color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
-        for label, value in formatted_data.get_dict().items():
+class Bars(Graph[dict[str, float]]):
+    def setup_figure(self, formatted_data: dict[str, float]) -> None:
+
+        color_map: dict[str, str] = get_color_map(assets=list(formatted_data.keys()))
+        for label, value in formatted_data.items():
             self.figure.add_trace(  # type: ignore
                 trace=go.Bar(
                     x=[label],

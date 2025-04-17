@@ -5,17 +5,17 @@ import polars as pl
 
 import numquant as nq
 from pathlib import Path
-from tradeframe.types import FrameConfig, SeriesConfig
-from tradeframe.constructor import TFConstructor
+from tradeframe.types import FrameConfig
+from tradeframe.constructor import TradeFrameConstructor
 
-class _AbstractTradeFrame(TFConstructor):
+class _AbstractTradeFrame(TradeFrameConstructor):
 
     def get_array(self) -> nq.Float2D:
         return self.values.to_numpy()
 
     @property
     @abstractmethod
-    def values(self) -> pl.DataFrame | pl.Series:
+    def values(self) -> pl.DataFrame:
         raise NotImplementedError
 
     @property
@@ -30,9 +30,16 @@ class _AbstractTradeFrame(TFConstructor):
     def to_parquet(self, path: Path) -> None:
         self._data.write_parquet(file=path)
 
+class BaseIndexedHorizontal(_AbstractTradeFrame, ABC):
+    _CONFIG: FrameConfig
 
-class _BaseWideFrame[T: FrameConfig | SeriesConfig](_AbstractTradeFrame, ABC):
-    _CONFIG: T
+    @property
+    def index(self) -> pl.Series:
+        index_list: list[str] = self.values.columns
+        return pl.Series(name=self._CONFIG.index_col, values=index_list)
+
+class _BaseIndexedVertical(_AbstractTradeFrame, ABC):
+    _CONFIG: FrameConfig
 
     @property
     def index(self) -> pl.Series:
@@ -46,41 +53,7 @@ class _BaseWideFrame[T: FrameConfig | SeriesConfig](_AbstractTradeFrame, ABC):
         data: dict[str, list[float]] = self._data[-1:].to_dict(as_series=False)
         return {key: value[0] for key, value in data.items()}
 
-
-class Frame1D(_BaseWideFrame[SeriesConfig]):
-    @property
-    def values(self) -> pl.Series:
-        return self._data[self._CONFIG.values_col]
-
-    def get_names(self) -> list[str]:
-        return self.index.to_list()
-
-    def sort_data(self, ascending: bool) -> Self:
-        return self.__class__._construct(
-            data=self._data.sort(by=self._CONFIG.values_col, descending=not ascending)
-        )
-
-    def get_dict(self) -> dict[str, float]:
-        return dict(
-            self._data.select(
-                self._CONFIG.index_col, self._CONFIG.values_col
-            ).iter_rows()
-        )
-
-    def clean_nans(self, total: bool = False) -> Self:
-        if total:
-            df: pl.DataFrame = self._data.drop_nulls(subset=self._CONFIG.values_col)
-            return self.__class__._construct(df)
-        else:
-            df = self._data.filter(
-                ~pl.all_horizontal(pl.col(name=self._CONFIG.values_col).is_null())
-            )
-            return self.__class__._construct(df)
-
-
-
-
-class Frame2D(_BaseWideFrame[FrameConfig]):
+class Frame2D(_BaseIndexedVertical):
     @property
     def values(self) -> pl.DataFrame:
         return self._data.drop(self._CONFIG.index_col)

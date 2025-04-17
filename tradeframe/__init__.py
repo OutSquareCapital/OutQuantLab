@@ -1,16 +1,11 @@
 from tradeframe.categorical import FrameCategorical, FrameCategoricalLong
 from tradeframe.frames2d import FrameDated, FrameDefault, FrameMatrix
-from tradeframe.frames1d import SeriesDated, SeriesNamed, SeriesDefault
-
 __all__: list[str] = [
     "FrameCategorical",
     "FrameCategoricalLong",
     "FrameDated",
     "FrameDefault",
     "FrameMatrix",
-    "SeriesDated",
-    "SeriesNamed",
-    "SeriesDefault",
 ]
 
 # TODO: FAIRE PIPELINE POUR LES 2 VERSIONS POSSIBLES:

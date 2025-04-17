@@ -11,7 +11,7 @@ class Server(Enum):
     IP = "127.0.0.1"
     URL = f"http://{IP}:{PORT}{DATA}"
 
-type Frames = tf.FrameDated | tf.FrameDefault | tf.SeriesDated | tf.SeriesNamed | tf.SeriesDefault
+type Frames = tf.FrameDated | tf.FrameDefault
 
 class LabServer:
     def __init__(self) -> None:

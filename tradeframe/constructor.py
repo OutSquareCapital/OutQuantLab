@@ -7,7 +7,7 @@ class _Token:
     __slots__: tuple[()] = ()
     pass
 
-class TFConstructor(ABC):
+class TradeFrameConstructor(ABC):
     _internal_token = _Token()
 
     def __new__(cls, *args: Any, **kwargs: Any) -> Self:
