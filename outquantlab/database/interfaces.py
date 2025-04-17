@@ -23,18 +23,11 @@ class FileHandler[T](ABC):
 
     def load(self, names: list[str] | None = None) -> T:
         if not self.path.exists():
-            print(
-                f"File {self.path.name} is not found. Returning empty data.\n{self.path}"
-            )
-            return self._handle_missing_file()
+            raise FileNotFoundError(f"File {self.path} does not exist.")
         return self._load_implementation(names=names)
 
     @abstractmethod
     def _load_implementation(self, names: list[str] | None = None) -> T:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _handle_missing_file(self) -> T:
         raise NotImplementedError
 
     @abstractmethod
@@ -53,11 +46,6 @@ class JSONHandler[K, V](FileHandler[dict[K, V]]):
             data: dict[K, V] = json.load(file)
         return data
 
-    def _handle_missing_file(self) -> dict[K, V]:
-        with open(self.path, "w") as file:
-            json.dump({}, file, indent=3)
-        return {}
-
     def save(self, data: dict[K, V]) -> None:
         with open(self.path, "w") as file:
             json.dump(data, file, indent=3)
@@ -71,11 +59,6 @@ class ParquetHandler(FileHandler[tf.FrameDated]):
             data: tf.FrameDated = tf.FrameDated.create_from_parquet(path=self.path, names=names)
             return data.clean_nans()
         return tf.FrameDated.create_from_parquet(path=self.path)
-
-    def _handle_missing_file(self) -> tf.FrameDated:
-        empty_df: tf.FrameDated = tf.FrameDated.create_as_empty()
-        empty_df.to_parquet(path=self.path)
-        return empty_df
 
     def save(self, data: tf.FrameDated) -> None:
         data.to_parquet(path=self.path)
