@@ -2,8 +2,7 @@ import json
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
-
-import tradeframe as tf
+import polars as pl
 
 
 class FilesObject[T](ABC):
@@ -14,6 +13,7 @@ class FilesObject[T](ABC):
     @abstractmethod
     def save(self, data: T) -> None:
         raise NotImplementedError
+
 
 class FileHandler[T](ABC):
     _EXTENSION: str
@@ -51,14 +51,13 @@ class JSONHandler[K, V](FileHandler[dict[K, V]]):
             json.dump(data, file, indent=3)
 
 
-class ParquetHandler(FileHandler[tf.FrameDated]):
+class ParquetHandler(FileHandler[pl.DataFrame]):
     _EXTENSION = ".parquet"
 
-    def _load_implementation(self, names: list[str] | None = None) -> tf.FrameDated:
+    def _load_implementation(self, names: list[str] | None = None) -> pl.DataFrame:
         if names:
-            data: tf.FrameDated = tf.FrameDated.create_from_parquet(path=self.path, names=names)
-            return data.clean_nans()
-        return tf.FrameDated.create_from_parquet(path=self.path)
+            return pl.read_parquet(source=self.path, columns=names)
+        return pl.read_parquet(source=self.path)
 
-    def save(self, data: tf.FrameDated) -> None:
-        data.to_parquet(path=self.path)
+    def save(self, data: pl.DataFrame) -> None:
+        data.write_parquet(file=self.path)

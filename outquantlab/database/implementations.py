@@ -1,8 +1,9 @@
 from pathlib import Path
 
-from outquantlab.core import AssetsConfig, IndicsConfig
+import polars as pl
+
+from outquantlab.core import AssetsConfig, IndicsConfig, TickersData
 from outquantlab.database.interfaces import FilesObject, JSONHandler, ParquetHandler
-import tradeframe as tf
 from outquantlab.apis import YahooData
 
 class AssetFiles(FilesObject[AssetsConfig]):
@@ -35,17 +36,36 @@ class IndicFiles(FilesObject[IndicsConfig]):
         self.active.save(data=data.get_all_entities_dict())
         self.params.save(data=data.prepare_indic_params())
 
-class TickersData(FilesObject[tf.FrameDated]):
+
+class TickersDataFiles(FilesObject[TickersData]):
     def __init__(self, db_path: Path) -> None:
         self.returns = ParquetHandler(db_path=db_path, file_name="returns_data")
+        self.prices = ParquetHandler(db_path=db_path, file_name="prices_data")
+        self.dates = ParquetHandler(db_path=db_path, file_name="dates_data")
 
-    def get(self, assets: list[str] | None = None) -> tf.FrameDated:
-        return self.returns.load(names=assets)
+    def get(self, assets: list[str] | None = None) -> TickersData:
+        returns_df: pl.DataFrame = self.returns.load(names=assets)
+        prices_df: pl.DataFrame = self.prices.load(names=assets)
+        dates_df: pl.DataFrame = self.dates.load()
+        return TickersData(
+            dates=dates_df,
+            prices=prices_df,
+            returns=returns_df,
+        )
+    def save(self, data: TickersData) -> None:
+        self.returns.save(data=data.returns)
+        self.prices.save(data=data.prices)
+        self.dates.save(data=data.dates.data)
 
-    def save(self, data: tf.FrameDated) -> None:
-        self.returns.save(data=data)
-
-    def refresh_data(self, config: AssetsConfig, api: YahooData) -> None:
-        assets: list[str] = config.get_all_entities_names()
-        data: tf.FrameDated = api.fetch_data(assets=assets)
-        self.returns.save(data=data)
+    def refresh_data(
+        self, api: YahooData, config: AssetsConfig
+    ) -> TickersData:
+        api.refresh_data(assets=config.get_all_entities_names())
+        data = TickersData(
+            dates=api.dates,
+            prices=api.prices,
+            returns=api.returns,
+        )
+        config.update_assets(names=api.prices.columns)
+        self.save(data=data)
+        return data
