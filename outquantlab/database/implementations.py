@@ -3,6 +3,7 @@ from pathlib import Path
 from outquantlab.core import AssetsConfig, IndicsConfig
 from outquantlab.database.interfaces import FilesObject, JSONHandler, ParquetHandler
 import tradeframe as tf
+from outquantlab.apis import YahooData
 
 class AssetFiles(FilesObject[AssetsConfig]):
     def __init__(self, db_path: Path) -> None:
@@ -42,4 +43,9 @@ class TickersData(FilesObject[tf.FrameDated]):
         return self.returns.load(names=assets)
 
     def save(self, data: tf.FrameDated) -> None:
+        self.returns.save(data=data)
+
+    def refresh_data(self, config: AssetsConfig, api: YahooData) -> None:
+        assets: list[str] = config.get_all_entities_names()
+        data: tf.FrameDated = api.fetch_data(assets=assets)
         self.returns.save(data=data)

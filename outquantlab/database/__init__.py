@@ -1,5 +1,5 @@
-from outquantlab.database.main import DataBaseProvider
+from outquantlab.database.main import DBStructure
 
 __all__: list[str] = [
-    'DataBaseProvider',
+    'DBStructure',
 ]
