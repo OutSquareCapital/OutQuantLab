@@ -24,8 +24,7 @@ type OptionalFunc = Callable[[nq.Float2D, int | None], nq.Float2D]
 class StatProcessor[
     D: tf.FrameDated
     | tf.FrameDefault
-    | dict[str, float]
-    | tf.FrameMatrix,
+    | dict[str, float],
     F: Callable[..., nq.Float2D],
 ](ABC):
     _func: F
@@ -105,11 +104,11 @@ class SamplingProcessor(StatProcessor[tf.FrameDefault, OptionalFunc]):
         )
 
 
-class TableProcessor(StatProcessor[tf.FrameMatrix, DefinedFunc]):
-    def get_formatted_data(self, data: tf.FrameDated) -> tf.FrameMatrix:
+class TableProcessor(StatProcessor[tf.FrameDefault, DefinedFunc]):
+    def get_formatted_data(self, data: tf.FrameDated) -> tf.FrameDefault:
         clean_df: tf.FrameDated = data.clean_nans(total=True)
         stats_array: nq.Float2D = self._func(clean_df.get_array())
-        return tf.FrameMatrix.create_from_np(
+        return tf.FrameDefault.create_from_np(
             data=stats_array,
             asset_names=data.get_names(),
         )

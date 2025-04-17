@@ -17,7 +17,6 @@ class Graph[
     D: tf.FrameDated
     | tf.FrameDefault
     | dict[str, float]
-    | tf.FrameMatrix
 ](ABC):
     def __init__(self, formatted_data: D, title: str) -> None:
         self.figure = go.Figure()
@@ -161,8 +160,8 @@ class Bars(Graph[dict[str, float]]):
         )
 
 
-class HeatMap(Graph[tf.FrameMatrix]):
-    def setup_figure(self, formatted_data: tf.FrameMatrix) -> None:
+class HeatMap(Graph[tf.FrameDefault]):
+    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
         color_scale: list[list[float | str]] = get_heatmap_colorscale()
         self.figure.add_trace(  # type: ignore
             trace=go.Heatmap(
