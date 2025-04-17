@@ -9,16 +9,18 @@ __all__: list[str] = [
 ]
 
 # TODO: FAIRE PIPELINE POUR LES 2 VERSIONS POSSIBLES:
-# IndexedVertical: deja ok sauf pour la partie categorical (names horizontal, date vertical, une col par asset)
-# IndexedHorizontal: a implementer pour la partie avant categorical (names vertical, date horiontal, une col par date)
-# puis mettre en place long format (une col par attribut(return, date, nom), comme SQL
-# fonctionne plus ou moins disons pour la partie categorical (meme si aucune implementation concrete)
+# ! RENAME les classes
+# ! METTRE EN PLACE BACKTEST arrays avec format Vertical
+# TODO: CHECK LES GRAPHS
+# NamedHorizontall: (une col par asset, une ligne par date, les noms d'asset sont les noms de colonnes)
+# NameddVertical: (une col par date, une ligne par asset, + 1 col pour les noms d'asset)
+# DatedData (jsplus le nom): le data de date et d'index stocké une fois seulement
 
-# il faut que chacune soit implémentée dans chaque partie:
-# db fetch/save
-# base returns df
-# array de backtest
-# categorical df sur array
-# backtest results 
+# pour chaque version, mettre en place le categorical correspondant
 
-# on ignore volontairement la partie plotting (deja implémentée pour IndexedVertical)
+# puis mettre en place long format (une col par attribut(return, date, nom), comme SQL ->
+# array, categorical
+# il faudra voir comment connecter le datedData
+
+# au final, j'aurai un array filling, un base frame, et un categorical frame de chaque type:
+# - vertical, horizontal, long

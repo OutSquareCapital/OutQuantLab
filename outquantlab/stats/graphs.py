@@ -14,8 +14,7 @@ import tradeframe as tf
 
 
 class Graph[
-    D: tf.FrameDated
-    | tf.FrameDefault
+    D:tf.FrameDefault
     | dict[str, float]
 ](ABC):
     def __init__(self, formatted_data: D, title: str) -> None:
@@ -55,13 +54,12 @@ class Graph[
         )
 
 
-class Curves(Graph[tf.FrameDated]):
-    def setup_figure(self, formatted_data: tf.FrameDated) -> None:
+class Curves(Graph[tf.FrameDefault]):
+    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
                 trace=go.Scatter(
-                    x=formatted_data.index,
                     y=column,
                     mode="lines",
                     name=column.name,

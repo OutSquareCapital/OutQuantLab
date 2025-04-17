@@ -11,8 +11,6 @@ class Server(Enum):
     IP = "127.0.0.1"
     URL = f"http://{IP}:{PORT}{DATA}"
 
-type Frames = tf.FrameDated | tf.FrameDefault
-
 class LabServer:
     def __init__(self) -> None:
         self.app = FastAPI()
@@ -35,7 +33,7 @@ class LabServer:
         uvicorn.run(app=self.app, host=Server.IP.value, port=Server.PORT.value)
 
     def store_result(
-        self, data: Frames
+        self, data: tf.FrameDefault
     ) -> None:
         result: dict[str, float] = data.get_last_row_dict()
         self._data_store[self._current_id] = result
