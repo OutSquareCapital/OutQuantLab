@@ -11,7 +11,8 @@ class FrameCategorical:
     @property
     def values(self) -> pl.DataFrame:
         return self._data.drop(self._categories)
-
+    def get_array(self) -> nq.Float2D:
+        return self.values.to_numpy()
     def get_names(self) -> list[str]:
         return (
             self._data.select(pl.concat_str(exprs=self._categories, separator="_"))
