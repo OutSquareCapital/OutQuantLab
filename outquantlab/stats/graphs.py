@@ -14,7 +14,7 @@ import tradeframe as tf
 
 
 class Graph[
-    D:tf.FrameDefault
+    D:tf.FrameVertical
     | dict[str, float]
 ](ABC):
     def __init__(self, formatted_data: D, title: str) -> None:
@@ -54,8 +54,8 @@ class Graph[
         )
 
 
-class Curves(Graph[tf.FrameDefault]):
-    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
+class Curves(Graph[tf.FrameVertical]):
+    def setup_figure(self, formatted_data: tf.FrameVertical) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
@@ -69,8 +69,8 @@ class Curves(Graph[tf.FrameDefault]):
             )
 
 
-class LogCurves(Graph[tf.FrameDefault]):
-    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
+class LogCurves(Graph[tf.FrameVertical]):
+    def setup_figure(self, formatted_data: tf.FrameVertical) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
@@ -87,8 +87,8 @@ class LogCurves(Graph[tf.FrameDefault]):
         )
 
 
-class Violins(Graph[tf.FrameDefault]):
-    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
+class Violins(Graph[tf.FrameVertical]):
+    def setup_figure(self, formatted_data: tf.FrameVertical) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
@@ -106,8 +106,8 @@ class Violins(Graph[tf.FrameDefault]):
             )
 
 
-class Boxes(Graph[tf.FrameDefault]):
-    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
+class Boxes(Graph[tf.FrameVertical]):
+    def setup_figure(self, formatted_data: tf.FrameVertical) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
@@ -121,8 +121,8 @@ class Boxes(Graph[tf.FrameDefault]):
             )
 
 
-class Histograms(Graph[tf.FrameDefault]):
-    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
+class Histograms(Graph[tf.FrameVertical]):
+    def setup_figure(self, formatted_data: tf.FrameVertical) -> None:
         color_map: dict[str, str] = get_color_map(assets=formatted_data.get_names())
         for column in formatted_data.values:
             self.figure.add_trace(  # type: ignore
@@ -158,8 +158,8 @@ class Bars(Graph[dict[str, float]]):
         )
 
 
-class HeatMap(Graph[tf.FrameDefault]):
-    def setup_figure(self, formatted_data: tf.FrameDefault) -> None:
+class HeatMap(Graph[tf.FrameVertical]):
+    def setup_figure(self, formatted_data: tf.FrameVertical) -> None:
         color_scale: list[list[float | str]] = get_heatmap_colorscale()
         self.figure.add_trace(  # type: ignore
             trace=go.Heatmap(

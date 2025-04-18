@@ -22,10 +22,10 @@ class TickersData:
         self.prices: pl.DataFrame = prices
         self.returns: pl.DataFrame = returns
 
-    def get_returns_data(self) -> tf.FrameDefault:
+    def get_returns_data(self) -> tf.FrameVertical:
         array: nq.Float2D = nq.arrays.convert(data=self.returns.to_numpy())
         asset_names: list[str] = self.returns.columns
-        data: tf.FrameDefault = tf.FrameDefault.create_from_np(
+        data: tf.FrameVertical = tf.FrameVertical.create_from_np(
             data=array, asset_names=asset_names
         )
         return data

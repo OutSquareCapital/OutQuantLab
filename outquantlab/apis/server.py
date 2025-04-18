@@ -33,7 +33,7 @@ class LabServer:
         uvicorn.run(app=self.app, host=Server.IP.value, port=Server.PORT.value)
 
     def store_result(
-        self, data: tf.FrameDefault
+        self, data: tf.FrameVertical
     ) -> None:
         result: dict[str, float] = data.get_last_row_dict()
         self._data_store[self._current_id] = result

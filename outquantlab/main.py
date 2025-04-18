@@ -13,9 +13,9 @@ from outquantlab.portfolio import (
 
 
 class OutQuantLab:
-    def __init__(self, indics: list[GenericIndic], returns_df: tf.FrameDefault) -> None:
+    def __init__(self, indics: list[GenericIndic], returns_df: tf.FrameVertical) -> None:
         self.indics: list[GenericIndic] = indics
-        self.returns_df: tf.FrameDefault = returns_df
+        self.returns_df: tf.FrameVertical = returns_df
 
     def backtest(self, local: bool = True) -> nq.Float2D:
         process = Backtestor(
@@ -56,8 +56,8 @@ class OutQuantLab:
     def get_portfolio(self, data: tf.FrameCategorical) -> BacktestResults:
         return BacktestResults(benchmark=self.returns_df, global_result=data)
 
-    def get_clusters(self, data: tf.FrameDefault) -> dict[str, list[str]]:
-        clean_df: tf.FrameDefault = data.clean_nans(total=True)
+    def get_clusters(self, data: tf.FrameVertical) -> dict[str, list[str]]:
+        clean_df: tf.FrameVertical = data.clean_nans(total=True)
         return get_clusters(
             returns_array=clean_df.get_array(),
             asset_names=clean_df.get_names(),

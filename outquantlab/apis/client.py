@@ -28,7 +28,7 @@ class LabClient:
             raise ValueError(f"Error fetching data from {self.url}: {e}")
         return data
 
-    def return_data(self, data: tf.FrameDefault) -> None:
+    def return_data(self, data: tf.FrameVertical) -> None:
         try:
             signal: dict[str, float] = data.get_last_row_dict()
             requests.post(url=self.url, json=signal)
