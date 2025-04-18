@@ -4,7 +4,7 @@ import polars as pl
 
 import numquant as nq
 from tradeframe.interfaces import AbstractTradeFrame
-from tradeframe.categorical import FrameCategorical
+from tradeframe.categorical import FrameCategoricalHorizontal
 
 
 
@@ -40,7 +40,7 @@ class FrameVertical(AbstractTradeFrame):
         return cls._construct(data=returns)
 
     @classmethod
-    def create_from_categorical(cls, data: FrameCategorical) -> Self:
+    def create_from_categorical_horizontal(cls, data: FrameCategoricalHorizontal) -> Self:
         transposed_data: pl.DataFrame = data.values.transpose(
             column_names=data.get_names()
         )
