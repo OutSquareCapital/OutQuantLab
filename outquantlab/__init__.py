@@ -1,14 +1,14 @@
-from outquantlab.main import OutQuantLab
+from outquantlab.backtest import Backtestor
 from outquantlab.stats import Stats
 from outquantlab.database import DBStructure
-from outquantlab.portfolio import BacktestResults
+from outquantlab.portfolio import PortfolioConstructor
 from outquantlab.core import AssetsConfig, IndicsConfig, TickersData
 import outquantlab.apis as apis
 
 __all__: list[str] = [
-    "OutQuantLab",
+    "Backtestor",
     "Stats",
-    "BacktestResults",
+    "PortfolioConstructor",
     "DBStructure",
     "AssetsConfig",
     "IndicsConfig",

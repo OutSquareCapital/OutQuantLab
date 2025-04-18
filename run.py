@@ -4,14 +4,14 @@ import outquantlab as oql
 def internal_use() -> None:
     db = oql.DBStructure(db_name="data")
     tickers_data: oql.TickersData = db.tickers.get()
-    #assets_config: oql.AssetsConfig = db.assets.get()
+    # assets_config: oql.AssetsConfig = db.assets.get()
     indics_config: oql.IndicsConfig = db.indics.get()
-    lab = oql.OutQuantLab(
-        indics=indics_config.get_indics_params(),
+    lab = oql.Backtestor(
         returns_df=tickers_data.get_returns_data(),
+        indics=indics_config.get_indics_params(),
     )
-    results: oql.BacktestResults = lab.get_portfolio(
-        data=lab.format_backtest(lab.backtest())
+    results = oql.PortfolioConstructor(
+        data=lab.process_backtest(),
     )
     stats = oql.Stats()
     stats.equity.plot(data=results.assets, frequency=1)
@@ -20,15 +20,14 @@ def internal_use() -> None:
 def server_use() -> None:
     db = oql.DBStructure(db_name="data")
     tickers_data: oql.TickersData = db.tickers.get()
-    #assets_config: oql.AssetsConfig = db.assets.get()
+    # assets_config: oql.AssetsConfig = db.assets.get()
     indics_config: oql.IndicsConfig = db.indics.get()
-    lab = oql.OutQuantLab(
-        indics=indics_config.get_indics_params(),
+    lab = oql.Backtestor(
         returns_df=tickers_data.get_returns_data(),
+        indics=indics_config.get_indics_params(),
     )
-    results: oql.BacktestResults = lab.get_portfolio(
-        data=lab.format_backtest(lab.backtest())
-    )
+    results = oql.PortfolioConstructor(
+        data=lab.process_backtest())
     stats = oql.Stats()
     oql_server = oql.apis.LabServer()
     oql_server.store_result(
