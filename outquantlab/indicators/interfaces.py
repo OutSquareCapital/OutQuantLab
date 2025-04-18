@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
-from concurrent.futures import ThreadPoolExecutor
-from typing import Protocol, TypeAlias, Any
+from typing import Protocol, TypeAlias, Any, NamedTuple
 
 import numquant as nq
 from itertools import product
 from dataclasses import dataclass
 
+class ParamResult(NamedTuple):
+    indic: str
+    param: str
+    data: nq.Float2D
 
 class AssetsData(Protocol):
     prices: nq.Float2D
@@ -67,22 +70,16 @@ class BaseIndic[T: BaseParams](ABC):
     def _get_combo(self, combination: tuple[int, ...]) -> T:
         raise NotImplementedError
 
-    def process_params_parallel(
-        self,
-        data_arrays: AssetsData,
-        global_executor: ThreadPoolExecutor,
-    ) -> list[nq.Float2D]:
-        def process_single_param(param_tuple: T) -> nq.Float2D:
-            return (
-                self.normalize_signal(
-                    signal=self.execute(data=data_arrays, params=param_tuple),
-                    long_only=False,
-                )
-                * data_arrays.adjusted_returns
-            )
-
-        return list(global_executor.map(process_single_param, self.combos))
-
+    def process_single_param(self, data_arrays: AssetsData, param_tuple: T) -> ParamResult:
+        data = self.normalize_signal(
+                signal=self.execute(data=data_arrays, params=param_tuple),
+                long_only=False,
+            ) * data_arrays.adjusted_returns
+        return ParamResult(
+            indic=self.name,
+            param=param_tuple.get_names(),
+            data=data
+        )
     def normalize_signal(
         self, signal: nq.Float2D, long_only: bool
     ) -> nq.Float2D:
