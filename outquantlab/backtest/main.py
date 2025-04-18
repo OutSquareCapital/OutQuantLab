@@ -1,7 +1,5 @@
-from concurrent.futures import ThreadPoolExecutor
-
 from outquantlab.backtest.data import DataArrays
-from outquantlab.backtest.specs import BacktestSpecs
+from outquantlab.backtest.specs import BacktestSpecs, ThreadingManager
 from outquantlab.indicators import GenericIndic, ParamResult
 import numquant as nq
 import tradeframe as tf
@@ -45,32 +43,29 @@ class Backtestor:
     def process_backtest(self) -> RawResults:
         specs = BacktestSpecs(pct_returns=self.data.pct_returns, indics=self.indics)
         strategie_names: list[StrategyName] = []
+        threads: ThreadingManager = ThreadingManager()
+        # TODO: degager strategy names et mettre en place le fill array "correct" (et donc rawreesults sera surement impacté)
+        for indic in self.indics:
+            try:
+                results_list: list[ParamResult] = threads.process_params_parallel(
+                    indic=indic, params=indic.combos, data_arrays=self.data
+                )
+                specs.fill_main_array(
+                    results_list=results_list,
+                )
 
-        with ThreadPoolExecutor(max_workers=specs.threads.thread_nb) as global_executor:
-            for indic in self.indics:
-                try:
-                    results_list: list[ParamResult] = specs.threads.process_params_parallel(
-                        indic=indic,
-                        params=indic.combos,
-                        data_arrays=self.data,
-                        global_executor=global_executor,
-                    )
-                    specs.fill_main_array(
-                        results_list=results_list,
-                    )
+                combo_names: list[str] = indic.get_combo_names()
+                names: list[StrategyName] = [
+                    StrategyName(asset=asset_name, indic=indic.name, param=combo)
+                    for combo in combo_names
+                    for asset_name in self.asset_names
+                ]
+                strategie_names.extend(names)
 
-                    combo_names: list[str] = indic.get_combo_names()
-                    names: list[StrategyName] = [
-                        StrategyName(asset=asset_name, indic=indic.name, param=combo)
-                        for combo in combo_names
-                        for asset_name in self.asset_names
-                    ]
-                    strategie_names.extend(names)
-                            
-                except Exception as e:
-                    raise Exception(
-                        f"Error during backtest.\n Issue: {e} \n Indicator:\n {indic}"
-                    )
+            except Exception as e:
+                raise Exception(
+                    f"Error during backtest.\n Issue: {e} \n Indicator:\n {indic}"
+                )
         return RawResults(
             array=specs.main_array,
             strategies_names=strategie_names,
@@ -80,24 +75,24 @@ class Backtestor:
     def process_backtest_pl(self) -> list[ParamResult]:
         specs = BacktestSpecs(pct_returns=self.data.pct_returns, indics=self.indics)
         global_results: list[ParamResult] = []
-
-        with ThreadPoolExecutor(max_workers=specs.threads.thread_nb) as global_executor:
-            for indic in self.indics:
-                try:
-
-                    results_list: list[ParamResult] = specs.threads.process_params_parallel(
-                        indic=indic,
-                        params=indic.combos,
-                        data_arrays=self.data,
-                        global_executor=global_executor,
-                    )
-                    global_results.extend(results_list)
-                    specs.update_progress(progress=specs.dimensions.assets * len(results_list))
-                except Exception as e:
-                    raise Exception(
-                        f"Error during backtest.\n Issue: {e} \n Indicator:\n {indic}"
-                    )
+        threads: ThreadingManager = ThreadingManager()
+        for indic in self.indics:
+            try:
+                results_list: list[ParamResult] = threads.process_params_parallel(
+                    indic=indic,
+                    params=indic.combos,
+                    data_arrays=self.data,
+                )
+                global_results.extend(results_list)
+                specs.update_progress(
+                    progress=specs.dimensions.assets * len(results_list)
+                )
+            except Exception as e:
+                raise Exception(
+                    f"Error during backtest.\n Issue: {e} \n Indicator:\n {indic}"
+                )
         return global_results
+
 
 def get_categories_df_long(
     data: nq.Float2D,

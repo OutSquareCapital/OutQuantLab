@@ -9,13 +9,13 @@ from tqdm import tqdm
 class ThreadingManager:
     def __init__(self) -> None:
         self.thread_nb: int = cpu_count() or 8
-
+        self.executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=self.thread_nb)
+    
     def process_params_parallel(
         self,
         indic: GenericIndic,
         params: list[BaseParams],
         data_arrays: DataArrays,
-        global_executor: ThreadPoolExecutor,
     ) -> list[ParamResult]:
         def process_single_param(param_tuple: BaseParams) -> ParamResult:
             return indic.process_single_param(
@@ -23,7 +23,7 @@ class ThreadingManager:
                 param_tuple=param_tuple,
             )
 
-        return list(global_executor.map(process_single_param, params))
+        return list(self.executor.map(process_single_param, params))
 
 
 class BacktestDimensions:
@@ -51,24 +51,23 @@ class BacktestDimensions:
 
 class BacktestSpecs:
     def __init__(self, pct_returns: nq.Float2D, indics: list[GenericIndic]) -> None:
-        self.current_index: int = 0
+        self._current_index: int = 0
         self.dimensions: BacktestDimensions = BacktestDimensions(
             pct_returns=pct_returns,
             indics=indics,
         )
         self.main_array: nq.Float2D = self.dimensions.get_main_array()
-        self.threads: ThreadingManager = ThreadingManager()
         self.progress_bar = tqdm(total=self.dimensions.total, desc="Backtest Progress")
 
     def fill_main_array(self, results_list: list[ParamResult]) -> None:
         for i in range(len(results_list)):
-            end_index: int = self.current_index + self.dimensions.assets
-            self.main_array[:, self.current_index : end_index] = results_list[i].data
-            self.current_index = end_index
+            end_index: int = self._current_index + self.dimensions.assets
+            self.main_array[:, self._current_index : end_index] = results_list[i].data
+            self._current_index = end_index
             self.update_progress(progress=self.dimensions.assets)
 
     def update_progress(self, progress: int) -> None:
         self.progress_bar.update(progress)
         self.progress_bar.refresh()
-        if self.current_index >= self.dimensions.total:
+        if self._current_index >= self.dimensions.total:
             self.progress_bar.close()
