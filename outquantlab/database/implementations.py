@@ -4,7 +4,6 @@ import polars as pl
 
 from outquantlab.core import AssetsConfig, IndicsConfig, TickersData
 from outquantlab.database.interfaces import FilesObject, JSONHandler, ParquetHandler
-from outquantlab.apis import YahooData
 
 class AssetFiles(FilesObject[AssetsConfig]):
     def __init__(self, db_path: Path) -> None:
@@ -52,20 +51,13 @@ class TickersDataFiles(FilesObject[TickersData]):
             prices=prices_df,
             returns=returns_df,
         )
+
     def save(self, data: TickersData) -> None:
-        self.returns.save(data=data.returns)
-        self.prices.save(data=data.prices)
+        self.returns.save(data=data.returns.values)
+        self.prices.save(data=data.prices.values)
         self.dates.save(data=data.dates.data)
 
     def refresh_data(
-        self, api: YahooData, config: AssetsConfig
-    ) -> TickersData:
-        api.refresh_data(assets=config.get_all_entities_names())
-        data = TickersData(
-            dates=api.dates,
-            prices=api.prices,
-            returns=api.returns,
-        )
-        config.update_assets(names=api.prices.columns)
-        self.save(data=data)
-        return data
+        self, prices: pl.DataFrame, returns: pl.DataFrame, dates: pl.DataFrame
+    ) -> None:
+        self.save(data=TickersData(prices=prices, returns=returns, dates=dates))
