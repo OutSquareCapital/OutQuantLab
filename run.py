@@ -7,7 +7,7 @@ def internal_use() -> None:
     # assets_config: oql.AssetsConfig = db.assets.get()
     indics_config: oql.IndicsConfig = db.indics.get()
     lab = oql.Backtestor(
-        returns_df=tickers_data.get_returns_data(),
+        returns_df=tickers_data.returns, 
         indics=indics_config.get_indics_params(),
     )
     results = oql.PortfolioConstructor(
@@ -23,7 +23,7 @@ def server_use() -> None:
     # assets_config: oql.AssetsConfig = db.assets.get()
     indics_config: oql.IndicsConfig = db.indics.get()
     lab = oql.Backtestor(
-        returns_df=tickers_data.get_returns_data(),
+        returns_df=tickers_data.returns,
         indics=indics_config.get_indics_params(),
     )
     results = oql.PortfolioConstructor(
