@@ -20,6 +20,11 @@ class RawResults:
     strategies_names: list[StrategyName]
     schema: dict[str, pl.Enum | None]
 
+    @property
+    def gb_size(self) -> float:
+        size: float = self.array.nbytes / (1024**3)
+        return round(size, 2)
+    
     def get_strategies_names_df(self) -> pl.DataFrame:
         return pl.DataFrame(
             data=self.strategies_names,
@@ -44,23 +49,24 @@ class Backtestor:
         specs = BacktestSpecs(pct_returns=self.data.pct_returns, indics=self.indics)
         strategie_names: list[StrategyName] = []
         threads: ThreadingManager = ThreadingManager()
-        # TODO: degager strategy names et mettre en place le fill array "correct" (et donc rawreesults sera surement impacté)
         for indic in self.indics:
             try:
                 results_list: list[ParamResult] = threads.process_params_parallel(
-                    indic=indic, params=indic.combos, data_arrays=self.data
+                    indic=indic,
+                    params=indic.combos,
+                    data_arrays=self.data,
                 )
                 specs.fill_main_array(
                     results_list=results_list,
                 )
-
-                combo_names: list[str] = indic.get_combo_names()
-                names: list[StrategyName] = [
-                    StrategyName(asset=asset_name, indic=indic.name, param=combo)
-                    for combo in combo_names
-                    for asset_name in self.asset_names
-                ]
-                strategie_names.extend(names)
+                for result in results_list:
+                    names: list[StrategyName] = [
+                        StrategyName(
+                            asset=asset_name, indic=indic.name, param=result.param
+                        )
+                        for asset_name in self.asset_names
+                    ]
+                    strategie_names.extend(names)
 
             except Exception as e:
                 raise Exception(
@@ -71,28 +77,6 @@ class Backtestor:
             strategies_names=strategie_names,
             schema=self.schema,
         )
-
-    def process_backtest_pl(self) -> list[ParamResult]:
-        specs = BacktestSpecs(pct_returns=self.data.pct_returns, indics=self.indics)
-        global_results: list[ParamResult] = []
-        threads: ThreadingManager = ThreadingManager()
-        for indic in self.indics:
-            try:
-                results_list: list[ParamResult] = threads.process_params_parallel(
-                    indic=indic,
-                    params=indic.combos,
-                    data_arrays=self.data,
-                )
-                global_results.extend(results_list)
-                specs.update_progress(
-                    progress=specs.dimensions.assets * len(results_list)
-                )
-            except Exception as e:
-                raise Exception(
-                    f"Error during backtest.\n Issue: {e} \n Indicator:\n {indic}"
-                )
-        return global_results
-
 
 def get_categories_df_long(
     data: nq.Float2D,
